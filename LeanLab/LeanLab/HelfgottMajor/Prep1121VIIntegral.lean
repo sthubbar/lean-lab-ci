@@ -1,5 +1,8 @@
 import LeanLab.HelfgottMajor.Prep1121VIPiecesLow
 import LeanLab.HelfgottMajor.Prep1121VIPiecesHigh
+import LeanLab.HelfgottMajor.Contour472
+import LeanLab.HelfgottMajor.LogIntegral680
+import LeanLab.HelfgottMajor.Prep1121DLogWeight
 
 /-!
 PREP 2026-11-21, route step `MainLemma41Split123.vertical_integral_bound`, part E.
@@ -30,7 +33,46 @@ X = 10, e = 0.0225; the true tail is 4.76833. Class MEDIUM: an improper integral
 explicit antiderivative and a bound on log 10. -/
 theorem tail_le :
     ∫ τ in Ioi (10 : ℝ), Real.log (τ ^ 2 + 9 / 4) ^ 2 / (1 / 4 + τ ^ 2) ≤ 4.797 := by
-  sorry
+  have hi := (Contour472.log_square_tail_integral 0.01125 10 (by norm_num)).1.const_mul 4
+  have hp : ∀ t ∈ Ioi (10 : ℝ),
+      Real.log (t ^ 2 + 9 / 4) ^ 2 / (1 / 4 + t ^ 2) ≤
+        4 * ((Real.log t + 0.01125) ^ 2 / t ^ 2) := by
+    intro t ht
+    change 10 < t at ht
+    have ht0 : 0 < t := by linarith [ht]
+    have ht2 : 100 ≤ t ^ 2 := by nlinarith [ht]
+    have hsmall : (9 / 4 : ℝ) / t ^ 2 ≤ 0.0225 := by
+      rw [div_le_iff₀ (by positivity : 0 < t ^ 2)]
+      nlinarith
+    have hsplit : t ^ 2 + 9 / 4 = t ^ 2 * (1 + (9 / 4 : ℝ) / t ^ 2) := by
+      field_simp [ne_of_gt ht0]
+      <;> ring
+    have hl : Real.log (t ^ 2 + 9 / 4) ≤ 2 * Real.log t + 0.0225 := by
+      rw [hsplit, Real.log_mul (by positivity) (by positivity), Real.log_pow]
+      have hh := Real.log_le_sub_one_of_pos
+        (by positivity : 0 < 1 + (9 / 4 : ℝ) / t ^ 2)
+      norm_num only [Nat.cast_ofNat]
+      linarith
+    have hl0 : 0 ≤ Real.log (t ^ 2 + 9 / 4) := Real.log_nonneg (by nlinarith)
+    have hsq := pow_le_pow_left₀ hl0 hl 2
+    calc
+      _ ≤ (2 * Real.log t + 0.0225) ^ 2 / t ^ 2 :=
+        div_le_div₀ (sq_nonneg _) hsq (by positivity) (by linarith)
+      _ = _ := by ring
+  have hf : IntegrableOn
+      (fun t : ℝ => Real.log (t ^ 2 + 9 / 4) ^ 2 / (1 / 4 + t ^ 2)) (Ioi 10) := by
+    apply hi.mono' Prep1121VIPiecesHigh.g_cont.aestronglyMeasurable.restrict
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+    rw [Real.norm_of_nonneg (by positivity)]
+    exact hp t ht
+  have hb := setIntegral_mono_on hf hi measurableSet_Ioi hp
+  rw [integral_const_mul, (Contour472.log_square_tail_integral 0.01125 10
+    (by norm_num)).2] at hb
+  have hl10 : Real.log (10 : ℝ) ≤ 2.3026 := by
+    exact Prep1121VIPiecesHigh.log_le_series 10 (5 / 4) 3 14 (by norm_num)
+      (by norm_num) 2.3026 (by norm_num [Finset.sum_range_succ])
+  have hl0 : 0 ≤ Real.log (10 : ℝ) := Real.log_nonneg (by norm_num)
+  nlinarith
 
 /-- LEAF: P0014 page 35, the integral after display 4.12: ∫_0^∞ splits at the nodes of the
 fourteen subintervals and the tail at 10. Class MEDIUM: integrability on Ioi 0 of
@@ -53,7 +95,52 @@ theorem half_line_split :
       (∫ τ in (5.2 : ℝ)..7.2, Real.log (τ ^ 2 + 9 / 4) ^ 2 / (1 / 4 + τ ^ 2)) +
       (∫ τ in (7.2 : ℝ)..10, Real.log (τ ^ 2 + 9 / 4) ^ 2 / (1 / 4 + τ ^ 2))) +
       ∫ τ in Ioi (10 : ℝ), Real.log (τ ^ 2 + 9 / 4) ^ 2 / (1 / 4 + τ ^ 2) := by
-  sorry
+  have hc := Prep1121VIPiecesHigh.g_cont
+  have h0 : IntegrableOn (fun t : ℝ => Real.log (t ^ 2 + 9 / 4) ^ 2 /
+      (1 / 4 + t ^ 2)) (Ioi 0) := LogIntegral680.integrable_log_square.integrableOn
+  have h10 : IntegrableOn (fun t : ℝ => Real.log (t ^ 2 + 9 / 4) ^ 2 /
+      (1 / 4 + t ^ 2)) (Ioi 10) := LogIntegral680.integrable_log_square.integrableOn
+  have hs := intervalIntegral.integral_interval_add_Ioi h0 h10
+  have h1 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 0.14)
+    (hc.intervalIntegrable 0.14 0.28)
+  have h2 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 0.28)
+    (hc.intervalIntegrable 0.28 0.29)
+  have h3 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 0.29)
+    (hc.intervalIntegrable 0.29 0.45)
+  have h4 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 0.45)
+    (hc.intervalIntegrable 0.45 0.65)
+  have h5 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 0.65)
+    (hc.intervalIntegrable 0.65 0.9)
+  have h6 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 0.9)
+    (hc.intervalIntegrable 0.9 1.2)
+  have h7 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 1.2)
+    (hc.intervalIntegrable 1.2 1.6)
+  have h8 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 1.6)
+    (hc.intervalIntegrable 1.6 2.1)
+  have h9 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 2.1)
+    (hc.intervalIntegrable 2.1 2.8)
+  have h10 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 2.8)
+    (hc.intervalIntegrable 2.8 3.8)
+  have h11 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 3.8)
+    (hc.intervalIntegrable 3.8 5.2)
+  have h12 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 5.2)
+    (hc.intervalIntegrable 5.2 7.2)
+  have h13 := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
+    (hc.intervalIntegrable 0 7.2)
+    (hc.intervalIntegrable 7.2 10)
+  linarith [hs, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13]
 
 /-- LEAF: P0014 page 35: the integrand ℓ² w is even, so its integral over ℝ is twice its
 integral over (0, ∞). Class EASY: a Mathlib lookup for even integrands, as
@@ -73,7 +160,24 @@ theorem expand_square (C : ℝ) :
       (1 / 4) * (∫ τ : ℝ, Real.log (τ ^ 2 + 9 / 4) ^ 2 / (1 / 4 + τ ^ 2)) +
         C * (∫ τ : ℝ, Real.log (τ ^ 2 + 9 / 4) / (1 / 4 + τ ^ 2)) +
         C ^ 2 * (∫ τ : ℝ, 1 / (1 / 4 + τ ^ 2)) := by
-  sorry
+  have hG := LogIntegral680.integrable_log_square
+  have hL := LogIntegral680.integrable_log
+  have hW : Integrable (fun t : ℝ => 1 / (1 / 4 + t ^ 2)) := by
+    simpa only [one_div] using Contour472.cauchy_kernel_integral.1
+  have heq : (fun τ : ℝ => ((1 / 2) * Real.log (τ ^ 2 + 9 / 4) + C) ^ 2 /
+      (1 / 4 + τ ^ 2)) = fun τ =>
+        (1 / 4) * (Real.log (τ ^ 2 + 9 / 4) ^ 2 / (1 / 4 + τ ^ 2)) +
+        C * (Real.log (τ ^ 2 + 9 / 4) / (1 / 4 + τ ^ 2)) +
+        C ^ 2 * (1 / (1 / 4 + τ ^ 2)) := by
+    funext τ
+    ring
+  rw [heq]
+  have h1 := integral_add ((hG.const_mul (1 / 4)).add (hL.const_mul C))
+    (hW.const_mul (C ^ 2))
+  have h2 := integral_add (hG.const_mul (1 / 4)) (hL.const_mul C)
+  simp only [Pi.add_apply] at h1 h2
+  rw [h1, h2, integral_const_mul, integral_const_mul, integral_const_mul]
+
 
 /-- LEAF: P0014 page 35: ∫_ℝ dτ / (1/4 + τ²) = 2π, the Plancherel weight of the line
 re s = -1/2, since |s|² = 1/4 + τ². Class EASY: `integral_univ_inv_one_add_sq` and the
@@ -96,7 +200,7 @@ The paper computes the whole integral numerically; the closed form only shortens
 certified part. Class HARD: Poisson kernel or differentiation in b under the integral. -/
 theorem integral_log_weight :
     ∫ τ : ℝ, Real.log (τ ^ 2 + 9 / 4) / (1 / 4 + τ ^ 2) = 4 * π * Real.log 2 := by
-  sorry
+  exact Prep1121DLogWeight.integral_log_weight
 
 /-- LEAF: numerical, log π ≤ 1.1449; the true value is 1.1447298858, margin 1.7e-4.
 Class EASY: `Real.pi_lt_d6` and π ≤ exp 1.1449 = e · exp 0.1449, with `Real.exp_one_gt_d9`

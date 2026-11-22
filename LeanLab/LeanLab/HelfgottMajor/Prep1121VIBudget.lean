@@ -1,6 +1,7 @@
 import LeanLab.HelfgottMajor.Energy669
 import LeanLab.HelfgottMajor.Prep1121VIPointwise
 import LeanLab.HelfgottMajor.Prep1121VIIntegral
+import LeanLab.HelfgottMajor.Prep1121DLineCont
 
 /-!
 PREP 2026-11-21, route step `MainLemma41Split123.vertical_integral_bound`, part F.
@@ -25,7 +26,8 @@ theorem logDeriv_line_continuous {q : ℕ} [NeZero q] {χ : DirichletCharacter �
     (hχ : χ.IsPrimitive) :
     Continuous (fun τ : ℝ => deriv χ.LFunction ((-1 / 2 : ℂ) + τ * I) /
       χ.LFunction ((-1 / 2 : ℂ) + τ * I)) := by
-  sorry
+  exact Prep1121DLineCont.logDeriv_line_continuous hχ
+
 
 /-- LEAF: P0014 page 35, the two functions of the Minkowski split after 4.12 are square
 integrable on the line: for real A and K, τ ↦ ((1/2) log(τ² + 9/4) + K)/√(1/4 + τ²) and
@@ -35,7 +37,32 @@ theorem memLp_split (A K : ℝ) :
     MemLp (fun τ : ℝ => A / Real.sqrt (1 / 4 + τ ^ 2)) 2 ∧
       MemLp (fun τ : ℝ => ((1 / 2) * Real.log (τ ^ 2 + 9 / 4) + K) /
         Real.sqrt (1 / 4 + τ ^ 2)) 2 := by
-  sorry
+  have hw : Integrable (fun t : ℝ => 1 / (1 / 4 + t ^ 2)) := by
+    simpa only [one_div] using Contour472.cauchy_kernel_integral.1
+  have hL := LogIntegral680.integrable_log
+  have hG := LogIntegral680.integrable_log_square
+  have hcden : Continuous (fun t : ℝ => Real.sqrt (1 / 4 + t ^ 2)) := by fun_prop
+  have hden : ∀ t : ℝ, Real.sqrt (1 / 4 + t ^ 2) ≠ 0 :=
+    fun t => (Real.sqrt_pos.mpr (by positivity)).ne'
+  have hcA : Continuous (fun t : ℝ => A / Real.sqrt (1 / 4 + t ^ 2)) :=
+    continuous_const.div hcden hden
+  have hcn : Continuous (fun t : ℝ => (1 / 2) * Real.log (t ^ 2 + 9 / 4) + K) :=
+    (continuous_const.mul (Continuous.log (by fun_prop) (fun t => by positivity))).add
+      continuous_const
+  have hcK := hcn.div hcden hden
+  constructor
+  · apply (memLp_two_iff_integrable_sq_norm hcA.aestronglyMeasurable).mpr
+    apply (hw.const_mul (A ^ 2)).congr
+    filter_upwards [] with t
+    rw [Real.norm_eq_abs, sq_abs, div_pow, Real.sq_sqrt (by positivity)]
+    ring
+  · apply (memLp_two_iff_integrable_sq_norm hcK.aestronglyMeasurable).mpr
+    have hi := ((hG.const_mul (1 / 4)).add (hL.const_mul K)).add (hw.const_mul (K ^ 2))
+    apply hi.congr
+    filter_upwards [] with t
+    simp only [Pi.add_apply, Pi.div_apply]
+    rw [Real.norm_eq_abs, sq_abs, div_pow, Real.sq_sqrt (by positivity)]
+    ring
 
 /-- LEAF: P0014 page 35, the Minkowski step after 4.12 in L²(ℝ): if ‖F‖ ≤ u + v pointwise
 with u, v in L² and F measurable, then F is in L² and √∫‖F‖² ≤ √∫u² + √∫v².

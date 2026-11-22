@@ -1,4 +1,7 @@
-import LeanLab.HelfgottMajor.MainLemma41Split123
+import LeanLab.HelfgottMajor.CircleResidue669
+import LeanLab.HelfgottMajor.Lemma41Kernel669
+import LeanLab.HelfgottMajor.Lemma41Leaf123
+import LeanLab.HelfgottMajor.Norm389
 import LeanLab.PNTPort.StrongPNT.ResidueCalcOnRectangles
 import LeanLab.Linnik.ExplicitFormula.Residues
 import LeanLab.Linnik.ExplicitFormula.LeftHalf

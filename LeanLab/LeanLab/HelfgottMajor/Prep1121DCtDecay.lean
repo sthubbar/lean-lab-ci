@@ -1,5 +1,9 @@
-import LeanLab.HelfgottMajor.Prep1121ContourShift
+import LeanLab.HelfgottMajor.CircleResidue669
+import LeanLab.HelfgottMajor.Lemma41Kernel669
+import LeanLab.HelfgottMajor.Lemma41Leaf123
+import LeanLab.HelfgottMajor.Norm389
 import LeanLab.Linnik.ExplicitFormula.ZeroSum
+import LeanLab.Linnik.ExplicitFormula.Residues
 
 /-!
 PREP deepening 2026-11-21, session CLAUDE-prep1121 HM-contour-p2. Pieces for four leaves of

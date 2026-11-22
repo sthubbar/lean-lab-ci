@@ -10,6 +10,9 @@ import LeanLab.KadiriLumley2014.TableCertificates259
 import LeanLab.KadiriLumley2014.BindingRow
 import LeanLab.KadiriLumley2014.OmegaIntegral
 import LeanLab.KadiriLumley2014.WeightTail
+import LeanLab.KadiriLumley2014.CostaSplit
+import LeanLab.KadiriLumley2014.BrunTitchmarshMV
+import LeanLab.KadiriLumley2014.MVInput
 
 namespace LeanLab.KadiriLumley2014.Task92
 open Real Set MeasureTheory
@@ -208,9 +211,10 @@ theorem normalized_domain {δ u a x : ℝ}
 
 /-- LEAF. Page 3 Lemma 2.1, equation 2.9. Cited external input:
 N. Costa Pereira, Estimates for the Chebyshev Function psi minus theta,
-Math. Comp. 44, 1985, Theorem 5. This leaf remains unproved. -/
-theorem costa_pereira : CostaEstimate := by
-  sorry
+Math. Comp. 44, 1985, Theorem 5. Wired S59 burst-20261122: now proved from
+CostaSplit.costa_pereira_of_leaf, CONDITIONAL ON its LEAF, Dusart 2010 Theorem 5.2 row eta_2 0.05. -/
+theorem costa_pereira : CostaEstimate :=
+  CostaSplit.costa_pereira_of_leaf
 
 /-- LEAF. Page 3 equation 2.6. Integrating a pointwise theta bound over
 the two endpoint intervals gives its weighted tail bound. -/
@@ -247,14 +251,16 @@ theorem tail_bound_of_pointwise (m : ℕ) {δ u X a C : ℝ}
 
 /-- LEAF. Page 3 equation 2.6 with the enlarged logarithm of equation 2.7.
 Cited external input: Montgomery and Vaughan, The Large Sieve,
-Mathematika 20, 1973, Theorem 2. The exact constant two remains unproved. -/
+Mathematika 20, 1973, Theorem 2. Wired S59 burst-20261122: now proved from
+BrunTitchmarshMV, CONDITIONAL ON the LEAF MVInput.mv_brun_titchmarsh, the lab's MVBrunTitchmarsh. -/
 theorem brun_titchmarsh_pointwise {δ u X t : ℝ}
     (hδ : 0 ≤ δ) (hδ1 : δ ≤ 0.0001) (hu : 0 < u) (hu1 : u ≤ 0.0001)
     (hX : Real.exp 38 ≤ X) (hgap : 1 < X * (Real.exp u - 1))
     (ht : t ∈ Icc (0 : ℝ) 1) :
     Chebyshev.theta (Real.exp u * (X * (1 + δ * t))) -
       Chebyshev.theta (X * (1 + δ * t)) ≤ tailCoefficient δ u X := by
-  sorry
+  exact BrunTitchmarshMV.brun_titchmarsh_pointwise_of_MV MVInput.mv_brun_titchmarsh
+    hδ hδ1 hu hu1 hX hgap ht
 
 /-- LEAF. Page 3 equations 2.6 and 2.7. Cited external input:
 Montgomery and Vaughan, The Large Sieve, Mathematika 20, 1973, Theorem 2;

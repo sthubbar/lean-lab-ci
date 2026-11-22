@@ -1,3 +1,4 @@
+import LeanLab.HelfgottMajor.Prep1121ContourShift
 import LeanLab.HelfgottMajor.CircleResidue669
 import LeanLab.HelfgottMajor.Lemma41Kernel669
 import LeanLab.HelfgottMajor.Lemma41Leaf123
@@ -45,7 +46,7 @@ theorem contour_shift (x : ℝ) (hx : 1 ≤ x) (q : ℕ) [NeZero q]
           (2 * π * Complex.I)⁻¹ * circleIntegral (contourIntegrand χ δ x) 0 r =
         -((2 * π : ℂ)⁻¹ *
           ∫ τ : ℝ, contourIntegrand χ δ x (-1 / 2 + τ * Complex.I)) := by
-  sorry
+  exact Prep1121ContourShift.contour_shift_of_leaves x hx q χ hχ δ T
 
 open Classical in
 /-- LEAF: P0014 proof of Lemma 4.1, page 33, displays 4.6, 4.8 and 4.9, and the case analysis

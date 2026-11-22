@@ -1,7 +1,11 @@
-import LeanLab.HelfgottMajor.MainLemma41Split123
+import LeanLab.HelfgottMajor.CircleResidue669
+import LeanLab.HelfgottMajor.Lemma41Kernel669
+import LeanLab.HelfgottMajor.Lemma41Leaf123
+import LeanLab.HelfgottMajor.Norm389
 import LeanLab.HelfgottMajor.PrincipalRoute669
 import LeanLab.Linnik.ExplicitFormula.Heights
 import LeanLab.HelfgottMajor.Prep1121ContourRect
+import LeanLab.HelfgottMajor.Prep1121DCtDecay
 
 /-!
 PREP split 2026-11-21, session CLAUDE-prep1121, route step
@@ -59,7 +63,7 @@ constant. -/
 theorem line_two_integrable {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) (δ : ℝ) {x : ℝ}
     (hx : 1 ≤ x) :
     Integrable (fun τ : ℝ => contourIntegrand χ δ x ((2 : ℂ) + τ * Complex.I)) := by
-  sorry
+  exact Prep1121DCtDecay.line_two_integrable_of_pieces χ δ hx
 
 /-- PROVED. P0014 page 33, display 4.7, the line Re s = -1/2: the integrand is integrable
 there, from `principal_half_line_integrable` and contMellin = continuedGaussian on
@@ -138,7 +142,7 @@ SPLIT_principal_contour_identity, for `continuedGaussian`, with `Route669.contMe
 theorem contMellin_decay_strip (δ : ℝ) :
     ∃ K : ℝ, 0 < K ∧ ∀ σ ∈ Icc (-1 / 2 : ℝ) 2, ∀ y : ℝ, 1 ≤ |y| →
       ‖contMellin δ ((σ : ℂ) + (y : ℂ) * Complex.I)‖ ≤ K / (1 + y ^ 2) := by
-  sorry
+  exact Prep1121DCtDecay.contMellin_decay_strip_of_pieces δ
 
 /-- LEAF: P0014 page 33, display 4.7, the horizontal sides vanish. At heights Y n in
 [max n 5, max n 5 + 1] where |L'/L| is at most C log²(max n 5 + 2) on both horizontal sides,
@@ -157,7 +161,7 @@ theorem horizontal_tendsto {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) 
         contourIntegrand χ δ x ((σ : ℂ) + (Y n : ℂ) * Complex.I)) atTop (𝓝 0) ∧
     Tendsto (fun n : ℕ => ∫ σ in (-1 / 2 : ℝ)..2,
         contourIntegrand χ δ x ((σ : ℂ) + ((-Y n : ℝ) : ℂ) * Complex.I)) atTop (𝓝 0) := by
-  sorry
+  exact Prep1121DCtDecay.horizontal_tendsto_of_pieces χ δ hx hdec hC Y hYI hB
 
 /-- LEAF: P0014 page 31, display 4.1, convergence of the zero sum. The terms m(ρ) G_δ(ρ) x^ρ
 over the zeros with 0 < Re ρ < 1 are summable: |G_δ(ρ)| ≪ 1/|(ρ + 1)(ρ + 2)| in the strip
@@ -167,7 +171,7 @@ theorem zero_sum_summable {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) (
     (δ : ℝ) {x : ℝ} (hx : 1 ≤ x) :
     Summable (fun ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
       0 < ρ.re ∧ ρ.re < 1} => zeroTerm χ δ x ρ.val) := by
-  sorry
+  exact Prep1121DCtDecay.zero_sum_summable_of_pieces χ hχ δ hx
 
 /-- PROVED. P0014 page 31, display 4.1 split at height T as in Lemmas 4.4 and 4.5: for a
 summable family the zeros of height at most T and above T together give the full zero sum. -/
