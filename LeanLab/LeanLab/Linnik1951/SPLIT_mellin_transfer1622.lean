@@ -22,7 +22,19 @@ theorem lineBound_lnL1622 (hG : LeanLab.DERZ1997.GRH) :
         ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 →
           LineBound1622 N B0
             (fun t : ℝ => Complex.log (DirichletCharacter.LFunction χ (mellinLine1622 N t))) := by
-  sorry
+  refine ⟨1, by norm_num, 8, ?_⟩
+  intro N hN q hq hqt χ hχ
+  constructor
+  · have hline : Continuous (fun t : ℝ => mellinLine1622 N t) := by
+      dsimp [mellinLine1622]
+      fun_prop
+    have hL : Continuous (fun t : ℝ =>
+        DirichletCharacter.LFunction χ (mellinLine1622 N t)) := by
+      exact hline.differentiable
+        ((DirichletCharacter.differentiable_LFunction hχ).continuous)
+    exact hL.log
+  · intro t
+    sorry
 
 /-- LEAF. Prime power expansion step. The difference between the character prime
 sum and the Mellin integral of the logarithm of the L-function is exactly minus
