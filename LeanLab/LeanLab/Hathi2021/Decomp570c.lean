@@ -168,7 +168,20 @@ theorem joint_moment_rounding_reserve (C η : ℝ) (hC : 1 < C) (hη : 0 < η) :
       Odd n₁ → Odd n₂ → N₀ ≤ n₂ → n₂ < n₁ → (n₁ : ℝ) ≤ C * n₂ →
       primeMoment n₁ n₂ * squareMoment n₁ n₂ ≤
         ((108238 / 10 + η) * ((n₁ : ℝ) * n₂ * L n₁ ^ 16)) ^ 2 := by
-  sorry
+  obtain ⟨N₁, h₁⟩ := kong_liu_prime_moment C hC
+  obtain ⟨N₂, h₂⟩ := hu_square_moment C η hC hη
+  refine ⟨max N₁ N₂, ?_⟩
+  intro n₁ n₂ ho₁ ho₂ hn hlt hratio
+  have hm := h₁ n₁ n₂ ho₁ ho₂ ((le_max_left _ _).trans hn) hlt hratio
+  have hs := h₂ n₁ n₂ ho₁ ho₂ ((le_max_right _ _).trans hn) hlt hratio
+  obtain ⟨hp, hq⟩ := moments_nonneg n₁ n₂
+  have hL : 0 ≤ L n₁ := by
+    have h16 : 16 ≤ n₁ := ((le_max_left _ _).trans hn).trans hlt.le
+    exact (Decomp115.logScale_pos n₁ h16).le
+  have h1 := mul_le_mul hm hs hq (le_trans (by positivity) hp)
+  have key : (3058869 / 10000 : ℝ) * (383000 + η) ≤ (108238 / 10 + η) ^ 2 := by
+    nlinarith [final_constant_rounding_gap]
+  nlinarith [key]
 
 /-- Page 199. A bound on the product of the two moments controls the
 square root product, including the zero moment cases. -/
