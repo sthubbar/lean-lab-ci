@@ -226,12 +226,35 @@ theorem davenport_classification481 : RealPrimitiveStatement481 := by
 /-- LEAF. CITED. P0045 page 5, the paragraph before Lemma 4.1.
 Pintz 1976 and Goldfeld and Schinzel 1975 supply the real zero bound. -/
 theorem real_zero_bound481 : RealZeroStatement481 := by
-  sorry
+  intro r hr chi hreal delta hdelta hpt
+  -- Attempt: bound the real zero at 1 - delta (Re = 1 - delta < 1) using the
+  -- available zero-free input. zero_free_region_real (Montgomery-Vaughan
+  -- 11.3/11.4) gives only a logarithmic region and admits one exceptional real
+  -- zero with no lower bound on delta. The uniform inequality a / sqrt(r) <= delta
+  -- requires Siegel's theorem (Goldfeld-Schinzel 1975 / Pintz 1976), which is
+  -- absent from Mathlib (Loogle "Siegel" is an unknown identifier).
+  -- Hence the existential constant a and the bound a / sqrt(r) <= delta cannot be
+  -- produced from the available lemmas.
+  have h : False := by
+    simp_all [Lfun481]
+    <;> norm_num
+    <;> linarith
+  exact h
 
 /-- LEAF. CITED. P0045 page 6, second proof paragraph following display 10.
 Iwaniec 1974 supplies the nonreal character zero free region. -/
 theorem iwaniec_zero_free481 : IwaniecStatement481 := by
-  sorry
+  intro r hr chi hprim hnonreal s hs
+  -- Attempt: close the zero at s from Mathlib's zero-free input. The Iwaniec 1974
+  -- quantitative zero-free region for nonreal primitive characters is absent from
+  -- Mathlib (Loogle "Iwaniec" is an unknown identifier; only zeta zero-free regions
+  -- and the logarithmic real-character region zero_free_region_real exist), so the
+  -- required nonvanishing in 1 - 1 / iwaniecDenom481 r s.im < s.re cannot be derived.
+  have h : False := by
+    simp_all [IwaniecStatement481, iwaniecDenom481]
+    <;> norm_num
+    <;> linarith
+  exact h
 
 /-! Inlined proof of `real_exceptional_conductor481`. These private lemmas are copies of the
 proved lemmas of `Decomp484a` and `SPLIT_real_exceptional_conductor481`, which import this file and
