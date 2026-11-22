@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Prep1121VIIntegral
+import LeanLab.HelfgottMajor.Prep1121DIntegrable
 
 /-!
 PREP 2026-11-21 deepening pass p2, route step `MainLemma41Split123.vertical_integral_bound`.
@@ -15,6 +16,63 @@ AI wrote this Lean code. Binary Goldbach is open.
 namespace LeanLab.HelfgottMajor.Prep1121DLogWeight
 open Real MeasureTheory Set Filter Topology
 
+/-- The logarithmically weighted reciprocal quadratic is integrable for every positive
+parameter.  This is the uniform-input analogue of `Prep1121DIntegrable.integrable_log_weight`. -/
+theorem integrable_log_weight_general (c : ℝ) (hc : 0 < c) :
+    Integrable (fun τ : ℝ => Real.log (τ ^ 2 + c ^ 2) / (1 / 4 + τ ^ 2)) := by
+  let A : ℝ := |2 * Real.log c|
+  let K : ℝ := Real.log (1 + c ^ 2)
+  have hc2 : 0 < c ^ 2 := sq_pos_of_pos hc
+  have hK : 0 ≤ K := by
+    dsimp [K]
+    exact Real.log_nonneg (by nlinarith)
+  have hlower : ∀ τ : ℝ, 2 * Real.log c ≤ Real.log (τ ^ 2 + c ^ 2) := by
+    intro τ
+    have hp : 0 < τ ^ 2 + c ^ 2 := by positivity
+    have hc2pos : 0 < c ^ 2 := hc2
+    have := Real.log_le_log (by positivity : 0 < c ^ 2) hp
+    rw [Real.log_pow] at this
+    simpa [Real.log_pow] using this
+  have hupper : ∀ τ : ℝ,
+      Real.log (τ ^ 2 + c ^ 2) ≤ Real.log (τ ^ 2 + 9 / 4) + K := by
+    intro τ
+    have hprod : τ ^ 2 + c ^ 2 ≤ (τ ^ 2 + 1) * (1 + c ^ 2) := by
+      nlinarith [sq_nonneg τ]
+    have hp : 0 < τ ^ 2 + c ^ 2 := by positivity
+    have hq : 0 < (τ ^ 2 + 1) * (1 + c ^ 2) := by positivity
+    have hlog := Real.log_le_log hp hq hprod
+    rw [Real.log_mul (by positivity : 0 < τ ^ 2 + 1) (by positivity : 0 < 1 + c ^ 2)] at hlog
+    dsimp [K]
+    exact hlog
+  have hL : ∀ τ : ℝ, 0 ≤ Real.log (τ ^ 2 + 9 / 4) := by
+    intro τ
+    exact Real.log_nonneg (by nlinarith [sq_nonneg τ])
+  have hbound : ∀ τ : ℝ,
+      |Real.log (τ ^ 2 + c ^ 2)| ≤ A + K + Real.log (τ ^ 2 + 9 / 4) := by
+    intro τ
+    have habs := abs_le_max_abs_abs (hlower τ) (hupper τ)
+    have hmax : max |2 * Real.log c| |Real.log (τ ^ 2 + 9 / 4) + K| ≤
+        A + K + Real.log (τ ^ 2 + 9 / 4) := by
+      apply max_le
+      · exact le_abs_self (2 * Real.log c)
+      · rw [abs_of_nonneg (by linarith [hL τ, hK])]
+        dsimp [A, K]
+        linarith [abs_nonneg (2 * Real.log c)]
+    simpa [A, K, abs_of_nonneg (by linarith [hL τ, hK])] using habs.trans hmax
+  have hg : Integrable (fun τ : ℝ =>
+      (A + K) * (1 / (1 / 4 + τ ^ 2)) +
+        Real.log (τ ^ 2 + 9 / 4) * (1 / (1 / 4 + τ ^ 2))) := by
+    exact (LeanLab.HelfgottMajor.Prep1121DIntegrable.integrable_weight.const_mul (A + K)).add
+      LeanLab.HelfgottMajor.Prep1121DIntegrable.integrable_log_weight
+  refine hg.mono (Measurable.aestronglyMeasurable (by fun_prop)) ?_
+  filter_upwards [] with τ
+  have hw : 0 < 1 / 4 + τ ^ 2 := by positivity
+  rw [Real.norm_eq_abs, abs_div, abs_of_pos hw]
+  apply (div_le_div_iff₀ hw (by positivity)).2
+  have hnum := hbound τ
+  dsimp [A, K] at hnum ⊢
+  linarith
+
 /-- LEAF: P0014 page 35, the exact part of the integral after display 4.12, step one:
 differentiation under the integral sign in b, for b > 0,
 d/db ∫ log(τ² + b²)/(1/4 + τ²) dτ = ∫ 2b/((τ² + b²)(1/4 + τ²)) dτ.
@@ -24,7 +82,51 @@ log(τ² + c²)/(1/4 + τ²), as in `Prep1121DIntegrable`. -/
 theorem hasDerivAt_param (b : ℝ) (hb : 0 < b) :
     HasDerivAt (fun c : ℝ => ∫ τ : ℝ, Real.log (τ ^ 2 + c ^ 2) / (1 / 4 + τ ^ 2))
       (∫ τ : ℝ, 2 * b / ((τ ^ 2 + b ^ 2) * (1 / 4 + τ ^ 2))) b := by
-  sorry
+  let s : Set ℝ := Ioo (b / 2) (2 * b)
+  have hs : s ∈ 𝓝 b := by
+    dsimp [s]
+    exact Ioo_mem_nhds (by linarith) (by linarith)
+  let F : ℝ → ℝ → ℝ := fun c τ =>
+    Real.log (τ ^ 2 + c ^ 2) / (1 / 4 + τ ^ 2)
+  let F' : ℝ → ℝ → ℝ := fun c τ =>
+    2 * c / ((τ ^ 2 + c ^ 2) * (1 / 4 + τ ^ 2))
+  have hF_meas : ∀ᶠ c in 𝓝 b, AEStronglyMeasurable (F c) := by
+    filter_upwards [] with c
+    exact (Measurable.aestronglyMeasurable (by fun_prop))
+  have hF_int : Integrable (F b) := by
+    exact integrable_log_weight_general b hb
+  have hF'_meas : AEStronglyMeasurable (F' b) := by
+    exact Measurable.aestronglyMeasurable (by fun_prop)
+  have h_bound : ∀ᵐ τ ∂volume, ∀ c ∈ s,
+      ‖F' c τ‖ ≤ (4 / b) / (1 / 4 + τ ^ 2) := by
+    filter_upwards [] with τ
+    intro c hc
+    have hc' : b / 2 < c := (hc.1 : b / 2 < c)
+    have hc0 : 0 < c := by linarith
+    have hτ : 0 < τ ^ 2 + c ^ 2 := by positivity
+    have hw : 0 < 1 / 4 + τ ^ 2 := by positivity
+    rw [Real.norm_eq_abs, abs_of_pos (by positivity : 0 < 2 * c)]
+    apply (div_le_div_iff₀ hw (by positivity : 0 < 4 / b)).2
+    have hsq : 0 ≤ τ ^ 2 := sq_nonneg τ
+    nlinarith
+  have hbound_int : Integrable (fun τ : ℝ => (4 / b) / (1 / 4 + τ ^ 2)) := by
+    exact LeanLab.HelfgottMajor.Prep1121DIntegrable.integrable_weight.const_mul (4 / b)
+  have h_diff : ∀ᵐ τ ∂volume, ∀ c ∈ s, HasDerivAt (F · τ) (F' c τ) c := by
+    filter_upwards [] with τ
+    intro c hc
+    have hc' : b / 2 < c := (hc.1 : b / 2 < c)
+    have hc0 : 0 < c := by linarith
+    have hτ : 0 < τ ^ 2 + c ^ 2 := by positivity
+    have hpoly : HasDerivAt (fun t : ℝ => t ^ 2 + τ ^ 2) (2 * c) c := by
+      simpa using ((hasDerivAt_id c).pow 2).const_add (τ ^ 2)
+    have hlog := (Real.hasDerivAt_log hτ.ne').comp c hpoly
+    have hdiv := hlog.div_const (1 / 4 + τ ^ 2)
+    simpa [F, F', div_eq_mul_inv] using hdiv
+  have hresult := hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (s := s) (x₀ := b) (F := F) (F' := F')
+    (bound := fun τ : ℝ => (4 / b) / (1 / 4 + τ ^ 2))
+    hs hF_meas hF_int hF'_meas h_bound hbound_int h_diff
+  exact hresult.2
 
 /-- 1/(τ² + c²) = c⁻² (1 + (τ/c)²)⁻¹. -/
 theorem inv_sq_add_eq (c : ℝ) (hc : 0 < c) :
