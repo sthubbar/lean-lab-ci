@@ -28,10 +28,230 @@ on the strip 1/2 ≤ Re s ≤ 5/2 decays like (1 + t²)⁻¹ in the height t, un
 integrations by parts, the boundary terms vanishing for Re s above 0. MEDIUM: a public port of
 the private `pcsB_mellin_decay_strip` of SPLIT_principal_contour_identity, which has exactly
 this statement, through its helper `pcsB_line_constant_uniform`. -/
+private theorem abs_im_le_norm_add_nat (s : ℂ) (k : ℕ) : |s.im| ≤ ‖s + (k : ℂ)‖ := by
+  have him : (s + (k : ℂ)).im = s.im := by simp
+  have hsq : ‖s + (k : ℂ)‖ ^ 2 = (s + (k : ℂ)).re ^ 2 + s.im ^ 2 := by
+    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply, him]
+    ring
+  have h1 : s.im ^ 2 ≤ ‖s + (k : ℂ)‖ ^ 2 := by
+    rw [hsq]
+    nlinarith [sq_nonneg (s + (k : ℂ)).re]
+  have h2 : |s.im| ^ 2 ≤ ‖s + (k : ℂ)‖ ^ 2 := by
+    rwa [sq_abs]
+  simpa using (sq_le_sq.mp h2)
+
+/-- A constant bound for the Gaussian Mellin transform on the wide strip of real parts
+`[1/2, 13/2]`, uniform in the imaginary part. -/
+private theorem line_const_uniform (δ : ℝ) :
+    ∃ B : ℝ, 0 ≤ B ∧ ∀ s : ℂ, 1 / 2 ≤ s.re → s.re ≤ 13 / 2 →
+      ‖Decomp269a.gaussianMellin δ s‖ ≤ B := by
+  have hint1 : IntegrableOn (fun x : ℝ => x ^ (-(1 / 2 : ℝ)) * Real.exp (-x ^ 2 / 2))
+      (Set.Ioi (0 : ℝ)) := by
+    have h := integrableOn_rpow_mul_exp_neg_mul_sq (b := (1 / 2 : ℝ)) (by norm_num)
+      (s := -(1 / 2 : ℝ)) (by norm_num)
+    refine h.congr_fun ?_ measurableSet_Ioi
+    intro x _
+    simp only [show -(1 / 2 : ℝ) * x ^ 2 = -x ^ 2 / 2 by ring]
+  have hint2 : IntegrableOn (fun x : ℝ => x ^ (11 / 2 : ℝ) * Real.exp (-x ^ 2 / 2))
+      (Set.Ioi (0 : ℝ)) := by
+    have h := integrableOn_rpow_mul_exp_neg_mul_sq (b := (1 / 2 : ℝ)) (by norm_num)
+      (s := (11 / 2 : ℝ)) (by linarith)
+    refine h.congr_fun ?_ measurableSet_Ioi
+    intro x _
+    simp only [show -(1 / 2 : ℝ) * x ^ 2 = -x ^ 2 / 2 by ring]
+  set g : ℝ → ℝ := fun x =>
+    x ^ (-(1 / 2 : ℝ)) * Real.exp (-x ^ 2 / 2) +
+      x ^ (11 / 2 : ℝ) * Real.exp (-x ^ 2 / 2) with hg
+  have hsum : IntegrableOn g (Set.Ioi (0 : ℝ)) := by
+    rw [hg]
+    exact hint1.add hint2
+  refine ⟨∫ x in Set.Ioi (0 : ℝ), g x, setIntegral_nonneg measurableSet_Ioi ?_, ?_⟩
+  · intro x hx
+    have hx0 : (0 : ℝ) < x := hx
+    have h1 : (0 : ℝ) ≤ x ^ (-(1 / 2 : ℝ)) := Real.rpow_nonneg hx0.le _
+    have h2 : (0 : ℝ) ≤ x ^ (11 / 2 : ℝ) := Real.rpow_nonneg hx0.le _
+    have h3 : (0 : ℝ) < Real.exp (-x ^ 2 / 2) := Real.exp_pos _
+    have h4 : (0 : ℝ) ≤ x ^ (-(1 / 2 : ℝ)) * Real.exp (-x ^ 2 / 2) := mul_nonneg h1 h3.le
+    have h5 : (0 : ℝ) ≤ x ^ (11 / 2 : ℝ) * Real.exp (-x ^ 2 / 2) := mul_nonneg h2 h3.le
+    rw [hg]
+    linarith
+  · intro s hs1 hs2
+    refine (Gaussian269.mellin_norm_le δ s).trans ?_
+    have hint : IntegrableOn (fun x : ℝ => x ^ (s.re - 1) * Real.exp (-x ^ 2 / 2))
+        (Set.Ioi (0 : ℝ)) := by
+      have h := integrableOn_rpow_mul_exp_neg_mul_sq (b := (1 / 2 : ℝ)) (by norm_num)
+        (s := s.re - 1) (by linarith)
+      refine h.congr_fun ?_ measurableSet_Ioi
+      intro x _
+      simp only [show -(1 / 2 : ℝ) * x ^ 2 = -x ^ 2 / 2 by ring]
+    refine setIntegral_mono_on hint hsum measurableSet_Ioi ?_
+    intro x hx
+    have hx0 : (0 : ℝ) < x := hx
+    have hlo : (0 : ℝ) ≤ x ^ (-(1 / 2 : ℝ)) := Real.rpow_nonneg hx0.le _
+    have hhi : (0 : ℝ) ≤ x ^ (11 / 2 : ℝ) := Real.rpow_nonneg hx0.le _
+    have hexp : (0 : ℝ) < Real.exp (-x ^ 2 / 2) := Real.exp_pos _
+    have hkey : x ^ (s.re - 1) ≤ x ^ (-(1 / 2 : ℝ)) + x ^ (11 / 2 : ℝ) := by
+      rcases le_or_gt x 1 with h1 | h1
+      · have hle : x ^ (s.re - 1) ≤ x ^ (-(1 / 2 : ℝ)) :=
+          Real.rpow_le_rpow_of_exponent_ge hx0 h1 (by linarith)
+        linarith
+      · have hle : x ^ (s.re - 1) ≤ x ^ (11 / 2 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le h1.le (by linarith)
+        linarith
+    have hfac : x ^ (s.re - 1) * Real.exp (-x ^ 2 / 2) ≤
+        (x ^ (-(1 / 2 : ℝ)) + x ^ (11 / 2 : ℝ)) * Real.exp (-x ^ 2 / 2) :=
+      mul_le_mul_of_nonneg_right hkey hexp.le
+    rw [hg]
+    calc x ^ (s.re - 1) * Real.exp (-x ^ 2 / 2)
+        ≤ (x ^ (-(1 / 2 : ℝ)) + x ^ (11 / 2 : ℝ)) * Real.exp (-x ^ 2 / 2) := hfac
+      _ = x ^ (-(1 / 2 : ℝ)) * Real.exp (-x ^ 2 / 2) +
+          x ^ (11 / 2 : ℝ) * Real.exp (-x ^ 2 / 2) := by ring
+
+/-- One integration by parts in norms: the recurrence at a point of positive real part
+bounds the transform by the two shifted values. -/
+private theorem recurrence_norm (δ : ℝ) {s : ℂ} (hs : 0 < s.re) :
+    ‖Decomp269a.gaussianMellin δ s‖ * ‖s‖ ≤
+      ‖Decomp269a.gaussianMellin δ (s + 2)‖ +
+        ‖(2 * π * Complex.I * δ : ℂ)‖ * ‖Decomp269a.gaussianMellin δ (s + 1)‖ := by
+  have h := Continuation457.gaussian_mellin_recurrence δ s hs
+  have he : ‖Decomp269a.gaussianMellin δ s‖ * ‖s‖ = ‖s * Decomp269a.gaussianMellin δ s‖ := by
+    rw [norm_mul, mul_comm]
+  rw [he, h]
+  calc ‖Decomp269a.gaussianMellin δ (s + 2) -
+        (2 * π * Complex.I * δ) * Decomp269a.gaussianMellin δ (s + 1)‖
+      ≤ ‖Decomp269a.gaussianMellin δ (s + 2)‖ +
+        ‖(2 * π * Complex.I * δ) * Decomp269a.gaussianMellin δ (s + 1)‖ := norm_sub_le _ _
+    _ = ‖Decomp269a.gaussianMellin δ (s + 2)‖ +
+        ‖(2 * π * Complex.I * δ : ℂ)‖ * ‖Decomp269a.gaussianMellin δ (s + 1)‖ := by rw [norm_mul]
+
+/-- Two integrations by parts on the strip: the transform times the modulus times the
+imaginary part is at most the uniform constant. -/
+private theorem decay_step (δ : ℝ) {B c : ℝ}
+    (hB : ∀ z : ℂ, 1 / 2 ≤ z.re → z.re ≤ 13 / 2 → ‖Decomp269a.gaussianMellin δ z‖ ≤ B)
+    (hc : c = ‖(2 * π * Complex.I * δ : ℂ)‖) {s : ℂ}
+    (hs1 : 1 / 2 ≤ s.re) (hs2 : s.re ≤ 5 / 2) :
+    ‖Decomp269a.gaussianMellin δ s‖ * ‖s‖ * |s.im| ≤ (B + c * B) * (1 + c) := by
+  have hs0 : 0 < s.re := by linarith
+  have hc0 : (0 : ℝ) ≤ c := by rw [hc]; exact norm_nonneg _
+  have hB0 : (0 : ℝ) ≤ B := le_trans (norm_nonneg _) (hB s hs1 (by linarith))
+  have hshift : ∀ k : ℕ, k ≤ 4 → ‖Decomp269a.gaussianMellin δ (s + (k : ℂ))‖ ≤ B := by
+    intro k hk
+    refine hB _ ?_ ?_
+    · have hr : (s + (k : ℂ)).re = s.re + (k : ℝ) := by simp
+      rw [hr]; linarith
+    · have hr : (s + (k : ℂ)).re = s.re + (k : ℝ) := by simp
+      have hk4 : (k : ℝ) ≤ 4 := by exact_mod_cast hk
+      rw [hr]; linarith
+  have h1 : ‖Decomp269a.gaussianMellin δ (s + 1)‖ ≤ B := by simpa using hshift 1 (by norm_num)
+  have h2 : ‖Decomp269a.gaussianMellin δ (s + 2)‖ ≤ B := by simpa using hshift 2 (by norm_num)
+  have h3 : ‖Decomp269a.gaussianMellin δ (s + 3)‖ ≤ B := by simpa using hshift 3 (by norm_num)
+  have h4 : ‖Decomp269a.gaussianMellin δ (s + 4)‖ ≤ B := by simpa using hshift 4 (by norm_num)
+  have e31 : (s + 1) + 2 = s + 3 := by ring
+  have e21 : (s + 1) + 1 = s + 2 := by ring
+  have e42 : (s + 2) + 2 = s + 4 := by ring
+  have e32 : (s + 2) + 1 = s + 3 := by ring
+  have hr1 : (0 : ℝ) < (s + 1).re := by
+    have hh : (s + 1).re = s.re + 1 := by simp
+    linarith
+  have hr2 : (0 : ℝ) < (s + 2).re := by
+    have hh : (s + 2).re = s.re + 2 := by simp
+    linarith
+  -- the recurrence at `s+1` and at `s+2`, with the shifts normalised
+  have r1 : ‖Decomp269a.gaussianMellin δ (s + 1)‖ * ‖s + 1‖ ≤
+      ‖Decomp269a.gaussianMellin δ (s + 3)‖ + c * ‖Decomp269a.gaussianMellin δ (s + 2)‖ := by
+    have h := recurrence_norm δ (s := s + 1) hr1
+    rw [← hc] at h
+    rwa [e31, e21] at h
+  have r2 : ‖Decomp269a.gaussianMellin δ (s + 2)‖ * ‖s + 2‖ ≤
+      ‖Decomp269a.gaussianMellin δ (s + 4)‖ + c * ‖Decomp269a.gaussianMellin δ (s + 3)‖ := by
+    have h := recurrence_norm δ (s := s + 2) hr2
+    rw [← hc] at h
+    rwa [e42, e32] at h
+  have n1 : ‖Decomp269a.gaussianMellin δ (s + 1)‖ * |s.im| ≤ B + c * B := by
+    have him : |s.im| ≤ ‖s + 1‖ := by simpa using abs_im_le_norm_add_nat s 1
+    have hb : ‖Decomp269a.gaussianMellin δ (s + 1)‖ * ‖s + 1‖ ≤ B + c * B := by
+      linarith [r1, mul_le_mul_of_nonneg_left h2 hc0]
+    exact (mul_le_mul_of_nonneg_left him (norm_nonneg _)).trans hb
+  have n2 : ‖Decomp269a.gaussianMellin δ (s + 2)‖ * |s.im| ≤ B + c * B := by
+    have him : |s.im| ≤ ‖s + 2‖ := by simpa using abs_im_le_norm_add_nat s 2
+    have hb : ‖Decomp269a.gaussianMellin δ (s + 2)‖ * ‖s + 2‖ ≤ B + c * B := by
+      linarith [r2, mul_le_mul_of_nonneg_left h3 hc0]
+    exact (mul_le_mul_of_nonneg_left him (norm_nonneg _)).trans hb
+  -- the recurrence at `s`, multiplied through by the imaginary part
+  have r0 : ‖Decomp269a.gaussianMellin δ s‖ * ‖s‖ ≤
+      ‖Decomp269a.gaussianMellin δ (s + 2)‖ + c * ‖Decomp269a.gaussianMellin δ (s + 1)‖ := by
+    have h := recurrence_norm δ (s := s) hs0
+    rw [← hc] at h
+    exact h
+  have hmul : ‖Decomp269a.gaussianMellin δ s‖ * ‖s‖ * |s.im| ≤
+      ‖Decomp269a.gaussianMellin δ (s + 2)‖ * |s.im| + c * (‖Decomp269a.gaussianMellin δ (s + 1)‖ * |s.im|) := by
+    have h := mul_le_mul_of_nonneg_right r0 (abs_nonneg s.im)
+    calc ‖Decomp269a.gaussianMellin δ s‖ * ‖s‖ * |s.im| ≤
+        (‖Decomp269a.gaussianMellin δ (s + 2)‖ + c * ‖Decomp269a.gaussianMellin δ (s + 1)‖) * |s.im| := h
+      _ = ‖Decomp269a.gaussianMellin δ (s + 2)‖ * |s.im| +
+          c * (‖Decomp269a.gaussianMellin δ (s + 1)‖ * |s.im|) := by ring
+  have hY : (0 : ℝ) ≤ B + c * B := by nlinarith
+  calc ‖Decomp269a.gaussianMellin δ s‖ * ‖s‖ * |s.im|
+      ≤ (B + c * B) + c * (B + c * B) := by
+        linarith [hmul, n2, mul_le_mul_of_nonneg_left n1 hc0]
+    _ = (B + c * B) * (1 + c) := by ring
+
+/-- Quadratic decay of the Gaussian Mellin transform to the right of the critical line,
+uniform on `1/2 ≤ Re s ≤ 5/2`, by two integrations by parts. -/
+
 theorem gaussianMellin_decay_right (δ : ℝ) :
     ∃ K : ℝ, 0 < K ∧ ∀ σ : ℝ, 1 / 2 ≤ σ → σ ≤ 5 / 2 → ∀ t : ℝ,
       ‖Decomp269a.gaussianMellin δ ((σ : ℂ) + t * Complex.I)‖ ≤ K / (1 + t ^ 2) := by
-  sorry
+  obtain ⟨B, hB0, hB⟩ := line_const_uniform δ
+  set c : ℝ := ‖(2 * π * Complex.I * δ : ℂ)‖ with hc
+  have hc0 : (0 : ℝ) ≤ c := by rw [hc]; exact norm_nonneg _
+  have hY : (0 : ℝ) ≤ (B + c * B) * (1 + c) := by
+    have : (0 : ℝ) ≤ B + c * B := by nlinarith
+    have : (0 : ℝ) ≤ 1 + c := by linarith
+    exact mul_nonneg ‹(0 : ℝ) ≤ B + c * B› ‹(0 : ℝ) ≤ 1 + c›
+  refine ⟨2 * ((B + c * B) * (1 + c)) + 2 * B + 1, by linarith, ?_⟩
+  intro σ hσ1 hσ2 t
+  set s : ℂ := (σ : ℂ) + t * Complex.I with hsdef
+  have hsr : s.re = σ := by rw [hsdef]; simp
+  have hsi : s.im = t := by rw [hsdef]; simp
+  rw [le_div_iff₀ (by positivity : (0 : ℝ) < 1 + t ^ 2)]
+  by_cases ht : 1 ≤ |t|
+  · have hstep : ‖Decomp269a.gaussianMellin δ s‖ * ‖s‖ * |s.im| ≤ (B + c * B) * (1 + c) :=
+      decay_step δ hB hc (s := s) (by rw [hsr]; exact hσ1) (by rw [hsr]; exact hσ2)
+    have ht2 : (1 : ℝ) ≤ t ^ 2 := by
+      have hs := sq_abs t
+      nlinarith [abs_nonneg t]
+    have hnorm : ‖Decomp269a.gaussianMellin δ s‖ * t ^ 2 ≤ (B + c * B) * (1 + c) := by
+      have hle : t ^ 2 ≤ ‖s‖ * |s.im| := by
+        have h1 : |s.im| ≤ ‖s‖ := by simpa using abs_im_le_norm_add_nat s 0
+        have hsq : t ^ 2 = |s.im| ^ 2 := by rw [← hsi, ← sq_abs]
+        rw [hsq, sq]
+        exact mul_le_mul_of_nonneg_right h1 (abs_nonneg s.im)
+      calc ‖Decomp269a.gaussianMellin δ s‖ * t ^ 2
+          ≤ ‖Decomp269a.gaussianMellin δ s‖ * (‖s‖ * |s.im|) :=
+            mul_le_mul_of_nonneg_left hle (norm_nonneg _)
+        _ = ‖Decomp269a.gaussianMellin δ s‖ * ‖s‖ * |s.im| := by ring
+        _ ≤ (B + c * B) * (1 + c) := hstep
+    have h2le : 1 + t ^ 2 ≤ 2 * t ^ 2 := by linarith
+    calc ‖Decomp269a.gaussianMellin δ s‖ * (1 + t ^ 2)
+        ≤ ‖Decomp269a.gaussianMellin δ s‖ * (2 * t ^ 2) :=
+          mul_le_mul_of_nonneg_left h2le (norm_nonneg _)
+      _ = 2 * (‖Decomp269a.gaussianMellin δ s‖ * t ^ 2) := by ring
+      _ ≤ 2 * ((B + c * B) * (1 + c)) := by linarith
+      _ ≤ 2 * ((B + c * B) * (1 + c)) + 2 * B + 1 := by linarith
+  · have ht1 : |t| < 1 := lt_of_not_ge ht
+    have ht2 : t ^ 2 < 1 := by
+      have hs := sq_abs t
+      nlinarith [abs_nonneg t]
+    have hBs : ‖Decomp269a.gaussianMellin δ s‖ ≤ B := by
+      refine hB s ?_ ?_
+      · rw [hsr]; linarith
+      · rw [hsr]; linarith
+    have hfac : 1 + t ^ 2 ≤ 2 := by linarith
+    calc ‖Decomp269a.gaussianMellin δ s‖ * (1 + t ^ 2)
+        ≤ B * (1 + t ^ 2) := mul_le_mul_of_nonneg_right hBs (by positivity)
+      _ ≤ B * 2 := by nlinarith
+      _ ≤ 2 * ((B + c * B) * (1 + c)) + 2 * B + 1 := by linarith
 
 /-- PROVED, the exact statement of `Prep1121ContourShift.contMellin_decay_strip`. P0014 page
 32, display 4.14: for Re s ≥ 1/2 the continuation is G_δ itself; for -1/2 ≤ Re s < 1/2 it is
@@ -79,6 +299,41 @@ theorem contMellin_decay_strip_of_pieces (δ : ℝ) :
           div_le_div_of_nonneg_left (by positivity) (by norm_num) hsnorm
       _ = _ := by ring
 
+open scoped LSeries.notation ArithmeticFunction in
+private lemma summable_vonMangoldt_div_sq :
+    Summable (fun n : ℕ => ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ 2) := by
+  have hs : (1 : ℝ) < ((2 : ℂ)).re := by norm_num
+  have h := ArithmeticFunction.LSeriesSummable_vonMangoldt (s := (2 : ℂ)) hs
+  refine h.norm.congr (fun n => ?_)
+  rcases eq_or_ne n 0 with rfl | hn
+  · simp
+  · have hnpos : (0 : ℝ) < (n : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn
+    have hcast : ((n : ℕ) : ℂ) = ((n : ℝ) : ℂ) := by push_cast; ring
+    rw [LSeries.term_of_ne_zero hn, norm_div, hcast,
+      Complex.norm_cpow_eq_rpow_re_of_pos hnpos,
+      Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg]
+    norm_num
+
+open scoped LSeries.notation ArithmeticFunction in
+private lemma term_norm_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) {s : ℂ} (hsr : s.re = 2)
+    (n : ℕ) :
+    ‖LSeries.term (↗χ * ↗Λ) s n‖ ≤ ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ 2 := by
+  rcases eq_or_ne n 0 with rfl | hn
+  · simp
+  · have hnpos : (0 : ℝ) < (n : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn
+    have hcast : ((n : ℕ) : ℂ) = ((n : ℝ) : ℂ) := by push_cast; ring
+    rw [LSeries.term_of_ne_zero hn, norm_div, hcast,
+      Complex.norm_cpow_eq_rpow_re_of_pos hnpos, hsr]
+    simp only [Real.rpow_two]
+    have hfn : ‖(↗χ * ↗Λ) n‖ ≤ ArithmeticFunction.vonMangoldt n := by
+      have h1 : ‖χ (n : ZMod q)‖ ≤ 1 := χ.norm_le_one (n : ZMod q)
+      have h2 : (0:ℝ) ≤ ArithmeticFunction.vonMangoldt n := ArithmeticFunction.vonMangoldt_nonneg
+      have h3 : (↗χ * ↗Λ) n = χ (n : ZMod q) * ((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ) := rfl
+      rw [h3, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg h2]
+      nlinarith
+    exact div_le_div_of_nonneg_right hfn (by positivity)
+
+open scoped LSeries.notation ArithmeticFunction in
 /-- LEAF: P0014 page 32, display 4.4: on the line Re s = 2 of absolute convergence,
 |L'/L(s, χ)| = |Σ χ(n) Λ(n) n^(-s)| is at most Σ Λ(n) n^(-2) = -ζ'/ζ(2), a bound uniform in
 the height τ. EASY: `DirichletCharacter.LSeries_twist_vonMangoldt_eq` and the termwise norm
@@ -87,7 +342,36 @@ theorem logDeriv_line_two_bound {q : ℕ} [NeZero q] (χ : DirichletCharacter �
     ∃ B : ℝ, 0 ≤ B ∧ ∀ τ : ℝ,
       ‖deriv χ.LFunction ((2 : ℂ) + τ * Complex.I) / χ.LFunction ((2 : ℂ) + τ * Complex.I)‖ ≤
         B := by
-  sorry
+
+  refine ⟨∑' n : ℕ, ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ 2, ?_, ?_⟩
+  · refine tsum_nonneg (fun n => ?_)
+    rcases eq_or_ne n 0 with rfl | hn
+    · simp
+    · exact div_nonneg ArithmeticFunction.vonMangoldt_nonneg (by positivity)
+  intro τ
+  set s : ℂ := (2 : ℂ) + τ * Complex.I with hsdef
+  have hsr : s.re = 2 := by simp [hsdef]
+  have hs : (1 : ℝ) < s.re := by rw [hsr]; norm_num
+  have hLne : LSeries (↗χ) s ≠ 0 := DirichletCharacter.LSeries_ne_zero_of_one_lt_re χ hs
+  have hderiv : deriv χ.LFunction s = deriv (LSeries (↗χ)) s :=
+    DirichletCharacter.deriv_LFunction_eq_deriv_LSeries χ hs
+  have hval : χ.LFunction s = LSeries (↗χ) s := DirichletCharacter.LFunction_eq_LSeries χ hs
+  have htwist : LSeries (↗χ * ↗Λ) s = -deriv (LSeries (↗χ)) s / LSeries (↗χ) s :=
+    DirichletCharacter.LSeries_twist_vonMangoldt_eq χ hs
+  have hratio : deriv (LSeries (↗χ)) s / LSeries (↗χ) s = - LSeries (↗χ * ↗Λ) s := by
+    rw [htwist]
+    ring
+  have hsumm : LSeriesSummable (↗χ * ↗Λ) s :=
+    DirichletCharacter.LSeriesSummable_twist_vonMangoldt χ hs
+  have hbound : ‖LSeries (↗χ * ↗Λ) s‖ ≤ ∑' n : ℕ, ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ 2 := by
+    have hnorm := norm_tsum_le_tsum_norm hsumm.norm
+    exact hnorm.trans (Summable.tsum_le_tsum (fun n => term_norm_le q χ hsr n)
+      hsumm.norm summable_vonMangoldt_div_sq)
+  calc ‖deriv χ.LFunction s / χ.LFunction s‖
+      = ‖deriv (LSeries (↗χ)) s / LSeries (↗χ) s‖ := by rw [hderiv, hval]
+    _ = ‖- LSeries (↗χ * ↗Λ) s‖ := by rw [hratio]
+    _ = ‖LSeries (↗χ * ↗Λ) s‖ := norm_neg _
+    _ ≤ ∑' n : ℕ, ArithmeticFunction.vonMangoldt n / (n : ℝ) ^ 2 := hbound
 
 /-- PROVED. The integrand is continuous on the line Re s = 2: L(s, χ) is analytic and nonzero
 there, Mathlib `LFunction_ne_zero_of_one_le_re`, and G_δ is holomorphic on Re s above -1
