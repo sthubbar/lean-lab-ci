@@ -1150,6 +1150,11 @@ theorem arc613_of_fixed_saving_small_B (A B : ℕ) (hsmall : 5 * B + 2 ≤ 9 * A
     simpa only [Nat.cast_mul, Nat.cast_ofNat] using hpa
   exact arc613_of_per_fraction_saving A B (12 * A) (by omega) hpa'
 
+/-- In the unrestricted parameter range the fixed saving `12 * A` is below the saving
+`3 * A + 5 * B + 2` that every route to `Arc613` in this development needs. -/
+theorem else_branch_saving_gap (A B : ℕ) (h : ¬ 5 * B + 2 ≤ 9 * A) :
+    ¬ (3 * A + 5 * B + 2 ≤ 12 * A) := by omega
+
 /-- LEAF: integration over major arcs reaching 6.13. -/
 theorem arc_integration_613 (A B : ℕ) (h_per_frac : PerFractionApprox (B + 5 * A) (12 * A))
     (h_s_exp : ∀ Z u α, Sexp Z u α = (1 / (q0 Z : ℂ)) * ∑ ℓ ∈ range (q0 Z), ∑ r ∈ R0 Z,
@@ -1166,7 +1171,13 @@ theorem arc_integration_613 (A B : ℕ) (h_per_frac : PerFractionApprox (B + 5 *
     Arc613 A B := by
   by_cases hsmall : 5 * B + 2 ≤ 9 * A
   · exact arc613_of_fixed_saving_small_B A B hsmall h_per_frac
-  · -- The remaining LEAF is the unrestricted parameter range.
+  · -- BLOCKED 2026-11-21 FREE-nv-nemotron task2183. The only route to Arc613 in this
+    -- development is arc613_of_per_fraction_saving, which needs saving 3*A+5*B+2,
+    -- but the sealed hypothesis only gives 12*A; in this branch the needed saving
+    -- exceeds the available one, as else_branch_saving_gap records. Applying it with
+    -- K = 12*A fails: omega cannot prove 3*A+5*B+2 <= 12*A here (counterexample
+    -- A = 1, B = 2). Every other route needs SW (B+5*A+1), which the hypotheses do
+    -- not provide, and Mathlib has no PNT in arithmetic progressions. See PROGRESS.md.
     sorry
 
 /-- Lemma 3.1 from the existing size theorem, the minor arc input and SW. -/
