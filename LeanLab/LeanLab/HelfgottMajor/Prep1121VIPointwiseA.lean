@@ -1,5 +1,6 @@
 import Mathlib
 import LeanLab.Linnik.ExplicitFormula.LeftHalf
+import LeanLab.HelfgottMajor.Prep1122BinetSplit
 
 /-!
 PREP 2026-11-21, route step `MainLemma41Split123.vertical_integral_bound`, part A.
@@ -148,12 +149,14 @@ theorem fe_digamma {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q} (hχ : �
 /-- LEAF: P0014 page 34, display 4.10, first line, which the paper takes from OLBC10
 (5.9.15) and GR00 (3.411.1): Binet's second formula for the digamma function,
 ψ(z) = log z - 1/(2z) - 2 ∫_0^∞ t dt / ((t² + z²)(e^{2πt} - 1)) for re z above 0.
-CITED-LEFT: the paper gives no proof. Class HARD: a full Binet formula port. -/
+CITED-LEFT: the paper gives no proof. Class HARD: a full Binet formula port.
+Wired 2026-11-22, burst-20261122: closed by `Prep1122BinetSplit.binet_formula`, which is
+assembled there from the cited leaves DLMF 5.9.13 and GR00 3.911.2. -/
 theorem binet_formula (z : ℂ) (hz : 0 < z.re) :
     digamma z = Complex.log z - 1 / (2 * z) -
       2 * ∫ t in Ioi (0 : ℝ),
-        (t : ℂ) / (((t : ℂ) ^ 2 + z ^ 2) * ((Real.exp (2 * Real.pi * t) : ℂ) - 1)) := by
-  sorry
+        (t : ℂ) / (((t : ℂ) ^ 2 + z ^ 2) * ((Real.exp (2 * Real.pi * t) : ℂ) - 1)) :=
+  LeanLab.HelfgottMajor.Prep1122BinetSplit.binet_formula z hz
 
 /-- LEAF: P0014 page 34, display 4.10, the remark before it: if re z = 3/2 then
 |t² + z²| ≥ 9/4 for all real t. Class EASY: a polynomial inequality in t² and (im z)².
