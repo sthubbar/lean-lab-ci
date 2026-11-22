@@ -20,6 +20,7 @@ arguments. CONDITIONAL, never PROVED. `U1539.lemma4` is accepted as the named hy
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.DQLemma9Decisions
 import LeanLab.ExceptionalSet.UpJ200.Decomp527a
 
 namespace LeanLab.ExceptionalSet.U1539
@@ -44,7 +45,15 @@ theorem leaf_large_value_shift_dq5 :
         ∀ α : ℝ, |α| ≤ F γ N ^ δ → N * calE γ κ N ^ (-(1 / 3 : ℝ)) < ‖Phie γ N α‖ →
           ∃ h : ℤ, (|h| : ℝ) ≤ calE γ κ N ^ (2 / 3 : ℝ) ∧
             N * calE γ κ N ^ (-(1 : ℝ)) < ‖PhiDQ5 γ N (α - h / 2)‖ := by
-  sorry
+  intro γ hγ₁ hγ₂
+  obtain ⟨δ₀, hδ₀, hA⟩ := DQLemma9.large_value_shift_of_lemma4 lemma4 γ hγ₁ hγ₂
+  refine ⟨δ₀, hδ₀, fun δ hδ hδlt => ?_⟩
+  obtain ⟨κ₀, hκ₀, hA⟩ := hA δ hδ hδlt
+  refine ⟨κ₀, hκ₀, fun κ hκ hκle => ?_⟩
+  obtain ⟨N₀, hN₀⟩ := hA κ hκ hκle
+  refine ⟨N₀, fun N hN α hα hlarge => ?_⟩
+  obtain ⟨h, hh, hbig⟩ := hN₀ N hN α hα hlarge
+  exact ⟨h, hh, hbig⟩
 
 /-- LEAF B of the DQ5 split of `lemma9`, page 370 last paragraph, Theorem 2 on the window.
 Plain math: for `0 < δ < γ - 1` and all small κ, eventually, every β with

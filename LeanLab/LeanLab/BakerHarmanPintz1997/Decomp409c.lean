@@ -84,6 +84,63 @@ theorem large_prime_ratios {x m n p : ℝ} (hx : 0 < x) (hn : 0 < n)
         congr 1
         norm_num
 
+/-- Page 31, region two is exactly the window `x^0.4 < mp` and `x^0.46 < mp`. -/
+theorem primeRegion_two_iff (x : ℝ) (m p : ℕ) :
+    primeRegion x m p = 2 ↔
+      x ^ (0.4 : ℝ) < (m : ℝ) * (p : ℝ) ∧ x ^ (0.46 : ℝ) < (m : ℝ) * (p : ℝ) := by
+  simp only [primeRegion, Nat.cast_mul]
+  by_cases h1 : (m : ℝ) * (p : ℝ) ≤ x ^ (0.4 : ℝ)
+  · simp [h1]
+  · by_cases h2 : (m : ℝ) * (p : ℝ) ≤ x ^ (0.46 : ℝ)
+    · simp [h1, h2]
+    · rw [if_neg h1, if_neg h2]
+      constructor
+      · intro _
+        exact ⟨lt_of_not_ge h1, lt_of_not_ge h2⟩
+      · intro _
+        rfl
+
+/-- Page 31, the large pm case: for one region two term the cofactor
+`h = k/(m*n/p)` satisfies `h ≤ x^0.18` and the two displayed ratios hold,
+namely `mp/n ≤ x^0.1` and `n/(mp) ≤ 2 x^(-0.06)`.  The divisibility
+hypotheses are exactly those forced by the prime filter in `primePart`. -/
+theorem large_prime_term_bounds {x : ℝ} {k m n p : ℕ} (hx : 0 < x)
+    (hk : (k : ℝ) ≤ x) (hn0 : 0 < n) (hmn : (m : ℝ) ≤ (n : ℝ))
+    (hdiv : m * n ∣ k) (hp : p ∣ k / (m * n))
+    (hpz : (p : ℝ) ≤ x ^ (0.1 : ℝ)) (hreg : primeRegion x m p = 2)
+    (hnx : (n : ℝ) ≤ 2 * x ^ (0.4 : ℝ)) :
+    ((k / (m * n) / p : ℕ) : ℝ) ≤ x ^ (0.18 : ℝ) ∧
+    ((m : ℝ) * (p : ℝ)) / (n : ℝ) ≤ x ^ (0.1 : ℝ) ∧
+    (n : ℝ) / ((m : ℝ) * (p : ℝ)) ≤ 2 * x ^ (-0.06 : ℝ) := by
+  have hreg' := primeRegion_two_iff x m p
+  have hmp : x ^ (0.46 : ℝ) < (m : ℝ) * (p : ℝ) := (hreg'.mp hreg).2
+  have hpq : p * (k / (m * n) / p) = k / (m * n) := by
+    rw [Nat.mul_comm]
+    exact Nat.div_mul_cancel hp
+  have hmul : m * n * p * (k / (m * n) / p) = k := by
+    calc
+      m * n * p * (k / (m * n) / p) = (m * n) * (p * (k / (m * n) / p)) := by ring
+      _ = (m * n) * (k / (m * n)) := by rw [hpq]
+      _ = k := by rw [Nat.mul_comm]; exact Nat.div_mul_cancel hdiv
+  have hcast : ((m * n * p * (k / (m * n) / p) : ℕ) : ℝ) = (k : ℝ) := by
+    exact_mod_cast congrArg (fun z : ℕ => (z : ℝ)) hmul
+  have hprod : ((m : ℝ) * (n : ℝ)) * (p : ℝ) * ((k / (m * n) / p : ℕ) : ℝ) ≤ x := by
+    have heq : ((m : ℝ) * (n : ℝ)) * (p : ℝ) * ((k / (m * n) / p : ℕ) : ℝ) = (k : ℝ) := by
+      calc
+        ((m : ℝ) * (n : ℝ)) * (p : ℝ) * ((k / (m * n) / p : ℕ) : ℝ)
+            = (((m * n * p * (k / (m * n) / p) : ℕ) : ℝ)) := by
+              rw [Nat.cast_mul, Nat.cast_mul, Nat.cast_mul]
+        _ = (k : ℝ) := hcast
+    rw [heq]
+    exact hk
+  have hcof : ((k / (m * n) / p : ℕ) : ℝ) ≤ x ^ (0.18 : ℝ) :=
+    large_prime_cofactor (x := x) (m := (m : ℝ)) (n := (n : ℝ)) (p := (p : ℝ))
+      (h := ((k / (m * n) / p : ℕ) : ℝ)) hx (Nat.cast_nonneg m) (Nat.cast_nonneg p)
+      (Nat.cast_nonneg _) hmn hprod hpz hmp
+  have hrat := large_prime_ratios (x := x) (m := (m : ℝ)) (n := (n : ℝ)) (p := (p : ℝ))
+    hx (by exact_mod_cast hn0) (Nat.cast_nonneg p) hmn hpz hnx (le_of_lt hmp)
+  exact ⟨hcof, hrat.1, hrat.2⟩
+
 /-- LEAF. OPEN. Page 31, the contribution with pm at most x to 0.4.
 This is the terminating repeated Buchstab procedure, with the divisor bounded
 coefficients treated as in the proof of Lemma13. It is only one prime error range. -/
@@ -115,6 +172,13 @@ theorem large_prime_transfer :
       (∀ x k, ‖a x k‖ ≤ tau k ^ B) → (∀ x k, ‖b x k‖ ≤ tau k ^ B) →
       Ev (fun x => z x = x ^ (0.1 : ℝ) ∧ M x ≤ N x ∧ N x ≤ x ^ (0.4 : ℝ)) →
       Holds42 ε fun x k => primePart 2 x (a x) (b x) (M x) (N x) (wof x) (z x) k := by
+  -- The per term data of this range is proved in `large_prime_term_bounds`
+  -- above: the cofactor bound `h ≤ x^0.18` and the two ratios `mp/n ≤ x^0.1`,
+  -- `n/(mp) ≤ 2 x^(-0.06)`, which are exactly the numerical hypotheses of
+  -- `Decomp546a.theorem4_large_block`.  What is still missing is the transfer
+  -- from the Theorem 4 conclusion (3.9) (`Concl39`) to the interval sum
+  -- bound on the large pm error, i.e. the Perron step of page 31; see
+  -- PROGRESS.md, FREE-nv-glm5 task2439.
   sorry
 
 /-- Pages 30 and 31, exact Lemma15 assembled from the smaller prime error ranges.
@@ -170,6 +234,8 @@ example : primePart 2 1 (fun _ => 1) (fun _ => 1) 1 1 2 7 12 = 1 := by
 #print axioms primePart_sum
 #print axioms large_prime_cofactor
 #print axioms large_prime_ratios
+#print axioms primeRegion_two_iff
+#print axioms large_prime_term_bounds
 #print axioms small_prime_transfer
 #print axioms middle_prime_transfer
 #print axioms large_prime_transfer
