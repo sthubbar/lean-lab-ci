@@ -8,6 +8,9 @@ AI wrote the Lean code. Goldbach is open.
 import LeanLab.Languasco2004.Source565
 import LeanLab.Languasco2004.Numeric565
 import LeanLab.Languasco2004.Decomp578a
+import LeanLab.Languasco2004.Decomp578b
+import LeanLab.Languasco2004.Decomp578c
+import LeanLab.Languasco2004.Decomp578d
 
 namespace LeanLab.Languasco2004.Decomp565a
 open Finset Real Decomp279a Decomp316a GroupSplit548 Source565 Numeric565
@@ -32,7 +35,8 @@ theorem lemma19_transfer :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n =>
         0.0000001 * scale N (localization N ε) n < lemma19Error true N (localization N ε) n ε)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  exact Decomp578b.lemma19_transfer_from_parts
 
 /-- LEAF. Jia page 283 display 60 and page 285 remaining region formula.
 Only the model pair sum is compared with its Buchstab integral lower bound.
@@ -42,7 +46,8 @@ theorem model_pair_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n =>
         modelPair true N (localization N ε) n < (mainOne + 0.0000004) * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  exact Decomp578c.model_pair_lower_from_parts
 
 /-- LEAF. Jia pages 284 and 285 after display 63, using Lemma 20 on pages 261 and 262.
 Only the model triple sum is bounded by its three reduced logarithmic integrals. -/
@@ -51,7 +56,8 @@ theorem model_triple_upper :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n =>
         (tripleOne + tripleTwo + tripleThree + 0.0000001) * scale N (localization N ε) n < modelTriple true N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  exact Decomp578d.model_triple_upper_from_parts
 
 /-- Jia page 285 display 64 and the remaining seven regions.
 CONDITIONAL ON the four analytic transfer and model leaves above.
