@@ -1,5 +1,6 @@
 import LeanLab.LanguascoPintzZaccagnini2007.Decomp481a
 import LeanLab.PNTPort.DirichletZF.RealZero
+import LeanLab.PNTPort.DirichletZF.Siegel
 
 /-!
 The real and nonreal character cases of P0045 preprint page 6.
@@ -223,10 +224,128 @@ theorem davenport_classification481 : RealPrimitiveStatement481 := by
   · right; left; simpa using hdecomp
   · right; right; simpa using hdecomp
 
-/-- LEAF. CITED. P0045 page 5, the paragraph before Lemma 4.1.
-Pintz 1976 and Goldfeld and Schinzel 1975 supply the real zero bound. -/
+
+/-! Inlined proof of the real zero lower bound. The cited input is Goldfeld and Schinzel 1975
+and Pintz 1976; the same lower bound is supplied in this tree by `siegel_zero` at exponent one
+half, so the leaf is closed without the citation. The reduction is the textbook one: Siegel's
+bound at `epsilon = 1 / 2` for the non-principal character with the modulus lifted to `8 * r`,
+the Euler product at the principal character, and `r ^ (-(1 / 2)) <= 1` past `delta = 1 / 2`.
+
+The statement is primitive-free on purpose, and the all real characters form follows from the
+primitive one: an imprimitive real character of modulus `r` differs from its inducing primitive
+character of conductor `r'` only by the Euler factors `1 - chi'(p) p ^ (-s)` at the primes of `r`
+outside `r'`, and each of those is nonzero at a real `s` in `(0, 1)` because `p ^ (-s) < 1`.
+So a real zero in `(1 / 2, 1)` of the imprimitive function is a real zero of the primitive one at
+the smaller modulus `r' <= r`, where `r ^ (-(1 / 2)) <= r' ^ (-(1 / 2))`, and the lower bound
+transfers. -/
+
+section RealZeroInl481b
+
+open Complex LeanLab.PNTPort.DirichletZF
+
+/-- A character with real values has square one. -/
+private theorem rz481_sq_of_real {r : ℕ} [NeZero r] (χ : DirichletCharacter ℂ r)
+    (hreal : ∀ a, (χ a).im = 0) : χ ^ 2 = 1 := by
+  have hstar : star χ = χ := by
+    ext a
+    change star (χ a) = χ a
+    apply Complex.ext <;> simp [hreal a]
+  rw [MulChar.star_eq_inv] at hstar
+  calc χ ^ 2 = χ⁻¹ * χ := by rw [hstar, pow_two]
+    _ = 1 := inv_mul_cancel _
+
+/-- One Euler factor of the principal character does not vanish at a real point of `(0,1)`. -/
+private theorem rz481_one_sub_cpow_neg_ne_zero {p : ℕ} (hp : p.Prime) {β : ℝ} (h0 : 0 < β) :
+    (1 : ℂ) - (p : ℂ) ^ (-(β : ℂ)) ≠ 0 := by
+  intro h
+  have h1 : (p : ℂ) ^ (-(β : ℂ)) = 1 := by linear_combination -h
+  have hp0 : (0 : ℝ) < (p : ℝ) := by exact_mod_cast hp.pos
+  have hcast : (((p : ℝ)) : ℂ) = (p : ℂ) := by push_cast; ring
+  have hn := Complex.norm_cpow_eq_rpow_re_of_pos (x := (p : ℝ)) hp0 (-(β : ℂ))
+  rw [hcast, h1, norm_one] at hn
+  simp only [Complex.neg_re, Complex.ofReal_re] at hn
+  have hlt : (p : ℝ) ^ (-β) < 1 :=
+    Real.rpow_lt_one_of_one_lt_of_neg (by exact_mod_cast hp.one_lt) (by linarith)
+  linarith
+
+/-- The principal character has no real zero in `(0,1)`. -/
+private theorem rz481_principal_ne_zero {r : ℕ} [NeZero r] {β : ℝ} (hβ0 : 0 < β) (hβ1 : β < 1) :
+    DirichletCharacter.LFunction (1 : DirichletCharacter ℂ r) (β : ℂ) ≠ 0 := by
+  have hne : (β : ℂ) ≠ 1 := by
+    intro h
+    have hre := congrArg Complex.re h
+    simp only [Complex.ofReal_re, Complex.one_re] at hre
+    linarith
+  change DirichletCharacter.LFunctionTrivChar r (β : ℂ) ≠ 0
+  rw [DirichletCharacter.LFunctionTrivChar_eq_mul_riemannZeta hne]
+  refine mul_ne_zero ?_ ?_
+  · refine Finset.prod_ne_zero_iff.mpr (fun p hp => ?_)
+    exact rz481_one_sub_cpow_neg_ne_zero (Nat.prime_of_mem_primeFactors hp) hβ0
+  · intro hz
+    have hneg : (riemannZeta ((β : ℝ) : ℂ)).re < 0 := (riemannZeta_real_neg hβ0 hβ1).2
+    rw [hz] at hneg
+    simp at hneg
+
+/-- **The real zero lower bound for every real character**, from Siegel's theorem at exponent
+one half. No case distinction on primitivity and no restriction on the size of `delta`. -/
+private theorem rz481_real_zero_bound_all :
+    ∃ a : ℝ, 0 < a ∧ ∀ r : ℕ, 1 ≤ r → ∀ χ : DirichletCharacter ℂ r,
+      (∀ b, (χ b).im = 0) → ∀ δ : ℝ, 0 < δ →
+        Lfun481 χ (1 - (δ : ℂ)) = 0 → a * (r : ℝ) ^ (-(1 / 2 : ℝ)) ≤ δ := by
+  obtain ⟨c, hc, H⟩ := LeanLab.PNTPort.DirichletZF.siegel_zero (1 / 2) (by norm_num)
+  let C := min (c * (8 : ℝ) ^ (-(1 / 2 : ℝ))) (1 / 2)
+  have hC : 0 < C := lt_min (by positivity) (by norm_num)
+  refine ⟨C, hC, fun r hr χ hreal δ hδ hz => ?_⟩
+  have hr0 : 0 < r := by omega
+  have hrne : r ≠ 0 := by omega
+  haveI : NeZero r := ⟨hrne⟩
+  have hrreal : (1 : ℝ) ≤ (r : ℝ) := by exact_mod_cast hr
+  have hrpow : (r : ℝ) ^ (-(1 / 2 : ℝ)) ≤ 1 :=
+    Real.rpow_le_one_of_one_le_of_nonpos hrreal (by norm_num)
+  by_cases hfar : (1 / 2 : ℝ) ≤ δ
+  · have hC1 : C ≤ 1 / 2 := min_le_right _ _
+    calc C * (r : ℝ) ^ (-(1 / 2 : ℝ)) ≤ C * 1 := mul_le_mul_of_nonneg_left hrpow hC.le
+      _ = C := mul_one C
+      _ ≤ δ := by linarith
+  have hβ0 : 0 < 1 - δ := by linarith
+  have hβ1 : 1 - δ < 1 := by linarith
+  have hL : Lfun481 χ (1 - (δ : ℂ)) = DirichletCharacter.LFunction χ (1 - (δ : ℂ)) := by
+    unfold Lfun481
+    rw [dif_neg hrne]
+  have hz' : DirichletCharacter.LFunction χ ((1 - δ : ℝ) : ℂ) = 0 := by
+    rw [hL] at hz
+    rwa [show (1 : ℂ) - (δ : ℂ) = ((1 - δ : ℝ) : ℂ) by push_cast; ring] at hz
+  have hχ : χ ≠ 1 := by
+    rintro rfl
+    exact rz481_principal_ne_zero hβ0 hβ1 hz'
+  have hχ2 : χ ^ 2 = 1 := rz481_sq_of_real χ hreal
+  let M := 8 * r
+  haveI : NeZero M := ⟨Nat.mul_ne_zero (by decide) hrne⟩
+  have hd : r ∣ M := Dvd.intro_left 8 rfl
+  have hM : 8 ≤ M := by dsimp only [M]; omega
+  have hzlift : DirichletCharacter.LFunction (DirichletCharacter.changeLevel hd χ)
+      ((1 - δ : ℝ) : ℂ) = 0 := by
+    rw [LeanLab.PNTPort.DirichletZF.L_lift hd hχ, hz', zero_mul]
+  have hb := H M hM (DirichletCharacter.changeLevel hd χ)
+    (LeanLab.PNTPort.DirichletZF.lift_ne_one hd hχ)
+    (LeanLab.PNTPort.DirichletZF.lift_sq hd hχ2) (1 - δ) hβ1.le hzlift
+  have hMr : (M : ℝ) = 8 * r := by simp [M]
+  rw [hMr, Real.mul_rpow (by norm_num) (Nat.cast_nonneg r)] at hb
+  have hcoeff : C ≤ c * (8 : ℝ) ^ (-(1 / 2 : ℝ)) := min_le_left _ _
+  have hmul := mul_le_mul_of_nonneg_right hcoeff
+    (Real.rpow_nonneg (Nat.cast_nonneg r) (-(1 / 2 : ℝ)))
+  nlinarith
+
+end RealZeroInl481b
+
+/-- PROVED. P0045 page 5, the paragraph before Lemma 4.1, and its cited input.
+The real zero lower bound of Goldfeld and Schinzel 1975 and Pintz 1976: the cited statement is
+derived here from `siegel_zero` at exponent one half, inlined above as `rz481_real_zero_bound_all`.
+The form ranges over every real character, primitive or not; the imprimitive case transfers from
+the inducing primitive character since the extra Euler factors are nonzero on `(0, 1)`. -/
 theorem real_zero_bound481 : RealZeroStatement481 := by
-  sorry
+  obtain ⟨a, ha, h⟩ := rz481_real_zero_bound_all
+  exact ⟨a, ha, h⟩
 
 /-- LEAF. CITED. P0045 page 6, second proof paragraph following display 10.
 Iwaniec 1974 supplies the nonreal character zero free region. -/
