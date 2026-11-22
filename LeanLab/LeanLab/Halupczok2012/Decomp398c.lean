@@ -16,6 +16,10 @@ namespace LeanLab.Halupczok2012.Decomp398c
 open Finset
 open scoped Classical
 
+/-- `ppsTerm` is an absolute value, hence nonnegative for every choice of `z`, `h`, `q`, `a`. -/
+lemma ppsTerm_nonneg (z h : ℝ) (q : ℕ) (a : ℤ) : 0 ≤ ppsTerm z h q a := by
+  exact abs_nonneg _
+
 /-- LEAF. PPS1984 pages 530 to 531, the small modulus range removed before display 5.
 At theta equal to 3 over 5, the printed Huxley Iwaniec range allows any fixed
 modulus exponent below 1 over 20. Use 1 over 100 and cover longer windows.
