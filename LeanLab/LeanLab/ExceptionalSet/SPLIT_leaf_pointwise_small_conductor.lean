@@ -82,7 +82,14 @@ theorem leaf_small_conductor_below_cut (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2
               c * F γ N * calE γ κ N ^ (-(1 / 10 : ℝ)) ≤
                 (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + j)).re +
                   A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n + j) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, h⟩ := leaf_pointwise_small_conductor γ h1 h2
+  refine ⟨δ₀, hδ₀, fun δ hδ hδlt => ?_⟩
+  obtain ⟨κ₀, hκ₀, h⟩ := h δ hδ hδlt
+  refine ⟨κ₀, hκ₀, fun κ hκ hκle => ?_⟩
+  obtain ⟨c, A, hc, hA, N₀, h⟩ := h κ hκ hκle
+  refine ⟨c, A, hc, hA, N₀, fun N hN r hr2 hrP hrlo hrhi j hj n hnw hne hnm => ?_⟩
+  have hr1 : 1 ≤ r := by omega
+  exact h N hN r hr1 hrP hrhi j hj n hnw hne hnm
 
 /-- LEAF. Conductor above the cut. For `1 < γ < 3/2` and a conductor `r` with `2 ≤ r` that is above
 `ℰ^(1/14)`, below the conductor cap `ℰ^(1/7)` and inside the truncation range, the real part of the
