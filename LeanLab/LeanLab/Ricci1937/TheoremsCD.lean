@@ -85,9 +85,8 @@ def TheoremDZ (a b : ℕ) : Prop :=
 
 def TheoremD (a b : ℕ) : Prop := TheoremDZ a b ∧ TheoremDW a b
 
-/-- Ricci's five pairs, cited: `(6, 6)` after Estermann, `(5, 7)`, `(4, 9)`, `(3, 15)`, `(2, 366)`. -/
-theorem ricciD : TheoremD 6 6 ∧ TheoremD 5 7 ∧ TheoremD 4 9 ∧ TheoremD 3 15 ∧ TheoremD 2 366 := by
-  sorry
+/- The sealed ricciD declaration now lives in DecompJ365.
+Its statement is unchanged and its proof uses the complete clean assembly. -/
 
 theorem theoremD_W_mono {a a' b b' : ℕ} (ha : a ≤ a') (hb : b ≤ b') (h : TheoremDW a b) :
     TheoremDW a' b' := by

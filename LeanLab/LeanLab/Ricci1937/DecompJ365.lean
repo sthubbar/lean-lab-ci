@@ -1,4 +1,5 @@
 import LeanLab.Ricci1937.TheoremsCD
+import LeanLab.Ricci1937.Head677
 import LeanLab.Ricci1937.CFactorBounds
 import LeanLab.Brun1919.Sieve
 import LeanLab.PNTSieve.MertensProduct
@@ -7297,13 +7298,1286 @@ theorem decompJ365_Z_lower_3_15 :
       c * ξ / Real.log ξ ^ 2 ≤ zCount 3 15 m ξ :=
   decomp338_Z_lower_3_15
 
+/-! Task677 auxiliary proofs from Moments677.lean. AI wrote the Lean code. -/
+/-- The retained prime family with the paper's nested odd caps. -/
+def decomp677PrimeFamily (w : ℕ) (c : ℕ → ℕ) (n : ℕ) : Finset (Finset ℕ) := by
+  classical
+  exact ((Ioc (c n) w).filter Nat.Prime).powerset.filter (fun S =>
+    ∀ j ∈ range (n + 1), (S.filter (fun p => c j < p)).card ≤ 2 * j + 1)
+
+/-- The actual retained coefficient at a fixed degree. -/
+def decomp677PrimeCoeff (x : ℕ → ℝ) (w : ℕ) (c : ℕ → ℕ) (n k : ℕ) : ℝ :=
+  ∑ S ∈ (decomp677PrimeFamily w c n).filter (fun S => S.card = k), ∏ p ∈ S, x p
+
+/-- Consecutive prime blocks, starting above the first cutoff. -/
+def decomp677PrimeBlock (w : ℕ) (c : ℕ → ℕ) : ℕ → Finset ℕ
+  | 0 => (Ioc (c 0) w).filter Nat.Prime
+  | i + 1 => (Ioc (c (i + 1)) (c i)).filter Nat.Prime
+
+/-- Auxiliary moment implication for second memoir page 97 formula 15.7
+and page 111 formula 28.11, at the candidate masses. -/
+lemma decomp677_prime_coeff_tendsto (x : ℕ → ℕ → ℝ)
+    (w : ℕ → ℕ) (c : ℕ → ℕ → ℕ)
+    (hc : ∀ q, Antitone (c q)) (hw : ∀ q, c q 0 ≤ w q)
+    (hx : ∀ q p, 0 ≤ x q p)
+    (ht : ∀ i, Tendsto (fun q => ∑ p ∈ decomp677PrimeBlock (w q) (c q) i, x q p)
+      atTop (nhds ((decomp677HeadMass i : ℝ) / 10000)))
+    (hq : ∀ i, Tendsto (fun q => ∑ p ∈ decomp677PrimeBlock (w q) (c q) i, (x q p) ^ 2)
+      atTop (nhds 0)) (n k : ℕ) :
+    Tendsto (fun q => decomp677PrimeCoeff (x q) (w q) (c q) n k) atTop
+      (nhds ((((decomp677HeadCoeff (n + 1))[k]?.getD 0 : ℕ) : ℝ) /
+        ((10000 : ℝ) ^ k * (k.factorial : ℝ)))) := by
+  classical
+  induction n generalizing k with
+  | zero =>
+    by_cases hk : k ≤ 1
+    · have heq : (fun q => decomp677PrimeCoeff (x q) (w q) (c q) 0 k) =
+          (fun q => esymm (x q) (decomp677PrimeBlock (w q) (c q) 0) k) := by
+        funext q
+        exact decomp338_prime_coeff_initial (x q) (w q) (c q) k hk
+      rw [heq]
+      have hl := decompJ365_esymm_tendsto x
+        (fun q => decomp677PrimeBlock (w q) (c q) 0) hx
+        ((decomp677HeadMass 0 : ℝ) / 10000) (ht 0) (hq 0) k
+      convert hl using 1
+      interval_cases k <;> norm_num [decomp677HeadCoeff, decomp677HeadStep,
+        decomp677HeadMass, sum_range_succ]
+    · have hk' : 1 < k := by omega
+      have heq : (fun q => decomp677PrimeCoeff (x q) (w q) (c q) 0 k) =
+          (fun _ : ℕ => (0 : ℝ)) := by
+        funext q
+        exact decomp338_prime_coeff_eq_zero (x q) (w q) (c q) 0 k (by omega)
+      rw [heq, List.getElem?_eq_none (by rw [decomp677_head_coeff_length]; omega)]
+      simpa using (tendsto_const_nhds : Tendsto (fun _ : ℕ => (0 : ℝ)) atTop (nhds 0))
+  | succ n ih =>
+    by_cases hk : k < 2 * (n + 1 + 1)
+    · have heq : (fun q => decomp677PrimeCoeff (x q) (w q) (c q) (n + 1) k) =
+          (fun q => ∑ j ∈ range (k + 1),
+            decomp677PrimeCoeff (x q) (w q) (c q) n j *
+              esymm (x q) (decomp677PrimeBlock (w q) (c q) (n + 1)) (k - j)) := by
+        funext q
+        exact decomp338_prime_coeff_step (x q) (w q) (c q) (hc q) n k
+          ((hc q (Nat.zero_le n)).trans (hw q)) (by omega)
+      rw [heq, decomp677_head_coeff_step (n + 1) k hk]
+      apply tendsto_finsetSum
+      intro j hj
+      exact (ih j).mul (decompJ365_esymm_tendsto x
+        (fun q => decomp677PrimeBlock (w q) (c q) (n + 1)) hx
+        ((decomp677HeadMass (n + 1) : ℝ) / 10000) (ht (n + 1)) (hq (n + 1)) (k - j))
+    · have heq : (fun q => decomp677PrimeCoeff (x q) (w q) (c q) (n + 1) k) =
+          (fun _ : ℕ => (0 : ℝ)) := by
+        funext q
+        exact decomp338_prime_coeff_eq_zero (x q) (w q) (c q) (n + 1) k (by omega)
+      rw [heq, List.getElem?_eq_none (by rw [decomp677_head_coeff_length]; omega)]
+      simpa using (tendsto_const_nhds : Tendsto (fun _ : ℕ => (0 : ℝ)) atTop (nhds 0))
+
+
+/-- Auxiliary moment implication for second memoir page 97 formula 15.7
+and page 111 formula 28.11, at the candidate masses. -/
+lemma decomp677_prime_head_tendsto (x : ℕ → ℕ → ℝ)
+    (w : ℕ → ℕ) (c : ℕ → ℕ → ℕ)
+    (hc : ∀ q, Antitone (c q)) (hw : ∀ q, c q 0 ≤ w q)
+    (hx : ∀ q p, 0 ≤ x q p)
+    (ht : ∀ i, Tendsto (fun q => ∑ p ∈ decomp677PrimeBlock (w q) (c q) i, x q p)
+      atTop (nhds ((decomp677HeadMass i : ℝ) / 10000)))
+    (hq : ∀ i, Tendsto (fun q => ∑ p ∈ decomp677PrimeBlock (w q) (c q) i, (x q p) ^ 2)
+      atTop (nhds 0)) (n : ℕ) :
+    Tendsto (fun q => ∑ S ∈ decomp677PrimeFamily (w q) (c q) n,
+      (-1 : ℝ) ^ S.card * ∏ p ∈ S, x q p) atTop (nhds (decomp677HeadValue (n + 1) : ℝ)) := by
+  classical
+  have heq : (fun q => ∑ S ∈ decomp677PrimeFamily (w q) (c q) n,
+      (-1 : ℝ) ^ S.card * ∏ p ∈ S, x q p) =
+      (fun q => ∑ k ∈ range (2 * (n + 1)),
+        (-1 : ℝ) ^ k * decomp677PrimeCoeff (x q) (w q) (c q) n k) := by
+    funext q
+    exact decomp338_prime_head_by_degree (x q) (w q) (c q) n
+  have hv : (decomp677HeadValue (n + 1) : ℝ) =
+      ∑ k ∈ range (2 * (n + 1)), (-1 : ℝ) ^ k *
+        ((((decomp677HeadCoeff (n + 1))[k]?.getD 0 : ℕ) : ℝ) /
+          ((10000 : ℝ) ^ k * (k.factorial : ℝ))) := by
+    rw [decomp677HeadValue]
+    push_cast
+    apply sum_congr rfl
+    intro k hk
+    ring
+  rw [heq, hv]
+  apply tendsto_finsetSum
+  intro k hk
+  exact tendsto_const_nhds.mul
+    (decomp677_prime_coeff_tendsto x w c hc hw hx ht hq n k)
+
+/-- Auxiliary moment implication for second memoir page 97 formula 15.7
+and page 111 formula 28.11, at the candidate masses. -/
+lemma decomp677_retained_mass_tendsto (h w : ℕ → ℕ) (c : ℕ → ℕ → ℕ)
+    (hc : ∀ q, Antitone (c q)) (hw : ∀ q, c q 0 ≤ w q)
+    (ht : ∀ i, Tendsto
+      (fun q => ∑ p ∈ decomp677PrimeBlock (w q) (c q) i, nuN (h q) p)
+      atTop (nhds ((decomp677HeadMass i : ℝ) / 10000))) (n : ℕ) :
+    Tendsto (fun q => ∑ p ∈ (Ioc (c q n) (w q)).filter Nat.Prime, nuN (h q) p)
+      atTop (nhds (∑ i ∈ range (n + 1), (decomp677HeadMass i : ℝ) / 10000)) := by
+  classical
+  have heq (q : ℕ) :
+      (∑ i ∈ range (n + 1), ∑ p ∈ decomp677PrimeBlock (w q) (c q) i, nuN (h q) p) =
+        ∑ p ∈ (Ioc (c q n) (w q)).filter Nat.Prime, nuN (h q) p := by
+    let e : ℕ → ℕ := fun i => match i with
+      | 0 => w q
+      | j + 1 => c q j
+    have he : Antitone e := by
+      apply antitone_nat_of_succ_le
+      intro i
+      cases i with
+      | zero => exact hw q
+      | succ i => exact hc q (by omega : i ≤ i + 1)
+    have hh := decomp338_prime_mass_telescopes (nuN (h q)) e he (n + 1)
+    calc
+      _ = ∑ i ∈ range (n + 1), ∑ p ∈ (Ioc (e (i + 1)) (e i)).filter Nat.Prime,
+          nuN (h q) p := by
+        apply sum_congr rfl
+        intro i hi
+        cases i <;> rfl
+      _ = _ := hh
+  have hh := tendsto_finsetSum (range (n + 1)) (fun i _ => ht i)
+  exact hh.congr' (Eventually.of_forall heq)
+
+
+/-- Auxiliary moment implication for second memoir page 97 formula 15.7
+and page 111 formula 28.11, at the candidate masses. -/
+lemma decomp677_normalized_head_of_moments (h w : ℕ → ℕ) (c : ℕ → ℕ → ℕ)
+    (heven : ∀ q, Even (h q)) (hc : ∀ q, Antitone (c q)) (hw : ∀ q, c q 0 ≤ w q)
+    (ht : ∀ i, Tendsto
+      (fun q => ∑ p ∈ decomp677PrimeBlock (w q) (c q) i, nuN (h q) p)
+      atTop (nhds ((decomp677HeadMass i : ℝ) / 10000)))
+    (hsq : ∀ i, Tendsto
+      (fun q => ∑ p ∈ decomp677PrimeBlock (w q) (c q) i, (nuN (h q) p) ^ 2)
+      atTop (nhds 0)) :
+    ∀ᶠ q : ℕ in atTop, (0.04 : ℝ) <
+      (∑ S ∈ decomp677PrimeFamily (w q) (c q) 19,
+        (-1 : ℝ) ^ S.card * ∏ p ∈ S, nuN (h q) p) /
+      (∏ p ∈ (Ioc (c q 19) (w q)).filter Nat.Prime, (1 - nuN (h q) p)) := by
+  classical
+  let E := fun q => ∑ S ∈ decomp677PrimeFamily (w q) (c q) 19,
+    (-1 : ℝ) ^ S.card * ∏ p ∈ S, nuN (h q) p
+  let M := fun q => ∑ p ∈ (Ioc (c q 19) (w q)).filter Nat.Prime, nuN (h q) p
+  let D := fun q => ∏ p ∈ (Ioc (c q 19) (w q)).filter Nat.Prime, (1 - nuN (h q) p)
+  have hE := decomp677_prime_head_tendsto (fun q => nuN (h q)) w c hc hw
+    (fun q => nuN_nonneg (h q)) ht hsq 19
+  change Tendsto E atTop (nhds (decomp677HeadValue 20 : ℝ)) at hE
+  have hM : Tendsto M atTop (nhds (10.3505 : ℝ)) := by
+    have hh := decomp677_retained_mass_tendsto h w c hc hw ht 19
+    norm_num [sum_range_succ, decomp677HeadMass] at hh
+    convert hh using 1 <;> norm_num [M]
+  have hD (q : ℕ) : 0 < D q := by
+    apply prod_pos
+    intro p hp
+    exact sub_pos.mpr (nuN_lt_one (heven q) (mem_filter.mp hp).2)
+  have hprod (q : ℕ) : D q ≤ exp (-M q) := by
+    calc
+      _ ≤ ∏ p ∈ (Ioc (c q 19) (w q)).filter Nat.Prime, exp (-nuN (h q) p) := by
+        apply prod_le_prod₀
+        · intro p hp
+          exact (sub_pos.mpr (nuN_lt_one (heven q) (mem_filter.mp hp).2)).le
+        · intro p hp
+          exact one_sub_le_exp_neg _
+      _ = exp (-M q) := by rw [← exp_sum, sum_neg_distrib]
+  have hmargin : (0.04 : ℝ) < exp (10.3505 : ℝ) * (decomp677HeadValue 20 : ℝ) := by
+    simpa [mul_comm] using decomp677_normalized_head20
+  have hval : (0 : ℝ) < (decomp677HeadValue 20 : ℝ) := by
+    have hh : (164 / 100000000 : ℝ) < (decomp677HeadValue 20 : ℝ) := by
+      have hh : ((164 / 100000000 : ℚ) : ℝ) < (decomp677HeadValue 20 : ℝ) :=
+        Rat.cast_lt.mpr decomp677_head20_positive
+      norm_num at hh ⊢
+      exact hh
+    linarith
+  have hMexp : Tendsto (fun q => exp (M q)) atTop (nhds (exp (10.3505 : ℝ))) :=
+    (Real.continuous_exp.tendsto _).comp hM
+  have hF := hMexp.mul hE
+  have hEpos : ∀ᶠ q : ℕ in atTop, 0 < E q :=
+    hE.eventually (eventually_gt_nhds (show (0 : ℝ) < (decomp677HeadValue 20 : ℝ) by linarith))
+  filter_upwards [hF.eventually (eventually_gt_nhds hmargin), hEpos] with q hFq hEq
+  change (0.04 : ℝ) < E q / D q
+  apply lt_of_lt_of_le hFq
+  apply (le_div_iff₀ (hD q)).mpr
+  have heq : exp (M q) * D q ≤ 1 := by
+    calc
+      _ ≤ exp (M q) * exp (-M q) := mul_le_mul_of_nonneg_left (hprod q) (exp_pos _).le
+      _ = 1 := by rw [← exp_add]; simp
+  have hm := mul_le_mul_of_nonneg_left heq hEq.le
+  convert hm using 1 <;> ring
+
+
+/-! Task677 auxiliary proofs from Cutoffs677.lean. AI wrote the Lean code. -/
+/-- The least endpoint whose prime density mass does not exceed the auxiliary target. -/
+def decomp677GreedyStep (h Y w i : ℕ) : ℕ := by
+  classical
+  exact if H : ∃ y : ℕ, Y ≤ y ∧ y ≤ w ∧
+      (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ≤ (decomp677HeadMass i : ℝ) / 10000
+    then Nat.find H else w
+
+/-- Successive least endpoints at the auxiliary masses. -/
+def decomp677GreedyCutoff (h Y t : ℕ) : ℕ → ℕ
+  | 0 => decomp677GreedyStep h Y t 0
+  | i + 1 => decomp677GreedyStep h Y (decomp677GreedyCutoff h Y t i) (i + 1)
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_head_mass_pos (i : ℕ) : 0 < (decomp677HeadMass i : ℝ) / 10000 := by
+  classical
+  rcases i with _ | i
+  · norm_num [decomp677HeadMass]
+  rcases i with _ | i
+  · norm_num [decomp677HeadMass]
+  rcases i with _ | i
+  · norm_num [decomp677HeadMass]
+  · norm_num [decomp677HeadMass]
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_step_bounds (h Y w i : ℕ) (hYw : Y ≤ w) :
+    Y ≤ decomp677GreedyStep h Y w i ∧ decomp677GreedyStep h Y w i ≤ w ∧
+      (∑ p ∈ (Ioc (decomp677GreedyStep h Y w i) w).filter Nat.Prime, nuN h p) ≤
+        (decomp677HeadMass i : ℝ) / 10000 := by
+  classical
+  have hex : ∃ y : ℕ, Y ≤ y ∧ y ≤ w ∧
+      (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ≤ (decomp677HeadMass i : ℝ) / 10000 :=
+    ⟨w, hYw, le_rfl, by simpa using (decomp677_head_mass_pos i).le⟩
+  unfold decomp677GreedyStep
+  rw [dif_pos hex]
+  exact Nat.find_spec hex
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_cutoff_bounds (h Y t : ℕ) (hYt : Y ≤ t) :
+    Antitone (decomp677GreedyCutoff h Y t) ∧
+      (∀ i, Y ≤ decomp677GreedyCutoff h Y t i) ∧ decomp677GreedyCutoff h Y t 0 ≤ t := by
+  classical
+  have hlo (i : ℕ) : Y ≤ decomp677GreedyCutoff h Y t i := by
+    induction i with
+    | zero => exact (decomp677_greedy_step_bounds h Y t 0 hYt).1
+    | succ i ih => exact (decomp677_greedy_step_bounds h Y _ (i + 1) ih).1
+  refine ⟨antitone_nat_of_succ_le ?_, hlo, (decomp677_greedy_step_bounds h Y t 0 hYt).2.1⟩
+  intro i
+  exact (decomp677_greedy_step_bounds h Y _ (i + 1) (hlo i)).2.1
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_step_tendsto (h w : ℕ → ℕ) (hw : Tendsto w atTop atTop) (Y i : ℕ) :
+    Tendsto (fun q => decomp677GreedyStep (h q) Y (w q) i) atTop atTop := by
+  classical
+  apply tendsto_atTop.2
+  intro Z
+  obtain ⟨W, hW, hmass⟩ := decompJ365_pair_block_mass_unbounded (max Y Z)
+    ((decomp677HeadMass i : ℝ) / 10000 + 1)
+  filter_upwards [hw.eventually (eventually_ge_atTop W)] with q hq
+  have hYw : Y ≤ w q := (le_max_left Y Z).trans (hW.trans hq)
+  obtain ⟨hlo, hhi, hsmall⟩ := decomp677_greedy_step_bounds (h q) Y (w q) i hYw
+  by_contra hbad
+  have hZ : decomp677GreedyStep (h q) Y (w q) i ≤ max Y Z := by omega
+  have hsub : (Ioc (max Y Z) (w q)).filter Nat.Prime ⊆
+      (Ioc (decomp677GreedyStep (h q) Y (w q) i) (w q)).filter Nat.Prime := by
+    intro p hp
+    obtain ⟨hpI, hpP⟩ := mem_filter.mp hp
+    exact mem_filter.mpr ⟨mem_Ioc.mpr ⟨hZ.trans_lt (mem_Ioc.mp hpI).1, (mem_Ioc.mp hpI).2⟩, hpP⟩
+  have hle := sum_le_sum_of_subset_of_nonneg hsub
+    (fun p _ _ => nuN_nonneg (h q) p)
+  have hbig := hmass (h q) (w q) hq
+  linarith
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_cutoff_tendsto (h w : ℕ → ℕ) (hw : Tendsto w atTop atTop)
+    (Y i : ℕ) : Tendsto (fun q => decomp677GreedyCutoff (h q) Y (w q) i) atTop atTop := by
+  classical
+  induction i with
+  | zero => exact decomp677_greedy_step_tendsto h w hw Y 0
+  | succ i ih =>
+    exact decomp677_greedy_step_tendsto h
+      (fun q => decomp677GreedyCutoff (h q) Y (w q) i) ih Y (i + 1)
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_step_mass_lower (h Y w i : ℕ) (hYw : Y ≤ w)
+    (hstop : Y < decomp677GreedyStep h Y w i) :
+    (decomp677HeadMass i : ℝ) / 10000 - 2 / (decomp677GreedyStep h Y w i : ℝ) <
+      ∑ p ∈ (Ioc (decomp677GreedyStep h Y w i) w).filter Nat.Prime, nuN h p := by
+  classical
+  let y := decomp677GreedyStep h Y w i
+  have hex : ∃ z : ℕ, Y ≤ z ∧ z ≤ w ∧
+      (∑ p ∈ (Ioc z w).filter Nat.Prime, nuN h p) ≤ (decomp677HeadMass i : ℝ) / 10000 :=
+    ⟨w, hYw, le_rfl, by simpa using (decomp677_head_mass_pos i).le⟩
+  have hy : y = Nat.find hex := by simp only [y, decomp677GreedyStep, dif_pos hex]
+  have hyw : y ≤ w := (decomp677_greedy_step_bounds h Y w i hYw).2.1
+  have hy0 : 0 < y := by dsimp [y]; omega
+  have hprev : (decomp677HeadMass i : ℝ) / 10000 <
+      ∑ p ∈ (Ioc (y - 1) w).filter Nat.Prime, nuN h p := by
+    have hmin := Nat.find_min hex (show y - 1 < Nat.find hex by rw [← hy]; omega)
+    apply lt_of_not_ge
+    intro hle
+    exact hmin ⟨by dsimp [y] at *; omega, by omega, hle⟩
+  have hsets : Ioc (y - 1) w = insert y (Ioc y w) := by
+    ext p
+    simp only [mem_Ioc, mem_insert]
+    omega
+  have hstep : (∑ p ∈ (Ioc (y - 1) w).filter Nat.Prime, nuN h p) ≤
+      (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) + 2 / (y : ℝ) := by
+    rw [hsets, filter_insert]
+    by_cases hp : y.Prime
+    · rw [ite_eq_left hp, sum_insert (by simp)]
+      rw [nuN_prime hp]
+      have hh := div_le_div_of_nonneg_right (wt_le_two h y) (by positivity : (0 : ℝ) ≤ y)
+      linarith
+    · rw [ite_eq_right hp]
+      exact le_add_of_nonneg_right (by positivity)
+  change (decomp677HeadMass i : ℝ) / 10000 - 2 / (y : ℝ) < _
+  linarith
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_step_le (h Y w i : ℕ) : decomp677GreedyStep h Y w i ≤ w := by
+  classical
+  unfold decomp677GreedyStep
+  split_ifs with H
+  · exact (Nat.find_spec H).2.1
+  · rfl
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_step_mass_tendsto (h w : ℕ → ℕ) (hw : Tendsto w atTop atTop)
+    (Y i : ℕ) :
+    Tendsto (fun q => ∑ p ∈ (Ioc (decomp677GreedyStep (h q) Y (w q) i) (w q)).filter Nat.Prime,
+      nuN (h q) p) atTop (nhds ((decomp677HeadMass i : ℝ) / 10000)) := by
+  classical
+  let y := fun q => decomp677GreedyStep (h q) Y (w q) i
+  have hy : Tendsto y atTop atTop := decomp677_greedy_step_tendsto h w hw Y i
+  have hyR : Tendsto (fun q => (y q : ℝ)) atTop atTop := tendsto_natCast_atTop_atTop.comp hy
+  have hinv : Tendsto (fun q => (y q : ℝ)⁻¹) atTop (nhds 0) := tendsto_inv_atTop_zero.comp hyR
+  have herr : Tendsto (fun q => 2 / (y q : ℝ)) atTop (nhds 0) := by
+    simpa [div_eq_mul_inv] using hinv.const_mul 2
+  apply tendsto_of_tendsto_of_tendsto_of_le_of_le'
+    (by simpa using tendsto_const_nhds.sub herr) tendsto_const_nhds
+  · filter_upwards [hw.eventually (eventually_ge_atTop Y),
+      hy.eventually (eventually_ge_atTop (Y + 1))] with q hwq hyq
+    change Y + 1 ≤ decomp677GreedyStep (h q) Y (w q) i at hyq
+    exact (decomp677_greedy_step_mass_lower (h q) Y (w q) i hwq (by omega)).le
+  · filter_upwards [hw.eventually (eventually_ge_atTop Y)] with q hwq
+    exact (decomp677_greedy_step_bounds (h q) Y (w q) i hwq).2.2
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_step_square_tendsto (h w : ℕ → ℕ) (hw : Tendsto w atTop atTop)
+    (Y i : ℕ) :
+    Tendsto (fun q => ∑ p ∈ (Ioc (decomp677GreedyStep (h q) Y (w q) i) (w q)).filter Nat.Prime,
+      (nuN (h q) p) ^ 2) atTop (nhds 0) := by
+  classical
+  let y := fun q => decomp677GreedyStep (h q) Y (w q) i
+  have hy : Tendsto y atTop atTop := decomp677_greedy_step_tendsto h w hw Y i
+  have hyR : Tendsto (fun q => (y q : ℝ)) atTop atTop := tendsto_natCast_atTop_atTop.comp hy
+  have hinv : Tendsto (fun q => (y q : ℝ)⁻¹) atTop (nhds 0) := tendsto_inv_atTop_zero.comp hyR
+  have hbound : Tendsto (fun q => 2 / (y q : ℝ) * ((decomp677HeadMass i : ℝ) / 10000))
+      atTop (nhds 0) := by
+    simpa [div_eq_mul_inv] using (hinv.const_mul 2).mul_const ((decomp677HeadMass i : ℝ) / 10000)
+  apply tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hbound
+  · exact Eventually.of_forall fun q => sum_nonneg (fun p _ => sq_nonneg _)
+  · filter_upwards [hw.eventually (eventually_ge_atTop Y),
+      hy.eventually (eventually_ge_atTop 1)] with q hwq hyq
+    have hupper := decompJ365_pair_block_square_upper (h q) (y q) (w q) (by omega)
+    exact hupper.trans (mul_le_mul_of_nonneg_left
+      (decomp677_greedy_step_bounds (h q) Y (w q) i hwq).2.2 (by positivity))
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_block_moments (h w : ℕ → ℕ) (hw : Tendsto w atTop atTop) (Y : ℕ) :
+    (∀ i, Tendsto
+      (fun q => ∑ p ∈ decomp677PrimeBlock (w q) (decomp677GreedyCutoff (h q) Y (w q)) i,
+        nuN (h q) p) atTop (nhds ((decomp677HeadMass i : ℝ) / 10000))) ∧
+    (∀ i, Tendsto
+      (fun q => ∑ p ∈ decomp677PrimeBlock (w q) (decomp677GreedyCutoff (h q) Y (w q)) i,
+        (nuN (h q) p) ^ 2) atTop (nhds 0)) := by
+  classical
+  constructor
+  · intro i
+    cases i with
+    | zero => exact decomp677_greedy_step_mass_tendsto h w hw Y 0
+    | succ i =>
+      exact decomp677_greedy_step_mass_tendsto h
+        (fun q => decomp677GreedyCutoff (h q) Y (w q) i)
+        (decomp677_greedy_cutoff_tendsto h w hw Y i) Y (i + 1)
+  · intro i
+    cases i with
+    | zero => exact decomp677_greedy_step_square_tendsto h w hw Y 0
+    | succ i =>
+      exact decomp677_greedy_step_square_tendsto h
+        (fun q => decomp677GreedyCutoff (h q) Y (w q) i)
+        (decomp677_greedy_cutoff_tendsto h w hw Y i) Y (i + 1)
+
+/-- Auxiliary actual block construction for second memoir pages 109 to 111,
+formulas 28.8, 28.9 and 28.11, at the candidate masses. -/
+lemma decomp677_greedy_normalized_head (h w : ℕ → ℕ) (heven : ∀ q, Even (h q))
+    (hw : Tendsto w atTop atTop) (Y : ℕ) :
+    ∀ᶠ q : ℕ in atTop, (0.04 : ℝ) <
+      (∑ S ∈ decomp677PrimeFamily (w q) (decomp677GreedyCutoff (h q) Y (w q)) 19,
+        (-1 : ℝ) ^ S.card * ∏ p ∈ S, nuN (h q) p) /
+      (∏ p ∈ (Ioc (decomp677GreedyCutoff (h q) Y (w q) 19) (w q)).filter Nat.Prime,
+        (1 - nuN (h q) p)) := by
+  classical
+  let c := fun q => decomp677GreedyCutoff (h q) Y (w q)
+  have hc : ∀ q, Antitone (c q) := by
+    intro q
+    apply antitone_nat_of_succ_le
+    intro i
+    exact decomp677_greedy_step_le (h q) Y (c q i) (i + 1)
+  have hcw : ∀ q, c q 0 ≤ w q := fun q => decomp677_greedy_step_le (h q) Y (w q) 0
+  obtain ⟨ht, hsq⟩ := decomp677_greedy_block_moments h w hw Y
+  exact decomp677_normalized_head_of_moments h w c heven hc hcw ht hsq
+
+/-- Auxiliary termination of the candidate greedy construction.
+Second memoir pages 109 to 111. -/
+lemma decomp677_head_mass_ge_tail (i : ℕ) : (0.4885 : ℝ) ≤ (decomp677HeadMass i : ℝ) / 10000 := by
+  classical
+  rcases i with _ | i
+  · norm_num [decomp677HeadMass]
+  rcases i with _ | i
+  · norm_num [decomp677HeadMass]
+  rcases i with _ | i
+  · norm_num [decomp677HeadMass]
+  · norm_num [decomp677HeadMass]
+
+
+/-- Auxiliary termination of the candidate greedy construction.
+Second memoir pages 109 to 111. -/
+lemma decomp677_greedy_step_lt (h Y w i : ℕ) (hY : 4 ≤ Y) (hYw : Y < w) :
+    decomp677GreedyStep h Y w i < w := by
+  classical
+  have hw0 : 0 < w := by omega
+  have hset : Ioc (w - 1) w = ({w} : Finset ℕ) := by
+    ext p
+    simp only [mem_Ioc, mem_singleton]
+    omega
+  have hmass : (∑ p ∈ (Ioc (w - 1) w).filter Nat.Prime, nuN h p) ≤
+      (decomp677HeadMass i : ℝ) / 10000 := by
+    apply le_trans _ (decomp677_head_mass_ge_tail i)
+    rw [hset]
+    by_cases hp : w.Prime
+    · simp only [filter_singleton, hp, ite_true, sum_singleton]
+      rw [nuN_prime hp]
+      have hwR : (5 : ℝ) ≤ w := by exact_mod_cast (by omega : 5 ≤ w)
+      rw [div_le_iff₀ (by positivity : (0 : ℝ) < w)]
+      linarith [wt_le_two h w]
+    · norm_num [filter_singleton, hp]
+  have hex : ∃ y : ℕ, Y ≤ y ∧ y ≤ w ∧
+      (∑ p ∈ (Ioc y w).filter Nat.Prime, nuN h p) ≤ (decomp677HeadMass i : ℝ) / 10000 :=
+    ⟨w, by omega, le_rfl, by simpa using (decomp677_head_mass_pos i).le⟩
+  unfold decomp677GreedyStep
+  rw [dif_pos hex]
+  have hh := Nat.find_min' hex (show Y ≤ w - 1 ∧ w - 1 ≤ w ∧
+      (∑ p ∈ (Ioc (w - 1) w).filter Nat.Prime, nuN h p) ≤
+        (decomp677HeadMass i : ℝ) / 10000 from ⟨by omega, by omega, hmass⟩)
+  omega
+
+
+/-- Auxiliary termination of the candidate greedy construction.
+Second memoir pages 109 to 111. -/
+lemma decomp677_greedy_stops (h Y t : ℕ) (hY : 4 ≤ Y) (hYt : Y ≤ t) :
+    decomp677GreedyCutoff h Y t t = Y := by
+  classical
+  let c := decomp677GreedyCutoff h Y t
+  obtain ⟨hc, hlo, hw⟩ := decomp677_greedy_cutoff_bounds h Y t hYt
+  have hbound (i : ℕ) : c i ≤ max Y (t - i) := by
+    induction i with
+    | zero => exact hw.trans (le_max_right _ _)
+    | succ i ih =>
+      by_cases hci : c i ≤ Y
+      · exact (hc (by omega : i ≤ i + 1)).trans (hci.trans (le_max_left _ _))
+      · have hnext : c (i + 1) < c i := decomp677_greedy_step_lt h Y (c i) (i + 1) hY (by omega)
+        have hprev : c i ≤ t - i := by omega
+        have hh : c (i + 1) ≤ t - (i + 1) := by omega
+        exact hh.trans (le_max_right _ _)
+  have hh := hbound t
+  simp only [Nat.sub_self, max_eq_left (Nat.zero_le Y)] at hh
+  exact Nat.le_antisymm hh (hlo t)
+
+
+/-! Task677 auxiliary proofs from Main677.lean. AI wrote the Lean code. -/
+/-- Exact cumulative auxiliary mass from the third block onward. -/
+lemma decomp677_head_mass_sum {b : ℕ} (hb : 3 ≤ b) :
+    (∑ i ∈ range b, (decomp677HeadMass i : ℝ) / 10000) = (b : ℝ) * 0.4885 + 0.5805 := by
+  classical
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hb
+  rw [sum_range_add]
+  have htail (i : ℕ) : decomp677HeadMass (3 + i) = 4885 := by
+    rw [show 3 + i = i + 3 by omega]
+    rfl
+  simp_rw [htail]
+  norm_num [sum_range_succ, decomp677HeadMass]
+  <;> ring
+
+
+/-- The auxiliary masses meet the existing later factorial tail budget after seven blocks. -/
+lemma decomp677_cumulative_mass_budget (h : ℕ) (e : ℕ → ℕ) (he : Antitone e)
+    (n : ℕ) (hn : 7 ≤ n)
+    (hm : ∀ i < n, (∑ p ∈ (Ioc (e (i + 1)) (e i)).filter Nat.Prime, nuN h p) ≤
+      (decomp677HeadMass i : ℝ) / 10000) :
+    (∑ p ∈ (Ioc (e n) (e 0)).filter Nat.Prime, nuN h p) ≤ ((n : ℝ) + 1) / 2 := by
+  classical
+  rw [← decomp338_prime_mass_telescopes (nuN h) e he n]
+  have hh : (∑ i ∈ range n, ∑ p ∈ (Ioc (e (i + 1)) (e i)).filter Nat.Prime, nuN h p) ≤
+      ∑ i ∈ range n, (decomp677HeadMass i : ℝ) / 10000 := by
+    apply sum_le_sum
+    intro i hi
+    exact hm i (mem_range.mp hi)
+  rw [decomp677_head_mass_sum (by omega)] at hh
+  have hnR : (7 : ℝ) ≤ n := by exact_mod_cast hn
+  linarith
+
+/-- Uniform actual twenty block head from the auxiliary moment construction. -/
+lemma decomp677_greedy_head_uniform (Y : ℕ) :
+    ∃ T : ℕ, ∀ h t : ℕ, Even h → T ≤ t → (0.04 : ℝ) ≤
+      (∑ S ∈ decomp677PrimeFamily t (decomp677GreedyCutoff h Y t) 19,
+        (-1 : ℝ) ^ S.card * ∏ p ∈ S, nuN h p) /
+      (∏ p ∈ (Ioc (decomp677GreedyCutoff h Y t 19) t).filter Nat.Prime, (1 - nuN h p)) := by
+  classical
+  by_contra hbad
+  push_neg at hbad
+  choose h t heven hge hfail using hbad
+  have ht : Tendsto t atTop atTop := tendsto_atTop_mono hge tendsto_id
+  have hh := decomp677_greedy_normalized_head h t heven ht Y
+  obtain ⟨N, hN⟩ := eventually_atTop.mp hh
+  have hhN := hN N le_rfl
+  have hfN := hfail N
+  linarith
+
+
+/-- The actual auxiliary greedy cutoffs obey the later factorial tail budget. -/
+lemma decomp677_greedy_cumulative_budget (h Y t : ℕ) (hYt : Y ≤ t) (n : ℕ) (hn : 6 ≤ n) :
+    (∑ p ∈ (Ioc (decomp677GreedyCutoff h Y t n) t).filter Nat.Prime, nuN h p) ≤
+      ((n : ℝ) + 2) / 2 := by
+  classical
+  let c := decomp677GreedyCutoff h Y t
+  obtain ⟨hc, hlo, hw⟩ := decomp677_greedy_cutoff_bounds h Y t hYt
+  let e : ℕ → ℕ := fun i => match i with
+    | 0 => t
+    | j + 1 => c j
+  have he : Antitone e := by
+    apply antitone_nat_of_succ_le
+    intro i
+    cases i with
+    | zero => exact hw
+    | succ i => exact hc (by omega : i ≤ i + 1)
+  change (∑ p ∈ (Ioc (e (n + 1)) (e 0)).filter Nat.Prime, nuN h p) ≤ _
+  convert decomp677_cumulative_mass_budget h e he (n + 1) (by omega) ?_ using 1 <;> try push_cast
+  · ring
+  intro i hi
+  cases i with
+  | zero => exact (decomp677_greedy_step_bounds h Y t 0 hYt).2.2
+  | succ i => exact (decomp677_greedy_step_bounds h Y (c i) (i + 1) (hlo i)).2.2
+
+
+/-- Uniform positive main density for the actual auxiliary greedy cutoffs.
+Second memoir page 99 formula 18.3 and page 111 formula 28.11. -/
+theorem decomp677_greedy_main_proved :
+    ∃ Y₀ : ℕ, 4 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
+      ∃ a : ℝ, 0 < a ∧ ∃ T : ℕ, ∀ h t : ℕ, Even h → T ≤ t →
+        a * (∏ p ∈ Nat.primesLE t, (1 - nuN h p)) ≤
+          ∑ S ∈ (Nat.primesLE t).powerset.filter (fun S =>
+            ∀ j ∈ range (t + 1),
+              (S.filter (fun p => decomp677GreedyCutoff h Y t j < p)).card ≤ 2 * j + 1),
+            (-1 : ℝ) ^ S.card * ∏ p ∈ S, nuN h p := by
+  classical
+  refine ⟨100, by norm_num, ?_⟩
+  intro Y hY
+  obtain ⟨T, hT⟩ := decomp677_greedy_head_uniform Y
+  refine ⟨0.02, by norm_num, max T (max Y 19), ?_⟩
+  intro h t heven ht
+  have hYt : Y ≤ t := by omega
+  have ht19 : 19 ≤ t := by omega
+  let c := decomp677GreedyCutoff h Y t
+  obtain ⟨hc, hlo, hw⟩ := decomp677_greedy_cutoff_bounds h Y t hYt
+  have hmass : ∀ i < t - 19,
+      (∑ p ∈ (Ioc (c (19 + i + 1)) t).filter Nat.Prime, nuN h p) ≤
+        (((19 + i + 2 : ℕ) : ℝ) + 1) / 2 := by
+    intro i hi
+    have hh := decomp677_greedy_cumulative_budget h Y t hYt (19 + i + 1) (by omega)
+    change (∑ p ∈ (Ioc (c (19 + i + 1)) t).filter Nat.Prime, nuN h p) ≤ _ at hh
+    convert hh using 1 <;> push_cast <;> ring
+  have hhead := hT h t heven (by omega)
+  have hpos := decomp338_pair_normalized_positive h t heven c hc hw (t - 19) Y hY
+    (hlo (19 + (t - 19))) hmass hhead
+  rw [show 19 + (t - 19) = t by omega] at hpos
+  let E := ∑ S ∈ decomp677PrimeFamily t c t, (-1 : ℝ) ^ S.card * ∏ p ∈ S, nuN h p
+  let D := ∏ p ∈ (Ioc (c t) t).filter Nat.Prime, (1 - nuN h p)
+  let z := ∏ p ∈ Nat.primesLE (c t), (1 - nuN h p)
+  have hD : 0 < D := by
+    apply prod_pos
+    intro p hp
+    exact sub_pos.mpr (nuN_lt_one heven (mem_filter.mp hp).2)
+  change (0.02 : ℝ) ≤ E / D at hpos
+  have hmul := mul_le_mul_of_nonneg_right ((le_div_iff₀ hD).mp hpos)
+    (show 0 ≤ z from prod_nonneg (fun p hp =>
+      (sub_pos.mpr (nuN_lt_one heven (Nat.mem_primesLE.mp hp).2)).le))
+  have hct : c t ≤ t := (hc (Nat.zero_le t)).trans hw
+  have hcomplete := decomp305_prime_family_complete (nuN h) t c hc t hct
+  change (∑ S ∈ (Nat.primesLE t).powerset.filter (fun S =>
+    ∀ j ∈ range (t + 1), (S.filter (fun p => c j < p)).card ≤ 2 * j + 1),
+      (-1 : ℝ) ^ S.card * ∏ p ∈ S, nuN h p) = E * z at hcomplete
+  have hsets : Nat.primesLE t = (Ioc (c t) t).filter Nat.Prime ∪ Nat.primesLE (c t) := by
+    ext p
+    constructor
+    · intro hp
+      obtain ⟨hpt, hprime⟩ := Nat.mem_primesLE.mp hp
+      by_cases hpc : p ≤ c t
+      · exact mem_union.mpr (Or.inr (Nat.mem_primesLE.mpr ⟨hpc, hprime⟩))
+      · exact mem_union.mpr (Or.inl (mem_filter.mpr
+          ⟨mem_Ioc.mpr ⟨by omega, hpt⟩, hprime⟩))
+    · intro hp
+      rcases mem_union.mp hp with hp | hp
+      · obtain ⟨hpI, hprime⟩ := mem_filter.mp hp
+        exact Nat.mem_primesLE.mpr ⟨(mem_Ioc.mp hpI).2, hprime⟩
+      · obtain ⟨hpc, hprime⟩ := Nat.mem_primesLE.mp hp
+        exact Nat.mem_primesLE.mpr ⟨hpc.trans hct, hprime⟩
+  have hdisj : Disjoint ((Ioc (c t) t).filter Nat.Prime) (Nat.primesLE (c t)) := by
+    apply disjoint_left.mpr
+    intro p hp hq
+    have hp' := (mem_Ioc.mp (mem_filter.mp hp).1).1
+    have hq' := (Nat.mem_primesLE.mp hq).1
+    omega
+  have hprod : (∏ p ∈ Nat.primesLE t, (1 - nuN h p)) = D * z := by
+    rw [hsets, prod_union hdisj]
+  rw [hcomplete, hprod]
+  nlinarith
+
+
+/-! Task677 auxiliary proofs from Support677.lean. AI wrote the Lean code. -/
+/-- The mixed density encoding, used only for the density coefficients. -/
+def decomp677EncodedGap (h v t : ℕ) : ℕ := h * ∏ p ∈ (Ioc v t).filter Nat.Prime, p
+
+/-- Every actual greedy prefix retains its cumulative target mass up to the endpoint losses. -/
+lemma decomp677_greedy_cumulative_lower (h Y t n : ℕ) (hYt : Y ≤ t) (ε : ℝ)
+    (hsmall : ∀ y : ℕ, Y ≤ y → 2 / (y : ℝ) ≤ ε)
+    (hstop : Y < decomp677GreedyCutoff h Y t n) :
+    (∑ i ∈ range (n + 1), (decomp677HeadMass i : ℝ) / 10000) - (n + 1 : ℕ) * ε ≤
+      ∑ p ∈ (Ioc (decomp677GreedyCutoff h Y t n) t).filter Nat.Prime, nuN h p := by
+  classical
+  let c := decomp677GreedyCutoff h Y t
+  obtain ⟨hc, hlo, hw⟩ := decomp677_greedy_cutoff_bounds h Y t hYt
+  have hblock (i : ℕ) (hi : i ∈ range (n + 1)) :
+      (decomp677HeadMass i : ℝ) / 10000 - ε ≤
+        ∑ p ∈ decomp677PrimeBlock t c i, nuN h p := by
+    have hin : i ≤ n := by have := mem_range.mp hi; omega
+    have hstopi : Y < c i := lt_of_lt_of_le hstop (hc hin)
+    have herr := hsmall (c i) (hlo i)
+    cases i with
+    | zero =>
+      have hh := decomp677_greedy_step_mass_lower h Y t 0 hYt hstopi
+      change (decomp677HeadMass 0 : ℝ) / 10000 - ε ≤
+        ∑ p ∈ (Ioc (c 0) t).filter Nat.Prime, nuN h p
+      change (decomp677HeadMass 0 : ℝ) / 10000 - 2 / (c 0 : ℝ) <
+        ∑ p ∈ (Ioc (c 0) t).filter Nat.Prime, nuN h p at hh
+      linarith
+    | succ i =>
+      have hh := decomp677_greedy_step_mass_lower h Y (c i) (i + 1) (hlo i) hstopi
+      change (decomp677HeadMass (i + 1) : ℝ) / 10000 - ε ≤
+        ∑ p ∈ (Ioc (c (i + 1)) (c i)).filter Nat.Prime, nuN h p
+      change (decomp677HeadMass (i + 1) : ℝ) / 10000 - 2 / (c (i + 1) : ℝ) <
+        ∑ p ∈ (Ioc (c (i + 1)) (c i)).filter Nat.Prime, nuN h p at hh
+      linarith
+  have hh := sum_le_sum hblock
+  rw [sum_sub_distrib, sum_const, card_range, nsmul_eq_mul] at hh
+  let e : ℕ → ℕ := fun i => match i with
+    | 0 => t
+    | j + 1 => c j
+  have he : Antitone e := by
+    apply antitone_nat_of_succ_le
+    intro i
+    cases i with
+    | zero => exact hw
+    | succ i => exact hc (by omega : i ≤ i + 1)
+  have htel := decomp338_prime_mass_telescopes (nuN h) e he (n + 1)
+  have hblocks : (∑ i ∈ range (n + 1), ∑ p ∈ decomp677PrimeBlock t c i, nuN h p) =
+      ∑ p ∈ (Ioc (c n) t).filter Nat.Prime, nuN h p := by
+    calc
+      _ = ∑ i ∈ range (n + 1), ∑ p ∈ (Ioc (e (i + 1)) (e i)).filter Nat.Prime,
+          nuN h p := by
+        apply sum_congr rfl
+        intro i hi
+        cases i <;> rfl
+      _ = _ := htel
+  rw [hblocks] at hh
+  exact hh
+
+/-- The entire cumulative prefix gives both possible mixed endpoint powers.
+The maximum preserves the dimension change at v without guessing its block index. -/
+lemma decomp677_mixed_cumulative_power (h Y v t n : ℕ) (hY : 4 ≤ Y)
+    (hYv : Y ≤ v) (hvt : v ≤ t) (ε ω : ℝ) (hε : 0 ≤ ε)
+    (hsmall : ∀ y : ℕ, Y ≤ y → 2 / (y : ℝ) ≤ ε ∧ 42 / Real.log y ≤ ε)
+    (hshift : ω ≤ Real.log (Real.log t / Real.log v)) :
+    let H := decomp677EncodedGap h v t
+    let A := ∑ i ∈ range (n + 1), (decomp677HeadMass i : ℝ) / 10000
+    (decomp677GreedyCutoff H Y t n : ℝ) ≤ max (Y : ℝ)
+      ((t : ℝ) ^ max (exp (-A + 2 * (n + 1 : ℕ) * ε))
+        (exp (-(A + ω) / 2 + (n + 1 : ℕ) * ε))) := by
+  classical
+  let H := decomp677EncodedGap h v t
+  let y := decomp677GreedyCutoff H Y t n
+  let A := ∑ i ∈ range (n + 1), (decomp677HeadMass i : ℝ) / 10000
+  change (y : ℝ) ≤ _
+  obtain ⟨hc, hlo, hw⟩ := decomp677_greedy_cutoff_bounds H Y t (hYv.trans hvt)
+  have hyt : y ≤ t := (hc (Nat.zero_le n)).trans hw
+  have hYy : Y ≤ y := hlo n
+  have hy2 : 2 ≤ y := by omega
+  have ht1 : (1 : ℝ) ≤ t := by exact_mod_cast (by omega : 1 ≤ t)
+  by_cases hstop : y ≤ Y
+  · exact (show (y : ℝ) ≤ Y by exact_mod_cast hstop).trans (le_max_left _ _)
+  have hstop' : Y < y := by omega
+  have hmass := decomp677_greedy_cumulative_lower H Y t n (hYv.trans hvt) ε
+    (fun z hz => (hsmall z hz).1) hstop'
+  change A - (n + 1 : ℕ) * ε ≤ ∑ p ∈ (Ioc y t).filter Nat.Prime, nuN H p at hmass
+  have hn1 : (1 : ℝ) ≤ (n + 1 : ℕ) := by exact_mod_cast (by omega : 1 ≤ n + 1)
+  have herr : ε ≤ (n + 1 : ℕ) * ε := by nlinarith
+  have hlogy : 0 < Real.log y := Real.log_pos (by exact_mod_cast (by omega : 1 < y))
+  have hlogv : 0 < Real.log v := Real.log_pos (by exact_mod_cast (by omega : 1 < v))
+  apply le_trans _ (le_max_right _ _)
+  by_cases hvy : v ≤ y
+  · have hid : (∑ p ∈ (Ioc y t).filter Nat.Prime, nuN H p) =
+        ∑ p ∈ (Ioc y t).filter Nat.Prime, (1 : ℝ) / p :=
+      decomp338_mixed_high_block h y t v t hvy le_rfl
+    rw [hid] at hmass
+    have h42 := (hsmall y hYy).2
+    have h14 : 14 / Real.log y ≤ (n + 1 : ℕ) * ε := by
+      have hnonneg : 0 ≤ 14 / Real.log y := by positivity
+      have heq : 42 / Real.log y = 3 * (14 / Real.log y) := by ring
+      nlinarith
+    have hp := decomp338_one_dimensional_cutoff_upper y t A ((n + 1 : ℕ) * ε)
+      hy2 hyt hmass h14
+    have hp' : (y : ℝ) ≤ (t : ℝ) ^ exp (-A + 2 * (n + 1 : ℕ) * ε) := by
+      simpa only [mul_assoc] using hp
+    exact hp'.trans (Real.rpow_le_rpow_of_exponent_le ht1 (le_max_left _ _))
+  · have hyv : y ≤ v := by omega
+    have h42y := (hsmall y hYy).2
+    have h42v := (hsmall v hYv).2
+    have hend : 28 / Real.log y + 14 / Real.log v ≤ (n + 1 : ℕ) * ε := by
+      have heqy : 28 / Real.log y = (2 / 3 : ℝ) * (42 / Real.log y) := by ring
+      have heqv : 14 / Real.log v = (1 / 3 : ℝ) * (42 / Real.log v) := by ring
+      nlinarith
+    have hp := decomp338_mixed_block_cutoff_upper h y v t t A ((n + 1 : ℕ) * ε) ω
+      hy2 hyv hvt le_rfl hmass hend hshift
+    exact hp.trans (Real.rpow_le_rpow_of_exponent_le ht1 (le_max_right _ _))
+
+/-- The actual nested floor cutoff has the required fixed logarithmic shift. -/
+lemma decomp677_transition_shift (t : ℕ)
+    (hv : 2 ≤ ⌊(t : ℝ) ^ (1 / 121 : ℝ)⌋₊) :
+    4.79 ≤ Real.log (Real.log t / Real.log ⌊(t : ℝ) ^ (1 / 121 : ℝ)⌋₊) := by
+  let v := ⌊(t : ℝ) ^ (1 / 121 : ℝ)⌋₊
+  have hvR : (0 : ℝ) < v := by exact_mod_cast (by dsimp [v]; omega : 0 < v)
+  have hlogv : 0 < Real.log v := Real.log_pos (by exact_mod_cast (by dsimp [v]; omega : 1 < v))
+  have hvpow : (v : ℝ) ≤ (t : ℝ) ^ (1 / 121 : ℝ) := Nat.floor_le (by positivity)
+  have ht0 : (0 : ℝ) < t := by
+    by_contra h
+    have ht : t = 0 := by exact_mod_cast (le_antisymm (le_of_not_gt h) (Nat.cast_nonneg t))
+    subst t
+    norm_num [v] at hv
+  have hl := Real.log_le_log hvR hvpow
+  rw [Real.log_rpow ht0] at hl
+  have hratio : (121 : ℝ) ≤ Real.log t / Real.log v :=
+    (le_div_iff₀ hlogv).mpr (by linarith)
+  have hi : (1 / 121 : ℝ) < 1 / exp (4.79 : ℝ) := by
+    simpa only [exp_neg, one_div] using decomp677_transition_ratio
+  have he : exp (4.79 : ℝ) < 121 := lt_of_one_div_lt_one_div (by norm_num) hi
+  have hpos : 0 < Real.log t / Real.log v := lt_of_lt_of_le (by norm_num) hratio
+  have hh := Real.log_le_log (exp_pos (4.79 : ℝ)) (he.le.trans hratio)
+  simpa only [Real.log_exp] using hh
+
+
+/-! Task677 auxiliary proofs from Profile677.lean. AI wrote the Lean code. -/
+/-- The cumulative auxiliary mass through i blocks. -/
+def decomp677CumulativeMass (i : ℕ) : ℝ :=
+  ∑ j ∈ range i, (decomp677HeadMass j : ℝ) / 10000
+
+/-- Eight dimension one endpoints followed by the shifted geometric tail. -/
+def decomp677Profile (ε : ℝ) (i : ℕ) : ℝ :=
+  if i ≤ 8 then exp (-decomp677CumulativeMass i + 2 * i * ε)
+  else exp (-4.8835 + 9 * ε) * exp (-0.24425 + ε) ^ (i - 9)
+
+/-- The finite head and complete geometric tail bounding the auxiliary profile. -/
+def decomp677ProfileSum (ε : ℝ) : ℝ :=
+  (∑ i ∈ range 8, exp (-decomp677CumulativeMass (i + 1) + 2 * (i + 1 : ℕ) * ε)) +
+    exp (-4.8835 + 9 * ε) / (1 - exp (-0.24425 + ε))
+
+/-- The profile exactly chooses the larger of the two cumulative mixed powers. -/
+lemma decomp677_profile_max (ε : ℝ) (hε0 : 0 ≤ ε) (hε : ε ≤ 0.01) (i : ℕ) :
+    decomp677Profile ε i = max
+      (exp (-decomp677CumulativeMass i + 2 * i * ε))
+      (exp (-(decomp677CumulativeMass i + 4.79) / 2 + i * ε)) := by
+  unfold decomp677Profile
+  by_cases hi : i ≤ 8
+  · rw [if_pos hi]
+    symm
+    apply max_eq_left
+    apply exp_le_exp.mpr
+    have hA : decomp677CumulativeMass i ≤ 4.4885 := by
+      interval_cases i <;> norm_num [decomp677CumulativeMass, sum_range_succ, decomp677HeadMass]
+    have hn : (0 : ℝ) ≤ i := by positivity
+    nlinarith
+  · rw [if_neg hi]
+    have hi9 : 9 ≤ i := by omega
+    have hiR : (9 : ℝ) ≤ i := by exact_mod_cast hi9
+    have hA : decomp677CumulativeMass i = (i : ℝ) * 0.4885 + 0.5805 :=
+      decomp677_head_mass_sum (by omega)
+    have hmul := mul_le_mul_of_nonneg_left hε (show (0 : ℝ) ≤ i by positivity)
+    have hmax : exp (-decomp677CumulativeMass i + 2 * i * ε) ≤
+        exp (-(decomp677CumulativeMass i + 4.79) / 2 + i * ε) := by
+      apply exp_le_exp.mpr
+      rw [hA]
+      nlinarith
+    rw [max_eq_right hmax, ← exp_nat_mul, ← exp_add]
+    congr 1
+    have hcast : ((i - 9 : ℕ) : ℝ) = (i : ℝ) - 9 := by
+      rw [Nat.cast_sub hi9]
+      norm_num
+    rw [hA, hcast]
+    ring
+
+/-- The perturbed support profile decreases from one and stays positive. -/
+lemma decomp677_profile_properties (ε : ℝ) (hε0 : 0 ≤ ε) (hε : ε ≤ 0.01) :
+    decomp677Profile ε 0 = 1 ∧ (∀ i, 0 < decomp677Profile ε i) ∧
+      ∀ i, decomp677Profile ε (i + 1) ≤ decomp677Profile ε i := by
+  have hstep (i : ℕ) : decomp677CumulativeMass (i + 1) =
+      decomp677CumulativeMass i + (decomp677HeadMass i : ℝ) / 10000 := by
+    exact sum_range_succ _ i
+  refine ⟨by norm_num [decomp677Profile, decomp677CumulativeMass], ?_, ?_⟩
+  · intro i
+    unfold decomp677Profile
+    split_ifs <;> positivity
+  · intro i
+    rw [decomp677_profile_max ε hε0 hε (i + 1), decomp677_profile_max ε hε0 hε i]
+    have hm := decomp677_head_mass_ge_tail i
+    apply max_le_max <;> apply exp_le_exp.mpr <;> rw [hstep] <;> push_cast <;> nlinarith
+
+/-- Every finite profile sum is bounded by its explicit finite head and geometric tail. -/
+lemma decomp677_profile_sum_le (ε : ℝ) (hε : ε < 0.01) (n : ℕ) :
+    (∑ i ∈ range n, decomp677Profile ε (i + 1)) ≤ decomp677ProfileSum ε := by
+  let q := exp (-0.24425 + ε)
+  have hq0 : 0 ≤ q := (exp_pos _).le
+  have hq1 : q < 1 := exp_lt_one_iff.mpr (by linarith)
+  have hgeom (k : ℕ) : (∑ i ∈ range k, q ^ i) ≤ 1 / (1 - q) := by
+    have hh := (hasSum_geometric_of_lt_one hq0 hq1).summable.sum_le_tsum
+      (range k) (fun i _ => pow_nonneg hq0 i)
+    simpa only [(hasSum_geometric_of_lt_one hq0 hq1).tsum_eq, one_div] using hh
+  have hhead : (∑ i ∈ range 8, decomp677Profile ε (i + 1)) =
+      ∑ i ∈ range 8, exp (-decomp677CumulativeMass (i + 1) + 2 * (i + 1 : ℕ) * ε) := by
+    apply sum_congr rfl
+    intro i hi
+    rw [decomp677Profile, if_pos (by have := mem_range.mp hi; omega)]
+  by_cases hn : n ≤ 8
+  · calc
+      _ ≤ ∑ i ∈ range 8, decomp677Profile ε (i + 1) :=
+        sum_le_sum_of_subset_of_nonneg (range_mono hn) (by
+          intro i hi hni
+          unfold decomp677Profile
+          split_ifs <;> positivity)
+      _ ≤ decomp677ProfileSum ε := by
+        rw [hhead]
+        exact le_add_of_nonneg_right (div_nonneg (exp_pos _).le (sub_pos.mpr hq1).le)
+  · obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le (show 8 ≤ n by omega)
+    rw [sum_range_add, hhead]
+    have htail : (∑ i ∈ range k, decomp677Profile ε (8 + i + 1)) =
+        exp (-4.8835 + 9 * ε) * ∑ i ∈ range k, q ^ i := by
+      rw [mul_sum]
+      apply sum_congr rfl
+      intro i hi
+      rw [decomp677Profile, if_neg (by omega)]
+      simp only [show 8 + i + 1 - 9 = i by omega]
+      rfl
+    rw [htail]
+    have hh := mul_le_mul_of_nonneg_left (hgeom k) (exp_pos (-4.8835 + 9 * ε)).le
+    have hh' : exp (-4.8835 + 9 * ε) * (∑ i ∈ range k, q ^ i) ≤
+        exp (-4.8835 + 9 * ε) / (1 - q) := by
+      simpa only [mul_one_div] using hh
+    change (∑ i ∈ range 8, exp (-decomp677CumulativeMass (i + 1) +
+      2 * (i + 1 : ℕ) * ε)) + exp (-4.8835 + 9 * ε) * (∑ i ∈ range k, q ^ i) ≤
+      (∑ i ∈ range 8, exp (-decomp677CumulativeMass (i + 1) +
+      2 * (i + 1 : ℕ) * ε)) + exp (-4.8835 + 9 * ε) / (1 - q)
+    linarith only [hh']
+
+/-- A small positive perturbation retains the strict auxiliary scalar support margin. -/
+lemma decomp677_profile_parameter :
+    ∃ ε : ℝ, 0 < ε ∧ ε < 0.01 ∧ decomp677ProfileSum ε < 0.999901 := by
+  have hd : 1 - exp (-0.24425 : ℝ) ≠ 0 := by
+    have he : exp (-0.24425 : ℝ) < 1 := exp_lt_one_iff.mpr (by norm_num)
+    linarith
+  have hzero : decomp677ProfileSum 0 = decomp677TauUpper := by
+    norm_num [decomp677ProfileSum, decomp677CumulativeMass, decomp677TauUpper,
+      sum_range_succ, decomp677HeadMass]
+  have hcont : ContinuousAt decomp677ProfileSum 0 := by
+    unfold decomp677ProfileSum
+    fun_prop (disch := simpa using hd)
+  have hnear : ∀ᶠ ε : ℝ in nhds 0, decomp677ProfileSum ε < 0.999901 :=
+    hcont.tendsto.eventually (eventually_lt_nhds (by rw [hzero]; linarith [decomp677_tau_upper]))
+  obtain ⟨δ, hδ, hball⟩ := Metric.eventually_nhds_iff.mp hnear
+  let ε := min (δ / 2) 0.005
+  have hε : 0 < ε := lt_min (by positivity) (by norm_num)
+  have hεδ : ε < δ := (min_le_left _ _).trans_lt (by linarith)
+  refine ⟨ε, hε, lt_of_le_of_lt (min_le_right _ _) (by norm_num), ?_⟩
+  apply hball
+  simpa [Real.dist_eq, abs_of_pos hε] using hεδ
+
+
+/-! Task677 auxiliary proofs from FullSupport677.lean. AI wrote the Lean code. -/
+/-- Auxiliary mixed saved divisor support for two and 366.
+First memoir pages 88 to 90 and second memoir pages 113 to 115. -/
+theorem decomp677_mixed_support_2_366 :
+    ∃ Y₀ : ℕ, 4 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
+      ∃ δ κ : ℝ, 1 / ((2 : ℝ) + 1) < δ ∧ δ ≤ 1 / 2 ∧
+        1 / ((366 : ℝ) + 1) < δ * (1 / 121 : ℝ) ∧ 0 < κ ∧
+        ∃ X : ℕ, ∀ ξ h : ℕ, X ≤ ξ →
+          let t := ⌊(ξ : ℝ) ^ δ⌋₊
+          let v := ⌊(t : ℝ) ^ (1 / 121 : ℝ)⌋₊
+          let H := decomp677EncodedGap h v t
+          ∀ S ⊆ Nat.primesLE t, (∀ j ∈ range (t + 1),
+            (S.filter (fun p : ℕ => decomp677GreedyCutoff H Y t j < p)).card ≤ 2 * j + 1) →
+              ((∏ p ∈ S, p : ℕ) : ℝ) ≤ (ξ : ℝ) ^ (1 - κ) := by
+  classical
+  obtain ⟨ε, hε0, hε, hsum⟩ := decomp677_profile_parameter
+  let α := decomp677Profile ε
+  obtain ⟨hα0, hαpos, hαmono⟩ := decomp677_profile_properties ε hε0.le hε.le
+  let δ : ℝ := 0.33335
+  let κ : ℝ := 0.00001
+  have hδ0 : 0 < δ := by norm_num [δ]
+  have hκ : 0 < κ := by norm_num [κ]
+  have hsave : δ * (1 + 2 * (0.999901 : ℝ)) ≤ 1 - κ := by norm_num [δ, κ]
+  obtain ⟨Z, hZ, hsmall₀⟩ := decomp338_endpoint_error_threshold (ε / 2) (by positivity)
+  let Y₀ := max Z 100
+  refine ⟨Y₀, by dsimp [Y₀]; omega, ?_⟩
+  intro Y hY
+  have hY100 : 100 ≤ Y := by dsimp [Y₀] at hY; omega
+  obtain ⟨T, hT⟩ := eventually_atTop.mp
+    (decomp338_nested_floor_cutoff 1 (1 / 121 : ℝ) 0.008
+      (by norm_num) le_rfl (by norm_num) (by norm_num) (by norm_num) (by norm_num) Y)
+  refine ⟨δ, κ / 2, by norm_num [δ], by norm_num [δ], by norm_num [δ], by positivity, ?_⟩
+  let C : ℕ := ∏ p ∈ Nat.primesLE Y, p
+  have hCpos : 0 < C := by
+    apply prod_pos
+    intro p hp
+    exact (Nat.mem_primesLE.mp hp).2.pos
+  have hcast : Tendsto (fun ξ : ℕ => (ξ : ℝ)) atTop atTop := tendsto_natCast_atTop_atTop
+  obtain ⟨X₁, hX₁⟩ := eventually_atTop.mp
+    (((tendsto_rpow_atTop hδ0).comp hcast).eventually
+      (eventually_ge_atTop ((max (max Y 2) T : ℕ) : ℝ)))
+  obtain ⟨X₂, hX₂⟩ := eventually_atTop.mp
+    (((tendsto_rpow_atTop (show 0 < κ / 2 by positivity)).comp hcast).eventually
+      (eventually_ge_atTop (C : ℝ)))
+  refine ⟨max 2 (max X₁ X₂), ?_⟩
+  intro ξ h hξ
+  dsimp only
+  let t := ⌊(ξ : ℝ) ^ δ⌋₊
+  let v := ⌊(t : ℝ) ^ (1 / 121 : ℝ)⌋₊
+  let H := decomp677EncodedGap h v t
+  intro S hS hcaps
+  change S ⊆ Nat.primesLE t at hS
+  change ∀ j ∈ range (t + 1),
+    (S.filter (fun p : ℕ => decomp677GreedyCutoff H Y t j < p)).card ≤ 2 * j + 1 at hcaps
+  have hξ2 : 2 ≤ ξ := by omega
+  have hξ0 : (0 : ℝ) < ξ := by exact_mod_cast (by omega : 0 < ξ)
+  have hξ1 : (1 : ℝ) ≤ ξ := by exact_mod_cast (by omega : 1 ≤ ξ)
+  have htm : max (max Y 2) T ≤ t := Nat.le_floor (hX₁ ξ (by omega))
+  have hYt : Y ≤ t := by omega
+  have hY4 : 4 ≤ Y := by omega
+  have ht2 : 2 ≤ t := by omega
+  have hvlarge := hT t (by omega)
+  simp only [Real.rpow_one, Nat.floor_natCast] at hvlarge
+  have hYv : Y ≤ v := hvlarge.1
+  have hvpow : (v : ℝ) ≤ (t : ℝ) ^ (1 / 121 : ℝ) := Nat.floor_le (by positivity)
+  have hvt : v ≤ t := by
+    have hh := Real.rpow_le_rpow_of_exponent_le
+      (show (1 : ℝ) ≤ t by exact_mod_cast (by omega : 1 ≤ t))
+      (show (1 / 121 : ℝ) ≤ 1 by norm_num)
+    rw [Real.rpow_one] at hh
+    exact_mod_cast hvpow.trans hh
+  have hsmall : ∀ y : ℕ, Y ≤ y → 2 / (y : ℝ) ≤ ε ∧ 42 / Real.log y ≤ ε := by
+    intro y hy
+    have hZY : Z ≤ Y := by dsimp [Y₀] at hY; omega
+    obtain ⟨h1, h2⟩ := hsmall₀ y (hZY.trans hy)
+    have heq : 42 / Real.log y = (3 / 2 : ℝ) * (28 / Real.log y) := by ring
+    constructor <;> nlinarith
+  have hshift := decomp677_transition_shift t (show 2 ≤ v by omega)
+  have hprofile (n : ℕ) : (decomp677GreedyCutoff H Y t n : ℝ) ≤
+      max (Y : ℝ) ((t : ℝ) ^ (α (n + 1))) := by
+    have hh := decomp677_mixed_cumulative_power h Y v t n hY4 hYv hvt ε 4.79
+      hε0.le hsmall hshift
+    simpa only [α, decomp677_profile_max ε hε0.le hε.le, decomp677CumulativeMass] using hh
+  have hstop := decomp677_greedy_stops H Y t hY4 hYt
+  let A := S.filter (fun p => Y < p)
+  let B := S.filter (fun p => p ≤ Y)
+  have hAB : S = A ∪ B := by
+    ext p
+    simp only [A, B, mem_filter, mem_union]
+    constructor
+    · intro hp
+      by_cases hy : Y < p
+      · exact Or.inl ⟨hp, hy⟩
+      · exact Or.inr ⟨hp, by omega⟩
+    · intro hp
+      rcases hp with hp | hp <;> exact hp.1
+  have hdisj : Disjoint A B := by
+    apply disjoint_left.mpr
+    intro p hp hq
+    have hpY := (mem_filter.mp hp).2
+    have hqY := (mem_filter.mp hq).2
+    omega
+  have hBsub : B ⊆ Nat.primesLE Y := by
+    intro p hp
+    obtain ⟨hpS, hpY⟩ := mem_filter.mp hp
+    exact Nat.mem_primesLE.mpr ⟨hpY, (Nat.mem_primesLE.mp (hS hpS)).2⟩
+  have hBbound : (∏ p ∈ B, p) ≤ C :=
+    Nat.le_of_dvd hCpos (prod_dvd_prod_of_subset B (Nat.primesLE Y) id hBsub)
+  have hcard : A.card ≤ 2 * t + 1 := by
+    have hh := hcaps t (mem_range.mpr (by omega : t < t + 1))
+    simpa only [hstop] using hh
+  have hAcaps : ∀ i ∈ range t,
+      (A.filter (fun p : ℕ => (t : ℝ) ^ (α (i + 1)) < (p : ℝ))).card ≤ 2 * i + 1 := by
+    intro i hi
+    have hsub : A.filter (fun p : ℕ => (t : ℝ) ^ (α (i + 1)) < (p : ℝ)) ⊆
+        S.filter (fun p : ℕ => decomp677GreedyCutoff H Y t i < p) := by
+      intro p hp
+      obtain ⟨hpA, hpow⟩ := mem_filter.mp hp
+      obtain ⟨hpS, hpY⟩ := mem_filter.mp hpA
+      have hpYR : (Y : ℝ) < p := by exact_mod_cast hpY
+      have hmax : max (Y : ℝ) ((t : ℝ) ^ (α (i + 1))) < p := max_lt_iff.mpr ⟨hpYR, hpow⟩
+      have hcR := (hprofile i).trans_lt hmax
+      exact mem_filter.mpr ⟨hpS, by exact_mod_cast hcR⟩
+    exact (card_le_card hsub).trans (hcaps i (mem_range.mpr (by have := mem_range.mp hi; omega)))
+  have htop : (t : ℝ) ≤ (ξ : ℝ) ^ δ := Nat.floor_le (by positivity)
+  have hApos : ∀ p ∈ A, 0 < p := by
+    intro p hp
+    exact (Nat.mem_primesLE.mp (hS (mem_filter.mp hp).1)).2.pos
+  have hAmax : ∀ p ∈ A, (p : ℝ) ≤ t := by
+    intro p hp
+    exact_mod_cast (Nat.mem_primesLE.mp (hS (mem_filter.mp hp).1)).1
+  have hpsum : (∑ i ∈ range t, α (i + 1)) ≤ (0.999901 : ℝ) :=
+    (decomp677_profile_sum_le ε hε t).trans hsum.le
+  have hlarge := decompJ365_nested_saved_support A (ξ : ℝ) (t : ℝ) δ 0.999901 κ
+    hξ1 (by exact_mod_cast (by omega : 1 < t)) htop (by norm_num) hκ
+    α hαmono hα0 t (hαpos t).le hpsum hApos hAmax hcard hAcaps hsave
+  have hsmallprod : ((∏ p ∈ B, p : ℕ) : ℝ) ≤ C := by exact_mod_cast hBbound
+  have hCbound : (C : ℝ) ≤ (ξ : ℝ) ^ (κ / 2) := hX₂ ξ (by omega)
+  have hsplit : ((∏ p ∈ S, p : ℕ) : ℝ) =
+      ((∏ p ∈ A, p : ℕ) : ℝ) * ((∏ p ∈ B, p : ℕ) : ℝ) := by
+    rw [hAB, prod_union hdisj, Nat.cast_mul]
+  calc
+    _ = ((∏ p ∈ A, p : ℕ) : ℝ) * ((∏ p ∈ B, p : ℕ) : ℝ) := hsplit
+    _ ≤ (ξ : ℝ) ^ (1 - κ) * (C : ℝ) :=
+      mul_le_mul hlarge hsmallprod (Nat.cast_nonneg _) (Real.rpow_nonneg hξ0.le _)
+    _ ≤ (ξ : ℝ) ^ (1 - κ) * (ξ : ℝ) ^ (κ / 2) :=
+      mul_le_mul_of_nonneg_left hCbound (Real.rpow_nonneg hξ0.le _)
+    _ = (ξ : ℝ) ^ (1 - κ / 2) := by
+      rw [← Real.rpow_add hξ0]
+      congr 1
+      ring
+
+
+/-! Task677 auxiliary proofs from Counts677.lean. AI wrote the Lean code. -/
+/-- Complete lower Z assembly from explicit auxiliary mixed support. -/
+lemma decomp677_mixed_Z_of_support (a b : ℕ) (r : ℝ) (hr : 0 < r) (hr1 : r ≤ 1)
+    (hsupport : ∃ Y₀ : ℕ, 4 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
+      ∃ δ κ : ℝ, 1 / ((a : ℝ) + 1) < δ ∧ δ ≤ 1 / 2 ∧
+        1 / ((b : ℝ) + 1) < δ * r ∧ 0 < κ ∧
+        ∃ X : ℕ, ∀ ξ h : ℕ, X ≤ ξ →
+          let t := ⌊(ξ : ℝ) ^ δ⌋₊
+          let v := ⌊(t : ℝ) ^ r⌋₊
+          let H := decomp677EncodedGap h v t
+          ∀ S ⊆ Nat.primesLE t, (∀ j ∈ range (t + 1),
+            (S.filter (fun p : ℕ => decomp677GreedyCutoff H Y t j < p)).card ≤ 2 * j + 1) →
+              ((∏ p ∈ S, p : ℕ) : ℝ) ≤ (ξ : ℝ) ^ (1 - κ)) :
+    ∀ m : ℤ, m ≠ 0 → ∃ c : ℝ, 0 < c ∧ ∃ ξ₀ : ℕ, ∀ ξ : ℕ, ξ₀ ≤ ξ →
+      c * ξ / Real.log ξ ^ 2 ≤ zCount a b m ξ := by
+  classical
+  intro m hm
+  obtain ⟨Y₁, hY₁, hmain⟩ := decomp677_greedy_main_proved
+  obtain ⟨Y₂, hY₂, hsupp⟩ := hsupport
+  let Y := max Y₁ Y₂
+  obtain ⟨a₀, ha₀, T, hmain⟩ := hmain Y (le_max_left _ _)
+  obtain ⟨δ, κ, hδA, hδhalf, hδB, hκ, X, hsupp⟩ := hsupp Y (le_max_right _ _)
+  have hδ : 0 < δ := lt_trans (by positivity : (0 : ℝ) < 1 / ((a : ℝ) + 1)) hδA
+  let A : ℝ := (1 + |1 - κ|) ^ 2
+  let B : ℝ := a₀ * exp (-52 : ℝ) / 4
+  have hB : 0 < B := by dsimp [B]; positivity
+  apply decompJ365_lower_of_main_error hB (show 0 < κ / 2 by positivity) A
+  have hcutA := decomp338_nested_floor_cutoff δ 1 (1 / ((a : ℝ) + 1)) hδ (by linarith)
+    (by norm_num) (by norm_num) (by positivity) (by simpa using hδA) (max T 3)
+  have hcutB := decomp338_nested_floor_cutoff δ r (1 / ((b : ℝ) + 1)) hδ (by linarith)
+    hr hr1 (by positivity) hδB 3
+  filter_upwards [hcutA, hcutB, decomp338_level_error_upper κ hκ, eventually_ge_atTop X,
+    eventually_ge_atTop (max 3 (4 * m.natAbs))] with ξ hA hBb herr hX hξ
+  let t := ⌊(ξ : ℝ) ^ δ⌋₊
+  let v := ⌊(t : ℝ) ^ r⌋₊
+  let H := decomp677EncodedGap (2 * m.natAbs) v t
+  let N := ξ + 1 - 2 * m.natAbs
+  let L := (ξ : ℝ) ^ (1 - κ)
+  let c := decomp677GreedyCutoff H Y t
+  let U := (Nat.primesLE t).powerset.filter (fun S =>
+    ∀ j ∈ range (t + 1), (S.filter (fun p : ℕ => c j < p)).card ≤ 2 * j + 1)
+  let E := ∑ S ∈ U, (-1 : ℝ) ^ S.card * ∏ p ∈ S, nuN H p
+  have htm : max T 3 ≤ t := by simpa only [Real.rpow_one, Nat.floor_natCast] using hA.1
+  have hrootA : (ξ : ℝ) ^ (1 / ((a : ℝ) + 1)) < t := by
+    simpa only [Real.rpow_one, Nat.floor_natCast] using hA.2.2.2
+  have hrootB : (ξ : ℝ) ^ (1 / ((b : ℝ) + 1)) < v := hBb.2.2.2
+  have hvt : v ≤ t := hBb.2.1
+  have hv3 : 3 ≤ v := hBb.1
+  have ht3 : 3 ≤ t := by omega
+  have htξ : t ≤ ξ := hA.2.2.1
+  have hξR : (1 : ℝ) < ξ := by exact_mod_cast (by omega : 1 < ξ)
+  have heven : Even H := decomp338_encoded_gap_even (2 * m.natAbs) v t ⟨m.natAbs, by omega⟩
+  have hL : 1 ≤ L := by
+    have hh := hsupp ξ (2 * m.natAbs) hX ∅ (empty_subset _) (by simp)
+    simpa [L] using hh
+  have hlevel : ∀ S ⊆ Nat.primesLE t, (∀ j ∈ range (t + 1),
+      (S.filter (fun p : ℕ => c j < p)).card ≤ 2 * j + 1) → ((∏ p ∈ S, p : ℕ) : ℝ) ≤ L :=
+    hsupp ξ (2 * m.natAbs) hX
+  have hraw := decomp338_mixed_z_finite a b ξ N t v m (by omega) hvt (by dsimp [N]; omega)
+    (decomp338_size_of_root_lt a ξ t hrootA) (decomp338_size_of_root_lt b ξ v hrootB)
+    hrootA.le hrootB.le (range (t + 1)) c id L hL hlevel
+  change (N : ℝ) * E - L * (1 + Real.log L) ^ 2 ≤ zCount a b m ξ at hraw
+  have hprod := decomp338_full_pair_product_lower H t heven ht3
+  have hlogt : 0 < Real.log t := Real.log_pos (by exact_mod_cast (by omega : 1 < t))
+  have hlogξ : 0 < Real.log ξ := Real.log_pos hξR
+  have hlogle : Real.log t ≤ Real.log ξ := Real.log_le_log (by exact_mod_cast (by omega : 0 < t))
+    (by exact_mod_cast htξ)
+  have hprod' : exp (-52 : ℝ) / (2 * Real.log ξ ^ 2) ≤
+      ∏ p ∈ Nat.primesLE t, (1 - nuN H p) := by
+    apply le_trans _ hprod
+    apply div_le_div_of_nonneg_left (by positivity) (by positivity)
+    nlinarith
+  have hE : a₀ * exp (-52 : ℝ) / (2 * Real.log ξ ^ 2) ≤ E := by
+    have hh := hmain H t heven (by omega)
+    change a₀ * (∏ p ∈ Nat.primesLE t, (1 - nuN H p)) ≤ E at hh
+    calc
+      _ = a₀ * (exp (-52 : ℝ) / (2 * Real.log ξ ^ 2)) := by ring
+      _ ≤ a₀ * (∏ p ∈ Nat.primesLE t, (1 - nuN H p)) := mul_le_mul_of_nonneg_left hprod' ha₀.le
+      _ ≤ E := hh
+  have hN : (ξ : ℝ) / 2 ≤ N := by
+    have hn : ξ ≤ 2 * N := by dsimp [N]; omega
+    have hnR : (ξ : ℝ) ≤ 2 * (N : ℝ) := by exact_mod_cast hn
+    linarith
+  have hmainterm : B * ξ / Real.log ξ ^ 2 ≤ (N : ℝ) * E := by
+    calc
+      _ = ((ξ : ℝ) / 2) * (a₀ * exp (-52 : ℝ) / (2 * Real.log ξ ^ 2)) := by dsimp [B]; ring
+      _ ≤ (N : ℝ) * (a₀ * exp (-52 : ℝ) / (2 * Real.log ξ ^ 2)) := by gcongr
+      _ ≤ (N : ℝ) * E := mul_le_mul_of_nonneg_left hE (Nat.cast_nonneg _)
+  change L * (1 + Real.log L) ^ 2 ≤ A * (ξ : ℝ) ^ (1 - κ / 2) at herr
+  linarith
+
+/-- CONDITIONAL ON the supplied mixed saved support.
+Auxiliary complete assembly of a mixed lower W count, first memoir pages 88 and 89. -/
+
+lemma decomp677_mixed_W_of_support (a b : ℕ) (r : ℝ) (hr : 0 < r) (hr1 : r ≤ 1)
+    (hsupport : ∃ Y₀ : ℕ, 4 ≤ Y₀ ∧ ∀ Y : ℕ, Y₀ ≤ Y →
+      ∃ δ κ : ℝ, 1 / ((a : ℝ) + 1) < δ ∧ δ ≤ 1 / 2 ∧
+        1 / ((b : ℝ) + 1) < δ * r ∧ 0 < κ ∧
+        ∃ X : ℕ, ∀ ξ h : ℕ, X ≤ ξ →
+          let t := ⌊(ξ : ℝ) ^ δ⌋₊
+          let v := ⌊(t : ℝ) ^ r⌋₊
+          let H := decomp677EncodedGap h v t
+          ∀ S ⊆ Nat.primesLE t, (∀ j ∈ range (t + 1),
+            (S.filter (fun p : ℕ => decomp677GreedyCutoff H Y t j < p)).card ≤ 2 * j + 1) →
+              ((∏ p ∈ S, p : ℕ) : ℝ) ≤ (ξ : ℝ) ^ (1 - κ)) :
+    TheoremDW a b := by
+  classical
+  obtain ⟨Y₁, hY₁, hmain⟩ := decomp677_greedy_main_proved
+  obtain ⟨Y₂, hY₂, hsupp⟩ := hsupport
+  let Y := max Y₁ Y₂
+  obtain ⟨a₀, ha₀, T, hmain⟩ := hmain Y (le_max_left _ _)
+  obtain ⟨δ, κ, hδA, hδhalf, hδB, hκ, X, hsupp⟩ := hsupp Y (le_max_right _ _)
+  have hδ : 0 < δ := lt_trans (by positivity : (0 : ℝ) < 1 / ((a : ℝ) + 1)) hδA
+  let A : ℝ := (1 + |1 - κ|) ^ 2
+  let B : ℝ := a₀ * exp (-52 : ℝ) / 2
+  have hB : 0 < B := by dsimp [B]; positivity
+  have hcutA := decomp338_nested_floor_cutoff δ 1 (1 / ((a : ℝ) + 1)) hδ (by linarith)
+    (by norm_num) (by norm_num) (by positivity) (by simpa using hδA) (max T 3)
+  have hcutB := decomp338_nested_floor_cutoff δ r (1 / ((b : ℝ) + 1)) hδ (by linarith)
+    hr hr1 (by positivity) hδB 3
+  have hbound : ∀ᶠ N : ℕ in atTop, Even N →
+      B * N / Real.log N ^ 2 - A * (N : ℝ) ^ (1 - κ / 2) ≤ wCount a b N := by
+    filter_upwards [hcutA, hcutB, decomp338_level_error_upper κ hκ,
+      eventually_ge_atTop X, eventually_ge_atTop 3] with N hA hBb herr hX hN
+    intro hevenN
+    let t := ⌊(N : ℝ) ^ δ⌋₊
+    let v := ⌊(t : ℝ) ^ r⌋₊
+    let H := decomp677EncodedGap N v t
+    let L := (N : ℝ) ^ (1 - κ)
+    let c := decomp677GreedyCutoff H Y t
+    let U := (Nat.primesLE t).powerset.filter (fun S =>
+      ∀ j ∈ range (t + 1), (S.filter (fun p : ℕ => c j < p)).card ≤ 2 * j + 1)
+    let E := ∑ S ∈ U, (-1 : ℝ) ^ S.card * ∏ p ∈ S, nuN H p
+    have htm : max T 3 ≤ t := by simpa only [Real.rpow_one, Nat.floor_natCast] using hA.1
+    have hrootA : (N : ℝ) ^ (1 / ((a : ℝ) + 1)) < t := by
+      simpa only [Real.rpow_one, Nat.floor_natCast] using hA.2.2.2
+    have hrootB : (N : ℝ) ^ (1 / ((b : ℝ) + 1)) < v := hBb.2.2.2
+    have hvt : v ≤ t := hBb.2.1
+    have hv3 : 3 ≤ v := hBb.1
+    have ht3 : 3 ≤ t := by omega
+    have htN : t ≤ N := hA.2.2.1
+    have hNR : (1 : ℝ) < N := by exact_mod_cast (by omega : 1 < N)
+    have heven : Even H := decomp338_encoded_gap_even N v t hevenN
+    have hL : 1 ≤ L := by
+      have hh := hsupp N N hX ∅ (empty_subset _) (by simp)
+      simpa [L] using hh
+    have hlevel : ∀ S ⊆ Nat.primesLE t, (∀ j ∈ range (t + 1),
+        (S.filter (fun p : ℕ => c j < p)).card ≤ 2 * j + 1) → ((∏ p ∈ S, p : ℕ) : ℝ) ≤ L :=
+      hsupp N N hX
+    have hraw := decomp338_mixed_w_finite a b N t v (by omega) hvt hrootA.le hrootB.le
+      (range (t + 1)) c id L hL hlevel
+    change (N : ℝ) * E - L * (1 + Real.log L) ^ 2 ≤ wCount a b N at hraw
+    have hprod := decomp338_full_pair_product_lower H t heven ht3
+    have hlogt : 0 < Real.log t := Real.log_pos (by exact_mod_cast (by omega : 1 < t))
+    have hlogN : 0 < Real.log N := Real.log_pos hNR
+    have hlogle : Real.log t ≤ Real.log N := Real.log_le_log (by exact_mod_cast (by omega : 0 < t))
+      (by exact_mod_cast htN)
+    have hprod' : exp (-52 : ℝ) / (2 * Real.log N ^ 2) ≤
+        ∏ p ∈ Nat.primesLE t, (1 - nuN H p) := by
+      apply le_trans _ hprod
+      apply div_le_div_of_nonneg_left (by positivity) (by positivity)
+      nlinarith
+    have hE : a₀ * exp (-52 : ℝ) / (2 * Real.log N ^ 2) ≤ E := by
+      have hh := hmain H t heven (by omega)
+      change a₀ * (∏ p ∈ Nat.primesLE t, (1 - nuN H p)) ≤ E at hh
+      calc
+        _ = a₀ * (exp (-52 : ℝ) / (2 * Real.log N ^ 2)) := by ring
+        _ ≤ a₀ * (∏ p ∈ Nat.primesLE t, (1 - nuN H p)) := mul_le_mul_of_nonneg_left hprod' ha₀.le
+        _ ≤ E := hh
+    have hmainterm : B * N / Real.log N ^ 2 ≤ (N : ℝ) * E := by
+      calc
+        _ = (N : ℝ) * (a₀ * exp (-52 : ℝ) / (2 * Real.log N ^ 2)) := by dsimp [B]; ring
+        _ ≤ (N : ℝ) * E := mul_le_mul_of_nonneg_left hE (Nat.cast_nonneg _)
+    change L * (1 + Real.log L) ^ 2 ≤ A * (N : ℝ) ^ (1 - κ / 2) at herr
+    linarith
+  have hfinal : ∀ᶠ N : ℕ in atTop, Even N → (B / 2) * N / Real.log N ^ 2 ≤ wCount a b N := by
+    filter_upwards [hbound, decompJ365_power_error_absorb (show 0 < κ / 2 by positivity) hB A]
+      with N hN herr
+    intro heven
+    have hh := hN heven
+    have heq : B * N / Real.log N ^ 2 = 2 * ((B / 2) * N / Real.log N ^ 2) := by ring
+    linarith
+  obtain ⟨N₀, hN₀⟩ := eventually_atTop.mp hfinal
+  exact ⟨B / 2, by positivity, N₀, fun N hN heven => hN₀ N hN heven⟩
+
+/-- Exact lower Z supplier for the sealed fifth pair target. -/
+theorem decomp677_Z_lower_2_366 :
+    ∀ m : ℤ, m ≠ 0 → ∃ c : ℝ, 0 < c ∧ ∃ ξ₀ : ℕ, ∀ ξ : ℕ, ξ₀ ≤ ξ →
+      c * ξ / Real.log ξ ^ 2 ≤ zCount 2 366 m ξ := by
+  exact decomp677_mixed_Z_of_support 2 366 (1 / 121) (by norm_num) (by norm_num)
+    decomp677_mixed_support_2_366
+
+/-- Exact W supplier for the sealed fifth pair target. -/
+theorem decomp677_W_2_366 : TheoremDW 2 366 := by
+  exact decomp677_mixed_W_of_support 2 366 (1 / 121) (by norm_num) (by norm_num)
+    decomp677_mixed_support_2_366
+
+
 /-- LEAF. Pages 75, 88 and 90: the remaining positive lower count for Z.
 The upper estimate is decompJ365_zCount_upper; the lower count is decomp338_Z_lower_*,
 the `Decomp305a`/`Decomp338*` chain transcribed above. -/
 theorem decompJ365_Z_lower_2_366 :
     ∀ m : ℤ, m ≠ 0 → ∃ c : ℝ, 0 < c ∧ ∃ ξ₀ : ℕ, ∀ ξ : ℕ, ξ₀ ≤ ξ →
       c * ξ / Real.log ξ ^ 2 ≤ zCount 2 366 m ξ := by
-  sorry
+  exact decomp677_Z_lower_2_366
 
 /-- LEAF. Page 89, the Z half of Theorem D for (6, 6). -/
 theorem decompJ365_Z_6_6 : TheoremDZ 6 6 := by
@@ -7342,7 +8616,8 @@ theorem decompJ365_Z_2_366 : TheoremDZ 2 366 := by
   exact decompJ365_Z_of_lower decompJ365_Z_lower_2_366
 
 /-- LEAF. Page 90, the W half of Theorem D for (2, 366). -/
-theorem decompJ365_W_2_366 : TheoremDW 2 366 := by sorry
+theorem decompJ365_W_2_366 : TheoremDW 2 366 := by
+  exact decomp677_W_2_366
 
 /-- The final assembly matching exactly the cited `ricciD`. -/
 theorem ricciD_decompJ365 : TheoremD 6 6 ∧ TheoremD 5 7 ∧ TheoremD 4 9 ∧ TheoremD 3 15 ∧ TheoremD 2 366 := by
@@ -7353,4 +8628,10 @@ theorem ricciD_decompJ365 : TheoremD 6 6 ∧ TheoremD 5 7 ∧ TheoremD 4 9 ∧ T
          ⟨decompJ365_Z_2_366, decompJ365_W_2_366⟩⟩
 
 end
+
+/-- Ricci's five pairs, cited: `(6, 6)` after Estermann, `(5, 7)`, `(4, 9)`, `(3, 15)`, `(2, 366)`. -/
+theorem ricciD : TheoremD 6 6 ∧ TheoremD 5 7 ∧ TheoremD 4 9 ∧ TheoremD 3 15 ∧ TheoremD 2 366 := by
+  exact ricciD_decompJ365
+
+
 end LeanLab.Ricci1937
