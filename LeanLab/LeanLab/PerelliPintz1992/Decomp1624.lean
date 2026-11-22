@@ -61,6 +61,18 @@ theorem energyA_bound_exists (N : ℕ) (ε ξ : ℝ) :
   exact Finset.single_le_sum (f := fun M => energyA N ε ξ M)
     (fun M _ => energyA_nonneg N ε ξ M) hmem
 
+/-- A window mean is nonnegative because it integrates a squared norm. -/
+theorem windowMean_nonneg (N : ℕ) {q : ℕ+} (χ : DirichletCharacter ℂ (q : ℕ)) (h : ℝ) :
+    0 ≤ windowMean N χ h := by
+  unfold windowMean
+  exact setIntegral_nonneg measurableSet_Ioc fun x _ => sq_nonneg _
+
+/-- The averaged window quantity is nonnegative. -/
+theorem WA_nonneg (N : ℕ) {q : ℕ+} (χ : DirichletCharacter ℂ (q : ℕ)) :
+    0 ≤ WA N χ := by
+  unfold WA
+  exact Real.sqrt_nonneg _
+
 /-- LEAF. Sections 5 and 6, pp. 365 to 372, for WA. The zero sum of display 31 is monotone in
 the window through `min(Θ, 1 / |ρ|)`, so all windows up to q Q / 2 are served by the printed proof.
 The open sign question in ZeroFreeInputs remains separate. -/
@@ -68,7 +80,11 @@ theorem energy_decayA :
     ∀ ε : ℝ, 0 < ε → ε < 1 / 12 → ∀ D : ℝ, 0 < D →
       ∃ C N₀ : ℝ, 0 < C ∧ ∀ N : ℕ, N₀ ≤ N → ∀ ξ : ℝ, 0 ≤ ξ → ξ ≤ 1 →
         ∀ M : ℕ, 1 ≤ M → (M : ℝ) ≤ Q N → energyA N ε ξ M ≤ C * L N ^ (-D) := by
-  sorry
+  intro ε hε hε12 D hD
+  obtain ⟨C, N₀, hC, hdecay⟩ := Decomp97.energy_decay ε hε hε12 D hD
+  refine ⟨C, N₀, hC, ?_⟩
+  intro N hN ξ hξ hξ1 M hM hMQ
+  exact hdecay N hN ξ hξ hξ1 M hM hMQ
 
 #print axioms energyA_nonneg
 #print axioms energyA_bound_exists
