@@ -31,7 +31,15 @@ proper subfamily of the printed lower integrals. The numerical evaluation
 is proved separately. The global Buchstab bound is part of this analytic input. -/
 theorem rough11_to_integral (δ : ℝ) (hδ : 0 < δ) :
     ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y → 2 ≤ Y →
-      (integral11 - δ) * Y / Real.log Y ≤ roughModel labels11 Y := by sorry
+      (integral11 - δ) * Y / Real.log Y ≤ roughModel labels11 Y := by
+  -- BLOCKED OUT OF REACH: Jia 1996 Lemma 20/21/27 lower bound for roughModel
+  -- requires global Buchstab function analysis and the printed lower integrals
+  -- for regions 33,36,38,40,42,46,49 not available as proved lemmas in the repo.
+  -- Searches run: Mathlib exact?/apply?/Loogle for Buchstab bounds,
+  -- roughModel asymptotic lower bounds, Buchstab mean value theorem;
+  -- no matching lemma found. Equivalent leaves model4_asymptotic (Decomp568a)
+  -- and lemma21_rough_asymptotic (Decomp578c) are also open.
+  sorry
 
 /-- Jia Lemma 27: this proper mean value family has its printed subtotal.
 CONDITIONAL ON prime_to_rough11 and rough11_to_integral.
