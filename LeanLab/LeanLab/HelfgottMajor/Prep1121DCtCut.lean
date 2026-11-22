@@ -181,8 +181,75 @@ theorem rect_integral_principal (N : ℕ) (a : ℕ → ℂ) {z w : ℂ} {r : ℝ
     RectangleIntegral' (PP N, a) z w = ∑ k ∈ Finset.range N, if k = 0 then a k else 0 := by
   sorry
 
-/-- LEAF: P0014 page 33, display 4.7, linearity of the rectangle integral: subtracting the
-principal part splits the rectangle integral. MEDIUM: P is continuous on the border, which
+/-- PROVED, P0014 page 33, display 4.7, used for the rectangle side integrals: if two functions
+agree on a set codiscrete within `R` and a non-constant analytic path maps `[a, b]` into `R`,
+their integrals along the path agree. The argument of the private
+`intervalIntegral_congr_ae_of_codiscreteWithin_along_path` of PNTPort ResidueCalcOnRectangles,
+restated here because that lemma is private. -/
+theorem intervalIntegral_congr_codiscrete_along_path {f g : ℂ → ℂ} {R : Set ℂ}
+    (heq : {s : ℂ | f s = g s} ∈ Filter.codiscreteWithin R)
+    {a b : ℝ} {p : ℝ → ℂ}
+    (hp_an : AnalyticOnNhd ℝ p (Set.uIcc a b))
+    (hp_nonconst : ∀ x ∈ Set.uIcc a b, ¬Filter.EventuallyConst p (𝓝 x))
+    (hp_maps : Set.MapsTo p (Set.uIcc a b) R) :
+    ∫ x in a..b, f (p x) = ∫ x in a..b, g (p x) := by
+  refine intervalIntegral.integral_congr_ae_restrict (μ := volume) ?_
+  apply ae_restrict_le_codiscreteWithin measurableSet_uIoc
+  change {x : ℝ | f (p x) = g (p x)} ∈ Filter.codiscreteWithin (Set.uIoc a b)
+  simpa [Set.preimage] using Filter.codiscreteWithin_mono Set.uIoc_subset_uIcc
+    (hp_an.preimage_mem_codiscreteWithin hp_nonconst
+      (Filter.codiscreteWithin_mono
+        (by intro s hs; rcases hs with ⟨x, hx, rfl⟩; exact hp_maps hx) heq))
+
+/-- PROVED. Horizontal paths `x ↦ x + h i` are nowhere locally constant. -/
+theorem horizontalPath_not_eventuallyConst' (h : ℝ) (x : ℝ) :
+    ¬Filter.EventuallyConst (fun r : ℝ ↦ (r : ℂ) + (h : ℂ) * Complex.I) (𝓝 x) := by
+  intro hc
+  obtain ⟨c, hc⟩ := Filter.eventuallyConst_iff_exists_eventuallyEq.1 hc
+  have hpath : HasDerivAt (fun r : ℝ ↦ (r : ℂ) + (h : ℂ) * Complex.I) 1 x := by
+    simpa using (Complex.ofRealCLM.hasDerivAt (x := x)).add_const ((h : ℂ) * Complex.I)
+  have hconst : HasDerivAt (fun r : ℝ ↦ (r : ℂ) + (h : ℂ) * Complex.I) 0 x :=
+    (hasDerivAt_const x c).congr_of_eventuallyEq hc
+  exact one_ne_zero (hpath.unique hconst)
+
+/-- PROVED, P0014 page 33, display 4.7: the rectangle integral only sees a function up to a set
+codiscrete within the closed rectangle, since each side meets the complement in a null set. -/
+theorem rectangleIntegral_congr_codiscrete {f g : ℂ → ℂ} {z w : ℂ}
+    (h : {s : ℂ | f s = g s} ∈ Filter.codiscreteWithin (Complex.Rectangle z w)) :
+    RectangleIntegral f z w = RectangleIntegral g z w := by
+  have hH : ∀ c : ℝ, (∀ x ∈ Set.uIcc z.re w.re, (↑x + ↑c * Complex.I) ∈ Complex.Rectangle z w) →
+      HIntegral f z.re w.re c = HIntegral g z.re w.re c := fun c hm => by
+    unfold HIntegral
+    exact intervalIntegral_congr_codiscrete_along_path h
+      (by intro x _; exact (Complex.ofRealCLM.analyticAt x).add analyticAt_const)
+      (fun x _ ↦ horizontalPath_not_eventuallyConst' c x) hm
+  have hV : ∀ c : ℝ, (∀ y ∈ Set.uIcc z.im w.im, (↑c + ↑y * Complex.I) ∈ Complex.Rectangle z w) →
+      VIntegral f c z.im w.im = VIntegral g c z.im w.im := fun c hm => by
+    unfold VIntegral; congr 1
+    exact intervalIntegral_congr_codiscrete_along_path h
+      (by intro y _; exact analyticAt_const.add ((Complex.ofRealCLM.analyticAt y).mul analyticAt_const))
+      (fun x _ ↦ verticalPath_not_eventuallyConst c x) hm
+  unfold RectangleIntegral
+  rw [hH z.im (mapsTo_rectangle_left_im z w), hH w.im (mapsTo_rectangle_right_im z w),
+    hV w.re (mapsTo_rectangle_right_re z w), hV z.re (mapsTo_rectangle_left_re z w)]
+
+/-- PROVED. With z.re < 0 < w.re, the origin is not on the rectangle border. -/
+theorem zero_not_mem_border {z w : ℂ} (hzr : z.re < 0) (hzi : z.im < 0) (hwr : 0 < w.re)
+    (hwi : 0 < w.im) : (0 : ℂ) ∉ RectangleBorder z w := by
+  rintro (((h | h) | h) | h) <;>
+    simp only [Complex.mem_reProdIm, Set.mem_singleton_iff, Complex.zero_re,
+      Complex.zero_im] at h <;> obtain ⟨h1, h2⟩ := h <;> linarith
+
+/-- PROVED. Off 0 the principal part is analytic. -/
+theorem principal_analyticAt (N : ℕ) (a : ℕ → ℂ) {s : ℂ} (hs : s ≠ 0) :
+    AnalyticAt ℂ (PP N, a) s :=
+  DifferentiableOn.analyticAt (s := {0}ᶜ)
+    (fun _ ht => (principal_differentiableAt N a ht).differentiableWithinAt)
+    (isOpen_compl_singleton.mem_nhds hs)
+
+/-- PROVED here, burst-20261122 unit P1122-0051, formerly a LEAF. P0014 page 33, display 4.7,
+linearity of the rectangle integral: subtracting the principal part splits the rectangle
+integral. Proof plan, as followed: P is continuous on the border, which
 avoids 0; f has no pole on the border, so along each side it agrees off a finite set with a
 continuous function, as in the private `intervalIntegral_congr_ae_of_codiscreteWithin_along_path`
 of ResidueCalcOnRectangles; then `intervalIntegral.integral_sub` on the four sides. -/
@@ -193,11 +260,37 @@ theorem rect_integral_add_principal {f : ℂ → ℂ} {z w : ℂ} {r : ℝ} (hr 
     (a : ℕ → ℂ) :
     RectangleIntegral' f z w =
       RectangleIntegral' (f - PP N, a) z w + RectangleIntegral' (PP N, a) z w := by
-  sorry
+  set P : ℂ → ℂ := PP N, a with hPdef
+  set F : ℂ → ℂ := toMeromorphicNFOn f (Complex.Rectangle z w) with hFdef
+  have h0B := zero_not_mem_border (z := z) (w := w) (by linarith) (by linarith) (by linarith)
+    (by linarith)
+  have hPc : ContinuousOn P (RectangleBorder z w) := fun s hs =>
+    (principal_differentiableAt N a (fun h => h0B (h ▸ hs))).continuousAt.continuousWithinAt
+  have hFc : ContinuousOn F (RectangleBorder z w) := fun s hs => by
+    have hsR : s ∈ Complex.Rectangle z w := rectangleBorder_subset_rectangle z w hs
+    have hnf := meromorphicNFOn_toMeromorphicNFOn (f := f) (U := Complex.Rectangle z w) hsR
+    have hord : 0 ≤ meromorphicOrderAt F s := by
+      rw [hFdef, meromorphicOrderAt_toMeromorphicNFOn hmero hsR]
+      exact not_lt.1 (fun h => Set.disjoint_left.1 hbd hs h)
+    exact (hnf.meromorphicOrderAt_nonneg_iff_analyticAt.1 hord).continuousAt.continuousWithinAt
+  have hcod : {s : ℂ | f s = F s} ∈ Filter.codiscreteWithin (Complex.Rectangle z w) :=
+    toMeromorphicNFOn_eqOn_codiscrete hmero
+  have hcod2 : {s : ℂ | (f - P) s = (F - P) s} ∈ Filter.codiscreteWithin (Complex.Rectangle z w) :=
+    Filter.mem_of_superset hcod (fun s hs => by
+      simp only [Set.mem_setOf_eq, Pi.sub_apply] at hs ⊢
+      rw [hs])
+  have e1 := rectangleIntegral_congr_codiscrete hcod
+  have e2 := rectangleIntegral_congr_codiscrete hcod2
+  have hadd := RectangleBorderIntegrable.add (hFc.sub hPc).rectangleBorder_integrable
+    hPc.rectangleBorder_integrable
+  rw [sub_add_cancel] at hadd
+  simp only [RectangleIntegral']
+  rw [e1, e2, hadd, smul_add]
 
-/-- LEAF: P0014 page 33, display 4.7, the residue formula for f - P. With the principal part at
-0 removed, f - P is meromorphic on the rectangle with finitely many poles, none on the border,
-all simple, and its poles and residues are those of f away from 0. MEDIUM: apply
+/-- PROVED here, burst-20261122 unit P1122-0052, formerly a LEAF. P0014 page 33, display 4.7,
+the residue formula for f - P. With the principal part at 0 removed, f - P is meromorphic on the
+rectangle with finitely many poles, none on the border, all simple, and its poles and residues
+are those of f away from 0. Proof plan, as followed: apply
 `RectangleIntegral'_eq_sumResiduesIn` to f - P; off 0, P is analytic, so the order of f - P
 equals that of f where f has a pole and (s - p)P(s) → 0 gives equal residues;
 `sumResiduesIn_inter_eq_of_set_eq` for the index sets. -/
@@ -210,7 +303,91 @@ theorem rect_residue_sub_principal {f : ℂ → ℂ} {z w : ℂ} {r : ℝ} (hr :
     (hPm : MeromorphicAt (f - PP N, a) 0) (hP0 : 0 ≤ meromorphicOrderAt (f - PP N, a) 0) :
     RectangleIntegral' (f - PP N, a) z w =
       sumResiduesIn f ((Complex.Rectangle z w ∩ {p | meromorphicOrderAt f p < 0}) \ {0}) := by
-  sorry
+  set P : ℂ → ℂ := PP N, a with hPdef
+  set R : Set ℂ := Complex.Rectangle z w with hRdef
+  have h0B := zero_not_mem_border (z := z) (w := w) (by linarith) (by linarith) (by linarith)
+    (by linarith)
+  -- off 0, subtracting the analytic P keeps a pole's order and keeps a non-pole a non-pole
+  have hord : ∀ p : ℂ, p ≠ 0 → MeromorphicAt f p →
+      (meromorphicOrderAt f p < 0 → meromorphicOrderAt (f - P) p = meromorphicOrderAt f p) ∧
+      (0 ≤ meromorphicOrderAt f p → 0 ≤ meromorphicOrderAt (f - P) p) := by
+    intro p hp hfm
+    have hnan : AnalyticAt ℂ (-P) p := (principal_analyticAt N a hp).neg
+    have hnn : 0 ≤ meromorphicOrderAt (-P) p := hnan.meromorphicOrderAt_nonneg
+    rw [sub_eq_add_neg]
+    refine ⟨fun h => meromorphicOrderAt_add_eq_left_of_lt hnan.meromorphicAt
+      (lt_of_lt_of_le h hnn), fun h => le_trans (le_min h hnn)
+        (meromorphicOrderAt_add hfm hnan.meromorphicAt)⟩
+  have hset : R ∩ {p | meromorphicOrderAt (f - P) p < 0} =
+      (R ∩ {p | meromorphicOrderAt f p < 0}) \ {0} := by
+    ext p
+    simp only [Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_diff, Set.mem_singleton_iff]
+    by_cases hp : p = 0
+    · subst hp
+      simp only [not_true_eq_false, and_false, iff_false, not_and, not_lt]
+      exact fun _ => hP0
+    · have hfm := hmero p
+      constructor
+      · rintro ⟨hpR, hg⟩
+        refine ⟨⟨hpR, ?_⟩, hp⟩
+        by_contra hc
+        exact absurd hg (not_lt.2 ((hord p hp (hfm hpR)).2 (not_lt.1 hc)))
+      · rintro ⟨⟨hpR, hf⟩, -⟩
+        exact ⟨hpR, by rw [(hord p hp (hfm hpR)).1 hf]; exact hf⟩
+  have hgm : MeromorphicOn (f - P) R := by
+    intro p hpR
+    by_cases hp : p = 0
+    · subst hp; exact hPm
+    · exact (hmero p hpR).sub (principal_analyticAt N a hp).meromorphicAt
+  have hgbd : Disjoint (RectangleBorder z w) {p | meromorphicOrderAt (f - P) p < 0} := by
+    refine Set.disjoint_left.2 fun p hpB hpg => ?_
+    have hmem : p ∈ R ∩ {p | meromorphicOrderAt (f - P) p < 0} :=
+      ⟨rectangleBorder_subset_rectangle z w hpB, hpg⟩
+    rw [hset] at hmem
+    exact Set.disjoint_left.1 hbd hpB hmem.1.2
+  have hgfin : (R ∩ {p | meromorphicOrderAt (f - P) p < 0}).Finite := by
+    rw [hset]; exact hfin.subset Set.diff_subset
+  have hm1 : ((-1 : ℤ) : WithTop ℤ) ≤ 0 := by exact_mod_cast (show (-1 : ℤ) ≤ 0 by norm_num)
+  have hgsimple : HasSimplePolesOn (f - P) R := by
+    intro p hpR
+    by_cases hp : p = 0
+    · subst hp; exact le_trans hm1 hP0
+    · by_cases hf : meromorphicOrderAt f p < 0
+      · rw [(hord p hp (hmero p hpR)).1 hf]
+        exact hsimple p ⟨hpR, hp⟩
+      · exact le_trans hm1 ((hord p hp (hmero p hpR)).2 (not_lt.1 hf))
+  have hzw1 : z.re ≤ w.re := by linarith
+  have hzw2 : z.im ≤ w.im := by linarith
+  have hmain := RectangleIntegral'_eq_sumResiduesIn hzw1 hzw2 hgm hgbd hgfin hgsimple
+  rw [hmain, hset]
+  unfold sumResiduesIn
+  refine tsum_congr fun q => ?_
+  obtain ⟨⟨hqR, hqneg⟩, hq0⟩ := q.2
+  have hq0' : (q : ℂ) ≠ 0 := by simpa using hq0
+  have hfm : MeromorphicAt f q := hmero q hqR
+  have hsq : ((-1 : ℤ) : WithTop ℤ) ≤ meromorphicOrderAt f q := hsimple q ⟨hqR, hq0⟩
+  -- the limit of (s - q) f(s) exists, since (s - q) f(s) has order at least 0
+  have hmul_mero : MeromorphicAt (fun s : ℂ ↦ (s - q) * f s) q :=
+    (by fun_prop : MeromorphicAt (fun s : ℂ ↦ s - q) q).mul hfm
+  have hmul_nonneg : 0 ≤ meromorphicOrderAt (fun s : ℂ ↦ (s - q) * f s) q := by
+    change 0 ≤ meromorphicOrderAt ((fun s ↦ s - (q : ℂ)) * f) q
+    rw [meromorphicOrderAt_mul (by fun_prop : MeromorphicAt (fun s : ℂ ↦ s - q) q) hfm,
+      meromorphicOrderAt_id_sub_const]
+    lift meromorphicOrderAt f q to ℤ using hqneg.ne_top with n hn
+    have hn1 : (-1 : ℤ) ≤ n := by exact_mod_cast hsq
+    exact_mod_cast (show (0 : ℤ) ≤ 1 + n by omega)
+  obtain ⟨c, hc⟩ := tendsto_nhds_of_meromorphicOrderAt_nonneg hmul_mero hmul_nonneg
+  have hsub : Filter.Tendsto (fun s : ℂ ↦ s - q) (𝓝[{(q : ℂ)}ᶜ] (q : ℂ)) (𝓝 0) :=
+    tendsto_sub_nhds_zero_iff.mpr (tendsto_id.mono_left nhdsWithin_le_nhds)
+  have hPt : Filter.Tendsto P (𝓝[{(q : ℂ)}ᶜ] (q : ℂ)) (𝓝 (P q)) :=
+    (principal_analyticAt N a hq0').continuousAt.continuousWithinAt.tendsto
+  have hgt : Filter.Tendsto (fun s : ℂ ↦ (s - q) * (f - P) s) (𝓝[{(q : ℂ)}ᶜ] (q : ℂ))
+      (𝓝 (c - 0 * P q)) := by
+    have := hc.sub (hsub.mul hPt)
+    refine this.congr fun s => ?_
+    simp only [Pi.sub_apply]; ring
+  rw [residue_eq_of_tendsto hgt, residue_eq_of_tendsto hc]
+  ring
 
 /-- PROVED. Points of the closed disc of radius r about 0 lie in the rectangle when
 z.re < -r, z.im < -r, r < w.re and r < w.im. -/
@@ -282,3 +459,7 @@ end LeanLab.HelfgottMajor.Prep1121DCtCut
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.closedBall_subset_rect
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.circle_integral_principal
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.rect_cut_origin_of_pieces
+#print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.rectangleIntegral_congr_codiscrete
+#print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.principal_analyticAt
+#print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.rect_integral_add_principal
+#print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.rect_residue_sub_principal
