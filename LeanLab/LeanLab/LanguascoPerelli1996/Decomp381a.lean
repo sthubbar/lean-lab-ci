@@ -126,7 +126,14 @@ theorem partial_remainder_mean_square :
           ∀ Y : ℝ, X / 4 ≤ Y → Y ≤ 2 * X →
             (∫ t in (-(ξ X q))..(ξ X q), ‖partialR X Y t q a‖ ^ 2) ≤
               B * ξ X q * X ^ (1 + ε) := by
-  sorry
+  intro θ hθ hθ2 ξ hG ε hε
+  obtain ⟨C, X0, hF⟩ := hG.2.2 ε hε
+  refine ⟨max C 0, max X0 1, le_max_right _ _, ?_⟩
+  intro X hX hX1 q inst hq a ha Y hY hY2
+  have hxle : ξ X q ≤ 1 / 2 := (hG.2.1 X q).2
+  have hFbound := hF X (le_max_left _ _ |>.trans hX) q hq a ha X
+    (by nlinarith [hX1]) le_rfl
+  simpa only [partialR] using hFbound
 
 /-- Pages 358 and 359, Theorem 4 assembled with the actual integrals.
 Exactly the existing Theorem4. CONDITIONAL ON partial_remainder_mean_square alone. -/
