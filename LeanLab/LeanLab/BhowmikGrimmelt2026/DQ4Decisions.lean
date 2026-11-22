@@ -16,7 +16,7 @@ the right side is at most the absolute value of C. `not_prop52_dq4` proves this 
 no unproved step. Every theorem that takes `h52 : Prop52` is therefore vacuous.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BhowmikGrimmelt2026.Decomp508a
+import LeanLab.BhowmikGrimmelt2026.SharpArc673
 
 namespace LeanLab.BhowmikGrimmelt2026
 

@@ -5,6 +5,9 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Lemma72Proof
 import LeanLab.BhowmikGrimmelt2026.Discharged
+import LeanLab.BhowmikGrimmelt2026.DecompJ249
+import LeanLab.BhowmikGrimmelt2026.Decomp107
+import LeanLab.BhowmikGrimmelt2026.SPLIT_facts81
 
 #print axioms LeanLab.BhowmikGrimmelt2026.theorem31
 #print axioms LeanLab.BhowmikGrimmelt2026.meanSquare38

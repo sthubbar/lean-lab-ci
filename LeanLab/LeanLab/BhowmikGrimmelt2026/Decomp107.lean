@@ -4737,6 +4737,10 @@ theorem lemma76_decomposed107 : Lemma76 := by
     rw [archimedean_coordinates107 hϕ hG hT hTN ρ₁ ρ₂ hρ₁ hρ₁' hρ₂ hρ₂']
     exact hC N T hT hTN ρ₁ ρ₂ hρ₁ hρ₁' hρ₂ hρ₂' hs
 
+/-- P0029 page 29 displays 7.19 and 7.20, from the existing archimedean proof. -/
+theorem lemma76 : Lemma76 := by
+  exact lemma76_decomposed107
+
 end LeanLab.BhowmikGrimmelt2026
 
 #print axioms LeanLab.BhowmikGrimmelt2026.archimedean_coordinates107
@@ -4753,3 +4757,5 @@ end LeanLab.BhowmikGrimmelt2026
 
 #print axioms LeanLab.BhowmikGrimmelt2026.measurable_Jphi150
 #print axioms LeanLab.BhowmikGrimmelt2026.global_beta_taylor150
+
+#print axioms LeanLab.BhowmikGrimmelt2026.lemma76

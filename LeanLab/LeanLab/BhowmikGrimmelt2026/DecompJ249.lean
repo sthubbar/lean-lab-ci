@@ -3792,4 +3792,10 @@ theorem bound65_decomposed : Bound65 := by
     (euler_sing_eq N hN)
     (fun p hp => local_bound (ψ₁ p) (ψ₂ p) (h₁.1 p) (h₂.1 p) N hN p hp)
 
+/-- P0029 page 23 display 6.5, proved by the existing Euler factor assembly. -/
+theorem bound65 : Bound65 := by
+  exact bound65_decomposed
+
 end LeanLab.BhowmikGrimmelt2026
+
+#print axioms LeanLab.BhowmikGrimmelt2026.bound65

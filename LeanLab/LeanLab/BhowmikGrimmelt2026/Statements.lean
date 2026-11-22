@@ -228,8 +228,7 @@ def Bound65 : Prop :=
     (χ₂ : DirichletCharacter ℂ r₂), χ₁.IsPrimitive → χ₂.IsPrimitive →
     ∀ N : ℕ, 1 ≤ N → ‖genSing χ₁ χ₂ N‖ ≤ singular N
 
-/-- CITED, Pintz [21] Main Lemma. -/
-theorem bound65 : Bound65 := by sorry
+-- The sealed bound65 declaration is proved in DecompJ249.lean.
 
 /-- The generalised exceptional zeros (6.2), (6.3), p. 23. -/
 def calEZ (H T R X : ℝ) : Set (ℂ × PChar) :=
@@ -387,8 +386,8 @@ def Lemma76 : Prop :=
       ‖Iphi ϕ G N T ρ₁ ρ₂ - Bphi ϕ ρ₁ ρ₂ * (N : ℂ) ^ (ρ₁ + ρ₂ - 1)‖ ≤
         C * N ^ ((ρ₁ + ρ₂).re - 1) * (1 + |(ρ₁ + ρ₂).im|) * T / N)
 
-/-- CITED, Lemma 7.6. -/
-theorem lemma76 : Lemma76 := by sorry
+-- CITED, Lemma 7.6.
+-- The sealed lemma76 declaration is proved in Decomp107.lean.
 
 /-- `𝒵_R`, p. 28: pairs `(ρ, χ)`, `χ` primitive of conductor at most `R`, `ρ` any zero. -/
 def ZR (R : ℝ) : Set (ℂ × PChar) :=
@@ -437,8 +436,8 @@ def Facts81 : Prop :=
   (∀ (r : ℕ) [NeZero r] (χ : DirichletCharacter ℂ r), χ.IsPrimitive → IsRealChar χ →
     ∀ N : ℕ, Even N → 2 ≤ N → r ∣ N → genSing χ χ N = χ (-1) * singular N)
 
-/-- CITED, Pintz [20] (7.4) to (7.7). -/
-theorem facts81 : Facts81 := by sorry
+-- CITED, Pintz [20] displays 7.4 to 7.7.
+-- The sealed facts81 declaration is proved in SPLIT_facts81.lean.
 
 /-- Proposition 8.1, exceptional-zero Goldbach formula, (8.3), pp. 30 and 31:
 `2/5 ≤ ϑ < 4/9`, `R = X^ϑ`, `𝓛 = log X`, `r̃ ≤ R`, `β̃ = 1 − δ̃`, `0 < δ̃ < h/𝓛`. The

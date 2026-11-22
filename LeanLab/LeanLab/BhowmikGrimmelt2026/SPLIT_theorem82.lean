@@ -18,6 +18,7 @@ term, and the absence of zeros at or beyond one.  Everything else is proved here
 AI wrote the Lean code.  Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Statements
+import LeanLab.BhowmikGrimmelt2026.SPLIT_facts81
 import LeanLab.BhowmikGrimmelt2026.Decomp150a
 import LeanLab.BhowmikGrimmelt2026.Counting107
 import LeanLab.BhowmikGrimmelt2026.Section8Steps107

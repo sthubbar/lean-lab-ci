@@ -15,7 +15,7 @@ import LeanLab.BhowmikGrimmelt2026.Statements
 import LeanLab.BhowmikGrimmelt2026.MeanSquareCore150
 import LeanLab.BhowmikGrimmelt2026.Coefficients150
 import LeanLab.BhowmikGrimmelt2026.Decomp502a
-import LeanLab.BhowmikGrimmelt2026.Decomp508a
+import LeanLab.BhowmikGrimmelt2026.SharpArc673
 
 namespace LeanLab.BhowmikGrimmelt2026
 

@@ -2679,6 +2679,12 @@ theorem facts81_split : Facts81 := by
           facts81_diag r χ hprim hreal N hEven hN2 hdvd
       _ = χ (-1) * singular N := by rw [facts81_base N hEven hN2]
 
+/-- P0029 page 30 display 8.1, from the existing local factor proof. -/
+theorem facts81 : Facts81 := by
+  exact facts81_split
+
 end LeanLab.BhowmikGrimmelt2026
 
 #print axioms LeanLab.BhowmikGrimmelt2026.facts81_split
+
+#print axioms LeanLab.BhowmikGrimmelt2026.facts81
