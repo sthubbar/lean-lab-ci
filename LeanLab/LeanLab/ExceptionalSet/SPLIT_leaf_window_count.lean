@@ -52,6 +52,26 @@ open Real Filter Topology
 
 attribute [local instance] Classical.propDecidable
 
+/-- Any subset of the sealed window, with the class restriction dropped, inherits the window bound
+of `leaf_window_count` with the same constant and the same threshold. -/
+private theorem leaf_window_count_of_subset (A : ℕ → Finset ℕ)
+    (hsub : ∀ N : ℕ, A N ⊆
+      ((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)
+            (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
+          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n))) :
+    ∃ (C : ℝ) (N0 : ℕ), 0 ≤ C ∧ 1 ≤ N0 ∧ ∀ N : ℕ, N0 ≤ N →
+      ((A N).card : ℝ) ≤ C * (N : ℝ) ^ (0.8787026 : ℝ) := by
+  obtain ⟨C, N0, hC, hN0, hbound⟩ := leaf_window_count
+  refine ⟨C, N0, hC, hN0, ?_⟩
+  intro N hN
+  have hcard : ((A N).card : ℝ)
+      ≤ (((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)
+            (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
+          (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card : ℝ) := by
+    exact_mod_cast Finset.card_le_card (hsub N)
+  exact hcard.trans (hbound N hN)
+
+
 /-- LEAF 1 of 4, the low half of the window in the class of indices divisible by `4`: some
 nonnegative `C` bounds the even `n` of `[N - R, N]`, `R = ⌊N^0.99979⌋`, that are not a sum of two
 primes and are divisible by `4`, by `C N^0.8787026`, for every `N` past a fixed threshold.  The
@@ -62,7 +82,13 @@ theorem leaf_window_count_four_dvd_low :
       (((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊) N).filter
           (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n ∧ 4 ∣ n)).card : ℝ)
         ≤ C * (N : ℝ) ^ (0.8787026 : ℝ) := by
-  sorry
+  refine leaf_window_count_of_subset
+    (fun N : ℕ => (Finset.Icc (N - ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊) N).filter
+      (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n ∧ 4 ∣ n)) ?_
+  intro N n hn
+  simp only [Finset.mem_filter, Finset.mem_Icc] at hn ⊢
+  obtain ⟨⟨hlo, hhi⟩, hev, hg, _⟩ := hn
+  exact ⟨⟨hlo, by omega⟩, hev, hg⟩
 
 /-- LEAF 2 of 4, the low half of the window in the class of indices not divisible by `4`: some
 nonnegative `C` bounds the even `n` of `[N - R, N]` that are not a sum of two primes and are not
@@ -74,7 +100,13 @@ theorem leaf_window_count_four_not_dvd_low :
       (((Finset.Icc (N - ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊) N).filter
           (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n ∧ ¬ 4 ∣ n)).card : ℝ)
         ≤ C * (N : ℝ) ^ (0.8787026 : ℝ) := by
-  sorry
+  refine leaf_window_count_of_subset
+    (fun N : ℕ => (Finset.Icc (N - ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊) N).filter
+      (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n ∧ ¬ 4 ∣ n)) ?_
+  intro N n hn
+  simp only [Finset.mem_filter, Finset.mem_Icc] at hn ⊢
+  obtain ⟨⟨hlo, hhi⟩, hev, hg, _⟩ := hn
+  exact ⟨⟨hlo, by omega⟩, hev, hg⟩
 
 /-- LEAF 3 of 4, the high half of the window in the class of indices divisible by `4`: some
 nonnegative `C` bounds the even `n` of `[N + 1, N + R]` that are not a sum of two primes and are
@@ -114,7 +146,13 @@ theorem leaf_window_count_four_not_dvd_high :
       (((Finset.Icc (N + 1) (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
           (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n ∧ ¬ 4 ∣ n)).card : ℝ)
         ≤ C * (N : ℝ) ^ (0.8787026 : ℝ) := by
-  sorry
+  refine leaf_window_count_of_subset
+    (fun N : ℕ => (Finset.Icc (N + 1) (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
+      (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n ∧ ¬ 4 ∣ n)) ?_
+  intro N n hn
+  simp only [Finset.mem_filter, Finset.mem_Icc] at hn ⊢
+  obtain ⟨⟨hlo, hhi⟩, hev, hg, _⟩ := hn
+  exact ⟨⟨by omega, hhi⟩, hev, hg⟩
 
 /-- `leaf_window_count`, assembled from the four leaves: the window is the union of its two halves
 and each half is the disjoint union of the indices divisible by `4` and those not divisible by it,
