@@ -21,6 +21,7 @@ The two constants of the leaves are added, and the assembly below only adds the 
 error sizes. No analytic input is invented here.
 -/
 import LeanLab.Linnik1951.SPLIT_arc_local_expansion1622
+import LeanLab.Linnik1951.Decomp549a
 
 namespace LeanLab.Linnik1951
 
@@ -47,6 +48,42 @@ private theorem local_arc_unit_coefficient1622 (q : ℕ) (hq1 : q = 1) (m : ℕ)
       LeanLab.Perelli1996.Ramanujan103.ramanujanSum q m‖ = 1 := by
   subst hq1
   simp [LeanLab.Perelli1996.Ramanujan103.ramanujanSum, LeanLab.Perelli1996.Kernel.e]
+
+/-- The damped convolution leaf at the unit modulus is false.  At residual N the
+damped logarithmic convolution is xp (-1) times the convolution at N, and the
+clean lower bound for that convolution dominates every fixed multiple of the
+printed unit modulus error for all sufficiently large N. -/
+private theorem local_arc_core_unit_main_false1622 :
+    ¬ (∃ c : ℝ, 0 < c ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N → ∀ q : ℕ, 1 ≤ q →
+      (q : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ) → q = 1 → ∀ n : ℤ,
+        (4 : ℤ) ≤ n →
+        n ≤ N →
+        ‖((Real.exp (-(n.toNat : ℝ) / N) * logConvolution1622 n.toNat : ℝ) : ℂ)‖ ≤
+          c * (N : ℝ) * Real.log N ^ 13 *
+            (1 / (N : ℝ) ^ (1 / 7 : ℝ) + 1 / Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)))) := by
+  rintro ⟨c, hc, N0, hbound⟩
+  obtain ⟨N1, hdom⟩ := principal_main_dominates_error549 c hc
+  let N := max 4 (max N0 N1) + 1
+  have hN0 : N0 < N := by omega
+  have hN1 : N1 < N := by omega
+  have hN4 : (4 : ℤ) ≤ (N : ℤ) := by omega
+  have hNN : (N : ℤ) ≤ N := by omega
+  have hN1r : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (show 1 ≤ N by omega)
+  have hqQ : (1 : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ) :=
+    Real.one_le_rpow hN1r (by norm_num)
+  have hbound' := hbound N hN0 1 (by omega) hqQ rfl (N : ℤ) hN4 hNN
+  have hdom' := hdom N hN1
+  have hconv : 0 ≤ logConvolution1622 N := by
+    have h := logConv_main_le1622_lc111 N hN4
+    exact (by positivity : 0 ≤ (N : ℝ) / Real.log N ^ 2).trans h
+  have hnorm :
+      ‖((Real.exp (-((N : ℤ).toNat : ℝ) / N) * logConvolution1622 (N : ℤ).toNat : ℝ) : ℂ)‖ =
+        Real.exp (-1) * logConvolution1622 N := by
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    simp only [Int.toNat_natCast]
+    rw [show -(N : ℝ) / N = -1 by field_simp]
+  rw [hnorm] at hbound'
+  exact (not_lt_of_ge hbound') hdom'
 
 /-- LEAF. The size of the core integral at the unit modulus. The squared prime Fourier
 series against the phase of the residual, integrated over the interval of length two
