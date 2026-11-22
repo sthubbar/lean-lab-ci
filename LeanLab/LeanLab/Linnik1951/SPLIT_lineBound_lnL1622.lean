@@ -35,7 +35,8 @@ theorem continuous_lnL_line1622 :
       (∀ t : ℝ, DirichletCharacter.LFunction χ (mellinLine1622 N t) ≠ 0) →
         Continuous fun t : ℝ =>
           Complex.log (DirichletCharacter.LFunction χ (mellinLine1622 N t)) := by
-  sorry
+  intro N q χ hχ hne
+  exact continuous_lnL_of_slitPlane471 N q χ hχ ?_
 
 /-- LEAF. Size step, bounded height. Under the hypothesis on the zeros, the logarithm
 of the L-function on the line is at most a constant independent of everything, times
