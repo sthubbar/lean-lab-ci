@@ -46,15 +46,88 @@ theorem principal_differentiableAt (N : ℕ) (a : ℕ → ℂ) {s : ℂ} (hs : s
   funext t
   simp only [Finset.sum_apply]
 
-/-- LEAF: Cauchy's theorem for a removable singularity, P0014 page 33, display 4.7: g
-holomorphic on the closed punctured disc of radius r about 0 and with no pole at 0 has circle
-integral 0. EASY: g agrees off 0 with a function continuous on the closed disc and holomorphic
-inside, `circleIntegral.integral_eq_zero_of_differentiable_on_off_countable` with the
-countable set {0}; the circle integral only sees values on the circle. -/
+/-- PROVED here, in the repair of the FREE unit `free-ms-leanstral/task2211`: Cauchy for a
+removable singularity in circle integral form. If `g` is differentiable on the punctured open
+ball of radius `r` about 0 and `Function.update g 0 w` is continuous on the closed ball, then the
+circle integral of `g` about 0 vanishes. This is the statement the FREE unit proved; it is kept
+as the private step of `circle_removable`. Cauchy-Goursat with the countable exceptional set
+`{0}` applies to the updated function, and the circle integral only sees the sphere. -/
+private theorem circleIntegral_eq_zero_of_punctured {g : ℂ → ℂ} {r : ℝ} (hr : 0 < r) (w : ℂ)
+    (hcont : ContinuousOn (Function.update g 0 w) (Metric.closedBall 0 r))
+    (hdiff : ∀ z ∈ Metric.ball (0 : ℂ) r \ {(0 : ℂ)}, DifferentiableAt ℂ g z) :
+    circleIntegral g 0 r = 0 := by
+  have hs : ({(0 : ℂ)} : Set ℂ).Countable := countable_singleton _
+  have hd : ∀ z ∈ Metric.ball (0 : ℂ) r \ {(0 : ℂ)},
+      DifferentiableAt ℂ (Function.update g 0 w) z := by
+    intro z hz
+    have hz0 : z ≠ 0 := by simpa using hz.2
+    refine (hdiff z hz).congr_of_eventuallyEq ?_
+    filter_upwards [isOpen_compl_singleton.mem_nhds hz0] with x hx
+    exact Function.update_of_ne (by simpa using hx) w g
+  have hzero : circleIntegral (Function.update g 0 w) 0 r = 0 :=
+    Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hr.le hs hcont hd
+  have heq : EqOn g (Function.update g 0 w) (Metric.sphere 0 r) := by
+    intro z hz
+    have hz0 : z ≠ 0 := by
+      intro h
+      have hdist : dist z (0 : ℂ) = r := hz
+      rw [h, dist_self] at hdist
+      exact hr.ne' hdist.symm
+    rw [Function.update_of_ne hz0]
+  calc circleIntegral g 0 r = circleIntegral (Function.update g 0 w) 0 r :=
+        circleIntegral.integral_congr hr.le heq
+    _ = 0 := hzero
+
+/-- PROVED, P0014 page 33, display 4.7: Cauchy's theorem for a removable singularity. If `g` is
+holomorphic on the closed punctured disc of radius `r` about 0 and meromorphic at 0 with
+nonnegative order there, its circle integral about 0 vanishes. Riemann's removable singularity
+step `MeromorphicAt.meromorphicOrderAt_nonneg_iff` gives a function `G` analytic at 0 and equal
+to `g` off 0; then `Function.update g 0 (G 0)` is continuous on the closed disc, and
+`circleIntegral_eq_zero_of_punctured` applies to it. -/
 theorem circle_removable {g : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hg : DifferentiableOn ℂ g (Metric.closedBall 0 r \ {0})) (hm : MeromorphicAt g 0)
     (h0 : 0 ≤ meromorphicOrderAt g 0) : circleIntegral g 0 r = 0 := by
-  sorry
+  obtain ⟨G, hGan, hGg⟩ := (MeromorphicAt.meromorphicOrderAt_nonneg_iff hm).1 h0
+  set w : ℂ := G 0 with hw
+  have hGc : ContinuousAt G 0 := hGan.continuousAt
+  have hupd : Function.update g 0 w =ᶠ[𝓝 (0 : ℂ)] G := by
+    rw [show 𝓝 (0 : ℂ) = 𝓝[≠] (0 : ℂ) ⊔ pure (0 : ℂ) from (nhdsNE_sup_pure (0 : ℂ)).symm]
+    show ∀ᶠ y in (𝓝[≠] (0 : ℂ) ⊔ pure (0 : ℂ)), Function.update g 0 w y = G y
+    rw [eventually_sup]
+    constructor
+    · filter_upwards [hGg, self_mem_nhdsWithin] with y hEq hy
+      rw [Function.update_of_ne (by simpa using hy)]
+      exact hEq
+    · simp [hw]
+  have hcont0 : ContinuousAt (Function.update g 0 w) 0 := hGc.congr hupd.symm
+  have h1 : ContinuousOn (Function.update g 0 w) (Metric.closedBall 0 r \ {0}) := by
+    refine hg.continuousOn.congr ?_
+    intro z hz
+    exact Function.update_of_ne (by simpa using hz.2) w g
+  have hcont : ContinuousOn (Function.update g 0 w) (Metric.closedBall 0 r) := by
+    intro z hz
+    rcases eq_or_ne z 0 with rfl | hz0
+    · exact hcont0.continuousWithinAt
+    · have hc1 : ContinuousWithinAt (Function.update g 0 w) (Metric.closedBall 0 r \ {0}) z :=
+        h1 z ⟨hz, by simpa using hz0⟩
+      refine ContinuousWithinAt.mono_of_mem_nhdsWithin hc1 ?_
+      rw [Metric.mem_nhdsWithin_iff]
+      refine ⟨‖z‖, norm_pos_iff.mpr hz0, ?_⟩
+      rintro x ⟨hx1, hx2⟩
+      refine ⟨hx2, ?_⟩
+      intro hx0
+      rw [hx0] at hx1
+      simp at hx1
+  have hdiff : ∀ z ∈ Metric.ball (0 : ℂ) r \ {(0 : ℂ)}, DifferentiableAt ℂ g z := by
+    intro z hz
+    have hcl : Metric.closedBall (0 : ℂ) r ∈ 𝓝 z :=
+      Filter.mem_of_superset (Metric.isOpen_ball.mem_nhds hz.1) Metric.ball_subset_closedBall
+    have hz0 : z ≠ 0 := by simpa using hz.2
+    have hcl' : Metric.closedBall (0 : ℂ) r \ {0} ∈ 𝓝 z := by
+      have : ({0} : Set ℂ)ᶜ ∈ 𝓝 z := isOpen_compl_singleton.mem_nhds (by simpa using hz0)
+      simpa [Set.sdiff_eq] using Filter.inter_mem hcl this
+    exact hg.differentiableAt hcl'
+  exact circleIntegral_eq_zero_of_punctured hr w hcont hdiff
 
 /-- PROVED. P0014 page 33, display 4.7, the circle integral of the principal part:
 ∮ s^(-(k+1)) ds over |s| = r is 2πi for k = 0 and 0 for k ≥ 1, from
