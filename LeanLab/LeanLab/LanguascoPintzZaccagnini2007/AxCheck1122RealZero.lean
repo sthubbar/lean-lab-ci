@@ -1,0 +1,6 @@
+import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_real_zero_bound481
+
+#print axioms LeanLab.LPZ2007.leaf_real_zero_modulus_one481
+#print axioms LeanLab.LPZ2007.leaf_real_zero_primitive_large481
+#print axioms LeanLab.LPZ2007.leaf_real_zero_imprimitive481
+#print axioms LeanLab.LPZ2007.real_zero_bound481_split

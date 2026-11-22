@@ -38,11 +38,13 @@ is proved separately. The global Buchstab bound is part of this analytic input. 
 theorem rough12_to_integral (δ : ℝ) (hδ : 0 < δ) :
     ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y → 2 ≤ Y →
       (integral12 - δ) * Y / Real.log Y ≤ roughModel labels12 Y := by
-  -- BLOCKED OUT OF REACH: Jia 1996 Lemma 20/21/27 lower bound for roughModel
-  -- requires global Buchstab function analysis and the printed lower integrals
-  -- for regions 53,66 not available as proved lemmas in the repo.
-  -- Searches run: Mathlib exact?/apply?/Loogle for Buchstab bounds,
-  -- roughModel asymptotic lower bounds; no matching lemma found.
+  -- BLOCKED OUT OF REACH: Jia 1996 Lemma 20/21/27 lower bound for roughModel labels12
+  -- requires the global Buchstab function w(u) >= c/log u asymptotic and the printed
+  -- lower integrals for regions 53,66, neither available as proved lemmas in Mathlib
+  -- or the repo. Searches run: Mathlib exact?/apply?/Loogle/#find for Buchstab function
+  -- bounds, roughModel asymptotic lower bounds, zero-density estimates; no match found.
+  -- The statement is an asymptotic lower bound on a sieve count that depends on the
+  -- unformalized Buchstab delay-differential equation analysis of Jia 1996 pages 261-262.
   sorry
 
 /-- Jia Lemma 27: this proper mean value family has its printed subtotal.
