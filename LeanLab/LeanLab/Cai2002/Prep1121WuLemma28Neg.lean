@@ -33,7 +33,13 @@ contains H_M^2), and Cauchy-Schwarz in the form sum f^2/g >= (sum f)^2 / (sum g)
       sum_{n <= N} tau(n)^2 / n  >=  H_M^4 / (1 + log N)  >=  (log N)^3 / C,
 
 which is of order L^3, not L^2, and contradicts every bound K L^2 for large N.
-The true size of sum_{n <= x} tau(n)^2/n is a constant times log^3 x.
+That lower bound is all the refutation uses. For the record the true size of
+sum_{n <= x} tau(n)^2/n is of order L^4: the Dirichlet series of tau(n)^2/n is
+zeta(1+s)^4 / zeta(2+2s), which has a pole of order four at s = 0, so Perron gives
+sum_{n <= x} tau(n)^2/n = log(x)^4 / (4 pi^2) + O(log(x)^3); a sieve to 2*10^7
+gives the values 0.0653, 0.0572, 0.0518 and 0.0505 for the ratio to log(x)^4 at
+x = 10^5, 10^6, 10^7 and 2*10^7, decreasing towards 1/(4 pi^2) = 0.02533.
+So Wu's printed Lemma 2.8 fails here by two powers of log, not one.
 
 A correction replacing L^{lambda_1 + ... + lambda_k} by L^{k(lambda_1 + ... + lambda_k)}
 would cover this case, but no proof of that shape is given in Wu 1993: the lemma is
