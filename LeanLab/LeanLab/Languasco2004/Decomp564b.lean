@@ -31,7 +31,30 @@ proper subfamily of the printed lower integrals. The numerical evaluation
 is proved separately. The global Buchstab bound is part of this analytic input. -/
 theorem rough11_to_integral (δ : ℝ) (hδ : 0 < δ) :
     ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y → 2 ≤ Y →
-      (integral11 - δ) * Y / Real.log Y ≤ roughModel labels11 Y := by sorry
+      (integral11 - δ) * Y / Real.log Y ≤ roughModel labels11 Y := by
+  by_cases h : δ ≥ integral11
+  · -- Case: δ ≥ integral11, then (integral11 - δ) ≤ 0 and LHS ≤ 0 ≤ roughModel
+    have h₁ : (integral11 - δ : ℝ) ≤ 0 := by linarith
+    use 2
+    intro Y hY hY2
+    have h₂ : 0 < Real.log Y := Real.log_pos (by linarith)
+    have h₃ : (integral11 - δ : ℝ) * Y / Real.log Y ≤ 0 := by
+      have h₄ : (integral11 - δ : ℝ) ≤ 0 := h₁
+      have h₅ : 0 < Y / Real.log Y := by
+        apply div_pos
+        · linarith
+        · exact h₂.ne'
+      nlinarith
+    have h₄ : 0 ≤ roughModel labels11 Y := roughModel_nonneg labels11 Y
+    linarith
+  · -- Case: δ < integral11, need a Buchstab lower bound on roughModel
+    -- No such analytic estimate is available in Mathlib or this repository.
+    -- The required input is Jia's Lemma 27 / Buchstab mean value for labels11.
+    have h₁ : 0 < integral11 - δ := by linarith
+    -- Attempt: use only roughModel_nonneg, which gives 0 ≤ roughModel,
+    -- but this is insufficient since (integral11 - δ) * Y / Real.log Y > 0.
+    have h₂ : 0 ≤ roughModel labels11 (2 : ℝ) := roughModel_nonneg labels11 (2 : ℝ)
+    sorry
 
 /-- Jia Lemma 27: this proper mean value family has its printed subtotal.
 CONDITIONAL ON prime_to_rough11 and rough11_to_integral.
