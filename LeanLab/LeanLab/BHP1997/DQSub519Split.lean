@@ -6,7 +6,7 @@ fortiori if T2 is replaced by a smaller positive number, so the same argument yi
 with the same argument the proof of Lemma 29 on pages 43 and 44.
 
 At `z' = z0 = 1/T0^2` the smaller number is `T0^2`. The step is cut along the paper:
-* `leaf_char_principal_z0`, LEAF, the Perron step [29] Lemma 3.19 of page 43 and the variant of [8]
+* `leaf_char_principal_z0`, LEAF, the Perron step [30] Lemma 3.19 of page 43 and the variant of [8]
   Lemma 2 for `χ0` of page 44, as in `Prep1121LowExc.leaf_char_principal` with `T2` replaced by
   `T0^2` and `z = z0`;
 * `kernel_fortiori`, PROVED, the words "a fortiori": a kernel `1/(T^2 + t^2)` with a smaller
@@ -19,6 +19,18 @@ At `z' = z0 = 1/T0^2` the smaller number is `T0^2`. The step is cut along the pa
   `sub_519_principal`, checked by `sub_519_split_twin`.
 
 AI wrote the Lean code. Binary Goldbach is open; nothing here changes that.
+
+NOTE U-1745, 2026-11-22: P0069 pages 20 and 43 print `[29], Lemma 3.19`, but [29] is Saffari and
+Vaughan 1977, which has no Lemma 3.19. The result used is Titchmarsh [30], second edition 1986,
+Lemma 3.19, book p. 70, the finite Perron formula with error, which follows from Lemma 3.12,
+book p. 60, display 3.12.1. Page 22 of P0069 calls it Theorem 3.19 of [30]. Read from
+copies/Titchmarsh1986-chIII.pdf, page images. Below, [30] Lemma 3.19 replaces the printed label.
+NOTE U-1744, 2026-11-22: [8] is Harman, Primes in short intervals, Math. Z. 180, 1982, 335-348,
+Lemma 2 on p. 339: for continuous g and 0 < T0 < T < X, the mean of the square of the integral of
+g(s) x^s over c+iT0 to c+iT, c = 1 + 1/log X, over X to 2X is at most X^2 log X times the integral
+of |g|^2. The variant on P0069 p. 44 has y^(it), a factor Y L, and prints [T, T'] in [Y/2, 3Y].
+The leaves here use t in [-Y, Y] and no factor L: a stronger, still true form, by Plancherel
+after y = e^v. MISMATCH with the printed statements, no statement change; see PROGRESS.md.
 -/
 import LeanLab.BHP1997.DQLowerExceptional520Split
 
@@ -32,7 +44,7 @@ open MeasureTheory
 
 /-- LEAF: pages 43 and 44, proof of Lemma 29 for the principal character, rerun at `z' = z0 = 1/T0^2`
 with `T2` replaced by `T0^2`, page 52 "the same argument yields (5.19)". Class HARD, CITED
-[29] Lemma 3.19 and [8] Lemma 2. P0069 Baker Harman Pintz 1997: by [29] Lemma 3.19 the window
+[30] Lemma 3.19 and [8] Lemma 2. P0069 Baker Harman Pintz 1997: by [30] Lemma 3.19 the window
 sum of `b χ0` minus the Perron integral over `[1/2-iT0, 1/2+iT0]` is the Perron integral over
 `T0 ≤ |t| ≤ Y` plus `O(Y^ε)`; by the variant of [8] Lemma 2 on page 44 and the kernel bound
 `|((1+z0)^(1/2+it) - 1)/(1/2+it)|^2 ≪ 1/(T0^4 + t^2)`, which holds since `z0 = 1/T0^2`, the
@@ -224,7 +236,7 @@ theorem fortiori_52 (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) (ω : �
     exact mul_le_mul_of_nonneg_right (le_max_left _ _) (by positivity)
   exact le_trans hsum (le_trans hM' hfin)
 
-/-- Page 43, the Perron error `O(Y^ε)` of [29] Lemma 3.19 in 5.19: its mean square
+/-- Page 43, the Perron error `O(Y^ε)` of [30] Lemma 3.19 in 5.19: its mean square
 `K Y^(1+1/50)` is below `z0^2 Y^3 L^(-A)` for large `x`, since `z0^(-2) = T0^4 ≤ x^(1/20)`
 and `L^A ≤ n! T0`. A pure asymptotic inequality. -/
 theorem error_arith_z0 {ε : ℝ} (hε : 0 < ε) :

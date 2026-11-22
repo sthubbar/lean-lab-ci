@@ -27,6 +27,12 @@ proved from three LEAFs in DQLeaf518Split.lean and `leaf_521` from one cited LEA
 SPLIT_leaf_521.lean. `leaf_520` keeps its sorry here; DQLowerExceptional520Split.lean proves
 its exact type from two LEAFs, `leaf_520_of_subleaves`. See notes/burst-20261120b/.
 AI wrote the Lean code. Goldbach is open.
+
+NOTE U-1745, 2026-11-22: P0069 pages 20 and 43 print `[29], Lemma 3.19`, but [29] is Saffari and
+Vaughan 1977, which has no Lemma 3.19. The result used is Titchmarsh [30], second edition 1986,
+Lemma 3.19, book p. 70, the finite Perron formula with error, which follows from Lemma 3.12,
+book p. 60, display 3.12.1. Page 22 of P0069 calls it Theorem 3.19 of [30]. Read from
+copies/Titchmarsh1986-chIII.pdf, page images. Below, [30] Lemma 3.19 replaces the printed label.
 -/
 import LeanLab.BHP1997.LowerShortMeanSquare
 import LeanLab.BHP1997.DecompC165d
@@ -75,7 +81,7 @@ noncomputable def perronH (ω : ℝ → ℝ) (ε x : ℝ) (q : ℕ) (y : ℝ) : 
 
 /-- LEAF: page 52 display 5.18. P0069 Baker Harman Pintz 1997, "Lemma 29 yields (5.18)":
 Lemmas 33 to 35 and the decomposition 5.15 give 5.1 and 5.2 for b0, and Lemma 29 on page 43,
-via [29] Lemma 3.19, bounds the mean square of the J window sum of `b0 χ` minus `δχ W(y, z)`
+via [30] Lemma 3.19, bounds the mean square of the J window sum of `b0 χ` minus `δχ W(y, z)`
 outside an exceptional set of `O(q^(1/2) L^(-2A))` characters, page 3. Integrability included.
 CONDITIONAL on the cited Theorem 4 and Lemma 9 as in the sealed leaf. -/
 theorem leaf_518 (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9) (ω : ℝ → ℝ)

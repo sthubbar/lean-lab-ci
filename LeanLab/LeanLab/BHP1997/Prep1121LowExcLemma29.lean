@@ -4,7 +4,7 @@ This file splits `DQLeaf518Split.leaf_lemma29`, the open LEAF of the route that 
 Lemma 29 on page 43 of P0069, Baker Harman Pintz 1997, along the paper's own proof on
 pages 43 and 44.
 
-The paper's proof: by [29] Lemma 3.19 the window sum is a Perron integral at height `Y` plus
+The paper's proof: by [30] Lemma 3.19 the window sum is a Perron integral at height `Y` plus
 `O(Y^ε)`. So it is enough to show 5.3 for `χ ∈ F = E_q^c \ {χ0}` and 5.4 for `χ0`. Both follow
 from a variant of [8] Lemma 2 and the kernel bound `|((1+z)^s - 1)/s|^2 ≪ 1/(T2^2 + t^2)`,
 then from 5.1 and 5.2.
@@ -19,6 +19,18 @@ Here the per character steps and the error inequality are LEAFs, and the summati
 PROVED from the three leaves.
 
 AI wrote the Lean code. Binary Goldbach is open; nothing here changes that.
+
+NOTE U-1745, 2026-11-22: P0069 pages 20 and 43 print `[29], Lemma 3.19`, but [29] is Saffari and
+Vaughan 1977, which has no Lemma 3.19. The result used is Titchmarsh [30], second edition 1986,
+Lemma 3.19, book p. 70, the finite Perron formula with error, which follows from Lemma 3.12,
+book p. 60, display 3.12.1. Page 22 of P0069 calls it Theorem 3.19 of [30]. Read from
+copies/Titchmarsh1986-chIII.pdf, page images. Below, [30] Lemma 3.19 replaces the printed label.
+NOTE U-1744, 2026-11-22: [8] is Harman, Primes in short intervals, Math. Z. 180, 1982, 335-348,
+Lemma 2 on p. 339: for continuous g and 0 < T0 < T < X, the mean of the square of the integral of
+g(s) x^s over c+iT0 to c+iT, c = 1 + 1/log X, over X to 2X is at most X^2 log X times the integral
+of |g|^2. The variant on P0069 p. 44 has y^(it), a factor Y L, and prints [T, T'] in [Y/2, 3Y].
+The leaves here use t in [-Y, Y] and no factor L: a stronger, still true form, by Plancherel
+after y = e^v. MISMATCH with the printed statements, no statement change; see PROGRESS.md.
 -/
 import LeanLab.BHP1997.DQLeaf518Split
 
@@ -28,7 +40,7 @@ open scoped BigOperators
 open MeasureTheory
 
 /-- LEAF: page 43 to 44, proof of Lemma 29, the case `χ ∈ F = E_q^c \ {χ0}`. P0069 Baker
-Harman Pintz 1997: by [29] Lemma 3.19 the window sum `Σ_{m ∈ J_y} b(m) χ(m)` equals
+Harman Pintz 1997: by [30] Lemma 3.19 the window sum `Σ_{m ∈ J_y} b(m) χ(m)` equals
 `(1/2πi) ∫_{1/2-iY}^{1/2+iY} G(s, χ) ((y+yz)^s - y^s)/s ds + O(Y^ε)`; by the variant of [8]
 Lemma 2 on page 44 and the bound `|((1+z)^(1/2+it) - 1)/(1/2+it)|^2 ≪ 1/(T2^2 + t^2)`, the
 mean square over `y` in `[Y/2, 3Y]` of that Perron integral is
@@ -62,7 +74,7 @@ theorem leaf_char_nonprincipal (b : ℝ → ℕ → ℝ) {ε B : ℝ} (hε : 0 <
   sorry
 
 /-- LEAF: page 44, proof of Lemma 29, the principal character and display 5.4. P0069 Baker
-Harman Pintz 1997: by [29] Lemma 3.19 as in the case of `F`, the window sum of `b χ0` minus
+Harman Pintz 1997: by [30] Lemma 3.19 as in the case of `F`, the window sum of `b χ0` minus
 `W(y, z)` is the Perron integral over `[1/2+iT0, 1/2+iY]` and `[1/2-iY, 1/2-iT0]` plus
 `O(Y^ε)`; "Similarly (5.2) yields (5.4)", by the variant of [8] Lemma 2 on page 44 and the
 kernel bound, the mean square of those two integrals is
@@ -129,7 +141,7 @@ private lemma eventually_const_mul_log_rpow_le {A p R : ℝ} (hp : 0 < p) :
     have h2 : R * (R⁻¹ * x ^ p) = x ^ p := by field_simp
     linarith [mul_le_mul_of_nonneg_left hx hRpos.le, h2]
 
-/-- LEAF: page 43, proof of Lemma 29, the error `O(Y^ε)` of [29] Lemma 3.19. Its square,
+/-- LEAF: page 43, proof of Lemma 29, the error `O(Y^ε)` of [30] Lemma 3.19. Its square,
 integrated over `[Y/2, 3Y]` and summed over at most `q + 1` characters, is
 `≪ q Y^(1+1/50)`, below `(qQ)^2 Y L^(-A)` for large `x`, because `Q` is the integer part of
 `Y^(1/16-1/10^5) / 2` on page 3 and `q ≥ 1`. A pure asymptotic inequality. -/
