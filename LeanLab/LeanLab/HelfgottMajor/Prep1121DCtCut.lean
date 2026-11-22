@@ -26,7 +26,46 @@ open scoped Topology Interval
 /-- The principal part Σ_{k < N} a_k s^(-(k+1)) at s = 0, a finite Laurent polynomial. -/
 local notation "PP" N "," a => fun s : ℂ => ∑ k ∈ Finset.range N, a k * s ^ (-((k : ℤ) + 1))
 
-/-- LEAF: Ahlfors ch. 4 §3.2, the Laurent principal part at a pole, used at s = 0 on P0014
+/-- Helper for `principal_part_at_origin`: the difference quotient `dslope h 0` of a function
+analytic at 0 is analytic at 0, `HasFPowerSeriesAt.has_fpower_series_dslope_fslope`. -/
+private lemma pp_analytic_dslope {h : ℂ → ℂ} (hh : AnalyticAt ℂ h 0) :
+    AnalyticAt ℂ (dslope h 0) 0 := by
+  obtain ⟨p, hp⟩ := hh
+  exact ⟨_, hp.has_fpower_series_dslope_fslope⟩
+
+/-- Helper for `principal_part_at_origin`, Ahlfors ch. 4 §3.2: peeling one Taylor coefficient
+at a time, s^(-m) h(s) minus a principal part of length m is analytic at 0, for h analytic at 0.
+Induction on m with h s = h 0 + s * dslope h 0 s. -/
+private lemma pp_induct (m : ℕ) : ∀ h : ℂ → ℂ, AnalyticAt ℂ h 0 →
+    ∃ (a : ℕ → ℂ) (g : ℂ → ℂ), AnalyticAt ℂ g 0 ∧
+      ∀ s : ℂ, s ≠ 0 → s ^ (-(m : ℤ)) * h s - ∑ k ∈ Finset.range m, a k * s ^ (-((k : ℤ) + 1))
+        = g s := by
+  induction m with
+  | zero =>
+    intro h hh
+    refine ⟨0, h, hh, fun s _ => ?_⟩
+    simp
+  | succ m ih =>
+    intro h hh
+    obtain ⟨a, g, hg, hgs⟩ := ih (dslope h 0) (pp_analytic_dslope hh)
+    refine ⟨Function.update a m (h 0), g, hg, fun s hs => ?_⟩
+    rw [Finset.sum_range_succ, Function.update_self]
+    have hsum : ∑ k ∈ Finset.range m, Function.update a m (h 0) k * s ^ (-((k : ℤ) + 1))
+        = ∑ k ∈ Finset.range m, a k * s ^ (-((k : ℤ) + 1)) := by
+      refine Finset.sum_congr rfl fun k hk => ?_
+      rw [Function.update_of_ne (Finset.mem_range.mp hk).ne]
+    rw [hsum, ← hgs s hs]
+    have hd : h s = h 0 + s * dslope h 0 s := by
+      have := sub_smul_dslope h 0 s
+      simp only [sub_zero, smul_eq_mul] at this
+      rw [this]; ring
+    have hz : s ^ (-((m + 1 : ℕ) : ℤ)) * s = s ^ (-(m : ℤ)) := by
+      rw [← zpow_add_one₀ hs]; congr 1; push_cast; ring
+    rw [hd, mul_add, ← mul_assoc, hz]
+    push_cast
+    ring
+
+/-- PROVED, S5 burst-20261122 unit P1122-0048, formerly LEAF: Ahlfors ch. 4 §3.2, the Laurent principal part at a pole, used at s = 0 on P0014
 page 33, display 4.7. A function meromorphic at 0 differs from some finite Laurent polynomial
 Σ_{k < N} a_k s^(-(k+1)) by a function meromorphic at 0 with no pole there. MEDIUM: write
 f = s^n h with h analytic, `meromorphicOrderAt_eq_int_iff`, and take the first -n Taylor
@@ -34,7 +73,31 @@ coefficients of h, `HasFPowerSeriesAt`. -/
 theorem principal_part_at_origin {f : ℂ → ℂ} (hf : MeromorphicAt f 0) :
     ∃ (N : ℕ) (a : ℕ → ℂ), MeromorphicAt (f - PP N, a) 0 ∧
       0 ≤ meromorphicOrderAt (f - PP N, a) 0 := by
-  sorry
+  have hPP : ∀ (N : ℕ) (a : ℕ → ℂ), MeromorphicAt (PP N, a) 0 := by
+    intro N a
+    exact MeromorphicAt.fun_sum (s := Finset.range N)
+      (G := fun k (s : ℂ) => a k * s ^ (-((k : ℤ) + 1))) (x := (0 : ℂ))
+      (fun k _ => (MeromorphicAt.const (a k) 0).mul ((MeromorphicAt.id 0).zpow _))
+  have h0 : ∀ a : ℕ → ℂ, (f - PP 0, a) = f := by
+    intro a; funext s; simp
+  rcases hord : meromorphicOrderAt f 0 with _ | n
+  · refine ⟨0, 0, ?_, ?_⟩
+    · rw [h0]; exact hf
+    · rw [h0, hord]; exact le_top
+  by_cases hn : 0 ≤ n
+  · refine ⟨0, 0, ?_, ?_⟩
+    · rw [h0]; exact hf
+    · rw [h0, hord]; exact WithTop.coe_le_coe.mpr hn
+  obtain ⟨h, hh, -, hfe⟩ := (meromorphicOrderAt_eq_int_iff hf).mp hord
+  obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = -(m : ℤ) := ⟨n.natAbs, by omega⟩
+  obtain ⟨a, g, hg, hgs⟩ := pp_induct m h hh
+  refine ⟨m, a, hf.sub (hPP m a), ?_⟩
+  have : (f - PP m, a) =ᶠ[𝓝[≠] 0] g := by
+    filter_upwards [hfe, self_mem_nhdsWithin] with s hs hs0
+    rw [Pi.sub_apply, hs, ← hgs s hs0]
+    simp
+  rw [meromorphicOrderAt_congr this]
+  exact hg.meromorphicOrderAt_nonneg
 
 /-- PROVED. A finite Laurent polynomial in s^(-1) is holomorphic off 0. -/
 theorem principal_differentiableAt (N : ℕ) (a : ℕ → ℂ) {s : ℂ} (hs : s ≠ 0) :
@@ -278,6 +341,7 @@ theorem rect_cut_origin_of_pieces {f : ℂ → ℂ} {z w : ℂ} {r : ℝ} (hr : 
 
 end LeanLab.HelfgottMajor.Prep1121DCtCut
 
+#print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.principal_part_at_origin
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.principal_differentiableAt
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.closedBall_subset_rect
 #print axioms LeanLab.HelfgottMajor.Prep1121DCtCut.circle_integral_principal
