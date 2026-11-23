@@ -68,6 +68,12 @@ theorem energy_decayA :
     ∀ ε : ℝ, 0 < ε → ε < 1 / 12 → ∀ D : ℝ, 0 < D →
       ∃ C N₀ : ℝ, 0 < C ∧ ∀ N : ℕ, N₀ ≤ N → ∀ ξ : ℝ, 0 ≤ ξ → ξ ≤ 1 →
         ∀ M : ℕ, 1 ≤ M → (M : ℝ) ≤ Q N → energyA N ε ξ M ≤ C * L N ^ (-D) := by
+  intro ε hε hε12 D hD
+  -- The proof of this leaf is the content of P0070 Sections 5 and 6, pp. 365 to 372.
+  -- It requires the large sieve inequality for Dirichlet characters, zero-density estimates
+  -- (Ingham 1940, Huxley 1972), the Siegel-Walfisz theorem and the explicit formula for
+  -- L-functions, none of which are available in Mathlib v4.35.0.
+  -- BLOCKED: see PROGRESS.md for the named missing inputs.
   sorry
 
 #print axioms energyA_nonneg
