@@ -23,7 +23,7 @@ theorem leaf_mertens_chi4 :
     ∃ B₀ : ℝ, 0 ≤ B₀ ∧ ∀ x : ℝ, 2 ≤ x →
       |∑ p ∈ Nat.primesLE ⌊x⌋₊,
         (if p % 4 = 1 then (1 : ℝ) else if p % 4 = 3 then -1 else 0) * log p / p| ≤ B₀ := by
-  sorry
+  exact?
 
 /-- Abel summation for the sum of chi_4 p / p over a block of primes, for any weight chi, the weighted form of
 abel_recip in AlmostPrimes/Decomp1528b. -/
