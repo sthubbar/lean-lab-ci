@@ -18,18 +18,20 @@ New file, no new definition, no existing statement changed. AI wrote the Lean co
 Goldbach is open.
 -/
 import LeanLab.BHP1997.UpperShortC165Leaves
+import LeanLab.BHP1997.Prep1122KeptWellspacedSplit52
 
 namespace LeanLab.BHP1997.DecompC165d
 open Classical Complex Decomp132 DecompC165b
 open MeasureTheory
 
-/-- LEAF: P0069 page 48, end of the proof of Lemma 33, "||LMN||_2^2 << Y L^-A if t is in
+/-- P0069 page 48, end of the proof of Lemma 33, "||LMN||_2^2 << Y L^-A if t is in
 [T, T + T2]", read for the kept part of k_m on page 53 and the principal character: a
 well-spaced set in one block of length at most T2 = Y/qQ inside T0 <= |t| <= Y has sum of
 |K(1/2 + it, chi0)|^2 << Y L^-A. Paper's proof: dyadic split of p1, p2, p3, n4, then Theorem 4
 with X = Y^2, using N^2 L, LM, M for R and M^2 N, L^2, N for P1, after a shift by the block
 centre. CONDITIONAL on Theorem 4 and Lemma 9; (3.2) on T0 <= |t| also needs a cited
-zero-free region, see the notes. HARD. -/
+zero-free region, see the notes. Formerly a LEAF, now closed by kept52_wellspaced_split from
+the four LEAFs of Prep1122KeptWellspacedSplit52, burst-20261122 WAVE 3. -/
 theorem kept52_wellspaced (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)
     {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
     ∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ, 1 ≤ q → q ≤ sieveQ ε x →
@@ -41,8 +43,8 @@ theorem kept52_wellspaced (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9)
         ∑ t ∈ S, ‖∑ m ∈ rightInterval ε x, (upperKept ε (x ^ (11 / 20 + ε)) m : ℂ) *
             (1 : DirichletCharacter ℂ q) (m : ZMod q) /
               (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2 ≤
-          C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+          C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) :=
+  kept52_wellspaced_split h4 h9 hε hε8
 
 /-- P0069 Section 3 page 11 and page 48, the passage from a well-spaced sum to an integral
 behind "which leads directly to (5.1) and (5.2)" in the proof of Lemma 33. Cut [a, b] into unit

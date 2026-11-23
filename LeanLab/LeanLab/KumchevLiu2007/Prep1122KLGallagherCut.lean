@@ -15,8 +15,10 @@ The printed argument, with Y = windowY X eps, P = (log X)^B and Q = H/P:
 * page 6 before display 20: Gallagher's lemma, reference 5 Lemma 1, with the
   device of Saffari and Vaughan, reference 21 page 25, bounds the integral of
   |W2|^2 over |beta| at most 1/(qQ) by (qQ)^(-2) times the mean square of
-  (A2.2) plus delta, for some delta of size qQ/Y. LEAF
-  gallagher_saffari_vaughan, HARD, a citation wall.
+  (A2.2) plus delta, for some delta of size qQ/Y.
+  gallagher_saffari_vaughan, first a LEAF HARD, now PROVED from Gallagher's
+  lemma, by the lab's discrete form, and the smaller LEAF saffari_vaughan_device,
+  HARD, a citation wall.
 * hypothesis (A2.2), here A22Corr, then gives C P^(-4) for each chi; this
   combination is PROVED below as arc_char_mean_square.
 * at most P characters and at most 2 P^2 arcs give C P^(-1), at most
@@ -497,7 +499,101 @@ theorem arc_localization :
   have hR1 : 1 < H / P := by linarith
   exact integral_bound hPpos.le hR1 hR
 
-/-- LEAF: P0088 page 6, the display before display 20: Gallagher's lemma, reference 5
+/-! ## Gallagher and Saffari Vaughan, split in burst-20261122 -/
+
+/-- PROVED. The character e(k beta) of the circle is the exponential e of the lab's
+Gallagher module. -/
+theorem fourier_eq_gallagher_e (k : ℕ) (β : ℝ) :
+    (fourier (k : ℤ) (β : AddCircle (1 : ℝ)) : ℂ) = LeanLab.PNTPort.LargeSieve.e (k * β) := by
+  rw [fourier_coe_apply, LeanLab.PNTPort.LargeSieve.e]
+  congr 1
+  push_cast
+  ring
+
+/-- PROVED. P0088 page 2 display 5: for m in the square window, m^2 is below the
+floor of Y plus one. -/
+theorem sq_lt_floor_succ {Y : ℝ} {m : ℕ} (hm : m ∈ squareWindow Y) : m ^ 2 < ⌊Y⌋₊ + 1 := by
+  have h := (Finset.mem_filter.mp hm).2
+  have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg _
+  have h2 : (m : ℝ) ^ 2 < Y := (Real.lt_sqrt hm0).mp h.2
+  have : m ^ 2 ≤ ⌊Y⌋₊ := Nat.le_floor (by push_cast; exact h2.le)
+  omega
+
+/-- PROVED. A sum over the square window with frequencies m^2 is the exponential sum
+with coefficient at n the sum of c m over m with m^2 = n, n below the floor of Y plus one. -/
+theorem squareSum_eq (Y : ℝ) (c : ℕ → ℂ) (β : ℝ) :
+    ∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ)) =
+      ∑ n ∈ Finset.range (⌊Y⌋₊ + 1),
+        (∑ m ∈ squareWindow Y, if m ^ 2 = n then c m else 0) *
+          LeanLab.PNTPort.LargeSieve.e (n * β) := by
+  simp_rw [Finset.sum_mul]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun m hm => ?_
+  rw [Finset.sum_eq_single (m ^ 2)]
+  · rw [if_pos rfl, fourier_eq_gallagher_e]
+  · intro n _ hn
+    rw [if_neg (fun h => hn h.symm), zero_mul]
+  · intro h
+    exact absurd (Finset.mem_range.mpr (sq_lt_floor_succ hm)) h
+
+/-- PROVED. P0088 page 6, Gallagher's lemma, reference 5 Lemma 1, for a sum over the
+square window, from the lab's discrete form LeanLab.PNTPort.Gallagher.gallagher with an
+integer window L, on any |beta| at most r with r at most 1/(2L). -/
+theorem gallagher_squares (Y : ℝ) (c : ℕ → ℂ) (L : ℕ) (hL : 0 < L) (r : ℝ) (hr : 0 ≤ r)
+    (hrL : r ≤ 1 / (2 * L)) :
+    (∫ β in -r..r,
+      ‖∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ))‖ ^ 2) ≤
+      (π / (2 * L)) ^ 2 * ∑ k ∈ Finset.range (⌊Y⌋₊ + 1 + L),
+        ‖LeanLab.PNTPort.Gallagher.win
+          (fun n => ∑ m ∈ squareWindow Y, if m ^ 2 = n then c m else 0) (⌊Y⌋₊ + 1) L k‖ ^ 2 := by
+  have hcont : Continuous fun β : ℝ =>
+      ‖∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ))‖ ^ 2 :=
+    (Prep1121DKLMajorCut.trig_continuous _ _ (fun m => ((m ^ 2 : ℕ) : ℤ))).norm.pow 2
+  have h1 : (∫ β in -r..r,
+      ‖∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ))‖ ^ 2) ≤
+      ∫ β in -(1 / (2 * L) : ℝ)..(1 / (2 * L)),
+      ‖∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ))‖ ^ 2 :=
+    intervalIntegral.integral_mono_interval (by linarith) (by linarith) hrL
+      (Filter.Eventually.of_forall fun _ => by positivity) (hcont.intervalIntegrable _ _)
+  refine h1.trans (le_of_eq_of_le ?_ (LeanLab.PNTPort.Gallagher.gallagher _ _ _ hL))
+  congr 1
+  ext β
+  rw [squareSum_eq]
+
+/-- LEAF: P0088 page 6, the display before display 20, the device of Saffari and Vaughan,
+reference 21 page 25. Class HARD, a citation wall: the device is not printed in P0088.
+After Gallagher's lemma, which is PROVED here as gallagher_squares from the lab's
+discrete form with integer window L = floor(qQ/2), Q = H/P, the mean square of the
+window sums of length L of the coefficients of W2 at the squares m^2 is bounded by the
+mean square of the relative window sums of (A2.2): for some delta between c qQ/Y and
+qQ/Y, (pi/(2L))^2 times the sum of the squared window sums is at most a constant times
+(qQ)^(-2) times the integral over Y/4 to Y of the squared sums over t < m^2 <= t + delta t,
+plus delta. The term delta carries the edge of the t range below Y/4. -/
+theorem saffari_vaughan_device :
+    ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 →
+      ∃ C c X0 : ℝ, 0 < C ∧ 0 < c ∧ ∀ X H : ℝ, X0 ≤ X →
+        X ^ (7 / 18 + ε) * (Real.log X ^ B) ^ (-4 : ℤ) ≤ H →
+        H ≤ windowY X ε * (Real.log X ^ B) ^ (-4 : ℤ) →
+        ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ Real.log X ^ B →
+        ∀ χ : DirichletCharacter ℂ q,
+          ∃ δ : ℝ, c * ((q : ℝ) * (H / Real.log X ^ B)) / windowY X ε ≤ δ ∧
+            δ ≤ (q : ℝ) * (H / Real.log X ^ B) / windowY X ε ∧
+            (π / (2 * (⌊(q : ℝ) * (H / Real.log X ^ B) / 2⌋₊ : ℝ))) ^ 2 *
+              ∑ k ∈ Finset.range (⌊windowY X ε⌋₊ + 1 + ⌊(q : ℝ) * (H / Real.log X ^ B) / 2⌋₊),
+                ‖LeanLab.PNTPort.Gallagher.win
+                  (fun n => ∑ m ∈ squareWindow (windowY X ε), if m ^ 2 = n then
+                    (roughWeight (windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ)) m * χ m -
+                      (if χ = 1 then ((Task556a.f2Weight
+                        (windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ)) (m : ℝ) : ℝ) : ℂ)
+                       else 0)) else 0)
+                  (⌊windowY X ε⌋₊ + 1) ⌊(q : ℝ) * (H / Real.log X ^ B) / 2⌋₊ k‖ ^ 2 ≤
+              C * (((q : ℝ) * (H / Real.log X ^ B)) ^ (-2 : ℤ) *
+                (∫ t in windowY X ε / 4..windowY X ε,
+                  ‖roughDefect χ (windowY X ε) (Real.log X ^ B) δ t‖ ^ 2) + δ) := by
+  sorry
+
+/-- PROVED from gallagher_squares and the LEAF saffari_vaughan_device. Was LEAF HARD.
+P0088 page 6, the display before display 20: Gallagher's lemma, reference 5
 Lemma 1, combined with the device of Saffari and Vaughan, reference 21 page 25.
 Class HARD, a citation wall: neither proof is printed in P0088. For each modulus q at
 most P and each character chi modulo q there is delta of size qQ/Y, Q = H/P, at most
@@ -524,7 +620,41 @@ theorem gallagher_saffari_vaughan :
               C * (((q : ℝ) * (H / Real.log X ^ B)) ^ (-2 : ℤ) *
                 (∫ t in windowY X ε / 4..windowY X ε,
                   ‖roughDefect χ (windowY X ε) (Real.log X ^ B) δ t‖ ^ 2) + δ) := by
-  sorry
+  intro B hB ε hε hε'
+  obtain ⟨C, c, X0, hC, hc, kS⟩ := saffari_vaughan_device B hB ε hε hε'
+  obtain ⟨X1, hX1⟩ := Filter.eventually_atTop.mp (eventually_big B)
+  refine ⟨C, c, max X0 X1, hC, hc, ?_⟩
+  intro X H hX hlo hhi q hq hqP χ
+  obtain ⟨hXa, hL1, hbig⟩ := hX1 X (le_trans (le_max_right _ _) hX)
+  obtain ⟨δ, h1, h2, h3⟩ := kS X H (le_trans (le_max_left _ _) hX) hlo hhi q hq hqP χ
+  refine ⟨δ, h1, h2, le_trans ?_ h3⟩
+  have hP1 : 1 ≤ Real.log X ^ B := Real.one_le_rpow hL1 hB.le
+  set P := Real.log X ^ B with hPdef
+  have hP0 : 0 < P := by linarith
+  have hX7 : X ^ (7 / 18 : ℝ) ≤ X ^ (7 / 18 + ε) :=
+    Real.rpow_le_rpow_of_exponent_le hXa (by linarith)
+  have hP4 : P ^ (-4 : ℤ) = (P ^ 4)⁻¹ := by rw [zpow_neg]; norm_cast
+  have hH2 : 2 * P ^ 2 ≤ H := by
+    have hb : 2 * P ^ 2 * P ^ 4 ≤ X ^ (7 / 18 + ε) := by
+      have : 2 * P ^ 2 * P ^ 4 = 2 * P ^ 6 := by ring
+      rw [this]; linarith
+    have hp4 : 0 < P ^ 4 := by positivity
+    calc 2 * P ^ 2 = 2 * P ^ 2 * P ^ 4 * (P ^ 4)⁻¹ := by field_simp
+      _ ≤ X ^ (7 / 18 + ε) * (P ^ 4)⁻¹ := by gcongr
+      _ = X ^ (7 / 18 + ε) * P ^ (-4 : ℤ) := by rw [hP4]
+      _ ≤ H := hlo
+  have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  have hQ2 : 2 ≤ (q : ℝ) * (H / P) := by
+    have : 2 * P ≤ H / P := by rw [le_div_iff₀ hP0]; nlinarith
+    nlinarith
+  set L := ⌊(q : ℝ) * (H / P) / 2⌋₊ with hLdef
+  have hL : 0 < L := Nat.floor_pos.mpr (by linarith)
+  have hLle : (L : ℝ) ≤ (q : ℝ) * (H / P) / 2 := Nat.floor_le (by linarith)
+  have hLpos : (0 : ℝ) < L := by exact_mod_cast hL
+  have hrL : ((q : ℝ) * (H / P))⁻¹ ≤ 1 / (2 * L) := by
+    rw [← one_div]
+    exact one_div_le_one_div_of_le (by positivity) (by linarith)
+  exact gallagher_squares _ _ L hL _ (inv_nonneg.mpr (by linarith)) hrL
 
 /-! ## Proved combinations -/
 
@@ -719,6 +849,8 @@ end LeanLab.KumchevLiu2007.Prep1122KLGallagherCut
 
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.char_orthogonality_18
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.arc_localization
+#print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.gallagher_squares
+#print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.saffari_vaughan_device
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.gallagher_saffari_vaughan
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.arc_char_mean_square
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.card_arcPairs_le
