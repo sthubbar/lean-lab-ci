@@ -1051,31 +1051,441 @@ theorem leaf306_lemma7 (n : ℕ) (hn2 : 2 ≤ n) (hn500 : n ≤ 500) (s : ℝ)
 /-- H(s) of BJS display 24, page 8: the integral of h(t - 1) over t > s. -/
 def bjsH306 (s : ℝ) : ℝ := ∫ t in Set.Ioi s, LeanLab.ChenExplicit.hSieve (t - 1)
 
-/-- LEAF: BJS Lemma 10, display 25 with s0 = 2, page 8: H(s) ≤ κ_2 s h(s) for s ≥ 2,
-κ_2 = 0.9607. Class MEDIUM: the calculus on pages 8 and 9, integration by parts for s ≥ 4,
-the bound on [3, 4] and display 27 on [2, 3]. -/
-theorem leaf306_lemma10_25 (s : ℝ) (hs : 2 ≤ s) :
-    bjsH306 s ≤ 0.9607 * s * LeanLab.ChenExplicit.hSieve s := by
-  sorry
+/-! Helpers for leaf306_lemma10_26, written by a workflow subagent, burst-20261122 S61. -/
 
-/-- LEAF: BJS Lemma 10, display 26, page 8: H(3) ≤ κ tilde s h(s) for 1 ≤ s ≤ 3,
-κ tilde = 0.9214. Class MEDIUM: H(3) = (2 α - 1) e ^ -2 on page 9 and s e ^ -s decreasing. -/
+noncomputable def N_h26 (y : ℝ) : ℝ := y^4 + 19*y^3 + 102*y^2 + 154*y + 24
+noncomputable def N'_h26 (y : ℝ) : ℝ := 4*y^3 + 57*y^2 + 204*y + 154
+noncomputable def D_h26 (y : ℝ) : ℝ := y^5 + 20*y^4 + 120*y^3 + 240*y^2 + 120*y
+noncomputable def D'_h26 (y : ℝ) : ℝ := 5*y^4 + 80*y^3 + 360*y^2 + 480*y + 120
+noncomputable def F_h26 (y : ℝ) : ℝ := -3 * exp (-y) * (N_h26 y / D_h26 y)
+noncomputable def g_h26 (y : ℝ) : ℝ :=
+  3 * exp (-y) * (N_h26 y / D_h26 y - (N'_h26 y * D_h26 y - N_h26 y * D'_h26 y) / D_h26 y ^ 2)
+
+theorem hasDerivAt_N_h26 (y : ℝ) : HasDerivAt N_h26 (N'_h26 y) y := by
+  have := ((((hasDerivAt_pow 4 y).add ((hasDerivAt_pow 3 y).const_mul 19)).add
+    ((hasDerivAt_pow 2 y).const_mul 102)).add ((hasDerivAt_id y).const_mul 154)).add_const 24
+  convert this using 1
+  · funext x; simp [N_h26]
+  · simp [N'_h26]; ring
+
+theorem hasDerivAt_D_h26 (y : ℝ) : HasDerivAt D_h26 (D'_h26 y) y := by
+  have := ((((hasDerivAt_pow 5 y).add ((hasDerivAt_pow 4 y).const_mul 20)).add
+    ((hasDerivAt_pow 3 y).const_mul 120)).add ((hasDerivAt_pow 2 y).const_mul 240)).add
+    ((hasDerivAt_id y).const_mul 120)
+  convert this using 1
+  · funext x; simp [D_h26]
+  · simp [D'_h26]; ring
+
+theorem D_pos_h26 (y : ℝ) (hy : 0 < y) : 0 < D_h26 y := by
+  unfold D_h26; positivity
+
+theorem hasDerivAt_F_h26 (y : ℝ) (hy : 0 < y) : HasDerivAt F_h26 (g_h26 y) y := by
+  have hD := D_pos_h26 y hy
+  have he : HasDerivAt (fun y => exp (-y)) (exp (-y) * -1) y := (hasDerivAt_neg y).exp
+  have := (he.const_mul (-3)).mul ((hasDerivAt_N_h26 y).div (hasDerivAt_D_h26 y) hD.ne')
+  convert this using 1
+  · funext x; simp [F_h26, mul_assoc]
+  · simp only [g_h26, Pi.div_apply]; field_simp; ring
+
+theorem key_ineq_h26 (y : ℝ) (hy : 3 ≤ y) :
+    y⁻¹ ≤ N_h26 y / D_h26 y - (N'_h26 y * D_h26 y - N_h26 y * D'_h26 y) / D_h26 y ^ 2 := by
+  have hD := D_pos_h26 y (by linarith)
+  have hy0 : 0 < y := by linarith
+  have : N_h26 y / D_h26 y - (N'_h26 y * D_h26 y - N_h26 y * D'_h26 y) / D_h26 y ^ 2 - y⁻¹
+      = 2880 / D_h26 y ^ 2 := by
+    field_simp
+    simp only [N_h26, N'_h26, D_h26, D'_h26]
+    ring
+  have h2 : 0 ≤ 2880 / D_h26 y ^ 2 := by positivity
+  linarith
+
+theorem g_ge_h26 (y : ℝ) (hy : 3 ≤ y) : 3 * y⁻¹ * exp (-y) ≤ g_h26 y := by
+  have := key_ineq_h26 y hy
+  unfold g_h26
+  have he := exp_pos (-y)
+  nlinarith
+
+theorem g_nonneg_h26 (y : ℝ) (hy : 3 ≤ y) : 0 ≤ g_h26 y := by
+  have := g_ge_h26 y hy
+  have : 0 ≤ 3 * y⁻¹ * exp (-y) := by
+    have : 0 < y := by linarith
+    positivity
+  linarith
+
+theorem F_tendsto_h26 : Filter.Tendsto F_h26 Filter.atTop (nhds 0) := by
+  have h1 : Filter.Tendsto (fun y : ℝ => -3 * exp (-y)) Filter.atTop (nhds 0) := by
+    have := Real.tendsto_exp_neg_atTop_nhds_zero.const_mul (-3)
+    simpa using this
+  refine tendsto_of_tendsto_of_tendsto_of_le_of_le' h1 tendsto_const_nhds ?_ ?_
+  · filter_upwards [Filter.eventually_ge_atTop (3 : ℝ)] with y hy
+    have hD := D_pos_h26 y (by linarith)
+    have hle : N_h26 y / D_h26 y ≤ 1 := by
+      rw [div_le_one hD]; unfold N_h26 D_h26; nlinarith [pow_pos (show (0:ℝ) < y by linarith) 4,
+        pow_pos (show (0:ℝ) < y by linarith) 3, pow_pos (show (0:ℝ) < y by linarith) 2]
+    have he := exp_pos (-y)
+    unfold F_h26
+    nlinarith
+  · filter_upwards [Filter.eventually_ge_atTop (3 : ℝ)] with y hy
+    have hD := D_pos_h26 y (by linarith)
+    have hN : 0 ≤ N_h26 y := by
+      unfold N_h26
+      have : 0 ≤ y := by linarith
+      positivity
+    have : 0 ≤ N_h26 y / D_h26 y := div_nonneg hN hD.le
+    have he := exp_pos (-y)
+    unfold F_h26
+    nlinarith
+
+theorem tail_h26 :
+    MeasureTheory.IntegrableOn (fun t : ℝ => LeanLab.ChenExplicit.hSieve (t - 1)) (Set.Ioi 4) ∧
+    ∫ t in Set.Ioi (4:ℝ), LeanLab.ChenExplicit.hSieve (t - 1) ≤ 3 * exp (-3) * (1998 / 7623) := by
+  have hderiv : ∀ x ∈ Set.Ici (4:ℝ), HasDerivAt (fun t => F_h26 (t - 1)) (g_h26 (x - 1)) x := by
+    intro x hx
+    exact HasDerivAt.comp_sub_const x 1 (hasDerivAt_F_h26 (x - 1) (by simp at hx; linarith))
+  have hpos : ∀ x ∈ Set.Ioi (4:ℝ), 0 ≤ g_h26 (x - 1) := by
+    intro x hx; simp at hx; exact g_nonneg_h26 _ (by linarith)
+  have hlim : Filter.Tendsto (fun t => F_h26 (t - 1)) Filter.atTop (nhds 0) := by
+    refine F_tendsto_h26.comp ?_
+    simpa [sub_eq_add_neg] using Filter.tendsto_atTop_add_const_right _ (-1 : ℝ) Filter.tendsto_id
+  have hint := MeasureTheory.integrableOn_Ioi_deriv_of_nonneg' hderiv hpos hlim
+  have heq := MeasureTheory.integral_Ioi_of_hasDerivAt_of_nonneg' hderiv hpos hlim
+  have hcongr : Set.EqOn (fun t : ℝ => 3 * (t - 1)⁻¹ * exp (-(t - 1)))
+      (fun t : ℝ => LeanLab.ChenExplicit.hSieve (t - 1)) (Set.Ioi 4) := by
+    intro t ht
+    simp at ht
+    simp only [LeanLab.ChenExplicit.hSieve]
+    rw [if_neg (by linarith), if_neg (by linarith)]
+  have hkint : MeasureTheory.IntegrableOn (fun t : ℝ => 3 * (t - 1)⁻¹ * exp (-(t - 1)))
+      (Set.Ioi 4) := by
+    refine MeasureTheory.Integrable.mono' hint ?_ ?_
+    · exact (by fun_prop : Measurable (fun t : ℝ => 3 * (t - 1)⁻¹ * exp (-(t - 1)))).aestronglyMeasurable
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+      simp at ht
+      have h1 : 0 ≤ 3 * (t - 1)⁻¹ * exp (-(t - 1)) := by
+        have : 0 < t - 1 := by linarith
+        positivity
+      rw [Real.norm_eq_abs, abs_of_nonneg h1]
+      exact g_ge_h26 _ (by linarith)
+  refine ⟨hkint.congr_fun hcongr measurableSet_Ioi, ?_⟩
+  rw [← MeasureTheory.setIntegral_congr_fun measurableSet_Ioi hcongr]
+  have hle : ∫ t in Set.Ioi (4:ℝ), 3 * (t - 1)⁻¹ * exp (-(t - 1)) ≤
+      ∫ t in Set.Ioi (4:ℝ), g_h26 (t - 1) := by
+    apply MeasureTheory.integral_mono_of_nonneg
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+      simp at ht
+      have : 0 < t - 1 := by linarith
+      positivity
+    · exact hint
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+      simp at ht
+      exact g_ge_h26 _ (by linarith)
+  rw [heq] at hle
+  have hF : F_h26 (4 - 1) = -3 * exp (-3) * (1998 / 7623) := by
+    simp only [F_h26, N_h26, D_h26]; norm_num
+  rw [hF] at hle
+  linarith
+
+theorem head_h26 :
+    MeasureTheory.IntegrableOn (fun t : ℝ => LeanLab.ChenExplicit.hSieve (t - 1)) (Set.Ioc 3 4) ∧
+    ∫ t in Set.Ioc (3:ℝ) 4, LeanLab.ChenExplicit.hSieve (t - 1) = exp (-2) - exp (-3) := by
+  have hcongr : Set.EqOn (fun t : ℝ => exp (-(t - 1)))
+      (fun t : ℝ => LeanLab.ChenExplicit.hSieve (t - 1)) (Set.Ioc 3 4) := by
+    intro t ht
+    simp at ht
+    simp only [LeanLab.ChenExplicit.hSieve]
+    rw [if_neg (by linarith), if_pos (by linarith)]
+  have hcont : Continuous (fun t : ℝ => exp (-(t - 1))) := by fun_prop
+  refine ⟨((hcont.integrableOn_Icc).mono_set Set.Ioc_subset_Icc_self).congr_fun hcongr
+    measurableSet_Ioc, ?_⟩
+  rw [← MeasureTheory.setIntegral_congr_fun measurableSet_Ioc hcongr,
+    ← intervalIntegral.integral_of_le (by norm_num)]
+  have hd : ∀ x ∈ Set.uIcc (3:ℝ) 4, HasDerivAt (fun t : ℝ => -exp (-(t - 1))) (exp (-(x - 1))) x := by
+    intro x _
+    have := (((hasDerivAt_id x).sub_const 1).neg).exp.neg
+    convert this using 1
+    · funext t; simp
+    · simp
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd (hcont.intervalIntegrable _ _)]
+  norm_num
+  ring
+
+/-- BJS Lemma 10, display 26, page 8: H(3) ≤ κ tilde s h(s) for 1 ≤ s ≤ 3,
+κ tilde = 0.9214. PROVED in burst-20261122 S61 with a continued fraction upper bound for the exponential integral. -/
 theorem leaf306_lemma10_26 (s : ℝ) (hs1 : 1 ≤ s) (hs3 : s ≤ 3) :
     bjsH306 3 ≤ 0.9214 * s * LeanLab.ChenExplicit.hSieve s := by
-  sorry
+  obtain ⟨hi1, he1⟩ := head_h26
+  obtain ⟨hi2, he2⟩ := tail_h26
+  have hH : bjsH306 3 ≤ exp (-2) - exp (-3) + 3 * exp (-3) * (1998 / 7623) := by
+    unfold bjsH306
+    rw [← Set.Ioc_union_Ioi_eq_Ioi (show (3:ℝ) ≤ 4 by norm_num),
+      MeasureTheory.setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi hi1 hi2, he1]
+    linarith
+  have h23 : exp (-2) = exp (-3) * exp 1 := by rw [← exp_add]; norm_num
+  have he := exp_one_lt_d9
+  have h3 := exp_pos (-3)
+  -- s h(s) ≥ e^-2
+  have hsh : exp (-2) ≤ s * LeanLab.ChenExplicit.hSieve s := by
+    simp only [LeanLab.ChenExplicit.hSieve]
+    by_cases h2 : s ≤ 2
+    · rw [if_pos h2]; nlinarith [exp_pos (-2)]
+    · rw [if_neg h2, if_pos hs3]
+      have hx : exp (-s) = exp (-3) * exp (3 - s) := by rw [← exp_add]; ring_nf
+      have hb := add_one_le_exp (3 - s)
+      rw [hx, h23]
+      push_neg at h2
+      have : 3 ≤ s * (3 - s + 1) := by nlinarith
+      have h4 : 3 ≤ s * exp (3 - s) := by
+        nlinarith [mul_le_mul_of_nonneg_left hb (show (0:ℝ) ≤ s by linarith)]
+      nlinarith [mul_le_mul_of_nonneg_left h4 h3.le]
+  rw [h23] at hH hsh
+  nlinarith
 
-/-- LEAF: h(t - 1) is integrable on t > s for s ≥ 1, so H of display 24 is a convergent
-integral. Class EASY: h(t - 1) is bounded by e ^ -2 near s and by 3 e ^ (1 - t) / (t - 1) later. -/
+/-! Helpers for leaf306_hshift_integrable, written by a workflow subagent, burst-20261122 S61. -/
+
+theorem meas_hi306 : Measurable LeanLab.ChenExplicit.hSieve := by
+  unfold LeanLab.ChenExplicit.hSieve
+  refine Measurable.ite measurableSet_Iic measurable_const ?_
+  refine Measurable.ite measurableSet_Iic ?_ ?_
+  · fun_prop
+  · fun_prop
+
+theorem bound_hi306 (x : ℝ) : ‖LeanLab.ChenExplicit.hSieve x‖ ≤ exp 2 * exp (-x) := by
+  unfold LeanLab.ChenExplicit.hSieve
+  have e2 : 1 ≤ exp 2 := one_le_exp (by norm_num)
+  have ex : 0 < exp (-x) := exp_pos _
+  split_ifs with h1 h2
+  · rw [Real.norm_eq_abs, abs_of_pos (exp_pos _), ← exp_add]
+    exact exp_le_exp.mpr (by linarith)
+  · rw [Real.norm_eq_abs, abs_of_pos ex]; nlinarith
+  · have hx : 3 < x := by linarith
+    have hinv : x⁻¹ ≤ 1/3 := by rw [inv_eq_one_div]; exact one_div_le_one_div_of_le (by norm_num) hx.le
+    have hinv0 : 0 < x⁻¹ := inv_pos.mpr (by linarith)
+    have hp : 0 < 3 * x⁻¹ * exp (-x) := by positivity
+    rw [Real.norm_eq_abs, abs_of_pos hp]
+    have : 3 * x⁻¹ ≤ 1 := by linarith
+    nlinarith
+
+/-- h(t - 1) is integrable on t > s for s ≥ 1, so H of display 24 is a convergent
+integral. PROVED in burst-20261122 S61 against the bound e ^ 2 e ^ -x for h. -/
 theorem leaf306_hshift_integrable (s : ℝ) (hs : 1 ≤ s) :
     MeasureTheory.IntegrableOn (fun t : ℝ => LeanLab.ChenExplicit.hSieve (t - 1)) (Set.Ioi s) := by
-  sorry
+  have hI : MeasureTheory.IntegrableOn (fun t : ℝ => exp 2 * exp (-1 * (t - 1))) (Set.Ioi s) := by
+    have := (exp_neg_integrableOn_Ioi s (b := 1) one_pos).const_mul (exp 2 * exp 1)
+    have hf : (fun t : ℝ => exp 2 * exp (-1 * (t - 1))) = (fun t => exp 2 * exp 1 * exp (-1 * t)) := by
+      funext t
+      rw [show -1 * (t - 1) = 1 + -1 * t by ring, exp_add]; ring
+    rw [hf]; exact this
+  refine hI.mono' ((meas_hi306.comp (measurable_id.sub_const 1)).aestronglyMeasurable) ?_
+  refine MeasureTheory.ae_of_all _ (fun t => ?_)
+  have := bound_hi306 (t - 1)
+  simpa [neg_one_mul] using this
 
-/-- LEAF: BJS Lemma 8, page 7, Nathanson Lemma 9.7: display 18 holds with c_n = 0.9607 for
-every n ≥ 2. Class HARD: Nathanson's induction with H(s) ≤ α s h(s), Remark 1 on page 10. -/
+/-! Helpers for leaf306_lemma10_25, written by a workflow subagent, burst-20261122 S61. -/
+
+theorem H3_h25 : bjsH306 3 ≤ exp (-2) - exp (-3) + 3 * exp (-3) * (1998 / 7623) := by
+  obtain ⟨hi1, he1⟩ := head_h26
+  obtain ⟨hi2, he2⟩ := tail_h26
+  unfold bjsH306
+  rw [← Set.Ioc_union_Ioi_eq_Ioi (show (3:ℝ) ≤ 4 by norm_num),
+    MeasureTheory.setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi hi1 hi2, he1]
+  linarith
+
+theorem big_h25 (s : ℝ) (hs : 3 ≤ s) : bjsH306 s ≤ exp 1 * exp (-s) := by
+  unfold bjsH306
+  have hint : MeasureTheory.IntegrableOn (fun t : ℝ => exp 1 * exp (-t)) (Set.Ioi s) := by
+    have := (exp_neg_integrableOn_Ioi s (b := 1) one_pos).const_mul (exp 1)
+    simp only [neg_one_mul] at this
+    exact this
+  have hle : ∫ t in Set.Ioi s, LeanLab.ChenExplicit.hSieve (t - 1) ≤
+      ∫ t in Set.Ioi s, exp 1 * exp (-t) := by
+    apply MeasureTheory.integral_mono_of_nonneg
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+      exact hSieve_nonneg306 _ (by simp at ht; linarith)
+    · exact hint
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+      simp at ht
+      have hx : exp 1 * exp (-t) = exp (-(t - 1)) := by rw [← exp_add]; ring_nf
+      rw [hx]
+      simp only [LeanLab.ChenExplicit.hSieve]
+      rw [if_neg (by linarith)]
+      split_ifs with h
+      · exact le_rfl
+      · have hp : 0 < t - 1 := by linarith
+        have : 3 * (t - 1)⁻¹ ≤ 1 := by
+          rw [← div_eq_mul_inv, div_le_one hp]; linarith
+        have := exp_pos (-(t - 1))
+        nlinarith
+  rw [MeasureTheory.integral_const_mul, integral_exp_neg_Ioi] at hle
+  exact hle
+
+theorem small_h25 (s : ℝ) (hs2 : 2 ≤ s) (hs3 : s ≤ 3) :
+    bjsH306 s = (3 - s) * exp (-2) + bjsH306 3 := by
+  have hi1 : MeasureTheory.IntegrableOn (fun t : ℝ => LeanLab.ChenExplicit.hSieve (t - 1))
+      (Set.Ioc s 3) := (leaf306_hshift_integrable s (by linarith)).mono_set Set.Ioc_subset_Ioi_self
+  have hi2 := leaf306_hshift_integrable 3 (by norm_num)
+  unfold bjsH306
+  rw [← Set.Ioc_union_Ioi_eq_Ioi hs3,
+    MeasureTheory.setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi hi1 hi2]
+  congr 1
+  have hcongr : Set.EqOn (fun _ : ℝ => exp (-2))
+      (fun t : ℝ => LeanLab.ChenExplicit.hSieve (t - 1)) (Set.Ioc s 3) := by
+    intro t ht
+    simp at ht
+    simp only [LeanLab.ChenExplicit.hSieve]
+    rw [if_pos (by linarith)]
+  rw [← MeasureTheory.setIntegral_congr_fun measurableSet_Ioc hcongr,
+    MeasureTheory.setIntegral_const]
+  simp [hs3]
+
+theorem expneg_h25 (u : ℝ) (hu0 : 0 ≤ u) (hu1 : u ≤ 1) : 2 - u ≤ (2 + u) * exp (-u) := by
+  have hb := Real.exp_bound (x := -u) (by rw [abs_neg, abs_of_nonneg hu0]; exact hu1)
+    (n := 5) (by norm_num)
+  simp [Finset.sum_range_succ, Nat.factorial] at hb
+  rw [abs_of_nonneg hu0] at hb
+  have h := (abs_le.mp hb).1
+  norm_num at h
+  nlinarith [pow_nonneg hu0 3, pow_nonneg hu0 4, pow_nonneg hu0 5, pow_nonneg hu0 6,
+    mul_nonneg (pow_nonneg hu0 3) (sub_nonneg.mpr hu1)]
+
+/-- BJS Lemma 10, display 25 with s0 = 2, page 8: H(s) ≤ κ_2 s h(s) for s ≥ 2,
+κ_2 = 0.9607. PROVED in burst-20261122 S61: H(s) ≤ e e ^ -s for s ≥ 3, and on [2, 3]
+H(s) = (3 - s) e ^ -2 + H(3) with the bound for H(3) from the display 26 helpers. -/
+theorem leaf306_lemma10_25 (s : ℝ) (hs : 2 ≤ s) :
+    bjsH306 s ≤ 0.9607 * s * LeanLab.ChenExplicit.hSieve s := by
+  have he := exp_one_lt_d9
+  have he' := exp_one_gt_d9
+  by_cases h3 : s ≤ 3
+  · rw [small_h25 s hs h3]
+    have hH := H3_h25
+    have h23 : exp (-2) = exp (-3) * exp 1 := by rw [← exp_add]; norm_num
+    have hes : exp (-s) = exp (-2) * exp (-(s - 2)) := by rw [← exp_add]; ring_nf
+    have hk := expneg_h25 (s - 2) (by linarith) (by linarith)
+    have hhs : LeanLab.ChenExplicit.hSieve s = exp (-s) := by
+      simp only [LeanLab.ChenExplicit.hSieve]
+      split_ifs with h
+      · rw [show s = 2 by linarith]
+      · rfl
+    rw [hhs, hes]
+    have e3 := exp_pos (-3)
+    have e2 := exp_pos (-2)
+    have hk' : (2 - (s - 2)) * exp (-2) ≤ (2 + (s - 2)) * exp (-(s - 2)) * exp (-2) :=
+      mul_le_mul_of_nonneg_right hk e2.le
+    -- H3 ≤ c e^{-2} with c = 0.921386
+    have hc : exp (-2) - exp (-3) + 3 * exp (-3) * (1998 / 7623) ≤ 0.9214 * exp (-2) := by
+      rw [h23]; nlinarith
+    nlinarith
+  · push_neg at h3
+    have hb := big_h25 s h3.le
+    have hhs : LeanLab.ChenExplicit.hSieve s = 3 * s⁻¹ * exp (-s) := by
+      simp only [LeanLab.ChenExplicit.hSieve]
+      rw [if_neg (by linarith), if_neg (by linarith)]
+    rw [hhs]
+    have : 0.9607 * s * (3 * s⁻¹ * exp (-s)) = 2.8821 * exp (-s) := by
+      field_simp; ring
+    rw [this]
+    have := exp_pos (-s)
+    nlinarith
+
+/-! Helpers for leaf306_lemma8, written by a workflow subagent, burst-20261122 S61. -/
+
+theorem int_bound_l8306 (g : ℝ → ℝ) (σ K : ℝ) (hσ : 1 ≤ σ)
+    (h0 : ∀ t, σ < t → 0 ≤ g t)
+    (hle : ∀ t, σ < t → g t ≤ K * LeanLab.ChenExplicit.hSieve (t - 1)) :
+    ∫ t in Set.Ioi σ, g t ≤ K * bjsH306 σ := by
+  unfold bjsH306
+  rw [← MeasureTheory.integral_const_mul]
+  apply MeasureTheory.integral_mono_of_nonneg
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+    exact h0 t ht
+  · exact (leaf306_hshift_integrable σ hσ).const_mul K
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+    exact hle t ht
+
+theorem key_l8306 (n : ℕ) (hn1 : 1 ≤ n) (s : ℝ)
+    (hs : (Odd n ∧ 1 ≤ s) ∨ (Even n ∧ 2 ≤ s)) :
+    bjsF306 n s ≤ 2 * exp 2 * (0.9607 : ℝ) ^ (n - 1) * LeanLab.ChenExplicit.hSieve s := by
+  induction n using Nat.strong_induction_on generalizing s with
+  | _ n ih =>
+    match n, ih, hs, hn1 with
+    | 0, _, _, h => omega
+    | 1, _, hs, _ =>
+      have hs1 : 1 ≤ s := by rcases hs with h | h <;> [exact h.2; exact absurd h.1 (by decide)]
+      have := display18_one306 s hs1
+      simpa using this
+    | m + 2, ih, hs, _ =>
+      have hs1 : 1 ≤ s := by rcases hs with h | h <;> linarith [h.2]
+      have hspos : 0 < s := by linarith
+      have hh := hSieve_nonneg306 s hspos.le
+      set K : ℝ := 2 * exp 2 * (0.9607 : ℝ) ^ m with hKdef
+      have hK : 0 ≤ K := by positivity
+      have hgoal : 2 * exp 2 * (0.9607 : ℝ) ^ (m + 2 - 1) * LeanLab.ChenExplicit.hSieve s
+          = K * 0.9607 * LeanLab.ChenExplicit.hSieve s := by
+        rw [show m + 2 - 1 = m + 1 by omega, pow_succ]; ring
+      rw [hgoal]
+      have ihb : ∀ u : ℝ, ((Odd (m + 1) ∧ 1 ≤ u) ∨ (Even (m + 1) ∧ 2 ≤ u)) →
+          bjsF306 (m + 1) u ≤ K * LeanLab.ChenExplicit.hSieve u := by
+        intro u hu
+        have := ih (m + 1) (by omega) (by omega) u hu
+        simpa [hKdef] using this
+      have nnb : ∀ u : ℝ, ((Odd (m + 1) ∧ 1 ≤ u) ∨ (Even (m + 1) ∧ 2 ≤ u)) →
+          0 ≤ bjsF306 (m + 1) u := fun u hu => leaf306_fn_nonneg (m + 1) u hu
+      simp only [bjsF306]
+      split_ifs with h
+      · have hev : Even (m + 1) := by
+          rcases Nat.even_or_odd (m + 1) with he | ho
+          · exact he
+          · exact absurd h.1 (by rw [Nat.not_odd_iff_even]; exact ho.add_one)
+        have hI := int_bound_l8306 (fun t => bjsF306 (m + 1) (t - 1)) 3 K (by norm_num)
+          (fun t ht => nnb _ (Or.inr ⟨hev, by linarith⟩))
+          (fun t ht => ihb _ (Or.inr ⟨hev, by linarith⟩))
+        have hH := leaf306_lemma10_26 s hs1 h.2
+        rw [div_le_iff₀ hspos]
+        have : K * bjsH306 3 ≤ K * (0.9214 * s * LeanLab.ChenExplicit.hSieve s) :=
+          mul_le_mul_of_nonneg_left hH hK
+        have h2 : K * (0.9214 * s * LeanLab.ChenExplicit.hSieve s)
+            ≤ K * 0.9607 * LeanLab.ChenExplicit.hSieve s * s := by
+          have : 0 ≤ K * s * LeanLab.ChenExplicit.hSieve s := by positivity
+          nlinarith
+        linarith
+      · have hpar : ((Odd (m + 1) ∧ 1 ≤ s) ∨ (Even (m + 1) ∧ 3 ≤ s)) ∧ 2 ≤ s := by
+          rcases Nat.even_or_odd (m + 2) with he | ho
+          · have hs2 : 2 ≤ s := by
+              rcases hs with h' | h'
+              · exact absurd h'.1 (by rw [Nat.not_odd_iff_even]; exact he)
+              · exact h'.2
+            refine ⟨Or.inl ⟨?_, by linarith⟩, hs2⟩
+            rcases Nat.even_or_odd (m + 1) with he' | ho'
+            · exact absurd he (by rw [Nat.not_even_iff_odd]; exact he'.add_one)
+            · exact ho'
+          · have hs3 : 3 < s := by
+              by_contra hc; exact h ⟨ho, by linarith⟩
+            refine ⟨Or.inr ⟨?_, by linarith⟩, by linarith⟩
+            rcases Nat.even_or_odd (m + 1) with he' | ho'
+            · exact he'
+            · exact absurd ho (by rw [Nat.not_odd_iff_even]; exact ho'.add_one)
+        obtain ⟨hp, hs2⟩ := hpar
+        have hp' : ∀ t, s < t → ((Odd (m + 1) ∧ 1 ≤ t - 1) ∨ (Even (m + 1) ∧ 2 ≤ t - 1)) := by
+          intro t ht
+          rcases hp with ⟨a, b⟩ | ⟨a, b⟩
+          · exact Or.inl ⟨a, by linarith⟩
+          · exact Or.inr ⟨a, by linarith⟩
+        have hI := int_bound_l8306 (fun t => bjsF306 (m + 1) (t - 1)) s K hs1
+          (fun t ht => nnb _ (hp' t ht)) (fun t ht => ihb _ (hp' t ht))
+        have hH := leaf306_lemma10_25 s hs2
+        rw [div_le_iff₀ hspos]
+        have : K * bjsH306 s ≤ K * (0.9607 * s * LeanLab.ChenExplicit.hSieve s) :=
+          mul_le_mul_of_nonneg_left hH hK
+        have h2 : K * (0.9607 * s * LeanLab.ChenExplicit.hSieve s)
+            = K * 0.9607 * LeanLab.ChenExplicit.hSieve s * s := by ring
+        linarith
+
+/-- BJS Lemma 8, page 7, Nathanson Lemma 9.7: display 18 holds with c_n = 0.9607 for
+every n ≥ 2. Proved in burst-20261122 S61 by induction on n from leaf306_lemma10_25, leaf306_lemma10_26
+and leaf306_hshift_integrable, as in Remark 1 on page 10. -/
 theorem leaf306_lemma8 (n : ℕ) (hn2 : 2 ≤ n) (s : ℝ)
     (hs : (Odd n ∧ 1 ≤ s) ∨ (Even n ∧ 2 ≤ s)) :
     bjsF306 n s ≤ 2 * exp 2 * (0.9607 : ℝ) ^ (n - 1) * LeanLab.ChenExplicit.hSieve s := by
-  sorry
+  exact key_l8306 n (by omega) s hs
 
 /-- BJS Lemmas 7 and 8, pages 6 and 7: display 18,
 f_n(s) ≤ 2 e ^ 2 c_n ^ (n - 1) h(s) for n odd and s ≥ 1 or n even and s ≥ 2,
@@ -2224,6 +2634,10 @@ theorem theorem6_of_leaves306 : LeanLab.ChenExplicit.Theorem6Stmt := by
 #print axioms bjsC306_large
 #print axioms display18_one306
 #print axioms leaf306_display18
+#print axioms leaf306_lemma10_25
+#print axioms leaf306_lemma10_26
+#print axioms leaf306_hshift_integrable
+#print axioms leaf306_lemma8
 #print axioms leaf306_lemma11_base
 #print axioms leaf306_unique8
 #print axioms leaf306_display13

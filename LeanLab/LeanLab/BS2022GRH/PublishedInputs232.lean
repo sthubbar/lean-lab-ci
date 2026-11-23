@@ -3,7 +3,7 @@ Published analytic inputs for DecompC169b. Goldbach is open. -/
 import LeanLab.BS2022GRH.PaperInputs148
 import LeanLab.BS2022GRH.ModelC233
 import LeanLab.BS2022GRH.Theta332
-import LeanLab.BS2022GRH.Lemma5MuS63
+import LeanLab.BS2022GRH.Lemma5MuCdemNat
 
 namespace LeanLab.BS2022GRH.PublishedInputs232
 open Real Finset ChenThresholdGRH
@@ -11,7 +11,7 @@ open Real Finset ChenThresholdGRH
 /-- LEAF. Journal Lemma 5 p. 1216, Buthe 2014 display 4.6.
 The squarefree count is the Mobius square sum. -/
 theorem lemma5_mu : PaperInputs148.Lemma5MuJ := by
-  exact Lemma5MuS63.lemma5_mu_assembled
+  exact Lemma5MuCdemNat.lemma5_mu_assembled_nat
 
 /-- LEAF. Journal Lemma 5 p. 1216, Ramare 2019 Theorem 3.1.
 Keep the reciprocal totient weight rather than replacing it by one. -/
