@@ -26,7 +26,8 @@ KarLemma1, Lemma 1 of p. 243, a hypothesis of the target. No open leaves remain 
 
 AI wrote the Lean code, Claude. Binary Goldbach is OPEN.
 -/
-import LeanLab.ExceptionalSet.SPLIT_leaf_W_bound
+import LeanLab.ExceptionalSet.KaracubaSplit
+import LeanLab.ExceptionalSet.WBoundMoments1678
 
 namespace LeanLab.ExceptionalSet.U1539.KaracubaSplit
 

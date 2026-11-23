@@ -1,3 +1,4 @@
+import LeanLab.ExceptionalSet.SPLIT_leaf_karW_taylor_sum_bound
 /-
 Split of the sealed statement `leaf_W_bound` of `LeanLab.ExceptionalSet.KaracubaSplit`: the bound
 on `W(a) = Σ_{y,z ≤ M} e(f(a + yz))`, `M = [P^{c1/2 - 1/(2n²(n+1))}]`, that the case `n ≥ n0` of
@@ -387,7 +388,7 @@ theorem leaf_karW_taylor_sum_bound (h1 : KarLemma1) (h3 : KarLemma3) (h4 : KarLe
               iteratedDeriv j f (a : ℝ) / (j.factorial : ℝ) * (((y * z : ℕ) : ℝ) ^ j))‖
           ≤ B * ((karP2 c1 n P : ℝ) + 1) ^ 2 *
             (P : ℝ) ^ (-(ρ * c0 ^ 2 / (32 * (n : ℝ) ^ 2 * (4 + (Real.log (8 / (ρ * c0 ^ 2))) ^ 2) ^ 2))) := by
-  sorry
+  exact leaf_karW_taylor_sum_bound_split h1 h3 h4
 
 /-! ### The assembly -/
 
