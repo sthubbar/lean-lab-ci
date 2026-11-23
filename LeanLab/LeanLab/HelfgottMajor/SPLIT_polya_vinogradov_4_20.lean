@@ -2,6 +2,7 @@ import LeanLab.HelfgottMajor.PolyaVinogradov123
 import LeanLab.HelfgottMajor.EvenPVSums
 import LeanLab.HelfgottMajor.EvenPVNumeric
 import LeanLab.HelfgottMajor.EvenPVKernel
+import LeanLab.HelfgottMajor.SPLIT_leaf_odd_case_pomerance
 
 /-!
 Split of the explicit Polya-Vinogradov inequality for a primitive character modulo `q > 1`
@@ -159,7 +160,7 @@ theorem leaf_odd_case {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (hq : q ≠ 1) (h_odd : χ (-1) ≠ 1) :
     (⨆ n : ℕ, ‖∑ m ∈ Finset.Icc 1 n, χ (m : ZMod q)‖) ≤
       1 / (2 * π) * sqrt q * log q + 1 / π * sqrt q * log (log q) + sqrt q := by
-  sorry
+  exact leaf_odd_case_of_leaves χ hχ hq h_odd
 
 /-- The display, assembled from its two parity branches: split on the value of `chi (-1)` and hand
 each branch to the corresponding leaf. -/
