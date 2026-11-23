@@ -33,6 +33,63 @@ theorem leaf_gap_core :
 
 /-! ### The size of the integer `h` -/
 
+/-- The exponent comparison behind the counterexample to LEAF 2: for `L ≥ 1` we have
+`L ^ (1/2) * (2/3) ≤ L ^ (5/4)`, so `exp(L ^ (5/4))` eventually dominates
+`exp((2/3) L ^ (1/2))`. -/
+theorem exp_half_third_le_five_quarters (L : ℝ) (hL : 1 ≤ L) :
+    L ^ ((1:ℝ)/2) * ((2:ℝ)/3) ≤ L ^ ((5:ℝ)/4) := by
+  have hM0 : (0:ℝ) ≤ L ^ ((1:ℝ)/2) := Real.rpow_nonneg (le_trans zero_le_one hL) _
+  have hscale : L ^ ((1:ℝ)/2) * ((2:ℝ)/3) ≤ L ^ ((1:ℝ)/2) := by
+    rw [mul_comm]
+    simpa using mul_le_mul_of_nonneg_right (by norm_num : ((2:ℝ)/3) ≤ (1:ℝ)) hM0
+  exact le_trans hscale (Real.rpow_le_rpow_of_exponent_le hL (by norm_num))
+
+/-- Counterexample to LEAF 2, checked in Lean: with `γ = 5/4`, `δ = κ = 1` and any `N ≥ 3`,
+`F (5/4) N = exp(L ^ (5/4))` with `L = log N ≥ 1`, while
+`calE (5/4) 1 N ^ (2/3) = exp((2/3) L ^ (1/2))`.  Since `L ^ (5/4) ≥ L ^ (1/2) ≥
+(2/3) L ^ (1/2)`, the required inequality `2 * F + 2 ≤ calE ^ (2/3)` fails for every
+`N ≥ 3`, so no `N₁` works.  For `1 < γ < 3/2` the exponent `γ` of `log N` in `F`
+dominates the exponent `3 - 2γ` in `calE` for every fixed `κ > 0`, so no choice of
+`δ, κ` rescues the statement. -/
+theorem leaf_height_domination_false :
+    ¬ (∀ γ : ℝ, 1 < γ → γ < 3 / 2 → ∀ δ κ : ℝ, 0 < δ → 0 < κ →
+      ∃ N₁ : ℕ, ∀ N : ℕ, N₁ ≤ N → 2 * F γ N ^ δ + 2 ≤ calE γ κ N ^ (2 / 3 : ℝ)) := by
+  intro H
+  obtain ⟨N₁, hN₁⟩ := H (5 / 4 : ℝ) (by norm_num) (by norm_num) 1 1 one_pos one_pos
+  have hN1 : N₁ ≤ max N₁ 3 := le_max_left _ _
+  have hN3 : 3 ≤ max N₁ 3 := le_trans (by norm_num) (le_max_right _ _)
+  specialize hN₁ (max N₁ 3) hN1
+  have hlog3 : 1 < Real.log 3 := by
+    have h := Real.log_lt_log (Real.exp_pos 1) Real.exp_one_lt_three
+    rwa [Real.log_exp] at h
+  have hL1 : 1 ≤ Real.log ((max N₁ 3 : ℕ) : ℝ) := by
+    have h3 : Real.log 3 ≤ Real.log ((max N₁ 3 : ℕ) : ℝ) :=
+      Real.log_le_log (by norm_num) (by exact_mod_cast hN3)
+    linarith
+  have hE : calE (5 / 4 : ℝ) 1 (max N₁ 3)
+      = Real.exp (Real.log ((max N₁ 3 : ℕ) : ℝ) ^ ((1:ℝ)/2)) := by
+    unfold calE
+    norm_num
+  have hEpos : 0 < calE (5 / 4 : ℝ) 1 (max N₁ 3) := by
+    rw [hE]
+    exact Real.exp_pos _
+  have hEpow : calE (5 / 4 : ℝ) 1 (max N₁ 3) ^ ((2:ℝ)/3)
+      = Real.exp (Real.log ((max N₁ 3 : ℕ) : ℝ) ^ ((1:ℝ)/2) * ((2:ℝ)/3)) := by
+    rw [Real.rpow_def_of_pos hEpos, hE, Real.log_exp]
+  rw [Real.rpow_one] at hN₁
+  rw [hEpow] at hN₁
+  have hFval : F (5 / 4 : ℝ) ((max N₁ 3 : ℕ) : ℝ)
+      = Real.exp (Real.log ((max N₁ 3 : ℕ) : ℝ) ^ ((5:ℝ)/4)) := rfl
+  rw [hFval] at hN₁
+  have hkey := exp_half_third_le_five_quarters (Real.log ((max N₁ 3 : ℕ) : ℝ)) hL1
+  have hexp : Real.exp (Real.log ((max N₁ 3 : ℕ) : ℝ) ^ ((1:ℝ)/2) * ((2:ℝ)/3))
+      ≤ Real.exp (Real.log ((max N₁ 3 : ℕ) : ℝ) ^ ((5:ℝ)/4)) := Real.exp_le_exp.mpr hkey
+  have hPpos : 0 < Real.exp (Real.log ((max N₁ 3 : ℕ) : ℝ) ^ ((5:ℝ)/4)) := Real.exp_pos _
+  have hgt : Real.exp (Real.log ((max N₁ 3 : ℕ) : ℝ) ^ ((1:ℝ)/2) * ((2:ℝ)/3))
+      < 2 * Real.exp (Real.log ((max N₁ 3 : ℕ) : ℝ) ^ ((5:ℝ)/4)) + 2 := by
+    linarith
+  exact absurd hN₁ (not_le.2 hgt)
+
 /-- LEAF 2 of the split of `lemma9`: the size comparison.  For `1 < γ < 3/2` and any
 `δ, κ > 0` the main term `2 * F γ N ^ δ + 2` is eventually dominated by `ℰ ^ (2/3)`,
 because the exponent `γ` of `log N` in `F` exceeds the exponent `3 - 2γ` in `ℰ` as soon
