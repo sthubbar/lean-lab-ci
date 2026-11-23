@@ -5,7 +5,7 @@ estimate of pages 484 and 485 taken from the Char1122 split.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Perelli1996.Burst103
-import LeanLab.Perelli1996.Char1122
+import LeanLab.Perelli1996.Good1122
 
 namespace LeanLab.Perelli1996.Wire1122
 open Finset Real Polynomial MeasureTheory
@@ -15,14 +15,20 @@ open LeanLab.Perelli1996.Decomp88 LeanLab.Perelli1996.Decomp103 LeanLab.Perelli1
 noncomputable section
 
 /-- Theorem 1, page 478, the assembly of Burst103.theorem1_of_split copied with one change:
-the character step is Char1122.leaf_character_of_split instead of Decomp88.leaf_character.
+the character step is Good1122.leaf_character_of_split3 instead of Decomp88.leaf_character,
+and the assembly runs with A replaced by max A B₀, since that split holds for B ≥ B₀.
 CONDITIONAL ON Decomp103.leaf_nair_mean, Diff1122.leaf_weyl_differencing,
-Decomp582a.leaf_zero_density, Char1122.leaf_bad_character_removal and
-Char1122.leaf_good_character_mean. -/
+Decomp582a.leaf_zero_density, Bad1122.leaf_bad_modulus_large,
+Bad1122.leaf_character_expansion and Good1122.leaf_good_short_variance. -/
 theorem theorem1_of_split : LeanLab.Perelli1996.Theorem1 := by
-  intro F hF A ε hA hε
+  intro F hF A₀ ε hA₀ hε
   obtain ⟨c, Nc, hc, hNc, hcut⟩ := leaf_cutoff F hF
   obtain ⟨d, hd, hmajor⟩ := major_of_split F hF c hc
+  -- Burst S79: the character step holds for B ≥ B₀; run the assembly with A = max A₀ B₀,
+  -- so B > A ≥ B₀, and weaken L^(-A) to L^(-A₀) at the end.
+  obtain ⟨B₀, hB₀, hchar⟩ := Good1122.leaf_character_of_split3 F hF c hc
+  set A := max A₀ B₀ with hAdef
+  have hA : 0 < A := hA₀.trans_le (le_max_left _ _)
   let k : ℝ := F.natDegree
   let K : ℝ := Section2.weylExponent F
   have hk : 1 ≤ k := by dsimp [k]; exact_mod_cast hF.1
@@ -43,7 +49,10 @@ theorem theorem1_of_split : LeanLab.Perelli1996.Theorem1 := by
   obtain ⟨CR, NR, hCR, hNR, hR⟩ :=
     leaf_minor_reduction F hF (leaf_weyl F) c hc ε B hε hB
   obtain ⟨CL, NL, hCL, hNL, hL⟩ :=
-    leaf_local_mass F hF c hc ε B hε hB (Char1122.leaf_character_of_split F hF c hc ε B hε hB)
+    leaf_local_mass F hF c hc ε B hε hB (hchar ε B hε (by
+      have hkA : 0 ≤ 8 * K * (A + 2) := by positivity
+      have : B₀ ≤ A := le_max_right _ _
+      dsimp [B]; nlinarith [sq_nonneg k]))
   refine ⟨4 * CM + 2 * CR * (CL + 1), max (Real.exp 1) (max Nc (max NM (max NR NL))), ?_⟩
   intro N H hN hH hHu
   have hNcN : Nc ≤ N := le_trans (le_max_left _ _) (le_trans (le_max_right _ _) hN)
@@ -93,7 +102,10 @@ theorem theorem1_of_split : LeanLab.Perelli1996.Theorem1 := by
   calc _ ≤ 2 * majorError F ⌊c * N⌋₊ N H B + 2 * minorError F ⌊c * N⌋₊ N H B := hs
     _ ≤ 2 * (2 * CM * H * N ^ 2 * Real.log N ^ (-A)) +
       2 * (CR * (CL + 1) * H * N ^ 2 * Real.log N ^ (-A)) := by gcongr
-    _ = _ := by ring
+    _ = (4 * CM + 2 * CR * (CL + 1)) * H * N ^ 2 * Real.log N ^ (-A) := by ring
+    _ ≤ _ := by
+      have hAA : -A ≤ -A₀ := neg_le_neg (le_max_left _ _)
+      gcongr
 
 end
 end LeanLab.Perelli1996.Wire1122
