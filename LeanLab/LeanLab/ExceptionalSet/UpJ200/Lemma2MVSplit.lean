@@ -1,4 +1,9 @@
 import LeanLab.ExceptionalSet.UpJ200.DQLeafAbsentSelectedDecisions
+import LeanLab.ExceptionalSet.UpJ200.Lemma2MV.Singular616
+import LeanLab.ExceptionalSet.UpJ200.Lemma2MV.ArcMain611
+import LeanLab.ExceptionalSet.UpJ200.Lemma2MV.Truncation613
+import LeanLab.ExceptionalSet.UpJ200.Lemma2MV.Tail614
+import LeanLab.ExceptionalSet.UpJ200.Lemma2MV.Gallagher42Core
 
 /-!
 # Split of `Lemma2NoExcBP` into the displays of Montgomery and Vaughan 1975
@@ -24,6 +29,10 @@ Structure.
 * LEAF `mv_tail_614`: display (6.14).
 * LEAF `mv_gallagher_lemma42_step`: the first display of section 7, from Lemma 4.2.
 * LEAF `mv_gallagher_lemma43`: Lemma 4.3, Gallagher's Theorem 7, run with zero free constant `a`.
+* PROVED in burst S53, session claude/ExceptionalSet-lemma2-split-p2: `mv_arc_main_611`,
+  `mv_truncation_613`, `mv_tail_614`, `mv_singular_series_616`, `mv_gallagher_lemma42_step`, through
+  the helper modules in `UpJ200/Lemma2MV`. `mv_remainder_66_68` is split in
+  `Lemma2MV/Remainder66Split.lean` down to the one LEAF `rem66_lemma55`, P0015 Lemma 5.5.
 * PROVED from the leaves: `mv_617`, display (6.17); `mv_71`, display (7.1);
   `lemma2NoExcSmallDelta_of_leaves`, P0082 Lemma 2 for small `δ`.
 * PROVED sorry free: `lemma2NoExcSmallDelta_of_BP` and `leaf_absent_selected_of_small`, which gives
@@ -97,6 +106,55 @@ noncomputable def sharpSum {r : ℕ} (P X : ℝ) (χ : DirichletCharacter ℂ r)
   ∑ n ∈ (Ioc ⌊P⌋₊ ⌊X⌋₊).filter (fun n : ℕ => x - h < (n : ℝ) ∧ (n : ℝ) ≤ x),
     ((if Nat.Prime n then (Real.log n : ℂ) * χ (n : ZMod r) else 0) - if χ = 1 then 1 else 0)
 
+/-! ### Bridges to the helper modules of `Lemma2MV`, PROVED -/
+
+/-- The coefficient of the first term of P0015 display (6.4) is `HeathBrown1985.gm n q`, by
+`Lemma2MV.sing616_weight_eq`. -/
+lemma mainWeight_eq_gm (q n : ℕ) :
+    mainWeight q n = ((LeanLab.HeathBrown1985.gm n q : ℝ) : ℂ) :=
+  Lemma2MV.sing616_weight_eq q n
+
+lemma norm_mainWeight_eq (q n : ℕ) :
+    ‖mainWeight q n‖ = |LeanLab.HeathBrown1985.gm n q| := by
+  rw [mainWeight_eq_gm, Complex.norm_real, Real.norm_eq_abs]
+
+open LeanLab.ExceptionalSet.UpJ200.Lemma2MV (gall42_S gall42_B gall42_gallagher)
+
+open Classical in
+/-- P0015 page 361: `W(χ,η)` is the exponential sum with the coefficients of `Σ^#`, page 366. -/
+lemma gall42_Wchi_eq {r : ℕ} (P X : ℝ) (χ : DirichletCharacter ℂ r) (η : ℝ) :
+    Wchi P X χ η = gall42_S (Ioc ⌊P⌋₊ ⌊X⌋₊) (fun n =>
+      (if Nat.Prime n then (Real.log n : ℂ) * χ (n : ZMod r) else 0) -
+        if χ = 1 then 1 else 0) η := by
+  unfold Wchi Schi T gall42_S
+  rw [sum_filter]
+  split_ifs with h
+  · rw [← sum_sub_distrib]
+    refine sum_congr rfl (fun n _ => ?_)
+    by_cases hp : Nat.Prime n <;> simp only [hp, if_true, if_false] <;> ring
+  · rw [sub_zero]
+    refine sum_congr rfl (fun n _ => ?_)
+    by_cases hp : Nat.Prime n <;> simp only [hp, if_true, if_false] <;> ring
+
+open Classical in
+/-- P0015 page 366: the sum `Σ^#_{m-H<n≤m}` at integer `m` and `H` is the block sum of
+Lemma 4.2, page 357. -/
+lemma gall42_sharp_eq {r : ℕ} (P X : ℝ) (χ : DirichletCharacter ℂ r) (m H : ℕ) :
+    sharpSum P X χ (m : ℝ) (H : ℝ) = gall42_B (Ioc ⌊P⌋₊ ⌊X⌋₊) (fun n =>
+      (if Nat.Prime n then (Real.log n : ℂ) * χ (n : ZMod r) else 0) -
+        if χ = 1 then 1 else 0) H m := by
+  unfold sharpSum gall42_B
+  refine sum_congr (filter_congr (fun n _ => ?_)) (fun _ _ => rfl)
+  constructor
+  · rintro ⟨h1, h2⟩
+    refine ⟨by exact_mod_cast h2, ?_⟩
+    have : (m : ℝ) < n + H := by linarith
+    exact_mod_cast this
+  · rintro ⟨h1, h2⟩
+    have h1' : (n : ℝ) ≤ m := by exact_mod_cast h1
+    have h2' : (m : ℝ) < n + H := by exact_mod_cast h2
+    exact ⟨by linarith, h1'⟩
+
 /-! ### The leaves -/
 
 /-- LEAF: P0015 displays (6.1) to (6.9), pages 361 to 363, class HARD.
@@ -113,42 +171,58 @@ theorem mv_remainder_66_68 : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ → δ 
           (mvW (X ^ (6 * δ)) X * Real.sqrt X + mvW (X ^ (6 * δ)) X ^ 2) := by
   sorry
 
-/-- LEAF: P0015 displays (6.10) and (6.11), page 363, class MEDIUM.
+/-- PROVED in burst S53, formerly LEAF: P0015 displays (6.10) and (6.11), page 363, class MEDIUM.
 `T(η) ≪ ‖η‖⁻¹` gives `∫_{1/qQ}^{1/2} |T|² ≪ qQ`, so the arc integral is
 `∫_0^1 T(η)² e(-nη) dη + O(qQ) = n + O(qQ)` for `n ≤ X`, with `qQ = qX/P`. -/
 theorem mv_arc_main_611 : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ → δ < 1 / 100 →
     ∃ X₀ : ℝ, ∀ X : ℝ, X₀ ≤ X → ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ X ^ (6 * δ) →
       ∀ n : ℕ, 1 ≤ n → (n : ℝ) ≤ X →
         ‖arcIntegral (X ^ (6 * δ)) X q n - (n : ℂ)‖ ≤ C * q * (X / X ^ (6 * δ)) := by
-  sorry
+  exact Lemma2MV.arc611_main
 
-/-- LEAF: P0015 display (6.13), page 363, class MEDIUM.
+/-- PROVED in burst S53, formerly LEAF: P0015 display (6.13), page 363, class MEDIUM.
 By (5.2), `Q Σ_{q≤P} μ(q)² φ(q)⁻² |c_q(n)| q ≪ Q n φ(n)⁻¹ d(n) log P ≪ X^{1+δ} P⁻¹`, with
 `Q = X/P`; the `X^δ` absorbs `d(n) log P` and needs `X` large in terms of `δ`. -/
 theorem mv_truncation_613 : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ → δ < 1 / 100 →
     ∃ X₀ : ℝ, ∀ X : ℝ, X₀ ≤ X → ∀ n : ℕ, 1 ≤ n → (n : ℝ) ≤ X →
       (X / X ^ (6 * δ)) * ∑ q ∈ Icc 1 ⌊X ^ (6 * δ)⌋₊, ‖mainWeight q n‖ * q ≤
         C * (X ^ (1 + δ) / X ^ (6 * δ)) := by
-  sorry
+  obtain ⟨C, hC, h⟩ := Lemma2MV.trunc613_main
+  refine ⟨C, hC, fun δ hδ hδ1 => ?_⟩
+  obtain ⟨X₀, hX⟩ := h δ hδ hδ1
+  refine ⟨X₀, fun X hX' n hn hnX => ?_⟩
+  simpa only [norm_mainWeight_eq] using hX X hX' n hn hnX
 
-/-- LEAF: P0015 display (6.16), page 363, class MEDIUM.
+/-- PROVED in burst S53, formerly LEAF: P0015 display (6.16), page 363, class MEDIUM.
 `𝔖(n) = Σ_{q≥1} μ(q)² φ(q)⁻² c_q(-n) = ∏_{p∤n} (1 - (p-1)⁻²) ∏_{p∣n} (1 + (p-1)⁻¹)`, by (5.2);
 the series converges absolutely. The `q = 0` term is zero since `μ(0) = 0`. -/
 theorem mv_singular_series_616 (n : ℕ) (hn : 1 ≤ n) :
     Summable (fun q : ℕ => ‖mainWeight q n‖) ∧
       HasSum (fun q : ℕ => mainWeight q n) ((singularSeries n : ℝ) : ℂ) := by
-  sorry
+  obtain ⟨hs, hh⟩ := Lemma2MV.sing616_main n hn
+  have hw : ∀ q : ℕ, mainWeight q n = ((LeanLab.HeathBrown1985.gm n q : ℝ) : ℂ) :=
+    fun q => Lemma2MV.sing616_weight_eq q n
+  refine ⟨?_, ?_⟩
+  · refine hs.congr (fun q => ?_)
+    rw [hw, Complex.norm_real, Real.norm_eq_abs]
+  · rw [show (fun q : ℕ => mainWeight q n) =
+        (fun q : ℕ => ((LeanLab.HeathBrown1985.gm n q : ℝ) : ℂ)) from funext hw]
+    exact Complex.hasSum_ofReal.mpr hh
 
-/-- LEAF: P0015 display (6.14), page 363, class MEDIUM.
+/-- PROVED in burst S53, formerly LEAF: P0015 display (6.14), page 363, class MEDIUM.
 Extending the main term to all `q ≥ 1` costs
 `n Σ_{q>P} φ(q)⁻¹ φ(q/(q,n))⁻¹ ≪ n P⁻¹ d(n) n φ(n)⁻¹ ≪ X^{1+δ} P⁻¹` for `n ≤ X`. -/
 theorem mv_tail_614 : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ → δ < 1 / 100 →
     ∃ X₀ : ℝ, ∀ X : ℝ, X₀ ≤ X → ∀ n : ℕ, 1 ≤ n → (n : ℝ) ≤ X →
       (n : ℝ) * ∑' q : ℕ, (if X ^ (6 * δ) < (q : ℝ) then ‖mainWeight q n‖ else 0) ≤
         C * (X ^ (1 + δ) / X ^ (6 * δ)) := by
-  sorry
+  obtain ⟨C, hC, h⟩ := Lemma2MV.tail614_main
+  refine ⟨C, hC, fun δ hδ hδ1 => ?_⟩
+  obtain ⟨X₀, hX⟩ := h δ hδ hδ1
+  refine ⟨X₀, fun X hX' n hn hnX => ?_⟩
+  simpa only [norm_mainWeight_eq] using hX X hX' n hn hnX
 
-/-- LEAF: P0015 page 366, the first display of section 7, from Lemma 4.2 (Gallagher's Lemma 1),
+/-- PROVED in burst S53, formerly LEAF: P0015 page 366, the first display of section 7, from Lemma 4.2 (Gallagher's Lemma 1),
 class MEDIUM. With `κ = 1/(rQ)`,
 `W(χ) ≪ X^{1/2} max_{x≤2X} max_{0<h≤X} (h + X P⁻¹)⁻¹ |Σ^#_{x-h<p≤x} χ(p) log p|`.
 Stated with any bound `M` for the double maximum; the constant is absolute. -/
@@ -158,7 +232,85 @@ theorem mv_gallagher_lemma42_step : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ 
         (∀ x h : ℝ, 0 ≤ x → x ≤ 2 * X → 0 < h → h ≤ X →
           ‖sharpSum (X ^ (6 * δ)) X χ x h‖ ≤ M * (h + X / X ^ (6 * δ))) →
         Wnorm (X ^ (6 * δ)) X χ ≤ C * Real.sqrt X * M := by
-  sorry
+  classical
+  refine ⟨49, by norm_num, ?_⟩
+  intro δ hδ hδ1
+  refine ⟨256, ?_⟩
+  intro X hX r hr1 hrP χ _ M hM
+  set P := X ^ (6 * δ) with hPdef
+  have hX1 : (1 : ℝ) ≤ X := by linarith
+  have hX0 : (0 : ℝ) < X := by linarith
+  have hP1 : 1 ≤ P := Real.one_le_rpow hX1 (by linarith)
+  have hP0 : 0 < P := by linarith
+  have hsq : Real.sqrt X * Real.sqrt X = X := Real.mul_self_sqrt hX0.le
+  have hPs : P ≤ Real.sqrt X := by
+    rw [Real.sqrt_eq_rpow]; exact Real.rpow_le_rpow_of_exponent_le hX1 (by linarith)
+  have h16 : 16 ≤ Real.sqrt X := Real.le_sqrt_of_sq_le (by linarith)
+  have hXP : 16 ≤ X / P := by
+    rw [le_div_iff₀ hP0]; nlinarith
+  have hr : (1 : ℝ) ≤ r := by exact_mod_cast hr1
+  set Q := (r : ℝ) * X / P with hQ
+  have hXPQ : X / P ≤ Q := by
+    rw [hQ, mul_div_assoc]; nlinarith
+  have hQX : Q ≤ X := by
+    rw [hQ, div_le_iff₀ hP0]; nlinarith
+  have hQ0 : 0 < Q := by linarith
+  set H := ⌊Q / 8⌋₊ with hHdef
+  have hHle : (H : ℝ) ≤ Q / 8 := Nat.floor_le (by positivity)
+  have hHge : Q / 8 - 1 < H := Nat.sub_one_lt_floor _
+  have hHpos : (0 : ℝ) < H := by linarith
+  have hH1 : 1 ≤ H := by
+    have : (1 : ℝ) ≤ H := by linarith
+    exact_mod_cast this
+  have hκ : P / (r * X) = 1 / Q := by
+    rw [hQ]; field_simp
+  have hM0 : 0 ≤ M := by
+    have h := hM 0 1 le_rfl (by linarith) one_pos hX1
+    have h' : 0 ≤ M * (1 + X / P) := le_trans (norm_nonneg _) h
+    rcases le_or_gt 0 M with h0 | hneg
+    · exact h0
+    have : M * (1 + X / P) < 0 := mul_neg_of_neg_of_pos hneg (by positivity)
+    linarith
+  set a : ℕ → ℂ := fun n =>
+    (if Nat.Prime n then (Real.log n : ℂ) * χ (n : ZMod r) else 0) -
+      if χ = 1 then 1 else 0 with ha
+  set s := Ioc ⌊P⌋₊ ⌊X⌋₊ with hsdef
+  have hs : ∀ n ∈ s, n < ⌊X⌋₊ + 1 := by
+    intro n hn; have := (mem_Ioc.mp hn).2; omega
+  have hcore := gall42_gallagher s a (⌊X⌋₊ + 1) H hs hH1 (1 / Q) (by positivity)
+    (by rw [div_mul_eq_mul_div, one_mul, div_le_iff₀ hQ0]; linarith)
+  have hHQ : X / P ≤ 16 * H := by linarith
+  have hB : ∀ m ∈ range (⌊X⌋₊ + 1 + H), ‖gall42_B s a H m‖ ^ 2 ≤ (17 * M * H) ^ 2 := by
+    intro m hm
+    have hmlt : m < ⌊X⌋₊ + 1 + H := mem_range.mp hm
+    have hmle : (m : ℝ) ≤ X + H := by
+      have h1 : m ≤ ⌊X⌋₊ + H := by omega
+      have h2 : ((m : ℕ) : ℝ) ≤ ((⌊X⌋₊ + H : ℕ) : ℝ) := by exact_mod_cast h1
+      push_cast at h2; linarith [Nat.floor_le hX0.le]
+    have hb := hM m H (Nat.cast_nonneg _) (by linarith) hHpos (by linarith)
+    rw [gall42_sharp_eq] at hb
+    have h17 : ‖gall42_B s a H m‖ ≤ 17 * M * H := le_trans hb (by nlinarith)
+    exact pow_le_pow_left₀ (norm_nonneg _) h17 2
+  have hsum : ∑ m ∈ range (⌊X⌋₊ + 1 + H), ‖gall42_B s a H m‖ ^ 2 ≤
+      ((⌊X⌋₊ + 1 + H : ℕ) : ℝ) * (17 * M * H) ^ 2 := by
+    calc _ ≤ ∑ m ∈ range (⌊X⌋₊ + 1 + H), (17 * M * H) ^ 2 := sum_le_sum hB
+      _ = _ := by rw [sum_const, card_range, nsmul_eq_mul]
+  have hcard : ((⌊X⌋₊ + 1 + H : ℕ) : ℝ) ≤ 2 * X := by
+    push_cast; linarith [Nat.floor_le hX0.le]
+  have hint : ∫ η in (-(P / (r * X)))..(P / (r * X)), ‖Wchi P X χ η‖ ^ 2 ≤
+      2312 * X * M ^ 2 := by
+    simp_rw [gall42_Wchi_eq P X χ]
+    rw [hκ]
+    calc _ ≤ 4 / (H : ℝ) ^ 2 * ∑ m ∈ range (⌊X⌋₊ + 1 + H), ‖gall42_B s a H m‖ ^ 2 := hcore
+      _ ≤ 4 / (H : ℝ) ^ 2 * (((⌊X⌋₊ + 1 + H : ℕ) : ℝ) * (17 * M * H) ^ 2) := by gcongr
+      _ ≤ 4 / (H : ℝ) ^ 2 * (2 * X * (17 * M * H) ^ 2) := by gcongr
+      _ = 2312 * X * M ^ 2 := by field_simp; ring
+  have h49 : 2312 * X * M ^ 2 ≤ (49 * Real.sqrt X * M) ^ 2 := by
+    have : (49 * Real.sqrt X * M) ^ 2 = 2401 * (Real.sqrt X * Real.sqrt X) * M ^ 2 := by ring
+    rw [this, hsq]; nlinarith [sq_nonneg M]
+  unfold Wnorm
+  exact (Real.sqrt_le_sqrt hint).trans
+    ((Real.sqrt_le_sqrt h49).trans_eq (Real.sqrt_sq (by positivity)))
 
 /-- LEAF: P0015 Lemma 4.3, pages 357 and 358, Gallagher 1970 Theorem 7 made effective, applied
 with `N = 2X`, class HARD, a citation wall. For each zero free constant `a > 0` there are
@@ -565,6 +717,11 @@ example (hL : Lemma2NoExcSmallDelta) (hS : SingularSeriesEvenLowerBP) : True :=
     leaf_absent_selected_of_small hL hS
   trivial
 
+#print axioms mv_arc_main_611
+#print axioms mv_truncation_613
+#print axioms mv_tail_614
+#print axioms mv_singular_series_616
+#print axioms mv_gallagher_lemma42_step
 #print axioms lemma2NoExcSmallDelta_of_BP
 #print axioms leaf_absent_selected_of_small
 #print axioms mv_617
