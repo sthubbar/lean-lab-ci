@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Decomp457b
+import LeanLab.HelfgottMajor.SPLIT_principal_log_weight_sq_short
 
 /-!
 Copy of the Weierstrass-product digamma series (`Digamma210.DigammaSeries` of
@@ -1730,9 +1731,7 @@ over `|t| ≤ 2` is at most twenty. This is the piece where the weight is larges
 interval is short, and it carries the whole numerical size of the small range. -/
 theorem principal_log_weight_sq_short :
     (∫ t in {t : ℝ | |t| ≤ 2}, ‖principalLogWeight t‖ ^ 2) ≤ 20 := by
-  apply principal_log_weight_sq_short_of_pointwise
-  intro t ht
-  sorry
+  exact principal_log_weight_sq_short_of_leaves
 
 /-- LEAF. The long range step: the square energy of the logarithmic derivative weight
 over `2 < |t|` is at most one hundred and ninety. This is the decay step, where the
