@@ -205,7 +205,11 @@ theorem lemma4_envelope_not_log_saving2527 (γ : ℝ)
 
 /-- LEAF. Page 9, final use of Lemmas 4 and 5. QUESTION Q139c.
 This is the unresolved logarithmic saving needed by the printed deduction.
-Audit139 records the positive epsilon loss in the displayed bounds. -/
+Audit139 records the positive epsilon loss in the displayed bounds.
+Status audit CLAUDE S60 2026-11-22: BLOCKED. `Audit1122Absorption.printed_absorption_false` proves
+that the displayed Lemma 4 and Lemma 5 bounds cannot give this at the exact window; the margin
+version is `Repair591Margin.logarithmic_transfer_with_margin591`, and
+`Palomar1122Song.songTheorem1_of_lemma3_logTransfer` takes this content as `Flag1734.LogTransferDQ`. -/
 theorem logarithmic_transfer139 (H4 : Lemma4) :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 →
       ∃ C : ℝ, ∃ N₀ : ℕ, ∀ n : ℕ, N₀ ≤ n → ∀ y : ℝ,

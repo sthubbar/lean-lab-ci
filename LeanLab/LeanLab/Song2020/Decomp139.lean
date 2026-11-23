@@ -44,7 +44,7 @@ def terms (γ : ℝ) : List (ℝ × ℝ) :=
 /-- Page 8. The sum of the optimized monomials, including the prime power remainder. -/
 def budget (γ n y : ℝ) : ℝ := (terms γ |>.map (fun ab => n ^ ab.1 * y ^ ab.2)).sum
 
-/-- LEAF. Page 4, first two displays of the proof of Lemma 4.
+/-- PROVED, axioms propext, Classical.choice, Quot.sound, status audit CLAUDE S60 2026-11-22; formerly LEAF. Page 4, first two displays of the proof of Lemma 4.
 The floor characteristic and Taylor remainder reduce the discrepancy to the sawtooth sum. -/
 theorem characteristic_reduction :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 →
@@ -53,7 +53,10 @@ theorem characteristic_reduction :
           ‖fS γ n y α - gS n y α - sawSum γ n y α‖ ≤ C * (n : ℝ) ^ (3 / 2 - γ) :=
   LeanLab.Song2020.Characteristic139.characteristic_reduction139
 
-/-- LEAF. Pages 4 and 5, S2 bound.
+/-- LEAF. Pages 4 and 5, S2 bound. Status audit CLAUDE S60 2026-11-22: the sorry stays because
+Prep1121FourierS2 imports this file; the exact type is PROVED downstream by
+`Audit1122FourierDQ.fourier_approximation_type_of_leaves` and by
+`SplitFourierApprox.fourier_approximation_of_leaves`, and Lemma 4 by `Wire1122Lemma4.song_lemma4_of_leaves`.
 Published inputs: Graham and Kolesnik, Appendix and exponent pair display 3.3.4.
 The same coefficient family works at every truncation level. -/
 theorem fourier_approximation :
@@ -108,7 +111,7 @@ def perH (γ n y k : ℝ) : ℝ :=
   n ^ (3 * γ / 10) * y ^ ((3 : ℝ) / 5) * k ^ ((3 : ℝ) / 10) +
   n ^ (3 * γ / 14 + 2 / 7) * y ^ ((3 : ℝ) / 7) * k ^ ((3 : ℝ) / 14)
 
-/-- CITED. Song 2020, page 5, the displays from "For S1, we first observe" to
+/-- PROVED, axioms propext, Classical.choice, Quot.sound, status audit CLAUDE S60 2026-11-22; formerly CITED. Song 2020, page 5, the displays from "For S1, we first observe" to
 "We have shown so far": partial summation in the weight c x to the 1 minus gamma,
 the bound a_h at most K over h for the Fourier coefficients, the bound of
 e of h times the difference of x plus 1 to the gamma and x to the gamma minus 1
@@ -136,7 +139,7 @@ theorem s1_lambda_reduction :
   simpa only [fourier, truncatedSum, subWindow, lambdaSum]
     using LeanLab.Song2020.SPLIT_vaughan_per_u.s1_lambda_reduction
 
-/-- CITED. Song 2020, pages 5 to 7, the bounds for the three Vaughan pieces with both
+/-- PROVED, axioms propext, Classical.choice, Quot.sound, status audit CLAUDE S60 2026-11-22; formerly CITED. Song 2020, pages 5 to 7, the bounds for the three Vaughan pieces with both
 parameters u and v free, 1 at most u, 1 at most v and u v at most n, before the choice
 v = (n/u)^{1/2}: the Sigma 1 display of page 6, u |h|^{1/2} x^{γ/2-1} y plus
 x^{1-γ/2} |h|^{-1/2}, with its log squared factor absorbed in n to the epsilon, plus the
@@ -246,7 +249,7 @@ theorem vaughan_per_u_of_split :
   apply mul_le_mul_of_nonneg_left _ (by positivity)
   linarith
 
-/-- CITED. Song 2020, page 7, the display after "Choosing v = (n/u)^{1/2}": for every
+/-- PROVED, axioms propext, Classical.choice, Quot.sound, status audit CLAUDE S60 2026-11-22; formerly CITED. Song 2020, page 7, the display after "Choosing v = (n/u)^{1/2}": for every
 Vaughan parameter u with 1 at most u at most n, so that u v is at most n,
 x to the minus epsilon times Sigma 1 plus Sigma 2 plus Sigma 3 is bounded by six monomials,
 written here with x replaced by n since x is of size n over 3, and with k the absolute value
@@ -595,7 +598,7 @@ theorem lambda_sum_per_h_of_split :
         mul_le_mul_of_nonneg_left (add_le_add e0 hsum) (by positivity)
     _ = C₁ * (1 + 11 * Cg) * N ^ ε * perH γ N y k := by ring
 
-/-- CITED. Song 2020, pages 5 to 8, the per h estimate displayed at the top of page 8:
+/-- PROVED, axioms propext, Classical.choice, Quot.sound, status audit CLAUDE S60 2026-11-22; formerly CITED. Song 2020, pages 5 to 8, the per h estimate displayed at the top of page 8:
 x to the minus epsilon times Sigma 1 plus Sigma 2 plus Sigma 3 is bounded by the ten
 monomials of perH at k equal to the absolute value of h. Published inputs, in the order the
 paper applies them: Dirichlet approximation of alpha by a over q with q at most log n and the
@@ -833,7 +836,7 @@ theorem s1_estimate_of_split :
         mul_le_mul_of_nonneg_left hfin (by positivity)
     _ = C₁ * (1 + 4 * C₂) * K * (N ^ (3 / 2 - γ) + N ^ ε * s1Poly γ N y H) := by ring
 
-/-- CITED. Song 2020, pages 5 through 8, the S1 estimate after summing over h:
+/-- PROVED, axioms propext, Classical.choice, Quot.sound, status audit CLAUDE S60 2026-11-22; formerly CITED. Song 2020, pages 5 through 8, the S1 estimate after summing over h:
 S1 is bounded by n to the 3/2 minus gamma plus n to the epsilon times the nine H monomials.
 Published inputs used by the paper for this display: the reduction to Lambda weighted sums
 by partial summation, page 5; the Vaughan identity, the paper's Lemma 3.2, page 5;
@@ -976,7 +979,7 @@ theorem le_budget (γ n y : ℝ) (hn : 0 ≤ n) (hy : 0 ≤ y) (E F : ℝ)
     positivity
   · exact List.mem_map.mpr ⟨(E, F), h, rfl⟩
 
-/-- LEAF. Pages 5 through 8, S1 estimates and parameter choices.
+/-- PROVED, axioms propext, Classical.choice, Quot.sound, status audit CLAUDE S60 2026-11-22; formerly LEAF. Pages 5 through 8, S1 estimates and parameter choices.
 Published inputs: Iwaniec and Kowalski Corollary 8.13, the cited Vaughan identity,
 and Graham and Kolesnik Lemmas 2.4 and 2.5.
 The S2 monomial uses the balance derived from page 5, as recorded in STATEMENTS.md. -/
@@ -1144,7 +1147,7 @@ theorem optimized_truncated_bound :
       ≤ C₁ * K * M + max 1 C₁ * K * (Cg * (21 * M)) := hfin
     _ = (C₁ + max 1 C₁ * Cg * 21) * K * N ^ ε * budget γ N y := by rw [hM]; ring
 
-/-- LEAF. Page 8, last sentence. Endpoint exponent comparisons bound each monomial. -/
+/-- PROVED, axioms propext, Classical.choice, Quot.sound, status audit CLAUDE S60 2026-11-22; formerly LEAF. Page 8, last sentence. Endpoint exponent comparisons bound each monomial. -/
 theorem monomial_le (n y θ A B D E : ℝ) (hn : 1 ≤ n) (hy : n ^ θ ≤ y)
     (hyn : y ≤ n) (hlo : A + θ * (B - E) ≤ D) (hhi : A + B - E ≤ D) :
     n ^ A * y ^ B ≤ n ^ D * y ^ E := by
