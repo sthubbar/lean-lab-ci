@@ -1,6 +1,7 @@
 import LeanLab.Halupczok2012.U1439Combin
 import Mathlib.Data.Finset.NatDivisors
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+import LeanLab.Halupczok2012.Feed1122VoronoiDivisorSumAsymptotic
 
 /-!
 Halupczok journal pages 336 to 337, Lemma 2.1 and display 2.2.
@@ -181,8 +182,8 @@ theorem voronoi_divisor_sum_asymptotic :
     ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ x : ℝ, X0 ≤ x →
       |(∑ n ∈ Icc 1 ⌊x⌋₊, (n.divisors.card : ℝ)) -
         (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x)| ≤
-          C * x ^ (1 / 3 : ℝ) * Real.log x := by
-  sorry
+          C * x ^ (1 / 3 : ℝ) * Real.log x :=
+  Feed1122VoronoiDivisorSumAsymptotic.voronoi_divisor_sum_asymptotic_of_leaves
 
 /-- Extend the eventual Voronoi bound across the bounded initial range on page 337.
 This implication is CONDITIONAL ON the explicit eventual summatory estimate. -/
