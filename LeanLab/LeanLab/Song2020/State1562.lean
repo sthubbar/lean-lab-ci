@@ -16,6 +16,11 @@ Status labels:
 * `song_asymptotic` OPEN, the Section 4 formula for R(n), `DECOMPOSE WANTED`.
 * `singular_lower` OPEN, an elementary positivity fact the deduction of Theorem 1 needs.
 
+Status audit CLAUDE S60 2026-11-22, superseding the labels above: `song_lemma5` and
+`singular_lower` are PROVED; Lemma 4 is PROVED as `Wire1122Lemma4.song_lemma4_of_leaves`;
+`song_lemma3` stays CITED, Pan and Pan 1988 Theorem 3, not in papers/; `song_asymptotic` rests
+on `song_lemma3` and the BLOCKED `Decomp139b.logarithmic_transfer139`.
+
 Encoding notes.
 * Window: primes p with |p - n/3| < y, strict as in the definitions of f, g and R(n).
 * f carries the weight (1/γ) p^{1-γ} and runs over Piatetski-Shapiro primes `IsPSPrime γ`,
