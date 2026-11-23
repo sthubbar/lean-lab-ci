@@ -1,6 +1,7 @@
 /- AI wrote the Lean code for CODEX task164.
 Journal Lemma 3, pp. 1215 and 1216. Goldbach is open. -/
 import LeanLab.BS2022GRH.ChenThresholdGRH
+import LeanLab.BS2022GRH.ProgressionS63
 namespace LeanLab.BS2022GRH.DecompC164a
 open Real Finset Classical ChenThresholdGRH
 noncomputable section
@@ -148,7 +149,7 @@ theorem progression_at_endpoint (hG : GRH) (d a : ℕ) (N : ℝ)
     (hd : 3 ≤ d) (hdN : (d : ℝ) ≤ √N) (ha : Nat.Coprime a d) :
     |((((range (⌊N⌋₊ + 1)).filter (fun p => p.Prime ∧ p % d = a % d)).card : ℕ) : ℝ)
         - liPV N / (d.totient : ℝ)| ≤ qG N * √N * log N := by
-  sorry
+  exact ProgressionS63.progression_at_endpoint_of_theorem1 hG d a N hd hdN ha
 
 /-- Exact sealed Lemma3J. The endpoint input remains CITED and OPEN. -/
 theorem lemma3J : Lemma3J := by
