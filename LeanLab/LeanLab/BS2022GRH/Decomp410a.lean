@@ -4,6 +4,7 @@ Goldbach is open. -/
 import LeanLab.BS2022GRH.Density410
 import LeanLab.BS2022GRH.RH148
 import LeanLab.BS2022GRH.Mertens410
+import LeanLab.BS2022GRH.Reciprocal333
 
 namespace LeanLab.BS2022GRH.Decomp410a
 open Real Finset ChenThresholdGRH
@@ -16,7 +17,9 @@ Source https://doi.org/10.1090/S0025-5718-1976-0457374-X. -/
 theorem rh_reciprocal_upper (hRH : RiemannHypothesis) (x : ℝ) (hx : 64 ≤ x) :
     (∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 : ℝ) / p) ≤
       log (log x) + DecompC169c.mertensConstant + (3 * log x + 4) / (8 * π * √x) := by
-  sorry
+  by_cases hx2657 : 2657 ≤ x
+  · exact Reciprocal333.reciprocal_upper_of_prime_count ?h1 hRH x hx2657
+  · sorry
 
 /-- The lower half of Schoenfeld Corollary 3 p. 341 display 6.23.
 The finite logarithmic correction and exponential inequality are proved.
