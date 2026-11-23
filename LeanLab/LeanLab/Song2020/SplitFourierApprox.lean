@@ -5,12 +5,14 @@ the S2 estimate on printed pages 4 and 5, from the display after "By Lemma 3.1, 
 through "Concluding the above estimate, we have S2 << H^(1/2) n^(1-γ/2) + H^(-1) y n^(1-γ)".
 Lemma 1 is already PROVED on main as
 `Repair591FourierMajorant.song_lemma1_majorant591` and is used here, not restated.
-The remaining cited input is Graham and Kolesnik, display 3.3.4, the exponent pair 1/2, 1/2.
+The Graham and Kolesnik input, display 3.3.4, the exponent pair 1/2, 1/2, is now PROVED via
+`Prep1121FourierS2.exponent_pair_half`, CLAUDE S60 2026-11-22; the file has no sorry and builds.
 The original statement is not restated: the assembly proves its exact type.
-AI wrote the Lean code. Not compiled in this design unit. Binary Goldbach is open.
+AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Song2020.Decomp139
 import LeanLab.Song2020.Repair591FourierMajorant
+import LeanLab.Song2020.Prep1121FourierS2
 
 namespace LeanLab.Song2020.SplitFourierApprox
 
@@ -76,12 +78,16 @@ theorem leaf_saw_window_triangle (γ : ℝ) (hγ : 0 < γ) (a b : ℕ → ℤ �
   refine mul_le_mul_of_nonneg_left ?_ hpw
   exact (norm_sub_le _ _).trans (add_le_add (hmaj _) (hmaj _))
 
-/-- LEAF. CITED: S. W. Graham and G. Kolesnik, van der Corput's Method of Exponential Sums,
+/-- PROVED, formerly a LEAF citing S. W. Graham and G. Kolesnik, van der Corput's Method of Exponential Sums,
 LMS Lecture Note Series 126, Cambridge 1991, display 3.3.4 with the exponent pair 1/2, 1/2,
 as used by Song on printed page 4, last display. Applied on dyadic pieces of the window. -/
 theorem leaf_exponent_pair_half :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 → ExponentPairHalf γ := by
-  sorry
+  -- Closed by CLAUDE S60 burst-20261122 from the PROVED Prep1121FourierS2.exponent_pair_half,
+  -- the Graham and Kolesnik 3.3.4 route; its first conjunct is this bound without 0 < y.
+  intro γ hγ hγ1
+  obtain ⟨C, hC, N₀, h⟩ := LeanLab.Song2020.Prep1121FourierS2.exponent_pair_half γ hγ hγ1
+  exact ⟨C, hC, N₀, fun n hn y _ hy k hk t => (h n hn y hy t k hk).1⟩
 
 /-! ### Private helpers for the S2 window bound -/
 
