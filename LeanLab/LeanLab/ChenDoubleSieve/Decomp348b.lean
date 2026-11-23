@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp348a
+import LeanLab.ChenDoubleSieve.Feed1122_Decomp348b_main4_lower
 
 /-!
 Supply split for the F4 lower bound in Wu 2004.
@@ -2325,7 +2326,7 @@ theorem main4_lower (F f : ℝ → ℝ) (h : IsLinearSieve F f) :
     ∀ η : ℝ, 0 < η → ∃ B : ℝ, 0 < B ∧ ∃ N0 : ℕ,
       ∀ N : ℕ, Even N → N0 ≤ N →
         main4 f B N - η * Θ N ≤ sieveTerms N 4 := by
-  sorry
+  exact LeanLab.ChenDoubleSieve.Feed1122.Decomp348b.main4_lower_of_leaves F f h
 
 set_option maxHeartbeats 8000000 in
 /-- LEAF. Wu 2004 page 39 equation 10.5, replacement of prime sums by integrals.
