@@ -9,11 +9,13 @@ Split of `DecompC164a.progression_at_endpoint`, journal Lemma 3 p. 1216, into
 Theorem 1 needs x ≥ q; the journal statement has d ≤ √N with d ≥ 3, so N ≥ d ≥ q.
 No range of N or d is left uncovered. -/
 import LeanLab.BS2022GRH.ChenThresholdGRH
+import LeanLab.BS2022GRH.ProgressionEPS70
+import LeanLab.BS2022GRH.ProgressionWireS76
 namespace LeanLab.BS2022GRH.ProgressionS63
 open Real Finset Classical ChenThresholdGRH
 noncomputable section
 
-/-- LEAF: journal Lemma 3 p. 1216, the cited input, Ernvall-Hytonen and Palojarvi 2022,
+/-- Was a LEAF, split by S70 in ProgressionEPS70 along the paper's Section 4: journal Lemma 3 p. 1216, the cited input, Ernvall-Hytonen and Palojarvi 2022,
 arXiv 2003.01925v4, Theorem 1 p. 2, in its published form and range: GRH, gcd(a, q) = 1,
 q ≥ 3, real x ≥ q, strict bound with eight explicit terms. HARD, a citation proved in the
 source from its Theorem 3 by partial summation. li is the principal value, `liPV`.
@@ -30,7 +32,7 @@ theorem ep2022_theorem1 (hG : GRH) (q a : ℕ) (x : ℝ)
       + (5.254 * log q ^ 2 + 121.765 * log q + 939.260) * x ^ ((1 : ℝ) / 4)
       + (80.768 * log q ^ 2 + 1753.168 * log q + 11605.056) * √x / log x ^ 3
       - 237.934 := by
-  sorry
+  exact ProgressionWireS76.ep2022_theorem1_S76 hG q a x ha hq hx
 
 set_option maxHeartbeats 1000000 in
 /-- The specialization of journal Lemma 3 p. 1216: for 3 ≤ q ≤ √x the bound of
