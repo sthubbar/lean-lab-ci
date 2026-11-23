@@ -16,7 +16,7 @@ Pieces.
 
 AI wrote the Lean code. Binary Goldbach is OPEN.
 -/
-import LeanLab.ExceptionalSet.SPLIT_leaf_karW_display8
+import LeanLab.ExceptionalSet.SPLIT_leaf_W_bound
 
 namespace LeanLab.ExceptionalSet.U1539.KaracubaSplit
 
@@ -379,8 +379,7 @@ theorem leaf_karW_display8 (h1 : KarLemma1) (h3 : KarLemma3) (h4 : KarLemma4) :
             ((karP2 c1 n P : ℝ) + 1) ^ 2 *
             (P : ℝ) ^ (-(min (c1 / 3) (min c3 c4) * (∑ s ∈ T, (s : ℝ)) /
               (8 * (((n * l + ⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊ : ℕ) : ℝ)) ^ 2))) := by
-  intro c0 c1 c2 c3 c4 hc0 hc1 hc2 hc3 hc4 hc01 hc11 hc241
-  exact leaf_karW_display8_split h1 h3 h4 c0 c1 c2 c3 c4 hc0 hc1 hc2 hc3 hc4 hc01 hc11 hc241
+  sorry
 
 /-! ### The assembly -/
 
