@@ -1,6 +1,7 @@
 import LeanLab.ChenDoubleSieve.Decomp275b
 import LeanLab.ChenDoubleSieve.Section3
 import LeanLab.BS2022GRH.PortedMertens
+import LeanLab.ChenDoubleSieve.Feed1122_Decomp348a_main0_lower
 
 /-!
 Supply split for the lower sieve bounds in Wu 2004.
@@ -798,7 +799,7 @@ theorem main0_lower (F f : ℝ → ℝ) (h : IsLinearSieve F f) :
     ∀ η : ℝ, 0 < η → ∃ B : ℝ, 0 < B ∧ ∃ N0 : ℕ,
       ∀ N : ℕ, Even N → N0 ≤ N →
         main0 f B N - η * Θ N ≤ sieveTerms N 0 := by
-  sorry
+  exact LeanLab.ChenDoubleSieve.Feed1122.Decomp348a.main0_lower_of_leaves F f h
 
 /-- The finite main term has the required coefficient limit.
 CONDITIONAL ON the OPEN Euler product asymptotic and IsLinearSieve. -/
