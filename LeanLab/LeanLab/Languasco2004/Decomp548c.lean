@@ -40,17 +40,27 @@ theorem remainder_lower :
       (((window N ε).filter (fun n => pieceSum 3 4 false N (localization N ε) n <
         0.289310 * scale N (localization N ε) n)).card : ℝ) ≤
       C * windowLength N ε / Real.log N ^ B := by
-  -- BLOCKED 2026-11-21 FREE-nv-minimax3 task2177 remainder_lower
-  -- OUT OF REACH: attempted 2026-11-21 the only elementary route (filter_subset +
-  -- card_le_card); trace_state left the goal
-  --   card ≤ 1 * windowLength N ε / Real.log N ^ B with only card ≤ card(window N ε)
-  -- available, which is false for large N since Real.log N ^ B → ∞.
-  -- Requires Jia 1996 Lemma 26 display 65 large-sieve/Gallagher small-value bound for
-  -- pieceSum 3 4 false with coefficient 0.289310. LeanSearch queries on large sieve
-  -- exceptional set and sieve sum below constant times main term returned only
-  -- Mathlib SelbergSieve BoundingSieve (no exceptional-set count bound); Loogle query
-  -- (filter _ _).card ≤ _ / Real.log _ ^ _ returned 0 declarations. Not in Mathlib,
-  -- not CITED in Decomp279a/Decomp316c/GroupSplit548.
+  -- BLOCKED 2026-11-22 FREE-nv-glm5 task2583 remainder_lower
+  -- OUT OF REACH. Attempted 2026-11-22 the only elementary route (Finset.filter_subset
+  -- + Finset.card_le_card). Own lake build error at the final exact_mod_cast:
+  --   mod_cast has type #(filter ... pieceSum 3 4 false ... < 0.289310 * scale ...) ≤
+  --     #(window N ε)
+  --   but is expected to have type
+  --     ↑(#(filter ...)) ≤ 1 * windowLength N ε / log N ^ B
+  -- i.e. only card ≤ card (window N ε) is available, and card (window N ε) is not
+  -- ≤ C * windowLength N ε / Real.log N ^ B for fixed C since Real.log N ^ B → ∞.
+  -- Missing result: Jia 1996 Lemma 26 display 65 (p. 286) large-sieve/Gallagher
+  -- small-value bound #{n ∈ window : pieceSum 3 4 false < 0.289310 * scale}
+  -- = O(windowLength N ε / log^B N). Searches run 2026-11-22: LeanSearch
+  -- "exceptional set estimate large sieve ... window length over log power" and
+  -- "large sieve inequality sum over moduli exponential sum mean value bound"
+  -- returned only Mathlib SelbergSieve/BoundingSieve (combinatorial sifted-set
+  -- bounds, no exceptional-set count bound); Loogle (Finset.filter _ _).card ≤
+  -- _ / Real.log _ ^ _ returned count 0; Loogle Gallagher large sieve Real.log
+  -- returned unknown identifier. Grep of Decomp279a/Decomp316c/GroupSplit548/
+  -- Decomp316a/Geometry316/StatementsA found no card/log^B count bound except
+  -- extend_windows, which takes such a bound as hypothesis. Not in Mathlib, not
+  -- CITED in any imported lab file.
   sorry
 
 /-- Jia Lemma 26: the exact sealed group3_lower statement follows
