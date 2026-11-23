@@ -7,6 +7,7 @@ AI wrote the Lean code. Goldbach is open.
 import Mathlib
 import LeanLab.BHP1997.Repair499Euler
 import LeanLab.BHP1997.Decomp560a
+import LeanLab.BHP1997.FiniteOrderPortS64
 
 namespace LeanLab.BHP1997.DecompC165a.Contour230
 
@@ -838,16 +839,63 @@ theorem weighted_strip_interpolation_finite_order {δ : ℝ} (hδ : 0 < δ)
   exact hi.trans_eq halg
 
 
-/-- LEAF. P0069 page 22, Lemma 8, Rademacher reference 28.
+/-- P0069 page 22, Lemma 8, Rademacher reference 28.
 Rademacher page 195 display 3.1 is finite-order growth, used for the
 L-functions in Section 6 on pages 198 and 199. The principal pole is
-subtracted. The two growth constants can depend on the character. OPEN. -/
+subtracted. The two growth constants can depend on the character.
+PROVED by burst-20261122 S64 with exponent 2, from the port in FiniteOrderPortS64:
+compact rectangle at height at most one, pole cost one above it. -/
 theorem leaf_regularPart_finite_order_growth {δ : ℝ} (hδ : 0 < δ) (hδhalf : δ < 1 / 2)
     {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) :
     ∃ C c : ℝ, 0 < C ∧ 0 < c ∧ ∀ s : ℂ,
       -δ ≤ s.re → s.re ≤ 1 + δ →
       ‖regularPart χ s‖ ≤ C * Real.exp (|s.im| ^ c) := by
-  sorry
+  obtain ⟨E, G, B, hE, hG, hB, hL⟩ := FiniteOrderPortS64.LFunction_bound_high hδ χ
+  have hK : IsCompact (Set.Icc (-δ) (1 + δ) ×ℂ Set.Icc (-1 : ℝ) 1) :=
+    isCompact_Icc.reProdIm isCompact_Icc
+  obtain ⟨C0, hC0⟩ := hK.exists_bound_of_continuousOn
+    (regularPart_entire χ).continuous.continuousOn
+  set C1 : ℝ := max C0 0
+  refine ⟨C1 + 1 + (E * G + 1) * Real.exp (B ^ 2), 2, by positivity, by norm_num, ?_⟩
+  intro s hsl hsu
+  rw [Real.rpow_two]
+  have hexp1 : 1 ≤ Real.exp (|s.im| ^ 2) := Real.one_le_exp (by positivity)
+  have hCpos : 0 ≤ C1 + 1 + (E * G + 1) * Real.exp (B ^ 2) := by positivity
+  rcases le_or_gt |s.im| 1 with hlow | hhigh
+  · have hmem : s ∈ Set.Icc (-δ) (1 + δ) ×ℂ Set.Icc (-1 : ℝ) 1 := by
+      rw [Complex.mem_reProdIm]
+      exact ⟨⟨hsl, hsu⟩, abs_le.mp hlow⟩
+    have h0 := (hC0 s hmem).trans (le_max_left C0 0)
+    have hC1 : 0 ≤ C1 := le_max_right C0 0
+    calc _ ≤ C1 := h0
+      _ ≤ C1 + 1 + (E * G + 1) * Real.exp (B ^ 2) := by
+          have : 0 ≤ (E * G + 1) * Real.exp (B ^ 2) := by positivity
+          linarith
+      _ ≤ _ := le_mul_of_one_le_right hCpos hexp1
+  · have hs1 : s ≠ 1 := by
+      intro h; rw [h] at hhigh; norm_num at hhigh
+    have hd : 1 ≤ ‖s - 1‖ := by
+      have := abs_im_le_norm (s - 1)
+      simp only [sub_im, one_im, sub_zero] at this
+      linarith
+    have hp : 1 / ‖s - 1‖ ≤ 1 := by
+      rw [div_le_one (by linarith)]; exact hd
+    have hreg := (pole_norm_bounds χ hs1).1
+    have hLs := hL s hsl hsu hhigh.le
+    have hexpB : Real.exp (B * |s.im|) ≤ Real.exp (B ^ 2) * Real.exp (|s.im| ^ 2) := by
+      rw [← Real.exp_add]
+      exact Real.exp_le_exp.mpr (by nlinarith [sq_nonneg (B - |s.im|), abs_nonneg s.im])
+    have hexpB1 : 1 ≤ Real.exp (B * |s.im|) := Real.one_le_exp (by positivity)
+    have hEG : 0 ≤ E * G := by positivity
+    calc ‖regularPart χ s‖ ≤ E * (G * Real.exp (B * |s.im|)) + 1 := by linarith
+      _ ≤ (E * G + 1) * Real.exp (B * |s.im|) := by nlinarith
+      _ ≤ (E * G + 1) * (Real.exp (B ^ 2) * Real.exp (|s.im| ^ 2)) :=
+          mul_le_mul_of_nonneg_left hexpB (by positivity)
+      _ = ((E * G + 1) * Real.exp (B ^ 2)) * Real.exp (|s.im| ^ 2) := by ring
+      _ ≤ _ := by
+          apply mul_le_mul_of_nonneg_right _ (by positivity)
+          have : 0 ≤ C1 := le_max_right C0 0
+          linarith
 
 /-- P0069 page 22 and Rademacher page 195 display 3.1.
 The stronger linear-exponential growth statement follows from the printed
