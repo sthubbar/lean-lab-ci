@@ -25,6 +25,7 @@ AI-written Lean code, 2026-11-07. Checked only by the Lean kernel.
 Binary Goldbach itself is OPEN; this is the almost-all bound.
 -/
 import LeanLab.ExceptionalSet.Statements
+import LeanLab.ExceptionalSet.Feed1122LeafWindowCount
 
 namespace LeanLab.ExceptionalSet
 open Real Filter Topology
@@ -41,7 +42,7 @@ theorem leaf_window_count :
             (N + ⌊(N : ℝ) ^ (0.99979 : ℝ)⌋₊)).filter
           (fun n : ℕ => Even n ∧ ¬ IsGoldbachSum n)).card : ℝ)
         ≤ C * (N : ℝ) ^ (0.8787026 : ℝ) := by
-  sorry
+  exact Feed1122WindowCount.leaf_window_count_of_leaves
 
 /-- For `a ≥ 1` its `Nat.floor` is at least `a / 2`. -/
 private theorem half_le_floor {a : ℝ} (ha : 1 ≤ a) : a / 2 ≤ (⌊a⌋₊ : ℝ) := by
