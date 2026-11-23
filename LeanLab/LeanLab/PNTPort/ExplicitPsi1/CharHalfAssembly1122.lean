@@ -19,9 +19,8 @@ Proved pieces used:
 Leaves, each a cited step of Davenport ch. 19:
 * `good_height`, p. 116, the choice of a modified height, PROVED: it is
   `char_good_height_pm1122` of `CharGoodHeight1122.lean`.
-* `contour_good_height_leaf`, PROVED in session S73 as `CharContour1122.contour_bound`:
-  pp. 116 and 117, the contour shift at a good height, the horizontal integrals, the far left
-  segments and the left edge, leading to display (4).
+* `contour_good_height_leaf`, HARD: pp. 116 and 117, the contour shift at a good height, the
+  horizontal integrals, the far left segments and the left edge, leading to display (4).
 * `window_switch`, PROVED: p. 117, replacing the good height by `T`, the zeros with
   `T ≤ |γ| < T'` being `O(log qT)` in number by ch. 16 display (3).
 * p. 118, `b(χ) = O(log q) - Σ_{|γ|<1} 1/ρ`: PROVED as `CharBRegroup1122.b_regroup`, the
@@ -32,7 +31,6 @@ import LeanLab.PNTPort.ExplicitPsi1.CharTrivial1122
 import LeanLab.PNTPort.ExplicitPsi1.CharRect1122
 import LeanLab.PNTPort.ExplicitPsi1.CharGoodHeight1122
 import LeanLab.PNTPort.ExplicitPsi1.CharBRegroup1122
-import LeanLab.PNTPort.ExplicitPsi1.CharContour1122
 
 namespace LeanLab.PNTPort.ExplicitPsi1.CharHalfAssembly1122
 
@@ -90,10 +88,9 @@ theorem good_height : ∃ C : ℝ, 0 < C ∧ ∀ (q : ℕ) [NeZero q]
 `CharRect1122.char_rect_explicit`, `CharEdges1122.char_horizontal_edge1122`,
 `CharTrivial1122Rect.tendsto_rect_left_char`, `CharTrivial1122Left.left_edge_tendsto_zero_of_leaf`. -/
 
-/-- PROVED, formerly a LEAF of class HARD, burst-20261122 session S73: Davenport, Multiplicative
-Number Theory, second edition, ch. 19 pp. 116 and 117, the contour argument leading to display (4)
-at a good height `T'`, with `|L'/L| ≤ K` on the horizontal segments as given by `good_height`.
-It is `CharContour1122.contour_bound`. See the route notes above. -/
+/-- LEAF: Davenport, Multiplicative Number Theory, second edition, ch. 19 pp. 116 and 117, the
+contour argument leading to display (4) at a good height `T'`, with `|L'/L| ≤ K` on the
+horizontal segments as given by `good_height`. Class HARD. See the route notes above. -/
 theorem contour_good_height_leaf : ∃ D : ℝ, 0 ≤ D ∧ ∀ (q : ℕ) [NeZero q]
     (χ : DirichletCharacter ℂ q), χ.IsPrimitive → χ ≠ 1 → ∀ T' K : ℝ, 2 ≤ T' → 0 ≤ K →
       (∀ σ ∈ Icc (-1 / 2 : ℝ) 2, ∀ τ ∈ ({T', -T'} : Set ℝ),
@@ -106,9 +103,7 @@ theorem contour_good_height_leaf : ∃ D : ℝ, 0 ≤ D ∧ ∀ (q : ℕ) [NeZer
           (∑ ρ ∈ Z', (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℂ) *
             (n : ℂ) ^ ρ / ρ) + (zeroLog χ n : ℂ) + b - (trivSum χ n : ℂ)‖ ≤
         D * ((K + 1) * n / T' + Real.log ((q : ℝ) * T') / T' + Real.log n) := by
-  obtain ⟨D, hD, h⟩ := CharContour1122.contour_bound
-  exact ⟨D, hD, fun q _ χ hp hχ T' K hT hK hg b hb n hn Z' hZ =>
-    h q χ hp hχ T' K hT hK hg b hb n hn Z' hZ⟩
+  sorry
 
 /-- One window term: `‖m n^ρ/ρ‖ ≤ m n/T` for `Re ρ < 1`, `|Im ρ| ≥ T > 0`. -/
 lemma term_le {f : ℂ → ℂ} {n : ℕ} (hn : 2 ≤ n) {T : ℝ} (hT : 0 < T) {ρ : ℂ}
@@ -290,8 +285,8 @@ theorem exists_isB {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q} (hprim :
 /-! ## The assembly -/
 
 set_option maxHeartbeats 1000000 in
-/-- PROVED: `contour_good_height_leaf`, `good_height`, `window_switch`
-and `CharBRegroup1122.b_regroup` are all PROVED. Davenport, Multiplicative Number
+/-- CONDITIONAL ON the one leaf `contour_good_height_leaf`; `good_height`, `window_switch`
+and `CharBRegroup1122.b_regroup` are PROVED. Davenport, Multiplicative Number
 Theory, second edition, ch. 19 p. 117 display (4) with the error (6) at an integer `x = n`,
 and p. 118 for `b(χ)`: the half weighted integer character sum plus the zero sum up to height
 `T` minus the low reciprocal sum is `O(n/T log² qnT + log q + log n)`, uniformly. This is the
