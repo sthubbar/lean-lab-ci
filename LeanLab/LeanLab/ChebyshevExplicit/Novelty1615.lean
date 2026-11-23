@@ -1,4 +1,5 @@
 import Mathlib
+import LeanLab.ChebyshevExplicit.Feed1122_Novelty1615_chebyshev_pi_bounds_from_96098
 
 /-!
 # ChebyshevExplicit, Novelty1615: the sharp range of the 1852 constants
@@ -53,7 +54,7 @@ theorem chebyshevBoundsFrom_mono {M N : ℕ} (h : M ≤ N) (hM : ChebyshevBounds
 has leading constant 1.10556 and can never close it. The tail needs an explicit analytic bound of
 Rosser and Schoenfeld type, then a finite check up to about 1.5e6. -/
 theorem chebyshev_pi_bounds_from_96098 : ChebyshevBoundsFrom 96098 := by
-  sorry
+  exact chebyshev_pi_bounds_from_96098_of_leaves
 
 /-- Vacuity instance: the hypothesis of `ChebyshevBoundsFrom 96098` holds at `n = 96098`, the least
 value it allows. -/

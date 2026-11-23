@@ -1,4 +1,5 @@
 import LeanLab.Halupczok2012.Statements
+import LeanLab.Halupczok2012.DecompJ219LeavesWu
 import Mathlib.Data.Real.Basic
 import Mathlib.Algebra.Order.Field.Basic
 
@@ -14,8 +15,8 @@ We state it as: there exists `c > 0` such that for large `Y`,
 the count is `≥ c Y / (log Y)^2`. -/
 theorem leaf_wu_theorem :
   ∃ c > 0, ∃ Y0 > 0, ∀ (X Y : ℝ), Y0 ≤ Y → X ^ (0.971 : ℝ) ≤ Y → Y ≤ X →
-    c * Y / (Real.log Y) ^ 2 ≤ (@Finset.filter ℕ (fun (p : ℕ) => p.Prime ∧ IsP 2 (p + 2) ∧ ¬ 3 ∣ (p + 2)) (Classical.decPred _) (kRange X Y)).card := by
-  sorry
+    c * Y / (Real.log Y) ^ 2 ≤ (@Finset.filter ℕ (fun (p : ℕ) => p.Prime ∧ IsP 2 (p + 2) ∧ ¬ 3 ∣ (p + 2)) (Classical.decPred _) (kRange X Y)).card :=
+  LeanLab.Halupczok2012.DecompJ219LeavesWu.leaf_wu_theorem_of_leaves
 
 /-- LEAF: page 346. The number of exceptions in Corollary 1.2 is `≪ Y L^{-A}`.
 This directly extracts the bound from `Corollary2`. -/

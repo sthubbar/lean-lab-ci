@@ -1,5 +1,6 @@
 import LeanLab.Halupczok2012.Decomp329f
 import LeanLab.Halupczok2012.Decomp329b
+import LeanLab.Halupczok2012.DecompJ219LeavesWu
 
 /-!
 Fixed exponent analytic supply for the sealed Wu leaf.
@@ -88,8 +89,8 @@ theorem fixed_wu_rough_count_leaf :
     ∃ c > 0, ∃ X0 : ℝ, ∀ X : ℝ, X0 ≤ X → 2 ≤ X →
       c * X ^ (0.971 : ℝ) / (Real.log X) ^ 2 ≤
         (((kRange X (X ^ (0.971 : ℝ))).filter
-          (fun p => p.Prime ∧ IsP 2 (p + 2) ∧ ¬ 3 ∣ (p + 2))).card : ℝ) := by
-  sorry
+          (fun p => p.Prime ∧ IsP 2 (p + 2) ∧ ¬ 3 ∣ (p + 2))).card : ℝ) :=
+  LeanLab.Halupczok2012.DecompJ219LeavesWu.fixed_wu_count_of_sifted
 
 /-- Halupczok page 345, the exact sealed Wu statement from the fixed exponent leaf.
 This assembly has no sorry of its own and remains conditional on that open leaf. -/
