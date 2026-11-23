@@ -11,6 +11,7 @@ Binary Goldbach is open.
 -/
 import LeanLab.BS2022GRH.PaperInputs148
 import LeanLab.BS2022GRH.Lemma5Coeffs138
+import LeanLab.BS2022GRH.Lemma5MuMidS70All
 
 namespace LeanLab.BS2022GRH.Lemma5MuS63
 open Real Finset
@@ -165,12 +166,16 @@ theorem cdem07_thm3 : ∀ x : ℝ, 438653 ≤ x →
       ≤ 0.02767 * √x := by
   sorry
 
-/-- LEAF: Buthe 2014 display 4.6, the short computer calculation, upper half, on the
-middle range K0 + 1 ≤ x < 438653 not covered by the kernel check of this file. Class MEDIUM,
-a finite computation of about 4.4 * 10^5 squarefree tests. -/
+/-- PROVED in S70, was a LEAF: Buthe 2014 display 4.6, the short computer calculation,
+upper half, on the middle range K0 + 1 ≤ x < 438653 not covered by the kernel check of this
+file. Proved in Lemma5MuMidS70All by a kernel checked Legendre count at 1117 checkpoints. -/
 theorem buthe_compute_mid : ∀ x : ℝ, (K0 + 1 : ℝ) ≤ x → x < 438653 →
     (((Icc 1 ⌊x⌋₊).filter (fun n => Squarefree n)).card : ℝ) ≤ Lemma5Coeffs138.mMu x * x := by
-  sorry
+  intro x h1 h2
+  have h3 : (3001 : ℝ) ≤ x := by
+    have : ((K0 : ℕ) : ℝ) = 3000 := by norm_num [K0]
+    linarith
+  exact Lemma5MuMidS70.buthe_compute_mid_proved x h3 h2
 
 /-- Buthe 2014 display 4.6, upper half, as journal Lemma 5 uses it, assembled from the
 two leaves and the proved small range. CONDITIONAL ON the leaves through sorry. -/
@@ -192,3 +197,4 @@ end LeanLab.BS2022GRH.Lemma5MuS63
 #print axioms LeanLab.BS2022GRH.Lemma5MuS63.sqf_card_le_cP
 #print axioms LeanLab.BS2022GRH.Lemma5MuS63.real_of_good
 #print axioms LeanLab.BS2022GRH.Lemma5MuS63.lemma5_mu_assembled
+#print axioms LeanLab.BS2022GRH.Lemma5MuS63.buthe_compute_mid
