@@ -35,6 +35,7 @@ target into the three differences above and adds the three mean square estimates
 is OPEN.
 -/
 import LeanLab.BhowmikGrimmelt2026.Statements
+import LeanLab.BhowmikGrimmelt2026.Feed1122_SPLIT_prop75_leaf_rphi_major
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -58,7 +59,7 @@ theorem leaf_rphi_major (ϕ G : ℝ → ℝ) (hϕ : IsPhi ϕ) (hG : IsMajorWeigh
               (fun q => ((X : ℝ) ^ ϑ) ^ (-(1 / 4) : ℝ) * X * q / (X : ℝ) ^ ϑ) α *
             ee (-(N * α))‖ ^ 2 ≤
         C * ((X : ℝ) ^ (3 - ϑ) + (X : ℝ) ^ (13 / 5 : ℝ)) * Real.log X ^ 5 := by
-  sorry
+  exact leaf_rphi_major_of_leaves ϕ G hϕ hG ϑ hϑ0 hϑ
 
 /-- LEAF 2. Step two, the smoothed major arc integral against the main term and the single
 zero sum: there is `C` such that for every `X ≥ 2` the second moment over `N ≤ X` of the

@@ -2,6 +2,7 @@ import LeanLab.Halupczok2012.Decomp532a
 import LeanLab.Halupczok2012.Decomp598Pointwise
 import LeanLab.Halupczok2012.Decomp598Lemma21
 import LeanLab.Halupczok2012.U1439Thm2Reduction
+import LeanLab.Halupczok2012.Decomp598Theorem6LeavesKawada
 
 /-!
 Halupczok journal pages 338 to 340, display 2.4 and Theorem 3.1.
@@ -25,8 +26,8 @@ theorem kawada_thm22_display24 :
       1 ≤ Q2 → Q2 ≤ c3 * Y * X2 ^ (-(1 / 2) : ℝ) * Real.log Y ^ (-B) →
       ∑ q2 ∈ Icc 1 ⌊Q2⌋₊, ∑ k ∈ kRange X1 Y,
         |binSumAP X2 Y q2 a2 (2 * k) - Sqa (2 * k) q2 a2 * Y| ≤
-          C * Y ^ 2 * Real.log Y ^ (-A) := by
-  sorry
+          C * Y ^ 2 * Real.log Y ^ (-A) :=
+  LeanLab.Halupczok2012.Decomp598Theorem6LeavesKawada.kawada_thm22_display24_of_leaves
 
 /-- The nonnegative weighted Cauchy Schwarz step on journal page 340.
 A pointwise bound converts the second moment to the first moment. -/
