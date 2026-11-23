@@ -4,6 +4,7 @@ The final Perron bound is CONDITIONAL on the remaining horizontal leaf.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp488b
+import LeanLab.BHP1997.HorizontalConvexityS64
 
 namespace LeanLab.BHP1997.DecompC165a.Contour230
 open Classical Complex MeanValue132 MeasureTheory Set Filter
@@ -14,7 +15,8 @@ horizontal display before 3.36: the exponent is taken at epsilon equal to the
 reciprocal of log x, so that the maximum reads (qT)^(c - sigma) with c equal to
 1/2 + 1/log x. The uniformity in epsilon costs one factor log x, the zeta value at
 one plus epsilon in Rademacher reference 28. The safe height keeps the pole term
-bounded. CITED and OPEN. -/
+bounded. Was CITED and OPEN; now CONDITIONAL on
+Decomp530a.leaf_regularPart_finite_order_growth through HorizontalConvexityS64, S64. -/
 theorem horizontal_convexity_input :
     ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 2 ≤ x → ∀ (q : ℕ) [NeZero q], 1 ≤ q → (q : ℝ) ≤ x →
       ∀ χ : DirichletCharacter ℂ q, ∀ σ τ : ℝ, 0 ≤ σ → σ ≤ 1 / 2 + 1 / Real.log x →
@@ -22,7 +24,7 @@ theorem horizontal_convexity_input :
         ‖χ.LFunction (((1 / 2 + σ : ℝ) : ℂ) + τ * I)‖ ≤
           C * Real.log x *
             (((q : ℝ) * (|τ| + 1)) ^ (1 / 2 + 1 / Real.log x - σ) + 1) := by
-  sorry
+  exact horizontal_convexity_input_s64
 
 /-- P0069 Baker Harman Pintz 1997, page 22, the maximum over sigma in [0, c] in the
 horizontal display before 3.36. The product is log-convex in sigma, so it is
