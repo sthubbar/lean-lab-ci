@@ -254,6 +254,15 @@ theorem progression_endpoint (hG : LeanLab.DERZ1997.GRH) {q l : ℕ}
   exact character_average_bound hl x _
     (fun χ => LeanLab.Zinoviev1997.Decomp575c.character_error hG χ hx hqx)
 
+/-- A pointwise progression error gives the corresponding integrand bound. -/
+private theorem progression_integrand_mono {q l : ℕ} {u B : ℝ} (hu : 2 ≤ u)
+    (h : |psiMod u q l - u / (Nat.totient q : ℝ)| ≤ B) :
+    |psiMod u q l - u / (Nat.totient q : ℝ)| /
+        (u * Real.log u ^ 2) ≤ B / (u * Real.log u ^ 2) := by
+  have hu0 : 0 < u := by linarith
+  have hlog : 0 < Real.log u := Real.log_pos (by linarith)
+  exact div_le_div_of_nonneg_right h (mul_nonneg hu0.le (sq_nonneg _))
+
 /-- LEAF. Proposition 1.4, p. 341, the last remainder display.
 Supporting absolute integral form with the lower endpoint term reserved explicitly.
 The endpoint condition q at most x to the power 0.37 is not a uniform condition
