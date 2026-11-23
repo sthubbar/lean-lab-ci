@@ -11,6 +11,7 @@ and is strictly weaker than the split's main statement.
 AI wrote this Lean code, checked only by the Lean kernel. Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.State1539
+import LeanLab.ExceptionalSet.Feed1122LeafOddMoment
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -58,7 +59,7 @@ theorem leaf_even_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  exact leaf_even_moment_of_leaves γ h1 h2
 
 /-- LEAF. Step of the proof, the odd branch: display 30 with the reflected kernel.
 For `1 < γ < 3/2` the second moment of `R₁(ν_n)` over the odd `ν_n` of the window,
@@ -73,7 +74,7 @@ theorem leaf_odd_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  sorry
+  exact leaf_odd_moment_of_leaves γ h1 h2
 
 /-- LEAF. Step of the proof, the finite Chebyshev step after display 30, with no
 analysis in it. A nonnegative sequence whose squares sum to at most `A` exceeds
