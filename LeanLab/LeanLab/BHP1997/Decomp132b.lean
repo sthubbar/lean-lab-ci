@@ -13,7 +13,8 @@ open Classical Complex MeanValue132
 
 /-- LEAF. Pages 22 and 23, formula 3.36 and the following fourth moment
 estimate for J. Sources outside P0069: Perron's formula from Titchmarsh,
-reference 30, Theorem 3.19; the Dirichlet L fourth moment from Ramachandra,
+reference 30, Lemma 3.19, book p. 70, from Lemma 3.12, book p. 60;
+P0069 page 22 prints it as Theorem 3.19, checked U-1745 2026-11-22; the Dirichlet L fourth moment from Ramachandra,
 reference 26, as cited in Lemma 7; Rademacher, reference 28, via Lemma 8.
 The extra log x on the first contour error costs only an absolute constant
 since x is at least 2. Retain this named analytic input as CONDITIONAL. -/

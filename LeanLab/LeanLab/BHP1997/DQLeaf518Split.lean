@@ -13,7 +13,7 @@ Three sub-leaves, each a cited piece of that argument, and one PROVED lemma:
 * `leaf_518_E_M0`: the page 19 choice of `E_q` with its size, and display 5.1 for b0 over
   `E_q^c \ {χ0}`, Lemmas 30 to 35 and 5.15;
 * `leaf_lemma29`: Lemma 29 on page 43, for any coefficients with (3.1), proved in the paper
-  from [29] Lemma 3.19 and a variant of [8] Lemma 2, both CITED;
+  from [30] Lemma 3.19 and a variant of [8] Lemma 2, both CITED;
 * `leaf_lemma29_integrable`, PROVED here: the integrand of Lemma 29 is interval integrable,
   tacit in the paper.
 
@@ -22,6 +22,18 @@ The statements spell out `G` and `W` instead of using `lowerG` and `perronW` of
 spellings agree by unfolding.
 
 AI wrote the Lean code. Binary Goldbach is open; nothing here changes that.
+
+NOTE U-1745, 2026-11-22: P0069 pages 20 and 43 print `[29], Lemma 3.19`, but [29] is Saffari and
+Vaughan 1977, which has no Lemma 3.19. The result used is Titchmarsh [30], second edition 1986,
+Lemma 3.19, book p. 70, the finite Perron formula with error, which follows from Lemma 3.12,
+book p. 60, display 3.12.1. Page 22 of P0069 calls it Theorem 3.19 of [30]. Read from
+copies/Titchmarsh1986-chIII.pdf, page images. Below, [30] Lemma 3.19 replaces the printed label.
+NOTE U-1744, 2026-11-22: [8] is Harman, Primes in short intervals, Math. Z. 180, 1982, 335-348,
+Lemma 2 on p. 339: for continuous g and 0 < T0 < T < X, the mean of the square of the integral of
+g(s) x^s over c+iT0 to c+iT, c = 1 + 1/log X, over X to 2X is at most X^2 log X times the integral
+of |g|^2. The variant on P0069 p. 44 has y^(it), a factor Y L, and prints [T, T'] in [Y/2, 3Y].
+The leaves here use t in [-Y, Y] and no factor L: a stronger, still true form, by Plancherel
+after y = e^v. MISMATCH with the printed statements, no statement change; see PROGRESS.md.
 -/
 import LeanLab.BHP1997.LowerShortC165
 import LeanLab.BHP1997.Lemma29
@@ -95,7 +107,7 @@ theorem lemma29_ineq_six {t z T : ℝ} (hz : 0 ≤ z) (hz1 : z ≤ 1)
 /-- LEAF: page 43 Lemma 29, the mean square bound. P0069 Baker Harman Pintz 1997: for a
 Dirichlet polynomial over J with coefficients satisfying (3.1), (5.1) over `E^c \ {χ0}` and
 (5.2) give `Σ_{χ ∉ E} ∫_{Y/2}^{3Y} |Σ_{m ∈ J_y} b(m) χ(m) - δχ W(y, z)|^2 dy ≪ (qQ)^2 Y L^(-A)`
-for `z` in the range of 1.9. The paper's proof: the truncated Perron formula [29] Lemma 3.19 at
+for `z` in the range of 1.9. The paper's proof: the truncated Perron formula [30] Lemma 3.19 at
 height `Y` with error `O(Y^ε)`, then 5.3 and 5.4 from a variant of [8] Lemma 2 and the bound
 `|((1+z)^s - 1)/s|^2 ≪ 1/(T2^2 + t^2)`, which is `Lemma29.lemma29_ineq` in the lab. Both
 citations are CITED inside this leaf. The norm is taken over `[Y/2, 3Y]` as in 1.9 and 5.18;

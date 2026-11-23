@@ -18,12 +18,13 @@ Proved here, with no sorry of their own:
 * arcPairs_sum_le: the sum over q at most P and a of |S(q, a)|/phi(q).
 * S2star_M0_L1_of_pieces: the exact statement of S2star_M0_L1.
 
-Open LEAF pieces, both classical facts about the sum of display 8 that the paper
-uses without proof on page 6:
+Pieces on the sum of display 8, which the paper uses without proof on page 6.
+complete_gauss_gcd and gaussS_moebius are PROVED, by provers of session S37;
+complete_gauss_coprime is the one open LEAF:
 * complete_gauss_coprime, HARD: the complete quadratic Gauss sum with coprime
   coefficient has modulus at most (2m)^(1/2).
-* complete_gauss_gcd, MEDIUM: removing the common factor of coefficient and modulus.
-* gaussS_moebius, MEDIUM: Moebius inversion of the condition (x, q) = 1 in display 8.
+* complete_gauss_gcd, PROVED: removing the common factor of coefficient and modulus.
+* gaussS_moebius, PROVED: Moebius inversion of the condition (x, q) = 1 in display 8.
 
 AI wrote the Lean code. Binary Goldbach is open.
 -/
@@ -47,24 +48,120 @@ theorem complete_gauss_coprime (m c : ℕ) (hm : 1 ≤ m) (hc : Nat.Coprime c m)
       Real.sqrt (2 * m) := by
   sorry
 
-/-- LEAF: P0088 page 3 display 8 as used on page 6, the common factor step for the
+/-! Helpers for complete_gauss_gcd, proved by a workflow prover of session S37. -/
+
+lemma ee_add_nat_gcd (x : ℝ) (N : ℕ) : U1534.ee (x + N) = U1534.ee x := by
+  unfold U1534.ee
+  have : (2 * (Real.pi : ℂ) * Complex.I * ((x + N : ℝ) : ℂ)) =
+      2 * Real.pi * Complex.I * (x : ℂ) + (N : ℤ) * (2 * Real.pi * Complex.I) := by
+    push_cast; ring
+  rw [this, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
+
+lemma ee_period_gcd (c' n k y : ℕ) (hn : 0 < n) :
+    U1534.ee (((c' * (n * k + y) ^ 2 : ℕ) : ℝ) / (n : ℝ)) =
+      U1534.ee (((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ)) := by
+  have hn' : (n : ℝ) ≠ 0 := by exact_mod_cast hn.ne'
+  have : ((c' * (n * k + y) ^ 2 : ℕ) : ℝ) / (n : ℝ) =
+      ((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ) + ((c' * (n * k ^ 2 + 2 * k * y) : ℕ) : ℝ) := by
+    push_cast; field_simp; ring
+  rw [this, ee_add_nat_gcd]
+
+lemma sum_blocks_gcd (c' n : ℕ) (hn : 0 < n) (g : ℕ) :
+    (∑ y ∈ Finset.range (n * g), U1534.ee (((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ))) =
+      (g : ℂ) * ∑ y ∈ Finset.range n, U1534.ee (((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ)) := by
+  induction g with
+  | zero => simp
+  | succ k ih =>
+    rw [Nat.mul_succ, Finset.sum_range_add, ih]
+    simp_rw [ee_period_gcd c' n k _ hn]
+    push_cast; ring
+
+/-- PROVED. P0088 page 3 display 8 as used on page 6, the common factor step for the
 complete quadratic sum. With g = (c, m), each term e(c y^2 / m) equals
 e((c/g) y^2 / (m/g)), which has period m/g in y, so the sum over y modulo m is g
-times the sum over y modulo m/g. Class MEDIUM. -/
+times the sum over y modulo m/g. -/
 theorem complete_gauss_gcd (m c : ℕ) (hm : 1 ≤ m) :
     (∑ y ∈ Finset.range m, U1534.ee (((c * y ^ 2 : ℕ) : ℝ) / (m : ℝ))) =
       (Nat.gcd c m : ℂ) * ∑ y ∈ Finset.range (m / Nat.gcd c m),
         U1534.ee ((((c / Nat.gcd c m) * y ^ 2 : ℕ) : ℝ) / ((m / Nat.gcd c m : ℕ) : ℝ)) := by
-  sorry
+  set g := Nat.gcd c m with hg
+  have hgpos : 0 < g := Nat.gcd_pos_of_pos_right _ hm
+  have hm' : m = (m / g) * g := (Nat.div_mul_cancel (Nat.gcd_dvd_right c m)).symm
+  have hc' : c = (c / g) * g := (Nat.div_mul_cancel (Nat.gcd_dvd_left c m)).symm
+  have hnpos : 0 < m / g := Nat.div_pos (Nat.gcd_le_right _ hm) hgpos
+  rw [← sum_blocks_gcd (c / g) (m / g) hnpos g, ← hm']
+  apply Finset.sum_congr rfl
+  intro y _
+  congr 1
+  have hg' : (g : ℝ) ≠ 0 := by exact_mod_cast hgpos.ne'
+  conv_lhs => rw [hc', hm']
+  push_cast
+  field_simp
 
-/-- LEAF: P0088 page 3 display 8, the reduced sum S(q, a) by Moebius inversion of
+/-! Helpers for gaussS_moebius, proved by a workflow prover of session S37. -/
+
+theorem moebius_sum_divisors_complex (n : ℕ) (_hn : 1 ≤ n) :
+    ∑ d ∈ n.divisors, ((ArithmeticFunction.moebius d : ℤ) : ℂ) = if n = 1 then 1 else 0 := by
+  have h := congrArg (fun f : ArithmeticFunction ℤ => f n) ArithmeticFunction.moebius_mul_coe_zeta
+  simp only [ArithmeticFunction.coe_mul_zeta_apply, ArithmeticFunction.one_apply] at h
+  rw [← Int.cast_sum, h]
+  split_ifs <;> simp
+
+theorem filter_dvd_range_eq (a q d : ℕ) (hd : d ∣ q) (hd0 : 0 < d) :
+    ∑ x ∈ (Finset.range q).filter (fun x => d ∣ x), (fun x => U1534.ee (((a * x ^ 2 : ℕ) : ℝ) / (q : ℝ))) x
+      = ∑ y ∈ Finset.range (q / d), U1534.ee ((((a * d) * y ^ 2 : ℕ) : ℝ) / ((q / d : ℕ) : ℝ)) := by
+  obtain ⟨k, rfl⟩ := hd
+  rw [Nat.mul_div_cancel_left k hd0]
+  symm
+  refine Finset.sum_nbij' (fun y => d * y) (fun x => x / d) ?_ ?_ ?_ ?_ ?_
+  · intro y hy
+    simp only [Finset.mem_filter, Finset.mem_range] at hy ⊢
+    exact ⟨Nat.mul_lt_mul_of_pos_left hy hd0, dvd_mul_right _ _⟩
+  · intro x hx
+    simp only [Finset.mem_filter, Finset.mem_range] at hx ⊢
+    exact Nat.div_lt_of_lt_mul hx.1
+  · intro y _
+    simp [Nat.mul_div_cancel_left y hd0]
+  · intro x hx
+    simp only [Finset.mem_filter, Finset.mem_range] at hx
+    exact Nat.mul_div_cancel' hx.2
+  · intro y hy
+    simp only [Finset.mem_range] at hy
+    have hk : 0 < k := by omega
+    congr 1
+    push_cast
+    field_simp
+
+/-- PROVED. P0088 page 3 display 8, the reduced sum S(q, a) by Moebius inversion of
 the condition (x, q) = 1: the residues x = d y with d dividing q give
 S(q, a) = sum over d dividing q of mu(d) times the complete sum over y modulo q/d
-of e(a d y^2 / (q/d)). Class MEDIUM. -/
+of e(a d y^2 / (q/d)). -/
 theorem gaussS_moebius (q a : ℕ) (hq : 1 ≤ q) :
     U1534.gaussS q a = ∑ d ∈ q.divisors, ((ArithmeticFunction.moebius d : ℤ) : ℂ) *
       ∑ y ∈ Finset.range (q / d), U1534.ee ((((a * d) * y ^ 2 : ℕ) : ℝ) / ((q / d : ℕ) : ℝ)) := by
-  sorry
+  unfold U1534.gaussS
+  rw [Finset.sum_filter]
+  have step : ∀ x ∈ Finset.range q,
+      (if Nat.Coprime x q then U1534.ee (((a * x ^ 2 : ℕ) : ℝ) / (q : ℝ)) else 0)
+        = ∑ d ∈ q.divisors, (if d ∣ x then ((ArithmeticFunction.moebius d : ℤ) : ℂ) *
+            U1534.ee (((a * x ^ 2 : ℕ) : ℝ) / (q : ℝ)) else 0) := by
+    intro x _
+    rw [← Finset.sum_filter, ← Finset.sum_mul]
+    have hfil : q.divisors.filter (fun d => d ∣ x) = (Nat.gcd x q).divisors := by
+      ext d
+      simp only [Finset.mem_filter, Nat.mem_divisors, Nat.dvd_gcd_iff]
+      constructor
+      · rintro ⟨⟨h1, h2⟩, h3⟩; exact ⟨⟨h3, h1⟩, Nat.gcd_pos_of_pos_right _ (by omega) |>.ne'⟩
+      · rintro ⟨⟨h3, h1⟩, _⟩; exact ⟨⟨h1, by omega⟩, h3⟩
+    rw [hfil, moebius_sum_divisors_complex _ (Nat.gcd_pos_of_pos_right _ (by omega))]
+    unfold Nat.Coprime
+    split_ifs <;> simp
+  rw [Finset.sum_congr rfl step, Finset.sum_comm]
+  refine Finset.sum_congr rfl fun d hd => ?_
+  rw [← Finset.sum_filter, ← Finset.mul_sum]
+  congr 1
+  have hd' := Nat.mem_divisors.mp hd
+  exact filter_dvd_range_eq a q d hd'.1 (Nat.pos_of_mem_divisors hd)
 
 /-- PROVED. P0088 page 3 display 8, the complete quadratic sum with any coefficient:
 modulus at most (2 m (c, m))^(1/2), from complete_gauss_gcd and complete_gauss_coprime. -/
@@ -463,8 +560,8 @@ theorem eventually_small (B : ℝ) :
 
 /-- The exact statement of Prep1121DKLMajorCut.S2star_M0_L1, P0088 page 6 display 26
 second factor, from S2star_norm_le_on_M0, T2_arc_integral, arcPairs_sum_le,
-gaussS_norm_le and log_one_add_cube_le. No sorry of its own; it rests on the three
-LEAF pieces for the sum of display 8 through gaussS_norm_le. -/
+gaussS_norm_le and log_one_add_cube_le. No sorry of its own; it rests on the one
+LEAF complete_gauss_coprime for the sum of display 8 through gaussS_norm_le. -/
 theorem S2star_M0_L1_of_pieces (h2 : T2BoundProp) :
     ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 →
       ∃ C X0 : ℝ, 0 < C ∧ ∀ X H : ℝ, X0 ≤ X →
@@ -598,6 +695,8 @@ example : type_of% @S2star_M0_L1 := S2star_M0_L1_of_pieces
 
 end LeanLab.KumchevLiu2007.Prep1122S2starL1
 
+#print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.complete_gauss_gcd
+#print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.gaussS_moebius
 #print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.complete_gauss_le
 #print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.card_divisors_le_rpow
 #print axioms LeanLab.KumchevLiu2007.Prep1122S2starL1.gaussS_norm_le

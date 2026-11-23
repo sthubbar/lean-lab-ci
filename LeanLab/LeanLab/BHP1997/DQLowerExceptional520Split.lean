@@ -14,6 +14,12 @@ The sub-leaves need `perronW`, which lives in `DQLowerExceptionalMeanSquareDecis
 file imports that one and the sorry of `leaf_520` stays.
 
 AI wrote the Lean code. Goldbach is open.
+
+NOTE U-1745, 2026-11-22: P0069 pages 20 and 43 print `[29], Lemma 3.19`, but [29] is Saffari and
+Vaughan 1977, which has no Lemma 3.19. The result used is Titchmarsh [30], second edition 1986,
+Lemma 3.19, book p. 70, the finite Perron formula with error, which follows from Lemma 3.12,
+book p. 60, display 3.12.1. Page 22 of P0069 calls it Theorem 3.19 of [30]. Read from
+copies/Titchmarsh1986-chIII.pdf, page images. Below, [30] Lemma 3.19 replaces the printed label.
 -/
 import LeanLab.BHP1997.DQLowerExceptionalMeanSquareDecisions
 
@@ -27,7 +33,7 @@ open MeasureTheory
 /-- LEAF: page 52 display 5.19 at `z' = z0 = 1/T0^2`, the principal character term.
 P0069 Baker Harman Pintz 1997: "(5.1) and (5.2) hold a fortiori if `T2` is replaced by a
 smaller positive number, so the same argument yields (5.19)", here with `T2` replaced by
-`1/z0 = T0^2`. In the proof of Lemma 29 on page 43, via [29] Lemma 3.19, the principal
+`1/z0 = T0^2`. In the proof of Lemma 29 on page 43, via [30] Lemma 3.19, the principal
 character is treated by (5.2) alone, `F = E_q^c \ {χ0}`, so its term holds whether or not
 `χ0` lies in `E_q`. Integrability included. CONDITIONAL on the cited Theorem 4 and Lemma 9,
 which give (5.1) and (5.2) for b0 through Lemmas 33 to 35. -/
