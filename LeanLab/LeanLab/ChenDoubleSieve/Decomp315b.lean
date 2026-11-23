@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp275b
+import LeanLab.ChenDoubleSieve.Feed1122_Decomp315b_lower_F5
 
 /-!
 Supply split for Wu 2004 Section 10.
@@ -18,7 +19,7 @@ theorem lower_F0 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ,
     ∀ N : ℕ, Even N → N0 ≤ N →
       (integralTerms F f ω 0 - ε) * Θ N ≤ sieveTerms N 0 := by
-  sorry
+  exact Feed1122F0.lower_F0_of_leaves F f ω h hω
 
 /-- LEAF. Wu 2004 page 39 equation 10.5.
 The lower estimate for the single coordinate F4. -/
@@ -26,7 +27,7 @@ theorem lower_F4 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ,
     ∀ N : ℕ, Even N → N0 ≤ N →
       (integralTerms F f ω 4 - ε) * Θ N ≤ sieveTerms N 4 := by
-  sorry
+  exact Feed1122F0.lower_F4_of_leaves F f ω h hω
 
 /-- LEAF. Wu 2004 page 39 equation 10.5.
 The lower estimate for the single coordinate F5. -/
@@ -34,7 +35,7 @@ theorem lower_F5 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ,
     ∀ N : ℕ, Even N → N0 ≤ N →
       (integralTerms F f ω 5 - ε) * Θ N ≤ sieveTerms N 5 := by
-  sorry
+  exact Feed1122F0.lower_F5_of_leaves F f ω h hω
 
 /-- The exact positive_estimates statement follows from its three coordinates.
 OPEN through lower_F0, lower_F4 and lower_F5. -/

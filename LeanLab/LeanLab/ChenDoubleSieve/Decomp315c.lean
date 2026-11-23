@@ -1,4 +1,6 @@
 import LeanLab.ChenDoubleSieve.Decomp275b
+import LeanLab.ChenDoubleSieve.Feed1122_Decomp315c_switched_upper
+import LeanLab.ChenDoubleSieve.Feed1122_Decomp315c_refined_upper
 
 /-!
 Supply split for Wu 2004 Section 10.
@@ -19,7 +21,7 @@ theorem basic_upper (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     ∀ N : ℕ, Even N → N0 ≤ N →
       ∀ i : Fin 12, i ∈ ({1, 2, 3} : Finset (Fin 12)) →
         sieveTerms N i ≤ (integralTerms F f ω i + ε) * Θ N := by
-  sorry
+  exact Feed1122Up.basic_upper_of_leaves F f ω h hω
 
 /-- LEAF. Wu 2004 pages 40 and 41 equations 10.6 to 10.11.
 The upper estimates for coordinates 6, 7, 9. -/
@@ -28,7 +30,7 @@ theorem switched_upper (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     ∀ N : ℕ, Even N → N0 ≤ N →
       ∀ i : Fin 12, i ∈ ({6, 7, 9} : Finset (Fin 12)) →
         sieveTerms N i ≤ (integralTerms F f ω i + ε) * Θ N := by
-  sorry
+  exact Feed1122Up.switched_upper_of_leaves F f ω h hω
 
 /-- LEAF. Wu 2004 pages 41 equation 10.12.
 The upper estimates for coordinates 8, 10, 11. -/
@@ -37,7 +39,7 @@ theorem refined_upper (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     ∀ N : ℕ, Even N → N0 ≤ N →
       ∀ i : Fin 12, i ∈ ({8, 10, 11} : Finset (Fin 12)) →
         sieveTerms N i ≤ (integralTerms F f ω i + ε) * Θ N := by
-  sorry
+  exact Feed1122Up.refined_upper_of_leaves F f ω h hω
 
 /-- The exact negative_estimates statement follows from three smaller groups.
 OPEN through basic_upper, switched_upper and refined_upper. -/
