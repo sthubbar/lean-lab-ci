@@ -5,6 +5,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.Perelli1996.VaughanInput
 import LeanLab.Perelli1996.Linear88
 import LeanLab.Perelli1996.Divisor103
+import LeanLab.Perelli1996.Diff1122
 
 namespace LeanLab.Perelli1996.Decomp103b
 open Finset Real Polynomial
@@ -82,7 +83,53 @@ theorem leaf_differencing (F : ℤ[X]) (hF : Admissible F) (hk : 2 ≤ F.natDegr
       ‖polynomialKernel F N H α‖ ≤ C * H *
         (1 / H + divisorCost F c N H D α true + divisorCost F c N H D α false) ^
           (1 / weylExponent F) := by
-  sorry
+  -- Burst S79: equation 6 is the LEAF Diff1122.leaf_weyl_differencing; the K-th root,
+  -- the envelope bound and the heavy and light partition are proved here.
+  obtain ⟨c, C, N₀, hc, hC, hN₀, h6⟩ := Diff1122.leaf_weyl_differencing F hF hk
+  refine ⟨c, C ^ (1 / weylExponent F), N₀, hc, by positivity, hN₀, ?_⟩
+  intro N H D α hN hH hHu
+  obtain ⟨start, len, hlen, hb⟩ := h6 N H α hN hH hHu
+  set k := F.natDegree with hkdef
+  set K := weylExponent F with hKdef
+  have hK : 0 < K := by rw [hKdef]; unfold weylExponent; positivity
+  have hH0 : 0 < H := by linarith
+  set S := ∑ h ∈ Icc 1 ⌊c * H ^ (k - 1)⌋₊,
+    (divisorCount k h : ℝ) * linearEnvelope H (α * h) with hS
+  have hSle : (∑ h ∈ Icc 1 ⌊c * H ^ (k - 1)⌋₊,
+      (divisorCount k h : ℝ) * ‖Kernel.T (start h) (len h) (α * h)‖) ≤ S := by
+    apply Finset.sum_le_sum
+    intro h _
+    exact mul_le_mul_of_nonneg_left
+      (norm_T_le_linearEnvelope (start h) (len h) H (α * h) (hlen h)) (Nat.cast_nonneg _)
+  have hpart := divisorCost_partition F c N H D α
+  rw [← hkdef] at hpart
+  set X := 1 / H + divisorCost F c N H D α true + divisorCost F c N H D α false with hX
+  have hXeq : X = 1 / H + S / H ^ k := by rw [hX, add_assoc, hpart]
+  have hS0 : 0 ≤ S := by
+    apply Finset.sum_nonneg; intro h _
+    exact mul_nonneg (Nat.cast_nonneg _) (linearEnvelope_nonneg _ _)
+  have hX0 : 0 ≤ X := by rw [hXeq]; positivity
+  have hk1 : 1 ≤ k := by omega
+  have hHk : H ^ k = H ^ (k - 1) * H := by
+    rw [← pow_succ]; congr 1; omega
+  have hpowK : H ^ (K - (k : ℝ)) * H ^ k = H ^ K := by
+    rw [← Real.rpow_natCast, ← Real.rpow_add hH0]; congr 1; ring
+  have hmain : ‖polynomialKernel F N H α‖ ^ K ≤ C * H ^ K * X := by
+    calc ‖polynomialKernel F N H α‖ ^ K ≤ C * H ^ (K - (k : ℝ)) * (H ^ (k - 1) + S) :=
+          hb.trans (by gcongr)
+      _ = C * H ^ K * X := by
+          rw [hXeq, ← hpowK, hHk]
+          have : 0 < H ^ (k - 1) := by positivity
+          field_simp
+  have hnorm : ‖polynomialKernel F N H α‖ =
+      (‖polynomialKernel F N H α‖ ^ K) ^ (1 / K) := by
+    rw [← Real.rpow_mul (norm_nonneg _), mul_one_div_cancel hK.ne', Real.rpow_one]
+  rw [hnorm]
+  calc (‖polynomialKernel F N H α‖ ^ K) ^ (1 / K) ≤ (C * H ^ K * X) ^ (1 / K) :=
+        Real.rpow_le_rpow (by positivity) hmain (by positivity)
+    _ = C ^ (1 / K) * H * X ^ (1 / K) := by
+        rw [Real.mul_rpow (by positivity) hX0, Real.mul_rpow hC.le (by positivity),
+          ← Real.rpow_mul hH0.le, mul_one_div_cancel hK.ne', Real.rpow_one]
 
 /-- The heavy cost is bounded by the truncated divisor second moment. -/
 theorem heavyCost_le (F : ℤ[X]) (c N H D α : ℝ) (hH : 1 ≤ H)
