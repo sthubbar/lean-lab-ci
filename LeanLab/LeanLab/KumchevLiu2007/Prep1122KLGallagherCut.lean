@@ -560,6 +560,57 @@ theorem gallagher_squares (Y : ℝ) (c : ℕ → ℂ) (L : ℕ) (hL : 0 < L) (r 
   ext β
   rw [squareSum_eq]
 
+/-- PROVED. On the open unit interval from k - L to k - L + 1 the fixed window sum over
+x < n <= x + L is the Gallagher window sum ending at k. -/
+theorem window_eq_win (a : ℕ → ℂ) (N L k : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo ((k : ℝ) - L) ((k : ℝ) - L + 1)) :
+    ∑ n ∈ (Finset.range N).filter (fun n : ℕ => x < n ∧ (n : ℝ) ≤ x + L), a n =
+      LeanLab.PNTPort.Gallagher.win a N L k := by
+  unfold LeanLab.PNTPort.Gallagher.win
+  refine Finset.sum_congr (Finset.filter_congr fun n _ => ?_) fun _ _ => rfl
+  obtain ⟨h1, h2⟩ := hx
+  constructor
+  · rintro ⟨hn1, hn2⟩
+    constructor
+    · have : (n : ℝ) < k + 1 := by linarith
+      exact_mod_cast Nat.lt_succ_iff.mp (by exact_mod_cast this)
+    · have : (k : ℝ) < n + L := by linarith
+      exact_mod_cast this
+  · rintro ⟨hn1, hn2⟩
+    have hn1' : (n : ℝ) ≤ k := by exact_mod_cast hn1
+    have hn2' : k + 1 ≤ n + L := hn2
+    have hn2'' : (k : ℝ) + 1 ≤ n + L := by exact_mod_cast hn2'
+    constructor <;> linarith
+
+/-- PROVED. The Gallagher window mean square over integer k is the integral over real x
+of the squared fixed window sums over x < n <= x + L, the form the Saffari and Vaughan
+device of P0088 reference 21 works with. Support for a prover of the LEAF
+saffari_vaughan_device; not used by the assembly. -/
+theorem win_sum_eq_integral (a : ℕ → ℂ) (N L : ℕ) :
+    ∑ k ∈ Finset.range (N + L), ‖LeanLab.PNTPort.Gallagher.win a N L k‖ ^ 2 =
+      ∫ x in (-(L : ℝ))..(N : ℝ),
+        ‖∑ n ∈ (Finset.range N).filter (fun n : ℕ => x < n ∧ (n : ℝ) ≤ x + L), a n‖ ^ 2 := by
+  set f : ℝ → ℝ := fun x =>
+    ‖∑ n ∈ (Finset.range N).filter (fun n : ℕ => x < n ∧ (n : ℝ) ≤ x + L), a n‖ ^ 2 with hf
+  have hpiece : ∀ k : ℕ, Set.EqOn f (fun _ => ‖LeanLab.PNTPort.Gallagher.win a N L k‖ ^ 2)
+      (Set.uIoo ((k : ℝ) - L) (((k + 1 : ℕ) : ℝ) - L)) := by
+    intro k x hx
+    rw [Set.uIoo_of_le (by push_cast; linarith)] at hx
+    have hx' : x ∈ Set.Ioo ((k : ℝ) - L) ((k : ℝ) - L + 1) := by
+      push_cast at hx; constructor <;> linarith [hx.1, hx.2]
+    simp only [hf, window_eq_win a N L k hx']
+  have hint : ∀ k < N + L, IntervalIntegrable f volume ((k : ℝ) - L) (((k + 1 : ℕ) : ℝ) - L) :=
+    fun k _ => (intervalIntegrable_const).congr_uIoo (fun x hx => (hpiece k hx).symm)
+  have hs := intervalIntegral.sum_integral_adjacent_intervals
+    (a := fun k : ℕ => (k : ℝ) - L) (μ := volume) hint
+  simp only [Nat.cast_zero, zero_sub] at hs
+  have hN : ((N + L : ℕ) : ℝ) - L = N := by push_cast; ring
+  rw [hN] at hs
+  rw [← hs]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [intervalIntegral.integral_congr_uIoo (hpiece k), intervalIntegral.integral_const]
+  push_cast
+  simp
+
 /-- LEAF: P0088 page 6, the display before display 20, the device of Saffari and Vaughan,
 reference 21 page 25. Class HARD, a citation wall: the device is not printed in P0088.
 After Gallagher's lemma, which is PROVED here as gallagher_squares from the lab's
@@ -851,6 +902,8 @@ end LeanLab.KumchevLiu2007.Prep1122KLGallagherCut
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.arc_localization
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.gallagher_squares
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.saffari_vaughan_device
+#print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.window_eq_win
+#print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.win_sum_eq_integral
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.gallagher_saffari_vaughan
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.arc_char_mean_square
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.card_arcPairs_le

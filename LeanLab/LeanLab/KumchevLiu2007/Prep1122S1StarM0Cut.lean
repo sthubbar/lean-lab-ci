@@ -12,20 +12,20 @@ and what is left is a sum over chi of tau(chi^(-1)) chi(a)/phi(q) times W1(beta,
 The bound |tau(chi)| at most q^(1/2) gives display 25, and partial summation
 against e(m beta) with (A1.2), here A12Corr, bounds each W1.
 
-Five pieces carry those steps. Four are PROVED here; one is a LEAF:
+Five pieces carry those steps, all PROVED here:
 * S1star_on_arc, the disjointness of the arcs, PROVED.
 * char_expansion, the orthogonality step, PROVED.
 * gaussSum_one_eq_moebius, the principal character term, the Ramanujan sum
   c_q(1) = mu(q), PROVED.
 * norm_gaussSum_le_sqrt, |tau(chi)| at most q^(1/2) for every chi mod q, primitive
-  or not, LEAF, HARD.
+  or not, PROVED by Parseval over the additive characters mod q, which needs no
+  reduction to the conductor.
 * partial_summation_window, the partial summation step, PROVED.
 
 The final theorem S1_sub_S1star_on_M0_of_leaves proves the exact statement of
 Prep1121DKLMajorCut.S1_sub_S1star_on_M0 from these five, CONDITIONAL ON A12Corr
 as the parent is. It admits no step of its own; the size bounds of the block range
-are PROVED here in block_large. So the parent leaf now rests on one open LEAF,
-norm_gaussSum_le_sqrt, and the named hypothesis A12Corr.
+are PROVED here in block_large. So the parent leaf now rests only on the named hypothesis A12Corr.
 
 AI wrote the Lean code. Binary Goldbach is open.
 -/
@@ -33,6 +33,7 @@ import LeanLab.KumchevLiu2007.Prep1121DKLMajorCut
 import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
 import Mathlib.NumberTheory.DirichletCharacter.Bounds
 import Mathlib.NumberTheory.GaussSum
+import Mathlib.NumberTheory.DirichletCharacter.GaussSum
 import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 
@@ -42,7 +43,7 @@ open Real Complex MeasureTheory LeanLab.KumchevLiu2007 Task556a Task556d Prep112
 open scoped BigOperators Topology
 attribute [local instance] Classical.propDecidable
 
-/-! ## The five pieces of display 25; four PROVED, one LEAF -/
+/-! ## The five pieces of display 25, all PROVED -/
 
 /-- Two reduced fractions a/q and a'/q' with q' a = q a' are the same pair. -/
 lemma pair_eq_of_cross (q q' a' : ℕ) (a : ℤ) (hq : 1 ≤ q)
@@ -287,13 +288,100 @@ theorem gaussSum_one_eq_moebius (q : ℕ) [NeZero q] :
       rw [ZMod.stdAddChar_apply, ZMod.toCircle_natCast]; congr 1; ring
 
 
-/-- LEAF: P0088 page 6 display 25, the bound |tau(chi)| at most q^(1/2) that turns
+/-- Orthogonality of the additive characters `a ↦ e(a x / q)` mod `q`. -/
+lemma stdAddChar_orth (q : ℕ) [NeZero q] (x y : ZMod q) :
+    ∑ a : ZMod q, ZMod.stdAddChar (a * x) * (starRingEnd ℂ) (ZMod.stdAddChar (a * y)) =
+      if x = y then (q : ℂ) else 0 := by
+  have h : ∀ a : ZMod q, ZMod.stdAddChar (a * x) * (starRingEnd ℂ) (ZMod.stdAddChar (a * y))
+      = ZMod.stdAddChar (a * (x - y)) := by
+    intro a
+    rw [← AddChar.map_neg_eq_conj, ← AddChar.map_add_eq_mul]; congr 1; ring
+  simp_rw [h]
+  rw [AddChar.sum_mulShift _ (ZMod.isPrimitive_stdAddChar q), ZMod.card]
+  simp only [sub_eq_zero]
+  split_ifs <;> simp
+
+/-- Parseval for the discrete Fourier transform on `ZMod q`. -/
+lemma parseval_zmod (q : ℕ) [NeZero q] (f : ZMod q → ℂ) :
+    ∑ a : ZMod q, (∑ x, f x * ZMod.stdAddChar (a * x)) *
+        (starRingEnd ℂ) (∑ y, f y * ZMod.stdAddChar (a * y))
+      = (q : ℂ) * ∑ x, f x * (starRingEnd ℂ) (f x) := by
+  have key : ∀ x y : ZMod q, ∑ a : ZMod q, (f x * ZMod.stdAddChar (a * x)) *
+      ((starRingEnd ℂ) (f y) * (starRingEnd ℂ) (ZMod.stdAddChar (a * y)))
+      = f x * (starRingEnd ℂ) (f y) * (if x = y then (q : ℂ) else 0) := by
+    intro x y
+    rw [← stdAddChar_orth, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun a _ => ?_
+    ring
+  calc ∑ a : ZMod q, (∑ x, f x * ZMod.stdAddChar (a * x)) *
+        (starRingEnd ℂ) (∑ y, f y * ZMod.stdAddChar (a * y))
+      = ∑ a : ZMod q, ∑ x, ∑ y, (f x * ZMod.stdAddChar (a * x)) *
+          ((starRingEnd ℂ) (f y) * (starRingEnd ℂ) (ZMod.stdAddChar (a * y))) := by
+        refine Finset.sum_congr rfl fun a _ => ?_
+        rw [map_sum, Finset.sum_mul]
+        refine Finset.sum_congr rfl fun x _ => ?_
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl fun y _ => ?_
+        rw [map_mul (starRingEnd ℂ)]
+    _ = ∑ x, ∑ y, ∑ a : ZMod q, (f x * ZMod.stdAddChar (a * x)) *
+          ((starRingEnd ℂ) (f y) * (starRingEnd ℂ) (ZMod.stdAddChar (a * y))) := by
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl fun x _ => ?_
+        rw [Finset.sum_comm]
+    _ = ∑ x, ∑ y, f x * (starRingEnd ℂ) (f y) * (if x = y then (q : ℂ) else 0) := by
+        simp_rw [key]
+    _ = (q : ℂ) * ∑ x, f x * (starRingEnd ℂ) (f x) := by
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl fun x _ => ?_
+        simp only [mul_ite, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ite_true]
+        ring
+
+/-- PROVED, was LEAF: P0088 page 6 display 25, the bound |tau(chi)| at most q^(1/2) that turns
 1/phi(q) times the Gauss sum into the factor q^(-1/2 + eta). HARD. It holds for every
 character chi mod q, primitive or not: for chi induced by a primitive chi* mod q*,
 tau(chi) = mu(q/q*) chi*(q/q*) tau(chi*) and |tau(chi*)| = q*^(1/2). -/
 theorem norm_gaussSum_le_sqrt (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) :
     ‖gaussSum χ (ZMod.stdAddChar (N := q))‖ ≤ Real.sqrt q := by
-  sorry
+  set ψ := ZMod.stdAddChar (N := q)
+  set τ := gaussSum χ ψ
+  have hτa : ∀ a : ZMod q, gaussSum χ (ψ.mulShift a) = ∑ x, χ x * ψ (a * x) := fun a => by
+    simp only [gaussSum, AddChar.mulShift_apply]
+  have hR : ∑ a : ZMod q, ‖gaussSum χ (ψ.mulShift a)‖ ^ 2 = q * ∑ x, ‖χ x‖ ^ 2 := by
+    have h := parseval_zmod q (fun x => χ x)
+    simp only [Complex.mul_conj, Complex.normSq_eq_norm_sq] at h
+    exact_mod_cast h
+  have hU : ∀ u : (ZMod q)ˣ, ‖gaussSum χ (ψ.mulShift (u : ZMod q))‖ = ‖τ‖ := by
+    intro u
+    have h := congrArg norm (gaussSum_mulShift χ ψ u)
+    rw [norm_mul, DirichletCharacter.unit_norm_eq_one, one_mul] at h
+    exact h
+  let e : (ZMod q)ˣ ↪ ZMod q := ⟨((↑) : (ZMod q)ˣ → ZMod q), Units.val_injective⟩
+  have hemb : ∑ u : (ZMod q)ˣ, ‖gaussSum χ (ψ.mulShift (u : ZMod q))‖ ^ 2
+      ≤ ∑ a : ZMod q, ‖gaussSum χ (ψ.mulShift a)‖ ^ 2 := by
+    calc ∑ u : (ZMod q)ˣ, ‖gaussSum χ (ψ.mulShift (u : ZMod q))‖ ^ 2
+        = ∑ a ∈ Finset.univ.map e, ‖gaussSum χ (ψ.mulShift a)‖ ^ 2 :=
+          by rw [Finset.sum_map]; rfl
+      _ ≤ _ := Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
+          (fun _ _ _ => by positivity)
+  have hC : ∑ x : ZMod q, ‖χ x‖ ^ 2 = (Nat.totient q : ℝ) := by
+    have e1 : ∑ x : ZMod q, ‖χ x‖ ^ 2 = ∑ x ∈ Finset.univ.map e, ‖χ x‖ ^ 2 := by
+      symm
+      apply Finset.sum_subset (Finset.subset_univ _)
+      intro x _ hx
+      have : ¬ IsUnit x := by
+        rintro ⟨u, rfl⟩; exact hx (Finset.mem_map.2 ⟨u, Finset.mem_univ _, rfl⟩)
+      simp [χ.map_nonunit this]
+    rw [e1, Finset.sum_map]
+    simp [e, ZMod.card_units_eq_totient]
+  have hsum : ∑ u : (ZMod q)ˣ, ‖gaussSum χ (ψ.mulShift (u : ZMod q))‖ ^ 2
+      = (Nat.totient q : ℝ) * ‖τ‖ ^ 2 := by
+    simp [hU, ZMod.card_units_eq_totient]
+  have hφ : (0 : ℝ) < Nat.totient q := by exact_mod_cast Nat.totient_pos.2 (NeZero.pos q)
+  have h1 : (Nat.totient q : ℝ) * ‖τ‖ ^ 2 ≤ (Nat.totient q : ℝ) * q := by
+    rw [← hsum]; refine hemb.trans ?_; rw [hR, hC, mul_comm]
+  have h2 : ‖τ‖ ^ 2 ≤ q := le_of_mul_le_mul_left h1 hφ
+  calc ‖τ‖ = Real.sqrt (‖τ‖ ^ 2) := (Real.sqrt_sq (norm_nonneg _)).symm
+    _ ≤ Real.sqrt q := Real.sqrt_le_sqrt h2
 
 /-- The unimodularity of the Fourier character. -/
 lemma psum_norm_fourier (n : ℤ) (x : AddCircle (1 : ℝ)) : ‖fourier n x‖ = 1 := by

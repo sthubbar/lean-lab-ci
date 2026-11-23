@@ -10,6 +10,7 @@ and Prep1121KLRough.first_sum_block. AI wrote the Lean code. Binary Goldbach is 
 -/
 import LeanLab.KumchevLiu2007.Prep1121DKLRoughCut
 import LeanLab.KumchevLiu2007.SPLIT_lemma34_first_sum
+import LeanLab.KumchevLiu2007.Split1122KLLemma34M1
 
 namespace LeanLab.KumchevLiu2007.Split1122KLFirstRoughHalves
 
@@ -17,7 +18,8 @@ open Real Complex MeasureTheory LeanLab.KumchevLiu2007 Task556a Task556d Eq33Rou
 open scoped BigOperators Topology
 attribute [local instance] Classical.propDecidable
 
-/-- LEAF: P0088 page 11 Lemma 3.4 with x = Y/4, its integral over [x, 2x], applied on page 15 to the first sum of display 52,
+/-- REDUCED by S54 to the LEAF Split1122KLLemma34M1.lemma34_unit_coefficient, no sorry here.
+P0088 page 11 Lemma 3.4 with x = Y/4, its integral over [x, 2x], applied on page 15 to the first sum of display 52,
 left half [Y/4, Y/2] of the window, block
 range X^(7/18+eps) P^(-4) <= H <= Y P^(-4), cutoff 2 < z <= z1 = Y^(1/6+eps/2),
 y = H <= x. HARD. -/
@@ -35,10 +37,11 @@ theorem block_rough_left_half (A : ℝ) (hA : 0 < A) :
               (fun m : ℕ => t < (m : ℝ) ^ 2 ∧ (m : ℝ) ^ 2 ≤ t + H),
             roughWeight z m *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
-            C * H ^ 2 / Real.log X ^ A := by
-  sorry
+            C * H ^ 2 / Real.log X ^ A :=
+  Split1122KLLemma34M1.block_rough_left_half_of_lemma34 A hA
 
-/-- LEAF: P0088 page 11 Lemma 3.4 with x = Y/2, its integral over [x, 2x], applied on page 15 to the first sum of display 52,
+/-- REDUCED by S54 to the LEAF Split1122KLLemma34M1.lemma34_unit_coefficient, no sorry here.
+P0088 page 11 Lemma 3.4 with x = Y/2, its integral over [x, 2x], applied on page 15 to the first sum of display 52,
 right half [Y/2, Y] of the window, block
 range X^(7/18+eps) P^(-4) <= H <= Y P^(-4), cutoff 2 < z <= z1 = Y^(1/6+eps/2),
 y = H <= x. HARD. -/
@@ -56,8 +59,8 @@ theorem block_rough_right_half (A : ℝ) (hA : 0 < A) :
               (fun m : ℕ => t < (m : ℝ) ^ 2 ∧ (m : ℝ) ^ 2 ≤ t + H),
             roughWeight z m *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
-            C * H ^ 2 / Real.log X ^ A := by
-  sorry
+            C * H ^ 2 / Real.log X ^ A :=
+  Split1122KLLemma34M1.block_rough_right_half_of_lemma34 A hA
 
 /-- PROVED from the two half leaves. P0088 page 11 Lemma 3.4 over [x, 2x] with
 x = Y/4 and x = Y/2 covers [Y/4, Y]; page 15 display 52 first sum. The exact type of

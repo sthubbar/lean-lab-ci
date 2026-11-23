@@ -35,6 +35,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.SPLIT_lemma34_first_sum
 import LeanLab.KumchevLiu2007.Lemma34MoebiusOpen
+import LeanLab.KumchevLiu2007.Lemma34Case3Split
 
 namespace LeanLab.KumchevLiu2007.Eq33RouteD
 
@@ -90,11 +91,13 @@ theorem leaf_lemma32_type_two (A : ℝ) (hA : 0 < A) :
             C * H ^ 2 / Real.log X ^ A := by
   sorry
 
-/-- LEAF: P0088 page 12, Case 3 of the proof of Lemma 3.4, with M = 1: the
+/-- P0088 page 12, Case 3 of the proof of Lemma 3.4, with M = 1: the
 dyadic block 2^j ≤ d < 2^(j+1) of display 42 when 2^j exceeds
 V = y x^(-1/2) L^(-B), with x = Y / 4 and y = H. The paper writes
 d = d1 p p' d2 with L^B ≤ d1 p < V ≤ d1 p p', removes the side conditions by
-Lemma 3.3 and applies Lemma 3.2. Class HARD. -/
+Lemma 3.3 and applies Lemma 3.2. Formerly a LEAF of class HARD, split by
+burst session S55 in `Lemma34Case3Split`. CONDITIONAL ON
+leaf_case3_lemma33_reduction and leaf_lemma32_divisor_bounded. -/
 theorem leaf_case3_block (A : ℝ) (hA : 0 < A) :
     ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
       ∃ C X0 : ℝ, 0 < C ∧ 2 ≤ X0 ∧ ∀ X H : ℝ,
@@ -113,7 +116,7 @@ theorem leaf_case3_block (A : ℝ) (hA : 0 < A) :
               ((ArithmeticFunction.moebius d : ℤ) : ℂ)) *
               fourier ((n ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  exact case3_block_of_leaves A hA
 
 /-- P0088 page 11, Cases 1 and 2 of the proof of Lemma 3.4: the block weight
 of display 42 as a sum over the dyadic divisors of the coefficient
