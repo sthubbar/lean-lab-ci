@@ -592,7 +592,22 @@ theorem leaf_solution_count_deep :
       < (20 * n : ℝ) ^ (((n * (n + 1) : ℕ) : ℝ) / 2 * l) *
             ((P : ℝ) ^ (((n * (n + 1) : ℕ) : ℝ) / 2 * (1 - 1 / (n : ℝ)) ^ l) *
              (P : ℝ) ^ ((2 * (n * l + (⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊)) : ℝ) - ((n * (n + 1) : ℕ) : ℝ) / 2)) := by
-  sorry
+  intro n hn l hl h2l P hP
+  -- CONDITIONAL ON the CITED input `leaf_karLemma1_mvt` of KaracubaSplit: Vinogradov's
+  -- mean value theorem in Karacuba's exact form.  The count is the integral by the proved
+  -- identity `leaf_integral_eq_solution_count`, and the bound is the `b = b_l` case of the
+  -- cited lemma, reassembled through `leaf_excess_exponent_identity`.
+  rw [← leaf_integral_eq_solution_count n hn l hl P hP]
+  have hkar := leaf_karLemma1_mvt n hn l hl (n * l + (⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊))
+    (Nat.le_refl _) P hP
+  have hb : ((n * l + (⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊) : ℕ) : ℝ)
+      = (n : ℝ) * (l : ℝ) + ((⌊((n * (n + 1) : ℕ) : ℝ) / 4 + 1⌋₊ : ℕ) : ℝ) := by
+    push_cast
+    ring
+  rw [hb] at hkar
+  have hp : (0 : ℝ) < (P : ℝ) := by exact_mod_cast hP
+  rw [Real.rpow_add hp] at hkar
+  exact lt_of_lt_of_le hkar (le_of_eq (by ring))
 
 /-- LEAF. The bookkeeping identity that reassembles the two factors: for `P > 0` the
 product of the diagonal power `P^(2b - n(n+1)/2)` and the excess factor
