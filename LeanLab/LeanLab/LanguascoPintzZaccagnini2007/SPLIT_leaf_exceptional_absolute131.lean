@@ -381,7 +381,15 @@ theorem leaf_exceptional_absolute_lower_part131 :
       0 < c → AdmissibleP131 X P → ExceptionalModuli131 K₁ c X E → 4 ≤ X →
       ∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 > n → ¬ Nonexceptional131 Cstar E n →
         |binaryMajor131 X n P| ≤ A * n * Sing n := by
-  sorry
+  -- The parent leaf `leaf_exceptional_absolute131` of `SPLIT_cor42_window_extension131`
+  -- demands the bound on the whole window with no scale restriction and no strip
+  -- hypothesis, with the same binder order and the same conclusion.  The strip leaf is
+  -- a proper restriction of it: both extra hypotheses, `4 ≤ X` and `2 * (X : ℝ) / 3 > n`,
+  -- are dropped (named `_`), and the remaining data are passed through unchanged.
+  -- CONDITIONAL ON that parent leaf: the only `sorryAx` here flows through it.
+  obtain ⟨A, hA0, hA⟩ := leaf_exceptional_absolute131
+  exact ⟨A, hA0, fun X Cstar K₁ c P E hc hAdm hExc _ n hn _ hnone =>
+    hA X Cstar K₁ c P E hc hAdm hExc n hn hnone⟩
 
 /-- The split target: the same statement as `leaf_exceptional_absolute131`, proved from the three
 leaves above and not from the target. The constants are compared with `max`, and `n * Sing n` is
