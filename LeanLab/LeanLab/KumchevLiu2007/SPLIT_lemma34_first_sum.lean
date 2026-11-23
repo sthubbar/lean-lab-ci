@@ -22,6 +22,7 @@ each leaf: every leaf keeps the whole written range of H.
 -/
 import LeanLab.KumchevLiu2007.Eq33RouteD
 import LeanLab.KumchevLiu2007.SmallCutoff674
+import LeanLab.KumchevLiu2007.SPLIT_lemma34_large_right
 
 namespace LeanLab.KumchevLiu2007.Eq33RouteD
 
@@ -123,7 +124,7 @@ theorem leaf_large_cutoff_right_half (A : ℝ) (hA : 0 < A) :
             roughWeight z m *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  exact LargeRight1122.large_cutoff_right_half_of_cases A hA
 
 /-- The target estimate, from the four leaves: split the window at Y / 2, take
 the smaller cut-off on both halves when z is at most two and the rough case on
