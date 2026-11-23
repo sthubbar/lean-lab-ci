@@ -5,6 +5,7 @@ This file records the cited finite support sieve input.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Cai2002.Decomp306b
+import LeanLab.Cai2002.Split306Theorem6
 
 open Finset Real
 noncomputable section
@@ -14,9 +15,10 @@ namespace LeanLab.Cai2002
 equations 3 to 11 and Table 1. The existing finite support interface retains the
 complete Q times D remainder. Its weak bounds follow from the printed strict bounds.
 The constants of a table row apply below that row's epsilon as explained on page 5.
-This is a cited input, not a proved linear sieve theorem. -/
+Since burst-20261122 it is assembled in Split306Theorem6.lean from the pieces of the
+paper's proof in Section 2.4, and is CONDITIONAL ON the LEAF theorems of that file. -/
 theorem leaf306_theorem6 : LeanLab.ChenExplicit.Theorem6Stmt := by
-  sorry
+  exact theorem6_of_leaves306
 
 /-- The cited finite sieve applies to the constructed global functions.
 CONDITIONAL ON leaf306_theorem6. Pages 4 to 5, equations 5 and 6. -/
