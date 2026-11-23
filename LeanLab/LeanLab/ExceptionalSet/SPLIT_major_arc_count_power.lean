@@ -24,6 +24,7 @@ this way. LEAF 1 and LEAF 3 are no longer leaves; provers leave this file alone,
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.SPLIT_theorem51
+import LeanLab.ExceptionalSet.Feed1122CountLogSavingEnlarged
 
 namespace LeanLab.ExceptionalSet.BG2026
 open Real Finset ArithmeticFunction
@@ -46,7 +47,7 @@ theorem count_log_saving_enlarged :
               ‖majorPart (logPrimes x) (minorArcs x ((x : ℝ) ^ ((1 : ℝ) / 10)))
                 (n : ZMod (Mx x))‖ ≤ (Mx x : ℝ) * x / 4)).card : ℕ) : ℝ)
           ≤ C * (x : ℝ) / Real.log x ^ A := by
-  sorry
+  exact count_log_saving_enlarged_of_leaves
 
 /-- LEAF 2 of 3, the log saving against the power `x^{1/2}`: for all large `x` the fourth
 power of `log x` is at most `x^{1/2}`. One inequality on the real logarithm, with no counting
