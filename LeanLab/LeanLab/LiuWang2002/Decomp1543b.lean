@@ -18,6 +18,7 @@ Ternary Goldbach is a theorem, Helfgott 2013; binary Goldbach is OPEN.
 -/
 import Mathlib
 import LeanLab.LiuWang2002.Decomp1543a
+import LeanLab.LiuWang2002.RSMertensButhe1122
 
 namespace LeanLab.LiuWang2002.U1543
 
@@ -73,7 +74,10 @@ noncomputable def K67 : ℝ := 0.6111 * (0.5203 * 0.56)
 /-- CITED, not proved in the lab: Rosser-Schoenfeld 1962, Illinois J. Math. 6, Theorem 6 and
 (2.11), as used on p. 172: for `x ≥ 15000`, `log x - 1.385 ≤ ∑_{p≤x} p^(-1) log p ≤ log x - 1.28`. -/
 theorem rs2_mertens (x : ℝ) (hx : 15000 ≤ x) :
-    Real.log x - 1.385 ≤ primeLogSum x ∧ primeLogSum x ≤ Real.log x - 1.28 := by sorry
+    Real.log x - 1.385 ≤ primeLogSum x ∧ primeLogSum x ≤ Real.log x - 1.28 := by
+  -- burst-20261122 S78: wired to the Buthe route in RSMertensButhe1122.
+  unfold primeLogSum primesTo
+  exact RSMertensButhe1122.rs2_mertens_buthe x hx
 
 /-- Elementary logarithm bound for the range used on pages 171 to 174. -/
 theorem task141_log_log (L : ℝ) (hL : 3100 ≤ L) : Real.log L ≤ 0.0027 * L := by
