@@ -24,6 +24,7 @@ piece bounds are LEAFs. No new definition, no existing statement changed.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.DecompC165dBase312
+import LeanLab.BHP1997.Prep1122KeptLemma33Pieces52
 
 namespace LeanLab.BHP1997.DecompC165d
 open Classical Complex Decomp132 DecompC165b
@@ -53,6 +54,87 @@ theorem upD52_leaf_f_lemma30 (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemma9
         C * (x ^ (11 / 20 + ε) / (x ^ (11 / 20 + ε) / (q * sieveQ ε x)) ^ 2) *
           Real.log x ^ (-A) := by
   sorry
+
+/-- Reduction for the g-big leaf: if the one-prime coefficient c of the big part of g_m
+satisfies the well-spaced block bound in the shape of `kept52_wellspaced`, then display 5.2 on
+page 43 holds for it. PROVED by the same unit-block and consecutive-block summation as
+`kept52_of_leaves`; the well-spaced bound is the only analytic content left. No new definition,
+no existing statement changed. AI wrote the Lean code. Goldbach is open. -/
+theorem upD52_gbig_of_wellspaced {ε : ℝ} (c : ℝ → ℕ → ℝ)
+    (hws : ∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ, 1 ≤ q → q ≤ sieveQ ε x →
+      ∀ a b : ℝ, a ≤ b → b - a ≤ x ^ (11 / 20 + ε) / (q * sieveQ ε x) →
+      ((Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ a ∧ b ≤ x ^ (11 / 20 + ε)) ∨
+        (-x ^ (11 / 20 + ε) ≤ a ∧ b ≤ -Real.exp (Real.log x ^ (1 / 3 : ℝ)))) →
+      ∀ S : Finset ℝ, (∀ t ∈ S, a ≤ t ∧ t ≤ b) →
+        (∀ t ∈ S, ∀ t' ∈ S, t ≠ t' → 1 ≤ |t - t'|) →
+        ∑ t ∈ S, ‖∑ m ∈ rightInterval ε x, (c x m : ℂ) *
+            (1 : DirichletCharacter ℂ q) (m : ZMod q) /
+              (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2 ≤
+          C * x ^ (11 / 20 + ε) * Real.log x ^ (-A)) :
+    ∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ, 1 ≤ q → q ≤ sieveQ ε x →
+      (∫ t in (-x ^ (11 / 20 + ε))..(-Real.exp (Real.log x ^ (1 / 3 : ℝ))),
+          ‖∑ m ∈ rightInterval ε x, (c x m : ℂ) *
+              (1 : DirichletCharacter ℂ q) (m : ZMod q) / (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2 /
+            ((x ^ (11 / 20 + ε) / (q * sieveQ ε x)) ^ 2 + t ^ 2)) +
+        (∫ t in (Real.exp (Real.log x ^ (1 / 3 : ℝ)))..(x ^ (11 / 20 + ε)),
+          ‖∑ m ∈ rightInterval ε x, (c x m : ℂ) *
+              (1 : DirichletCharacter ℂ q) (m : ZMod q) / (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2 /
+            ((x ^ (11 / 20 + ε) / (q * sieveQ ε x)) ^ 2 + t ^ 2)) ≤
+        C * (x ^ (11 / 20 + ε) / (x ^ (11 / 20 + ε) / (q * sieveQ ε x)) ^ 2) *
+          Real.log x ^ (-A) := by
+  intro A hA
+  obtain ⟨C, hC⟩ := hws A hA
+  refine ⟨max (12 * max C 0) (max C 1), fun x hx q hq1 hqQ => ?_⟩
+  have hxC : C ≤ x := (le_max_left C 1).trans (hx.trans' (le_max_right _ _))
+  have hx1 : 1 ≤ x := (le_max_right C 1).trans (hx.trans' (le_max_right _ _))
+  have hx0 : 0 < x := lt_of_lt_of_le one_pos hx1
+  set Y := x ^ (11 / 20 + ε) with hYdef
+  set T0 := Real.exp (Real.log x ^ (1 / 3 : ℝ)) with hT0def
+  set T2 := x ^ (11 / 20 + ε) / (q * sieveQ ε x) with hT2def
+  set Lg := Real.log x ^ (-A) with hLg
+  set F : ℝ → ℝ := fun t => ‖∑ m ∈ rightInterval ε x, (c x m : ℂ) *
+      (1 : DirichletCharacter ℂ q) (m : ZMod q) / (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2
+    with hFdef
+  have hY0 : 0 < Y := Real.rpow_pos_of_pos hx0 _
+  have hL0 : 0 ≤ Lg := Real.rpow_nonneg (Real.log_nonneg hx1) _
+  have hQ1 : (1 : ℝ) ≤ (sieveQ ε x : ℝ) := by exact_mod_cast hq1.trans hqQ
+  have hq1' : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq1
+  have hT2 : 0 < T2 := by rw [hT2def]; positivity
+  have hT0 : 0 ≤ T0 := (Real.exp_pos _).le
+  have hFc : Continuous F := kept52_continuous ε x q (c x)
+  have hF0 : ∀ t, 0 ≤ F t := fun t => sq_nonneg _
+  set M := max C 0 with hM
+  have hV : 0 ≤ 2 * (M * Y * Lg) := by positivity
+  have hblock : ∀ a b : ℝ, a ≤ b → b - a ≤ T2 →
+      ((T0 ≤ a ∧ b ≤ Y) ∨ (-Y ≤ a ∧ b ≤ -T0)) → ∫ t in a..b, F t ≤ 2 * (M * Y * Lg) := by
+    intro a b hab hba hrange
+    have h1 := kept52_block_le_two_wellspaced F hFc hF0 hab
+      (hC x hxC q hq1 hqQ a b hab hba hrange)
+    have h2 : C * Y * Lg ≤ M * Y * Lg :=
+      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right (le_max_left _ _) hY0.le) hL0
+    linarith
+  have hpos : ∫ t in T0..Y, F t / (T2 ^ 2 + t ^ 2) ≤ 3 * (2 * (M * Y * Lg)) / T2 ^ 2 :=
+    kept52_block_sum F hFc hF0 hT0 hT2 hV fun a b ha hab hb hba =>
+      hblock a b hab hba (Or.inl ⟨ha, hb⟩)
+  have hneg : ∫ t in -Y..-T0, F t / (T2 ^ 2 + t ^ 2) ≤ 3 * (2 * (M * Y * Lg)) / T2 ^ 2 := by
+    have hc := intervalIntegral.integral_comp_neg (a := T0) (b := Y)
+      (fun t => F t / (T2 ^ 2 + t ^ 2))
+    simp only [neg_sq] at hc
+    rw [← hc]
+    refine kept52_block_sum (fun t => F (-t)) (hFc.comp continuous_neg) (fun t => hF0 _)
+      hT0 hT2 hV fun a b ha hab hb hba => ?_
+    have hc2 := intervalIntegral.integral_comp_neg (a := a) (b := b) F
+    rw [hc2]
+    exact hblock (-b) (-a) (by linarith) (by linarith) (Or.inr ⟨by linarith, by linarith⟩)
+  have hmain : 3 * (2 * (M * Y * Lg)) / T2 ^ 2 + 3 * (2 * (M * Y * Lg)) / T2 ^ 2 =
+      12 * M * (Y / T2 ^ 2) * Lg := by ring
+  have hfin : 12 * M * (Y / T2 ^ 2) * Lg ≤ max (12 * M) (max C 1) * (Y / T2 ^ 2) * Lg :=
+    mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right (le_max_left _ _) (by positivity)) hL0
+  calc _ ≤ 3 * (2 * (M * Y * Lg)) / T2 ^ 2 + 3 * (2 * (M * Y * Lg)) / T2 ^ 2 :=
+        add_le_add hneg hpos
+    _ = 12 * M * (Y / T2 ^ 2) * Lg := hmain
+    _ ≤ _ := hfin
 
 /-- LEAF: P0069 pages 49 and 50, proof of Lemma 34, the part of g_m with p1 >= Y^eps: "of
 course if P >= Y^eps we may obtain 5.1 and 5.2 from Lemma 33", with N(s, chi) the sum of
@@ -84,6 +166,15 @@ theorem upD52_leaf_g_big_lemma33 (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Le
             ((x ^ (11 / 20 + ε) / (q * sieveQ ε x)) ^ 2 + t ^ 2)) ≤
         C * (x ^ (11 / 20 + ε) / (x ^ (11 / 20 + ε) / (q * sieveQ ε x)) ^ 2) *
           Real.log x ^ (-A) := by
+  refine upD52_gbig_of_wellspaced c ?_
+  intro A hA
+  -- Attempt 2026-11-22: the only well-spaced block bound in the lab is kept52_wellspaced,
+  -- whose polynomial carries the upperKept coefficients, not the one-prime coefficient c of
+  -- the big part of g_m. The attempt `exact kept52_wellspaced h4 h9 hε hε8 A hA` fails with
+  -- a type mismatch, upperKept ε (x ^ (11 / 20 + ε)) m against c x m; see PROGRESS.md,
+  -- BLOCKED 2026-11-22. The missing input is the page 48 Lemma 33 well-spaced block bound
+  -- for the one-prime coefficient, case 5.13, whose paper proof needs the Lemma 5 bound 3.2
+  -- for the prime polynomial, which the lab does not formalize either.
   sorry
 
 /-- LEAF: P0069 page 50, proof of Lemma 34, the part of g_m with w <= p1 < Y^eps: "For
