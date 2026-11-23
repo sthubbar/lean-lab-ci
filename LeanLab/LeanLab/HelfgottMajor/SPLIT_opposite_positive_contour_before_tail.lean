@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Decomp511a
+import LeanLab.HelfgottMajor.SPLIT_leaf_lower_contour_estimate_paper
 
 /-!
 Split of `opposite_positive_contour_before_tail` of `HelfgottMajor/Decomp511a.lean`.
@@ -63,7 +64,7 @@ theorem leaf_lower_contour_estimate (δ : ℝ) (s : ℂ)
       mainCoefficient s.re |s.im| δ *
         exp (-BookE.E (|s.im| / (π * δ) ^ 2) * |s.im|) +
       firstCoefficient s.re |s.im| * exp (-0.4798 * |s.im|) := by
-  sorry
+  exact leaf_lower_contour_estimate_of_leaves δ s hσ0 hσ1 ht hsign
 
 /-- LEAF.  The real Gaussian tail beyond the endpoint.  The twist
 `e (δ * x)` has modulus one at real `x`, and the Mellin power has modulus
