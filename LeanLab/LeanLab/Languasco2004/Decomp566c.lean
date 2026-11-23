@@ -95,7 +95,8 @@ theorem remainder_transfer :
               η * scale N (localization N ε) n <
                 model * scale N (localization N ε) n)).card : ℝ) ≤
             C * windowLength N ε / Real.log N ^ B := by
-        sorry
+        have hlt : η < model := lt_of_not_ge hlarge
+        exact Decomp566b.remainder_transfer_count η hlt
     obtain ⟨ε₀, hε₀, h⟩ := hcount
     refine ⟨ε₀, hε₀, ?_⟩
     intro ε B hε hεε₀ hB
