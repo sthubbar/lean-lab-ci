@@ -7,7 +7,7 @@ displays 15, 18 and 19 and page 6 display 20.
 The printed argument, with Y = windowY X eps, P = (log X)^B and Q = H/P:
 * page 4 display 15: the arcs M(q, a) are disjoint, so on the arc of q, a the
   function S2* is the single term S(q, a)/phi(q) T2(beta), beta = alpha - a/q.
-  LEAF arc_localization, MEDIUM.
+  arc_localization, first a LEAF MEDIUM, PROVED in the same burst.
 * page 5 display 18: (A2.1) puts the rough weight on m coprime to q, and the
   orthogonality of the characters modulo q bounds |S2 - S2*|^2 by the sum over
   chi of |W2(beta, chi)|^2. char_orthogonality_18, first a LEAF MEDIUM, PROVED
@@ -15,8 +15,10 @@ The printed argument, with Y = windowY X eps, P = (log X)^B and Q = H/P:
 * page 6 before display 20: Gallagher's lemma, reference 5 Lemma 1, with the
   device of Saffari and Vaughan, reference 21 page 25, bounds the integral of
   |W2|^2 over |beta| at most 1/(qQ) by (qQ)^(-2) times the mean square of
-  (A2.2) plus delta, for some delta of size qQ/Y. LEAF
-  gallagher_saffari_vaughan, HARD, a citation wall.
+  (A2.2) plus delta, for some delta of size qQ/Y.
+  gallagher_saffari_vaughan, first a LEAF HARD, now PROVED from Gallagher's
+  lemma, by the lab's discrete form, and the smaller LEAF saffari_vaughan_device,
+  HARD, a citation wall.
 * hypothesis (A2.2), here A22Corr, then gives C P^(-4) for each chi; this
   combination is PROVED below as arc_char_mean_square.
 * at most P characters and at most 2 P^2 arcs give C P^(-1), at most
@@ -245,7 +247,213 @@ theorem char_orthogonality_18 (Y P : ℝ) (q a : ℕ) (hq : 1 ≤ q) (ha : Nat.C
     rw [fourier_split q a m hq0 β]
   · field_simp
 
-/-- LEAF: P0088 page 4 display 15 and page 5 the definition of S2* on M. Class MEDIUM.
+/-! ## Display 15, arc localization, PROVED in burst-20261122 -/
+
+theorem mem_arcPairs_bounds {P : ℝ} (hP : 0 ≤ P) {v : ℕ × ℕ} (hv : v ∈ arcPairs P) :
+    1 ≤ v.1 ∧ (v.1 : ℝ) ≤ P ∧ v.2 ≤ v.1 ∧ Nat.Coprime v.2 v.1 := by
+  unfold arcPairs at hv
+  simp only [Finset.mem_filter, Finset.mem_product, Finset.mem_Icc, Finset.mem_range] at hv
+  obtain ⟨⟨⟨h1, h2⟩, _⟩, h3, h4⟩ := hv
+  refine ⟨h1, ?_, h3, h4⟩
+  exact (Nat.cast_le.mpr h2).trans (Nat.floor_le hP)
+
+theorem arc_disjoint {P R : ℝ} (hP : 0 ≤ P) (hR : 2 * P < R) {v w : ℕ × ℕ}
+    (hv : v ∈ arcPairs P) (hw : w ∈ arcPairs P) {α : ℝ}
+    (hav : α ∈ arc R v) (haw : α ∈ arc R w) : v = w := by
+  obtain ⟨hv1, hvP, hv2, hvc⟩ := mem_arcPairs_bounds hP hv
+  obtain ⟨hw1, hwP, hw2, hwc⟩ := mem_arcPairs_bounds hP hw
+  unfold arc at hav haw
+  simp only [Set.mem_ofPred_eq] at hav haw
+  have hRpos : 0 < R := by linarith
+  have key : |((w.1 * v.2 : ℕ) : ℝ) - ((v.1 * w.2 : ℕ) : ℝ)| < 1 := by
+    have e : ((w.1 * v.2 : ℕ) : ℝ) - ((v.1 * w.2 : ℕ) : ℝ) =
+        (v.1 : ℝ) * ((w.1 : ℝ) * α - w.2) - (w.1 : ℝ) * ((v.1 : ℝ) * α - v.2) := by
+      push_cast; ring
+    rw [e]
+    calc _ ≤ |(v.1 : ℝ) * ((w.1 : ℝ) * α - w.2)| + |(w.1 : ℝ) * ((v.1 : ℝ) * α - v.2)| :=
+          abs_sub _ _
+      _ = (v.1 : ℝ) * |(w.1 : ℝ) * α - w.2| + (w.1 : ℝ) * |(v.1 : ℝ) * α - v.2| := by
+          rw [abs_mul, abs_mul, Nat.abs_cast, Nat.abs_cast]
+      _ ≤ P * R⁻¹ + P * R⁻¹ := by
+          gcongr
+      _ = 2 * P / R := by ring
+      _ < 1 := by rw [div_lt_one hRpos]; exact hR
+  have heq : w.1 * v.2 = v.1 * w.2 := by
+    have : ((w.1 * v.2 : ℕ) : ℤ) = ((v.1 * w.2 : ℕ) : ℤ) := by
+      have h := key
+      rw [← Int.cast_natCast (R := ℝ), ← Int.cast_natCast (R := ℝ) (v.1 * w.2), ← Int.cast_sub,
+        ← Int.cast_abs] at h
+      have h' : |((w.1 * v.2 : ℕ) : ℤ) - ((v.1 * w.2 : ℕ) : ℤ)| < 1 := by exact_mod_cast h
+      have := abs_lt.mp h'
+      omega
+    exact_mod_cast this
+  have h1 : v.1 ∣ w.1 := by
+    have : v.1 ∣ v.2 * w.1 := ⟨w.2, by rw [mul_comm v.2, heq]⟩
+    exact (Nat.Coprime.dvd_of_dvd_mul_left hvc.symm this)
+  have h2 : w.1 ∣ v.1 := by
+    have : w.1 ∣ w.2 * v.1 := ⟨v.2, by rw [heq]; ring⟩
+    exact (Nat.Coprime.dvd_of_dvd_mul_left hwc.symm this)
+  have hq : v.1 = w.1 := Nat.dvd_antisymm h1 h2
+  have ha : v.2 = w.2 := by
+    rw [hq] at heq
+    exact Nat.eq_of_mul_eq_mul_left (by omega) heq
+  exact Prod.ext hq ha
+
+theorem cover {H P α : ℝ} (hP : 0 ≤ P) (hR : 1 < H / P) (hα : α ∈ Set.Ioc (0 : ℝ) 1)
+    (hM : α ∈ majorArcs H P) : ∃ v ∈ arcPairs P, α ∈ arc (H / P) v := by
+  obtain ⟨q, hq1, hqP, a, hcop, hab⟩ := hM
+  have hinv : (H / P)⁻¹ < 1 := inv_lt_one_of_one_lt₀ hR
+  have hlt := (abs_lt.mp (lt_of_le_of_lt hab hinv))
+  obtain ⟨hα0, hα1⟩ := hα
+  have hqα : (q : ℝ) * α ≤ q := by
+    have : (0 : ℝ) ≤ q := Nat.cast_nonneg _
+    nlinarith
+  have hqα0 : 0 < (q : ℝ) * α := mul_pos (by exact_mod_cast hq1) hα0
+  have ha0 : (0 : ℤ) ≤ a := by
+    have : (-1 : ℝ) < a := by linarith
+    have : (-1 : ℤ) < a := by exact_mod_cast this
+    omega
+  have haq : a ≤ (q : ℤ) := by
+    have : (a : ℝ) < q + 1 := by linarith
+    have : a < (q : ℤ) + 1 := by exact_mod_cast this
+    omega
+  refine ⟨(q, a.toNat), ?_, ?_⟩
+  · unfold arcPairs
+    simp only [Finset.mem_filter, Finset.mem_product, Finset.mem_Icc, Finset.mem_range]
+    have hqf : q ≤ ⌊P⌋₊ := Nat.le_floor hqP
+    refine ⟨⟨⟨hq1, hqf⟩, by omega⟩, by omega, ?_⟩
+    have : IsCoprime ((a.toNat : ℕ) : ℤ) (q : ℤ) := by rwa [Int.toNat_of_nonneg ha0]
+    exact Nat.isCoprime_iff_coprime.mp this
+  · unfold arc
+    simp only [Set.mem_ofPred_eq]
+    have : ((a.toNat : ℕ) : ℝ) = (a : ℝ) := by
+      have : ((a.toNat : ℕ) : ℤ) = a := Int.toNat_of_nonneg ha0
+      exact_mod_cast this
+    rw [this]; exact hab
+
+theorem S2star_on_arc {Y H P α : ℝ} (hP : 0 ≤ P) (hR : 2 * P < H / P) {v : ℕ × ℕ}
+    (hv : v ∈ arcPairs P) (hα : α ∈ arc (H / P) v) :
+    S2star Y H P α = U1534.gaussS v.1 v.2 / (Nat.totient v.1 : ℂ) *
+      T2 Y P (α - v.2 / v.1) := by
+  unfold S2star
+  rw [Finset.sum_eq_single v]
+  · rw [Set.indicator_of_mem hα]
+  · intro w hw hwv
+    rw [Set.indicator_of_notMem]
+    intro hαw
+    exact hwv (arc_disjoint hP hR hw hv hαw hα)
+  · intro h; exact absurd hv h
+
+theorem arc_eq_Icc {R : ℝ} (hR : 0 < R) {v : ℕ × ℕ} (hv : 1 ≤ v.1) :
+    arc R v = Set.Icc ((v.2 : ℝ) / v.1 + -((v.1 : ℝ) * R)⁻¹) ((v.2 : ℝ) / v.1 + ((v.1 : ℝ) * R)⁻¹) := by
+  have hq : (0 : ℝ) < v.1 := by exact_mod_cast hv
+  ext α
+  simp only [arc, Set.mem_ofPred_eq, Set.mem_Icc, abs_le]
+  have key : ((v.1 : ℝ) * R)⁻¹ = R⁻¹ / v.1 := by rw [mul_inv]; ring
+  rw [key]
+  have e1 : (v.1 : ℝ) * α - v.2 = (α - v.2 / v.1) * v.1 := by field_simp
+  rw [e1]
+  generalize hd : α - v.2 / v.1 = d
+  have hα : α = v.2 / v.1 + d := by rw [← hd]; ring
+  rw [hα]
+  constructor
+  · rintro ⟨h1, h2⟩
+    have a1 : -R⁻¹ / v.1 ≤ d := (div_le_iff₀ hq).mpr h1
+    have a2 : d ≤ R⁻¹ / v.1 := (le_div_iff₀ hq).mpr h2
+    rw [neg_div] at a1
+    constructor <;> linarith
+  · rintro ⟨h1, h2⟩
+    have a1 : -R⁻¹ / v.1 ≤ d := by rw [neg_div]; linarith
+    have a2 : d ≤ R⁻¹ / v.1 := by linarith
+    exact ⟨(div_le_iff₀ hq).mp a1, (le_div_iff₀ hq).mp a2⟩
+
+theorem arc_measurable (R : ℝ) (v : ℕ × ℕ) : MeasurableSet (arc R v) := by
+  unfold arc
+  exact measurableSet_le (by fun_prop) measurable_const
+
+theorem cont_T2 (Y P : ℝ) : Continuous (fun β : ℝ => T2 Y P β) := by
+  unfold T2
+  exact Prep1121DKLMajorCut.trig_continuous _ _ _
+
+theorem integral_bound {Y H P : ℝ} (hP : 0 ≤ P) (hR1 : 1 < H / P) (hR : 2 * P < H / P) :
+    (∫ α in Set.Ioc (0 : ℝ) 1 ∩ majorArcs H P,
+        ‖roughSum Y P α - S2star Y H P α‖ ^ 2) ≤
+      ∑ v ∈ arcPairs P,
+        ∫ β in -((v.1 : ℝ) * (H / P))⁻¹..((v.1 : ℝ) * (H / P))⁻¹,
+          ‖roughSum Y P ((v.2 : ℝ) / v.1 + β) -
+            U1534.gaussS v.1 v.2 / (Nat.totient v.1 : ℂ) * T2 Y P β‖ ^ 2 := by
+  set R := H / P with hRdef
+  have hRpos : 0 < R := by linarith
+  set f : ℝ → ℝ := fun α => ‖roughSum Y P α - S2star Y H P α‖ ^ 2 with hf
+  let g : ℕ × ℕ → ℝ → ℝ := fun v α =>
+    ‖roughSum Y P α - U1534.gaussS v.1 v.2 / (Nat.totient v.1 : ℂ) * T2 Y P (α - v.2 / v.1)‖ ^ 2
+  have hg : ∀ v, Continuous (g v) := fun v => by
+    have h1 := Prep1121DKLMajorCut.cont_S2 Y P
+    have h2 := cont_T2 Y P
+    simp only [g]
+    fun_prop
+  have hfg : ∀ v ∈ arcPairs P, Set.EqOn f (g v) (arc R v) := by
+    intro v hv α hα
+    simp only [hf, g]
+    rw [S2star_on_arc hP hR hv hα]
+  have hint : ∀ v ∈ arcPairs P, IntegrableOn f (arc R v) := by
+    intro v hv
+    have h1 := (mem_arcPairs_bounds hP hv).1
+    have : IntegrableOn (g v) (arc R v) := by
+      rw [arc_eq_Icc hRpos h1]
+      exact (hg v).integrableOn_Icc
+    exact this.congr_fun (hfg v hv).symm (arc_measurable R v)
+  have hdisj : Set.Pairwise (↑(arcPairs P)) (Function.onFun Disjoint fun v => arc R v) := by
+    intro v hv w hw hvw
+    rw [Function.onFun, Set.disjoint_left]
+    intro α hαv hαw
+    exact hvw (arc_disjoint hP hR hv hw hαv hαw)
+  have hU : IntegrableOn f (⋃ v ∈ arcPairs P, arc R v) :=
+    (integrableOn_finset_iUnion).mpr hint
+  calc (∫ α in Set.Ioc (0 : ℝ) 1 ∩ majorArcs H P, f α)
+      ≤ ∫ α in ⋃ v ∈ arcPairs P, arc R v, f α := by
+        apply setIntegral_mono_set hU
+        · exact Filter.Eventually.of_forall (fun α => by positivity)
+        · apply Filter.Eventually.of_forall
+          intro α hα
+          obtain ⟨v, hv, hαv⟩ := cover hP hR1 hα.1 hα.2
+          exact Set.mem_biUnion hv hαv
+    _ = ∑ v ∈ arcPairs P, ∫ α in arc R v, f α :=
+        integral_biUnion_finset _ (fun v _ => arc_measurable R v) hdisj hint
+    _ = _ := by
+        apply Finset.sum_congr rfl
+        intro v hv
+        have h1 := (mem_arcPairs_bounds hP hv).1
+        rw [setIntegral_congr_fun (arc_measurable R v) (hfg v hv), arc_eq_Icc hRpos h1,
+          integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le]
+        · have e : ∀ β : ℝ, ‖roughSum Y P ((v.2 : ℝ) / v.1 + β) -
+              U1534.gaussS v.1 v.2 / (Nat.totient v.1 : ℂ) * T2 Y P β‖ ^ 2 =
+              g v ((v.2 : ℝ) / v.1 + β) := fun β => by simp only [g, add_sub_cancel_left]
+          simp_rw [e]
+          rw [intervalIntegral.integral_comp_add_left (g v) ((v.2 : ℝ) / v.1)]
+        · have : 0 < ((v.1 : ℝ) * R)⁻¹ := inv_pos.mpr (mul_pos (by exact_mod_cast h1) hRpos)
+          linarith
+
+theorem eventually_big (B : ℝ) :
+    ∀ᶠ X : ℝ in Filter.atTop, 1 ≤ X ∧ 1 ≤ Real.log X ∧
+      2 * (Real.log X ^ B) ^ (6 : ℕ) < X ^ (7 / 18 : ℝ) := by
+  have ht := (isLittleO_log_rpow_rpow_atTop (6 * B) (by norm_num : (0 : ℝ) < 7 / 18)).bound
+    (by norm_num : (0 : ℝ) < 1 / 4)
+  filter_upwards [ht, Filter.eventually_ge_atTop (Real.exp 1)] with X hsmall hX
+  have hX0 : 0 < X := lt_of_lt_of_le (Real.exp_pos 1) hX
+  have hL : 1 ≤ Real.log X := by
+    rw [← Real.log_exp 1]; exact Real.log_le_log (Real.exp_pos 1) hX
+  have hLp : 0 < Real.log X := by linarith
+  have hy : 0 < X ^ (7 / 18 : ℝ) := Real.rpow_pos_of_pos hX0 _
+  have hsmall' : Real.log X ^ (6 * B) ≤ (1 / 4 : ℝ) * X ^ (7 / 18 : ℝ) := by
+    simpa only [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hLp (6 * B)),
+      abs_of_pos hy] using hsmall
+  refine ⟨le_trans (Real.one_le_exp zero_le_one) hX, hL, ?_⟩
+  rw [← Real.rpow_natCast, ← Real.rpow_mul hLp.le]
+  rw [show B * ((6 : ℕ) : ℝ) = 6 * B by push_cast; ring]
+  linarith
+
+/-- PROVED. P0088 page 4 display 15 and page 5 the definition of S2* on M. Was LEAF MEDIUM.
 For X large in the block range, H/P exceeds 2P, so the closed arcs M(q, a) with q at
 most P are disjoint, and every alpha of the period interval in M lies on the arc of
 one pair of arcPairs P, with a from 0 to q. On that arc S2* is the single term
@@ -265,9 +473,127 @@ theorem arc_localization :
               ‖roughSum (windowY X ε) (Real.log X ^ B) ((v.2 : ℝ) / v.1 + β) -
                 U1534.gaussS v.1 v.2 / (Nat.totient v.1 : ℂ) *
                   T2 (windowY X ε) (Real.log X ^ B) β‖ ^ 2 := by
+  intro B hB ε hε _
+  obtain ⟨X0, hX0⟩ := Filter.eventually_atTop.mp (eventually_big B)
+  refine ⟨X0, fun X H hX hH1 _ => ?_⟩
+  obtain ⟨hX1, hL, hbig⟩ := hX0 X hX
+  set P := Real.log X ^ B with hPdef
+  have hLp : 0 < Real.log X := by linarith
+  have hP1 : 1 ≤ P := Real.one_le_rpow hL hB.le
+  have hPpos : 0 < P := by linarith
+  have hXe : X ^ (7 / 18 : ℝ) ≤ X ^ (7 / 18 + ε) :=
+    Real.rpow_le_rpow_of_exponent_le hX1 (by linarith)
+  have hP4 : (0 : ℝ) < P ^ (4 : ℕ) := by positivity
+  have hzp : P ^ (-4 : ℤ) = (P ^ (4 : ℕ))⁻¹ := by rw [zpow_neg, zpow_ofNat]
+  have hH : 2 * P ^ (2 : ℕ) < H := by
+    have h6 : 2 * P ^ (6 : ℕ) * (P ^ (4 : ℕ))⁻¹ = 2 * P ^ (2 : ℕ) := by
+      field_simp
+    calc 2 * P ^ (2 : ℕ) = 2 * P ^ (6 : ℕ) * (P ^ (4 : ℕ))⁻¹ := h6.symm
+      _ < X ^ (7 / 18 : ℝ) * (P ^ (4 : ℕ))⁻¹ := by
+          apply mul_lt_mul_of_pos_right hbig (inv_pos.mpr hP4)
+      _ ≤ X ^ (7 / 18 + ε) * (P ^ (4 : ℕ))⁻¹ := by
+          apply mul_le_mul_of_nonneg_right hXe (inv_pos.mpr hP4).le
+      _ ≤ H := by rw [← hzp]; exact hH1
+  have hR : 2 * P < H / P := by
+    rw [lt_div_iff₀ hPpos]; nlinarith
+  have hR1 : 1 < H / P := by linarith
+  exact integral_bound hPpos.le hR1 hR
+
+/-! ## Gallagher and Saffari Vaughan, split in burst-20261122 -/
+
+/-- PROVED. The character e(k beta) of the circle is the exponential e of the lab's
+Gallagher module. -/
+theorem fourier_eq_gallagher_e (k : ℕ) (β : ℝ) :
+    (fourier (k : ℤ) (β : AddCircle (1 : ℝ)) : ℂ) = LeanLab.PNTPort.LargeSieve.e (k * β) := by
+  rw [fourier_coe_apply, LeanLab.PNTPort.LargeSieve.e]
+  congr 1
+  push_cast
+  ring
+
+/-- PROVED. P0088 page 2 display 5: for m in the square window, m^2 is below the
+floor of Y plus one. -/
+theorem sq_lt_floor_succ {Y : ℝ} {m : ℕ} (hm : m ∈ squareWindow Y) : m ^ 2 < ⌊Y⌋₊ + 1 := by
+  have h := (Finset.mem_filter.mp hm).2
+  have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg _
+  have h2 : (m : ℝ) ^ 2 < Y := (Real.lt_sqrt hm0).mp h.2
+  have : m ^ 2 ≤ ⌊Y⌋₊ := Nat.le_floor (by push_cast; exact h2.le)
+  omega
+
+/-- PROVED. A sum over the square window with frequencies m^2 is the exponential sum
+with coefficient at n the sum of c m over m with m^2 = n, n below the floor of Y plus one. -/
+theorem squareSum_eq (Y : ℝ) (c : ℕ → ℂ) (β : ℝ) :
+    ∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ)) =
+      ∑ n ∈ Finset.range (⌊Y⌋₊ + 1),
+        (∑ m ∈ squareWindow Y, if m ^ 2 = n then c m else 0) *
+          LeanLab.PNTPort.LargeSieve.e (n * β) := by
+  simp_rw [Finset.sum_mul]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun m hm => ?_
+  rw [Finset.sum_eq_single (m ^ 2)]
+  · rw [if_pos rfl, fourier_eq_gallagher_e]
+  · intro n _ hn
+    rw [if_neg (fun h => hn h.symm), zero_mul]
+  · intro h
+    exact absurd (Finset.mem_range.mpr (sq_lt_floor_succ hm)) h
+
+/-- PROVED. P0088 page 6, Gallagher's lemma, reference 5 Lemma 1, for a sum over the
+square window, from the lab's discrete form LeanLab.PNTPort.Gallagher.gallagher with an
+integer window L, on any |beta| at most r with r at most 1/(2L). -/
+theorem gallagher_squares (Y : ℝ) (c : ℕ → ℂ) (L : ℕ) (hL : 0 < L) (r : ℝ) (hr : 0 ≤ r)
+    (hrL : r ≤ 1 / (2 * L)) :
+    (∫ β in -r..r,
+      ‖∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ))‖ ^ 2) ≤
+      (π / (2 * L)) ^ 2 * ∑ k ∈ Finset.range (⌊Y⌋₊ + 1 + L),
+        ‖LeanLab.PNTPort.Gallagher.win
+          (fun n => ∑ m ∈ squareWindow Y, if m ^ 2 = n then c m else 0) (⌊Y⌋₊ + 1) L k‖ ^ 2 := by
+  have hcont : Continuous fun β : ℝ =>
+      ‖∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ))‖ ^ 2 :=
+    (Prep1121DKLMajorCut.trig_continuous _ _ (fun m => ((m ^ 2 : ℕ) : ℤ))).norm.pow 2
+  have h1 : (∫ β in -r..r,
+      ‖∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ))‖ ^ 2) ≤
+      ∫ β in -(1 / (2 * L) : ℝ)..(1 / (2 * L)),
+      ‖∑ m ∈ squareWindow Y, c m * fourier ((m ^ 2 : ℕ) : ℤ) (β : AddCircle (1 : ℝ))‖ ^ 2 :=
+    intervalIntegral.integral_mono_interval (by linarith) (by linarith) hrL
+      (Filter.Eventually.of_forall fun _ => by positivity) (hcont.intervalIntegrable _ _)
+  refine h1.trans (le_of_eq_of_le ?_ (LeanLab.PNTPort.Gallagher.gallagher _ _ _ hL))
+  congr 1
+  ext β
+  rw [squareSum_eq]
+
+/-- LEAF: P0088 page 6, the display before display 20, the device of Saffari and Vaughan,
+reference 21 page 25. Class HARD, a citation wall: the device is not printed in P0088.
+After Gallagher's lemma, which is PROVED here as gallagher_squares from the lab's
+discrete form with integer window L = floor(qQ/2), Q = H/P, the mean square of the
+window sums of length L of the coefficients of W2 at the squares m^2 is bounded by the
+mean square of the relative window sums of (A2.2): for some delta between c qQ/Y and
+qQ/Y, (pi/(2L))^2 times the sum of the squared window sums is at most a constant times
+(qQ)^(-2) times the integral over Y/4 to Y of the squared sums over t < m^2 <= t + delta t,
+plus delta. The term delta carries the edge of the t range below Y/4. -/
+theorem saffari_vaughan_device :
+    ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 →
+      ∃ C c X0 : ℝ, 0 < C ∧ 0 < c ∧ ∀ X H : ℝ, X0 ≤ X →
+        X ^ (7 / 18 + ε) * (Real.log X ^ B) ^ (-4 : ℤ) ≤ H →
+        H ≤ windowY X ε * (Real.log X ^ B) ^ (-4 : ℤ) →
+        ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ Real.log X ^ B →
+        ∀ χ : DirichletCharacter ℂ q,
+          ∃ δ : ℝ, c * ((q : ℝ) * (H / Real.log X ^ B)) / windowY X ε ≤ δ ∧
+            δ ≤ (q : ℝ) * (H / Real.log X ^ B) / windowY X ε ∧
+            (π / (2 * (⌊(q : ℝ) * (H / Real.log X ^ B) / 2⌋₊ : ℝ))) ^ 2 *
+              ∑ k ∈ Finset.range (⌊windowY X ε⌋₊ + 1 + ⌊(q : ℝ) * (H / Real.log X ^ B) / 2⌋₊),
+                ‖LeanLab.PNTPort.Gallagher.win
+                  (fun n => ∑ m ∈ squareWindow (windowY X ε), if m ^ 2 = n then
+                    (roughWeight (windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ)) m * χ m -
+                      (if χ = 1 then ((Task556a.f2Weight
+                        (windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ)) (m : ℝ) : ℝ) : ℂ)
+                       else 0)) else 0)
+                  (⌊windowY X ε⌋₊ + 1) ⌊(q : ℝ) * (H / Real.log X ^ B) / 2⌋₊ k‖ ^ 2 ≤
+              C * (((q : ℝ) * (H / Real.log X ^ B)) ^ (-2 : ℤ) *
+                (∫ t in windowY X ε / 4..windowY X ε,
+                  ‖roughDefect χ (windowY X ε) (Real.log X ^ B) δ t‖ ^ 2) + δ) := by
   sorry
 
-/-- LEAF: P0088 page 6, the display before display 20: Gallagher's lemma, reference 5
+/-- PROVED from gallagher_squares and the LEAF saffari_vaughan_device. Was LEAF HARD.
+P0088 page 6, the display before display 20: Gallagher's lemma, reference 5
 Lemma 1, combined with the device of Saffari and Vaughan, reference 21 page 25.
 Class HARD, a citation wall: neither proof is printed in P0088. For each modulus q at
 most P and each character chi modulo q there is delta of size qQ/Y, Q = H/P, at most
@@ -294,7 +620,41 @@ theorem gallagher_saffari_vaughan :
               C * (((q : ℝ) * (H / Real.log X ^ B)) ^ (-2 : ℤ) *
                 (∫ t in windowY X ε / 4..windowY X ε,
                   ‖roughDefect χ (windowY X ε) (Real.log X ^ B) δ t‖ ^ 2) + δ) := by
-  sorry
+  intro B hB ε hε hε'
+  obtain ⟨C, c, X0, hC, hc, kS⟩ := saffari_vaughan_device B hB ε hε hε'
+  obtain ⟨X1, hX1⟩ := Filter.eventually_atTop.mp (eventually_big B)
+  refine ⟨C, c, max X0 X1, hC, hc, ?_⟩
+  intro X H hX hlo hhi q hq hqP χ
+  obtain ⟨hXa, hL1, hbig⟩ := hX1 X (le_trans (le_max_right _ _) hX)
+  obtain ⟨δ, h1, h2, h3⟩ := kS X H (le_trans (le_max_left _ _) hX) hlo hhi q hq hqP χ
+  refine ⟨δ, h1, h2, le_trans ?_ h3⟩
+  have hP1 : 1 ≤ Real.log X ^ B := Real.one_le_rpow hL1 hB.le
+  set P := Real.log X ^ B with hPdef
+  have hP0 : 0 < P := by linarith
+  have hX7 : X ^ (7 / 18 : ℝ) ≤ X ^ (7 / 18 + ε) :=
+    Real.rpow_le_rpow_of_exponent_le hXa (by linarith)
+  have hP4 : P ^ (-4 : ℤ) = (P ^ 4)⁻¹ := by rw [zpow_neg]; norm_cast
+  have hH2 : 2 * P ^ 2 ≤ H := by
+    have hb : 2 * P ^ 2 * P ^ 4 ≤ X ^ (7 / 18 + ε) := by
+      have : 2 * P ^ 2 * P ^ 4 = 2 * P ^ 6 := by ring
+      rw [this]; linarith
+    have hp4 : 0 < P ^ 4 := by positivity
+    calc 2 * P ^ 2 = 2 * P ^ 2 * P ^ 4 * (P ^ 4)⁻¹ := by field_simp
+      _ ≤ X ^ (7 / 18 + ε) * (P ^ 4)⁻¹ := by gcongr
+      _ = X ^ (7 / 18 + ε) * P ^ (-4 : ℤ) := by rw [hP4]
+      _ ≤ H := hlo
+  have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast hq
+  have hQ2 : 2 ≤ (q : ℝ) * (H / P) := by
+    have : 2 * P ≤ H / P := by rw [le_div_iff₀ hP0]; nlinarith
+    nlinarith
+  set L := ⌊(q : ℝ) * (H / P) / 2⌋₊ with hLdef
+  have hL : 0 < L := Nat.floor_pos.mpr (by linarith)
+  have hLle : (L : ℝ) ≤ (q : ℝ) * (H / P) / 2 := Nat.floor_le (by linarith)
+  have hLpos : (0 : ℝ) < L := by exact_mod_cast hL
+  have hrL : ((q : ℝ) * (H / P))⁻¹ ≤ 1 / (2 * L) := by
+    rw [← one_div]
+    exact one_div_le_one_div_of_le (by positivity) (by linarith)
+  exact gallagher_squares _ _ L hL _ (inv_nonneg.mpr (by linarith)) hrL
 
 /-! ## Proved combinations -/
 
@@ -489,6 +849,8 @@ end LeanLab.KumchevLiu2007.Prep1122KLGallagherCut
 
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.char_orthogonality_18
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.arc_localization
+#print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.gallagher_squares
+#print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.saffari_vaughan_device
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.gallagher_saffari_vaughan
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.arc_char_mean_square
 #print axioms LeanLab.KumchevLiu2007.Prep1122KLGallagherCut.card_arcPairs_le
