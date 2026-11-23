@@ -141,6 +141,232 @@ theorem large_prime_term_bounds {x : ℝ} {k m n p : ℕ} (hx : 0 < x)
     hx (by exact_mod_cast hn0) (Nat.cast_nonneg p) hmn hpz hnx (le_of_lt hmp)
   exact ⟨hcof, hrat.1, hrat.2⟩
 
+/-- Page 31, region one is exactly the window `x^0.4 < mp` and `mp ≤ x^0.46`. -/
+theorem primeRegion_one_iff (x : ℝ) (m p : ℕ) :
+    primeRegion x m p = 1 ↔
+      x ^ (0.4 : ℝ) < (m : ℝ) * (p : ℝ) ∧ (m : ℝ) * (p : ℝ) ≤ x ^ (0.46 : ℝ) := by
+  simp only [primeRegion, Nat.cast_mul]
+  by_cases h1 : (m : ℝ) * (p : ℝ) ≤ x ^ (0.4 : ℝ)
+  · simp [h1]
+  · by_cases h2 : (m : ℝ) * (p : ℝ) ≤ x ^ (0.46 : ℝ)
+    · rw [if_neg h1, if_pos h2]
+      exact ⟨fun _ => ⟨lt_of_not_ge h1, h2⟩, fun _ => rfl⟩
+    · rw [if_neg h1, if_neg h2]
+      simp [h2]
+
+/-- Page 31, the divisor bounded coefficient input (3.1) for one primePart range:
+with `k ≥ 1` and `‖a m‖ ≤ tau m ^ B`, `‖b n‖ ≤ tau n ^ B`, the norm of the prime error
+sum of one region is at most `tau k ^ (2 * max B 0 + 3)`. This is the coefficient bound a
+future Lemma 11 route to the three transfer leaves needs; the remaining gap for each leaf
+is only the mean value input (4.1), see PROGRESS.md. -/
+theorem primePart_norm_le {j : Fin 3} {x : ℝ} {a b : ℕ → ℂ} {M N w z : ℝ} {k : ℕ}
+    (hk : 0 < k) (B : ℝ) (ha : ∀ m, ‖a m‖ ≤ tau m ^ B) (hb : ∀ n, ‖b n‖ ≤ tau n ^ B) :
+    ‖primePart j x a b M N w z k‖ ≤ tau k ^ (2 * max B 0 + 3) := by
+  have hk0 : k ≠ 0 := hk.ne'
+  have htau1 : ∀ n : ℕ, n ≠ 0 → 1 ≤ tau n := by
+    intro n hn
+    simp only [tau, ArithmeticFunction.sigma_zero_apply]
+    exact_mod_cast Nat.one_le_iff_ne_zero.mpr
+      (Finset.card_ne_zero.mpr ⟨1, Nat.one_mem_divisors.mpr hn⟩)
+  have htaudvd : ∀ {l kk : ℕ}, l ∣ kk → kk ≠ 0 → tau l ≤ tau kk := by
+    intro l kk hdl hkk
+    simp only [tau, ArithmeticFunction.sigma_zero_apply]
+    exact_mod_cast card_le_card (Nat.divisors_subset_of_dvd hkk hdl)
+  have htau_card : ((k.divisors.card : ℕ) : ℝ) = tau k := by
+    simp only [tau, ArithmeticFunction.sigma_zero_apply]
+  have hpsi1 : ∀ (l : ℕ) (y : ℝ), ‖psi l y‖ ≤ 1 := by
+    intro l y
+    unfold psi
+    split <;> simp
+  have hpfl : ∀ {l : ℕ}, 0 < l → ((l.primeFactors).card : ℝ) ≤ tau l := by
+    intro l hl
+    have hsub : l.primeFactors ⊆ l.divisors := by
+      intro p hp
+      have hpp : p.Prime := Nat.prime_of_mem_primeFactors hp
+      have hpd : p ∣ l := Nat.dvd_of_mem_primeFactors hp
+      exact Nat.mem_divisors.mpr ⟨hpd, ne_of_gt hl⟩
+    simp only [tau, ArithmeticFunction.sigma_zero_apply]
+    exact_mod_cast card_le_card hsub
+  have htauk0 : (0 : ℝ) < tau k := lt_of_lt_of_le zero_lt_one (htau1 k hk0)
+  -- the per term bound
+  have hterm : ∀ m n : ℕ,
+      ‖(if m * n ∣ k then a m * b n *
+        ∑ p ∈ ((k / (m * n)).primeFactors.filter
+          (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+            (fun p => primeRegion x m p = j), psi (k / (m * n) / p) (p : ℝ)
+        else 0 : ℂ)‖ ≤ if m * n ∣ k then tau k ^ (2 * max B 0 + 1) else 0 := by
+    intro m n
+    by_cases hmn : m * n ∣ k
+    · have hmk : m ∣ k := (Nat.dvd_mul_right m n).trans hmn
+      have hnk : n ∣ k := (Nat.dvd_mul_left n m).trans hmn
+      have hm1 : 1 ≤ m := Nat.pos_of_dvd_of_pos hmk hk
+      have hn1 : 1 ≤ n := Nat.pos_of_dvd_of_pos hnk hk
+      have hm0 : m ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hm1)
+      have hn0 : n ≠ 0 := ne_of_gt (lt_of_lt_of_le zero_lt_one hn1)
+      have htaum1 : 1 ≤ tau m := htau1 m hm0
+      have htaun1 : 1 ≤ tau n := htau1 n hn0
+      have ham : ‖a m‖ ≤ tau k ^ max B 0 := by
+        calc ‖a m‖ ≤ tau m ^ B := ha m
+          _ ≤ tau k ^ max B 0 := by
+              by_cases hB : B ≤ 0
+              · rw [max_eq_right hB, Real.rpow_zero]
+                calc tau m ^ B ≤ tau m ^ 0 :=
+                    Real.rpow_le_rpow_of_exponent_le htaum1 hB
+                  _ = 1 := by rw [Real.rpow_zero]
+              · have hBpos : 0 < B := lt_of_not_ge hB
+                rw [max_eq_left hBpos.le]
+                exact Real.rpow_le_rpow (le_trans zero_le_one htaum1)
+                  (htaudvd hmk hk0) hBpos.le
+      have hbn : ‖b n‖ ≤ tau k ^ max B 0 := by
+        calc ‖b n‖ ≤ tau n ^ B := hb n
+          _ ≤ tau k ^ max B 0 := by
+              by_cases hB : B ≤ 0
+              · rw [max_eq_right hB, Real.rpow_zero]
+                calc tau n ^ B ≤ tau n ^ 0 :=
+                    Real.rpow_le_rpow_of_exponent_le htaun1 hB
+                  _ = 1 := by rw [Real.rpow_zero]
+              · have hBpos : 0 < B := lt_of_not_ge hB
+                rw [max_eq_left hBpos.le]
+                exact Real.rpow_le_rpow (le_trans zero_le_one htaun1)
+                  (htaudvd hnk hk0) hBpos.le
+      have hl1 : 0 < k / (m * n) :=
+        Nat.div_pos (Nat.le_of_dvd hk hmn) (by positivity)
+      have hinner : ‖∑ p ∈ ((k / (m * n)).primeFactors.filter
+          (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+            (fun p => primeRegion x m p = j), psi (k / (m * n) / p) (p : ℝ)‖ ≤ tau k := by
+        calc _ ≤ ∑ p ∈ ((k / (m * n)).primeFactors.filter
+            (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+              (fun p => primeRegion x m p = j),
+            ‖psi (k / (m * n) / p) (p : ℝ)‖ := norm_sum_le _ _
+          _ ≤ ∑ p ∈ ((k / (m * n)).primeFactors.filter
+              (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+                (fun p => primeRegion x m p = j), (1 : ℝ) :=
+              Finset.sum_le_sum (fun p _ => hpsi1 _ _)
+          _ ≤ ((k / (m * n)).primeFactors.card : ℝ) := by
+              have hsub2 : ((k / (m * n)).primeFactors.filter
+                  (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+                    (fun p => primeRegion x m p = j) ⊆
+                  (k / (m * n)).primeFactors := fun p hp =>
+                (Finset.mem_filter.mp (Finset.mem_filter.mp hp).1).1
+              have hcard2 : (((k / (m * n)).primeFactors.filter
+                  (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+                    (fun p => primeRegion x m p = j)).card ≤
+                  (k / (m * n)).primeFactors.card := card_le_card hsub2
+              refine le_trans ?_ (Nat.cast_le.2 hcard2)
+              rw [Finset.sum_const, smul_eq_mul]
+              norm_num
+          _ ≤ tau (k / (m * n)) := hpfl hl1
+          _ ≤ tau k := htaudvd (Nat.div_dvd_of_dvd hmn) hk0
+      rw [if_pos hmn, if_pos hmn]
+      have hprod : ‖a m * b n * ∑ p ∈ ((k / (m * n)).primeFactors.filter
+            (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+              (fun p => primeRegion x m p = j), psi (k / (m * n) / p) (p : ℝ)‖
+          ≤ tau k ^ max B 0 * tau k ^ max B 0 * tau k := by
+        rw [norm_mul, norm_mul]
+        exact mul_le_mul (mul_le_mul ham hbn (norm_nonneg _)
+          (by positivity)) hinner (norm_nonneg _) (by positivity)
+      have hpow : tau k ^ max B 0 * tau k ^ max B 0 * tau k
+          = tau k ^ (2 * max B 0 + 1) := by
+        have h3 : tau k ^ max B 0 * tau k ^ max B 0
+            = tau k ^ (2 * max B 0) := by
+          rw [← Real.rpow_add htauk0 (max B 0) (max B 0)]
+          congr 1
+          ring
+        rw [h3, Real.rpow_add htauk0 (2 * max B 0) 1, Real.rpow_one]
+    · rw [if_neg hmn]
+      simp
+  -- the double sum reduces to divisors of k
+  have hP0 : (0 : ℝ) ≤ tau k ^ (2 * max B 0 + 1) :=
+    Real.rpow_nonneg (by positivity) _
+  unfold primePart
+  calc ‖∑ m ∈ Finset.Ioc ⌊M⌋₊ ⌊2 * M⌋₊, ∑ n ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+      if m * n ∣ k then a m * b n *
+        ∑ p ∈ ((k / (m * n)).primeFactors.filter
+          (fun p : ℕ => w ≤ (p : ℝ) ∧ (p : ℝ) < z)).filter
+            (fun p => primeRegion x m p = j), psi (k / (m * n) / p) (p : ℝ)
+        else 0‖
+      ≤ ∑ m ∈ Finset.Ioc ⌊M⌋₊ ⌊2 * M⌋₊, ∑ n ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+          (if m * n ∣ k then tau k ^ (2 * max B 0 + 1) else 0) := by
+        refine (norm_sum_le _ _).trans ?_
+        refine Finset.sum_le_sum fun m _ => (norm_sum_le _ _).trans ?_
+        exact Finset.sum_le_sum fun n _ => hterm m n
+    _ ≤ ∑ m ∈ k.divisors, ∑ n ∈ k.divisors, tau k ^ (2 * max B 0 + 1) := by
+        have hinner1 : ∀ m : ℕ, m ∣ k →
+            ∑ n ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+              (if m * n ∣ k then tau k ^ (2 * max B 0 + 1) else 0)
+              ≤ tau k * tau k ^ (2 * max B 0 + 1) := by
+          intro m hmk
+          have hstep : ∑ n ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+              (if m * n ∣ k then tau k ^ (2 * max B 0 + 1) else 0)
+              = ∑ n ∈ (Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊).filter (fun n => n ∣ k),
+                (if m * n ∣ k then tau k ^ (2 * max B 0 + 1) else 0) :=
+            (Finset.sum_subset (Finset.filter_subset (fun n => n ∣ k) _)
+              (fun n hmem hnot => by
+                by_cases hmn : m * n ∣ k
+                · obtain ⟨c, hc⟩ := hmn
+                  exact absurd
+                    (Finset.mem_filter.mpr ⟨hmem, ⟨m * c, by rw [hc]; ring⟩⟩)
+                    hnot
+                · rw [if_neg hmn])).symm
+          rw [hstep]
+          refine le_trans (Finset.sum_le_sum_of_subset ?_) ?_
+          · intro n hn
+            have hn1 : 1 ≤ n := by
+              have := (Finset.mem_Ioc.mp (Finset.mem_filter.mp hn).1).1
+              omega
+            exact Finset.mem_divisors.mpr
+              ⟨(Finset.mem_filter.mp hn).2,
+                ne_of_gt (lt_of_lt_of_le zero_lt_one hn1)⟩
+          · calc ∑ n ∈ k.divisors,
+                (if m * n ∣ k then tau k ^ (2 * max B 0 + 1) else 0)
+              ≤ ∑ n ∈ k.divisors, tau k ^ (2 * max B 0 + 1) :=
+                Finset.sum_le_sum (fun n _ => by
+                  by_cases hmn : m * n ∣ k
+                  · rw [if_pos hmn]
+                  · rw [if_neg hmn]; exact hP0)
+            _ = tau k * tau k ^ (2 * max B 0 + 1) := by
+                rw [Finset.sum_const, smul_eq_mul, htau_card]
+                ring
+        have hstep2 : ∑ m ∈ Finset.Ioc ⌊M⌋₊ ⌊2 * M⌋₊,
+            ∑ n ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+              (if m * n ∣ k then tau k ^ (2 * max B 0 + 1) else 0)
+            = ∑ m ∈ (Finset.Ioc ⌊M⌋₊ ⌊2 * M⌋₊).filter (fun m => m ∣ k),
+              ∑ n ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+                (if m * n ∣ k then tau k ^ (2 * max B 0 + 1) else 0) :=
+          (Finset.sum_subset (Finset.filter_subset (fun m => m ∣ k) _)
+            (fun m hmem hnot => Finset.sum_eq_zero fun n _ => by
+              by_cases hmn : m * n ∣ k
+              · obtain ⟨c, hc⟩ := hmn
+                exact absurd
+                  (Finset.mem_filter.mpr ⟨hmem, ⟨n * c, by rw [hc]; ring⟩⟩)
+                  hnot
+              · rw [if_neg hmn])).symm
+        rw [hstep2]
+        refine le_trans (Finset.sum_le_sum_of_subset ?_) ?_
+        · intro m hm
+          have hm1 : 1 ≤ m := by
+            have := (Finset.mem_Ioc.mp (Finset.mem_filter.mp hm).1).1
+            omega
+          exact Finset.mem_divisors.mpr
+            ⟨(Finset.mem_filter.mp hm).2,
+              ne_of_gt (lt_of_lt_of_le zero_lt_one hm1)⟩
+        · calc ∑ m ∈ k.divisors, ∑ n ∈ Finset.Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+              (if m * n ∣ k then tau k ^ (2 * max B 0 + 1) else 0)
+            ≤ ∑ m ∈ k.divisors, tau k * tau k ^ (2 * max B 0 + 1) :=
+              Finset.sum_le_sum (fun m hm =>
+                hinner1 m (Finset.mem_divisors.mp hm).2)
+          _ = ((k.divisors.card : ℕ) : ℝ) *
+                (tau k * tau k ^ (2 * max B 0 + 1)) := by
+              rw [Finset.sum_const, smul_eq_mul]
+          _ = tau k * tau k * tau k ^ (2 * max B 0 + 1) := by
+              rw [htau_card]
+              ring
+    _ = tau k ^ 2 * tau k ^ (2 * max B 0 + 1) := by
+        rw [Real.rpow_two]
+    _ = tau k ^ (2 * max B 0 + 3) := by
+        rw [← Real.rpow_add htauk0 2 (2 * max B 0 + 1)]
+        norm_num
+
 /-- LEAF. OPEN. Page 31, the contribution with pm at most x to 0.4.
 This is the terminating repeated Buchstab procedure, with the divisor bounded
 coefficients treated as in the proof of Lemma13. It is only one prime error range. -/
