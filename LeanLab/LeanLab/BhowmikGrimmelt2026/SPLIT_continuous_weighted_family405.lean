@@ -10,6 +10,7 @@ use `continuous_weighted_family405`.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp405b
+import LeanLab.BhowmikGrimmelt2026.LEAF_feed1122_leaf_bRhat_minor_family405
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -30,8 +31,8 @@ theorem leaf_bRhat_minor_family405 {ϕ G : ℝ → ℝ} (hϕ : IsPhi ϕ) (hG : I
             bRhat G ((X : ℝ) ^ ϑ) (fun q => η * X * q / (X : ℝ) ^ ϑ) α *
             ee (-(N * α))) α‖ ^ 2 ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
-          (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+          (X : ℝ) ^ 3 * Real.log X ^ 5 :=
+  leaf_bRhat_minor_family405_from_leaves hϕ hG ϑ hϑ hϑ'
 
 /-- LEAF. Alias remainder part of the weighted minor family mean square. On the minor arc
 set the integral of the smoothed square against the continuous rational model minus its
