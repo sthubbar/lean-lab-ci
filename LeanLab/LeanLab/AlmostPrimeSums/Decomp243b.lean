@@ -1,5 +1,6 @@
 import LeanLab.AlmostPrimeSums.Base243
 import LeanLab.AlmostPrimeSums.Lower243
+import LeanLab.AlmostPrimeSums.Decomp243bFeed1122Summed
 
 /-!
 AI wrote this Lean code for CODEX task243. Binary Goldbach is open.
@@ -37,9 +38,8 @@ theorem summed_sieve_application (h : LevelBV) :
       Even N → N₀ ≤ N →
       (sumSAq N ((N : ℝ) ^ ((1 : ℝ) / 8)) ((N : ℝ) ^ ((1 : ℝ) / 3)) : ℝ) / 2
         ≤ summedMain N B + C * sieveError N := by
-  -- The attempted conversion from the normalized upper bound failed with a type mismatch.
-  -- See PROGRESS.md for the exact error and the missing analytic bridge.
-  sorry
+  -- Assembled from the leaves of Decomp243bFeed1122Summed, burst S82 feed1122.
+  exact LeanLab.AlmostPrimeSums.Decomp243bFeed1122Summed.summed_sieve_application_of_leaves h
 
 /-- The normalized summed main term has coefficient log six once the prime
 coefficient limit is supplied. Derived from BJS p. 54 equations 173 to 174.
