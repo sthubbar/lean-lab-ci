@@ -6,6 +6,7 @@ Two analytic transfers remain OPEN. The exact assembly is CONDITIONAL.
 This file does not import Decomp548d or any module importing it.
 -/
 import LeanLab.Languasco2004.Model564
+import LeanLab.Languasco2004.Decomp564a_rough30_Leaves
 
 namespace LeanLab.Languasco2004.Decomp564a
 open Finset Real Decomp279a Decomp316a GroupSplit548 Model564 Numeric30_548
@@ -32,7 +33,8 @@ The strict finite endpoints and the prime caps are part of the model. -/
 theorem rough30_to_integral (δ : ℝ) (hδ : 0 < δ) :
     ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y → 2 ≤ Y →
       ((∫ t in (34 / 99 : ℝ)..(1649 / 4752), inner30 t) - δ) * Y / Real.log Y ≤
-        roughModel {30} Y := by sorry
+        roughModel {30} Y :=
+  Decomp564aRoughLeaves.rough30_to_integral_from_leaves δ hδ
 
 /-- Jia page 281: the numerical reserve absorbs both analytic tolerances.
 CONDITIONAL ON prime_to_rough30 and rough30_to_integral.
