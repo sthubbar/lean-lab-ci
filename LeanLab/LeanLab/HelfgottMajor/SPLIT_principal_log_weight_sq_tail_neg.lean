@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_principal_log_weight_sq_long
+import LeanLab.HelfgottMajor.SPLIT_principal_log_weight_tail_neg_digamma_envelope
 
 /-!
 Splitting the negative tail square energy of the logarithmic derivative weight,
@@ -39,7 +40,7 @@ gamma factor in the functional equation, and it is the piece that no series expa
 the library supplies. -/
 theorem principal_log_weight_tail_neg_digamma_envelope (t : ℝ) (ht : 2 ≤ |t|) :
     ‖Complex.digamma ((-1 / 2 : ℂ) + t * Complex.I)‖ ≤ Real.log |t| + 3 / 2 := by
-  sorry
+  exact principal_log_weight_tail_neg_digamma_envelope_of_leaves t ht
 
 
 /-! ### The `Re s = 3 / 2` head: the von Mangoldt sum below one hundred -/
