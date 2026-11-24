@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le
+import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le_one_level_le_six
 
 /-!
 # Split of `book_count_band_above_one_mult_le_one`
@@ -101,7 +102,7 @@ theorem book_count_band_above_one_mult_le_one_level_le_six (χ : DirichletCharac
     (hχ : χ.IsPrimitive) (hq2 : 2 ≤ q) (hq6 : q ≤ 6) :
     ∀ ρ ∈ (stripZeros_finite χ (2 * Real.pi * Real.exp 1 / (q : ℝ))).toFinset.filter
       (fun ρ => 0 ≤ ρ.im ∧ 1 < ρ.im), (mult χ ρ : ℝ) ≤ 1 := by
-  sorry
+  exact book_count_band_above_one_mult_le_one_level_le_six_of_leaves χ hχ hq2 hq6
 
 /-- LEAF. Conductors `7` to `12`, at the top height of the band: for a primitive character of
 modulus `q` in that range every strip zero of `L(·, χ)` whose imaginary part lies in
