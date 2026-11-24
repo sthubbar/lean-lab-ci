@@ -1,5 +1,6 @@
 import LeanLab.AlmostPrimeSums.Decomp243b
 import LeanLab.AlmostPrimeSums.Double243
+import LeanLab.AlmostPrimeSums.Decomp243cFeed1122Switched
 
 /-!
 AI wrote this Lean code for CODEX task243. Binary Goldbach is open.
@@ -80,7 +81,8 @@ theorem switched_sieve_application (h : LevelBVTriples) :
       Even N → N₀ ≤ N →
       (SB N ((N : ℝ) ^ ((1 : ℝ) / 8)) ((N : ℝ) ^ ((1 : ℝ) / 3)) : ℝ) / 2
         ≤ switchedMain N B + C * sieveError N := by
-  sorry
+  -- Assembled from the leaves of Decomp243cFeed1122Switched, burst S82 feed1122.
+  exact LeanLab.AlmostPrimeSums.Decomp243cFeed1122Switched.switched_sieve_application_of_leaves h
 
 /-- Exact supply for the sealed SB_upper statement.
 CONDITIONAL ON LevelBVTriples and the open switched_sieve_application leaf. -/
