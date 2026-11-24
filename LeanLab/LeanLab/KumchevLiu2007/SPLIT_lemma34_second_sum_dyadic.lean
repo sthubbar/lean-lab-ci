@@ -31,6 +31,7 @@ each leaf: every leaf keeps the whole written range of H.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Eq33RouteD
+import LeanLab.KumchevLiu2007.SPLIT_lemma34_second_sum_dyadic_interior_Leaves
 
 namespace LeanLab.KumchevLiu2007.Eq33RouteD
 
@@ -98,7 +99,7 @@ theorem leaf_interior_left_half (A : ℝ) (hA : 0 < A) :
               roughWeight (windowY X ε ^ (1 / 6 + ε / 2)) (m / p)) *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  exact leaf_interior_left_half_from_leaves A hA
 
 /-- LEAF: the interior case z1 < 2 M and M < z0 of the dyadic block, on the
 right half [Y / 2, Y] of the t window, where the short sum has the smaller
@@ -125,7 +126,7 @@ theorem leaf_interior_right_half (A : ℝ) (hA : 0 < A) :
               roughWeight (windowY X ε ^ (1 / 6 + ε / 2)) (m / p)) *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  exact leaf_interior_right_half_from_leaves A hA
 
 theorem lemma34_second_sum_dyadic_split (A : ℝ) (hA : 0 < A) :
     ∃ B0 : ℝ, 0 < B0 ∧ ∀ B : ℝ, B0 ≤ B → ∀ ε : ℝ, 0 < ε →
