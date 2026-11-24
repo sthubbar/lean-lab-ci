@@ -6,6 +6,8 @@ Two proper region estimates remain OPEN. The final assembly is CONDITIONAL.
 The sealed group5_lower is unchanged.
 -/
 import LeanLab.Languasco2004.GroupSplit548
+import LeanLab.Languasco2004.Decomp565a
+import LeanLab.Languasco2004.Decomp565b
 
 namespace LeanLab.Languasco2004.Decomp548e
 open Finset Real Decomp279a Decomp316c GroupSplit548
@@ -28,7 +30,8 @@ theorem region1_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n => pieceSum 5 1 true N (localization N ε) n <
         0.468045 * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B :=
+  Decomp565a.region1_lower_from_parts
 
 /-- LEAF. Jia page 285, Lemma 28, supporting display 65 on page 286.
 Only group 5 with region 1 removed is bounded. The coefficient is 0.542578.
@@ -42,7 +45,8 @@ theorem remainder_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n => pieceSum 5 1 false N (localization N ε) n <
         0.542578 * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B :=
+  Decomp565b.remainder_lower_from_parts
 
 /-- Jia Lemma 28: the exact sealed group5_lower statement follows
 from the two smaller region estimates. CONDITIONAL ON region1_lower
