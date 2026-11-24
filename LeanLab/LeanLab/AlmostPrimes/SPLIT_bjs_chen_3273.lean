@@ -19,6 +19,7 @@ set of positive cardinality.
 No leaf is proved here.  AI wrote the Lean code.
 -/
 import LeanLab.AlmostPrimes.Statements
+import LeanLab.AlmostPrimes.SPLIT_bjs_chen_3273Feed1122Count
 
 namespace LeanLab.AlmostPrimes
 
@@ -34,17 +35,7 @@ theorem bjs_chen_3273_leaf_count_low (N : ℕ) (hN : Even N)
     (hhi : (N : ℝ) ≤ Real.exp (Real.exp 32.78)) :
     (1 / 10000 : ℝ) * (N : ℝ) / (Real.log (N : ℝ)) ^ 2 <
       ((Finset.range N).filter (fun p => p.Prime ∧ bigOmega (N - p) ≤ 2)).card := by
-  -- BLOCKED 2026-11-14 FREE-nv-nemotron task416 bjs_chen_3273_leaf_count_low: OUT OF REACH
-  -- The required unconditional lower bound on the Chen count (or the filtered set) is not available.
-  -- The library has conditional results:
-  -- 1. BJS3_of_sieveBounds: (2/10000) * U_N * N / log² N < chenCount N, assuming Thm44Bound, Thm50Bound, Thm51Bound
-  -- 2. cor4_of_BJS3At: √N < chenCount N, assuming BJS3At t
-  -- But the sieve bounds (Thm44Bound, Thm50Bound, Thm51Bound) for the concrete functions SA, sumSAq, SB
-  -- are not proved in the library. Only the parametric version (cAbP, cBP, etc.) in AT3273.lean is worked out.
-  -- Searches: grep for "Thm44Bound\|Thm50Bound\|Thm51Bound" in LeanLab/ChenExplicit/ shows only the definitions
-  -- and BJS3_of_sieveBounds, no proof of the bounds for concrete SA/sumSAq/SB.
-  -- The leaf requires formalizing the explicit lower-bound sieve with constants, which is not yet done.
-  sorry
+  exact bjs_chen_3273_leaf_count_low_of_leaves N hN hlo hhi
 
 /-- LEAF. The counting step of the sieve on the middle sub-range
 `exp (exp 32.78) < N ≤ exp (exp 32.83)`: the same estimate as the bottom sub-range, now with the
@@ -55,14 +46,7 @@ theorem bjs_chen_3273_leaf_count_mid (N : ℕ) (hN : Even N)
     (hhi : (N : ℝ) ≤ Real.exp (Real.exp 32.83)) :
     (1 / 10000 : ℝ) * (N : ℝ) / (Real.log (N : ℝ)) ^ 2 <
       ((Finset.range N).filter (fun p => p.Prime ∧ bigOmega (N - p) ≤ 2)).card := by
-  -- BLOCKED 2026-11-19 FREE-nv-nemosuper task1559 bjs_chen_3273_leaf_count_mid: OUT OF REACH
-  -- Attempted proof via BJS3At (32.78) failed: error "Unknown identifier `U_ge`" at line 62,
-  -- and even with U_ge the bound (2/10000)*U_N*N/log²N < chenCount N only gives (2/10^7)*N/log²N,
-  -- weaker than the needed (1/10000)*N/log²N. The unconditional lower bound on chenCount N
-  -- requires BJS sieve bounds Thm44Bound/Thm50Bound/Thm51Bound (or LevelBV/LevelBVTriples),
-  -- none proved in the library. Searches: grep for chenCount lower bounds, Thm44Bound, LevelBV
-  -- across LeanLab/ shows only conditional results. No unconditional lower bound exists.
-  sorry
+  exact bjs_chen_3273_leaf_count_mid_of_leaves N hN hlo hhi
 
 /-- LEAF. The counting step of the sieve on the top sub-range `N > exp (exp 32.83)`, where no
 upper bound on `N` is imposed and `log N` is large enough that the main term dominates every
@@ -72,10 +56,7 @@ theorem bjs_chen_3273_leaf_count_high (N : ℕ) (hN : Even N)
     (hlo : Real.exp (Real.exp 32.83) < (N : ℝ)) :
     (1 / 10000 : ℝ) * (N : ℝ) / (Real.log (N : ℝ)) ^ 2 <
       ((Finset.range N).filter (fun p => p.Prime ∧ bigOmega (N - p) ≤ 2)).card := by
-  -- BLOCKED 2026-11-14 FREE-nv-nemotron task416 bjs_chen_3273_leaf_count_high: OUT OF REACH
-  -- Same missing result: unconditional lower bound on chenCount N.
-  -- The library only has conditional results assuming unproved sieve bounds.
-  sorry
+  exact bjs_chen_3273_leaf_count_high_of_leaves N hN hlo
 
 /-! ### Assembly -/
 
