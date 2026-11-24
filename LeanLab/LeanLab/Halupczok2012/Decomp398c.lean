@@ -1,7 +1,6 @@
 import LeanLab.Halupczok2012.Decomp398a
 import LeanLab.Halupczok2012.U1510Final
-import LeanLab.Halupczok2012.Feed1122SmallModuli
-import LeanLab.Halupczok2012.Feed1122LargeModuli
+import LeanLab.Halupczok2012.Resplit398c
 
 /-!
 Supply decomposition for the sealed theorem_2.
@@ -32,8 +31,8 @@ theorem small_moduli :
       ∀ (a : ℕ → ℤ) (h z : ℕ → ℝ), (∀ q, Int.gcd (a q) q = 1) →
       (∀ q, 0 < h q ∧ h q ≤ y) → (∀ q, x / 2 < z q ∧ z q ≤ x) →
       ∑ q ∈ (Icc 1 ⌊Q⌋₊).filter (fun q : ℕ => (q : ℝ) ≤ x ^ (1 / 100 : ℝ)),
-        ppsTerm (z q) (h q) q (a q) ≤ C * y * Real.log x ^ (-A) :=
-  Feed1122SmallModuli.small_moduli_of_leaves
+        ppsTerm (z q) (h q) q (a q) ≤ C * y * Real.log x ^ (-A) := by
+  sorry
 
 /-- LEAF. PPS1984 page 531 display 6 through page 538, the remaining modulus range.
 The Heath Brown identity and the two polynomial estimates treat the moduli
@@ -45,23 +44,15 @@ theorem large_moduli :
       ∀ (a : ℕ → ℤ) (h z : ℕ → ℝ), (∀ q, Int.gcd (a q) q = 1) →
       (∀ q, 0 < h q ∧ h q ≤ y) → (∀ q, x / 2 < z q ∧ z q ≤ x) →
       ∑ q ∈ (Icc 1 ⌊Q⌋₊).filter (fun q : ℕ => x ^ (1 / 100 : ℝ) < (q : ℝ)),
-        ppsTerm (z q) (h q) q (a q) ≤ C * y * Real.log x ^ (-A) :=
-  Feed1122LargeModuli.large_moduli_of_leaves
+        ppsTerm (z q) (h q) q (a q) ≤ C * y * Real.log x ^ (-A) := by
+  sorry
 
-/-- The two disjoint modulus ranges give the existing uniform PPS input. -/
-theorem pps_uniform : PPS1984Uniform := by
-  intro A ε hA hε
-  obtain ⟨Cs, xs, hs⟩ := small_moduli A ε hA hε
-  obtain ⟨B, hB, Cl, xl, hl⟩ := large_moduli A ε hA hε
-  refine ⟨B, hB, Cs + Cl, max xs xl, ?_⟩
-  intro x y Q hx hxy hyx hQ a h z ha hh hz
-  have hsmall := hs x y Q ((le_max_left _ _).trans hx) hxy hyx a h z ha hh hz
-  have hlarge := hl x y Q ((le_max_right _ _).trans hx) hxy hyx hQ a h z ha hh hz
-  have he := sum_filter_add_sum_filter_not (Icc 1 ⌊Q⌋₊)
-    (fun q : ℕ => (q : ℝ) ≤ x ^ (1 / 100 : ℝ)) (fun q => ppsTerm (z q) (h q) q (a q))
-  simp only [not_le] at he
-  rw [← he]
-  nlinarith
+/-- The uniform PPS input, now from the re-split leaves of Resplit398c, which follow the cut
+of PPS1984 page 531 on the conductor, displays 4, 5 and 6. The modulus cut of `small_moduli`
+and `large_moduli` above does not match the paper and is no longer on the route;
+the old wiring proof is kept in notes/burst-20261122/Halupczok2012-398c-resplit.md. -/
+theorem pps_uniform : PPS1984Uniform :=
+  Resplit398c.pps_uniform_of_leaves
 
 /-- Exact statement of the sealed theorem_2.
 The proof reuses U1495 and U1496 and has no new reduction gap. -/
