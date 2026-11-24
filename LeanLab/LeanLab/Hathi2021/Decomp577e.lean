@@ -5,6 +5,7 @@ Periodic transfer of the unshifted exceptional measure to every slice.
 AI wrote this Lean code. Binary Goldbach is OPEN.
 -/
 import LeanLab.Hathi2021.Decomp577b
+import LeanLab.Hathi2021.Decomp577eLeavesPT
 
 open Finset Real MeasureTheory Filter Topology Set
 open LeanLab.Hathi2021.Decomp319a LeanLab.Hathi2021.Decomp570b
@@ -59,15 +60,16 @@ theorem exceptionalSlice_volume_eq (n₁ : ℕ) (t : ℝ) :
       rw [integral_Icc_eq_integral_Ioc, intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1)]
       simp only [add_zero]
 
-/-- LEAF. Hu page 194, Lemma 2.3, the exceptional measure display.
+/-- Hu page 194, Lemma 2.3, the exceptional measure display. Split in
+Decomp577eLeavesPT, CONDITIONAL ON its moment certificate and shift leaves.
 Only the unshifted unit interval remains. The strict exponent reserve is
 retained literally. Platt and Trudgian sections 3 and 4 describe the
 interval computation but the lab has no certificate for this strict reserve. -/
 theorem platt_trudgian_unshifted_bound :
     ∃ E : ℝ, 3 / 4 + 1 / 10 ^ 10 < E ∧ ∃ K : ℝ, 0 ≤ K ∧
       ∃ N₀ : ℕ, ∀ n₁ : ℕ, N₀ ≤ n₁ →
-        volume.real (exceptionalSlice n₁ 0) ≤ K * (n₁ : ℝ) ^ (-E) := by
-  sorry
+        volume.real (exceptionalSlice n₁ 0) ≤ K * (n₁ : ℝ) ^ (-E) :=
+  LeanLab.Hathi2021.Decomp577eLeavesPT.platt_trudgian_unshifted_bound_of_leaves
 
 /-- Hu pages 194 and 195. CONDITIONAL ON the unshifted strict exceptional
 measure estimate. This supplies the exact sealed translated slice statement. -/
