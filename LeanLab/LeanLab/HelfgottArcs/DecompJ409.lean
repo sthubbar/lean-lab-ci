@@ -4,6 +4,7 @@ AI wrote this Lean code for CODEX task409. Binary Goldbach is open.
 -/
 import LeanLab.HelfgottArcs.Statements
 import LeanLab.HelfgottArcs.MajorAssembly
+import LeanLab.HelfgottArcs.DecompJ409LeavesProp46
 
 namespace LeanLab.HelfgottArcs.DecompJ409
 open Real
@@ -14,8 +15,8 @@ theorem major_1_1_leaf (hG : HelfgottInput) (x : ℝ) (hx : 10 ^ 8 ≤ x) (q : �
     (hδ : |δ| ≤ 4 * 300000 / q) :
     MajorShape etaHeart χ δ x
       (5.281e-22 + (648662 / √q + 111) / √x + (55 + 1.7e7 / q) / x +
-        (19 + 1.2e8 / q) / (x * √x)) := by
-  sorry
+        (19 + 1.2e8 / q) / (x * √x)) :=
+  DecompJ409LeavesProp46.major_1_1_leaf_of_leaves hG x hx q hq χ hχ δ hδ
 
 /-- The exact cited theorem 1.1 assembled from the leaf. -/
 theorem major_1_1_assembled (hG : HelfgottInput) (x : ℝ) (hx : 10 ^ 8 ≤ x) (q : ℕ) [NeZero q]
