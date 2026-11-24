@@ -15,6 +15,7 @@ prime restricted family is the genuine open obligation and is the other leaf.
 Both leaves are open, the assembly is complete, and nothing here is assumed.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp451a
+import LeanLab.BhowmikGrimmelt2026.LEAF_feed1122_prime_minor_multi_451
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -42,8 +43,8 @@ theorem prime_minor_multi_451 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ)
               ((vonMangoldt n * ϕ (n / N) : ℝ) : ℂ) * ee (α * n)) ^ 2 *
               ee (-(N * α))‖ ^ 2 ≤
         C * (((X : ℝ) ^ ϑ)⁻¹ + (X : ℝ) ^ (-(2 / 5) : ℝ)) *
-          (X : ℝ) ^ 3 * Real.log X ^ 5 := by
-  sorry
+          (X : ℝ) ^ 3 * Real.log X ^ 5 :=
+  prime_minor_multi_451_from_leaves hϕ ϑ hϑ hϑ'
 
 /-- LEAF. Defect where the prime part is removed from the squared smoothing.
 For an admissible phi bounded by the nonnegative constant M, every X at least
