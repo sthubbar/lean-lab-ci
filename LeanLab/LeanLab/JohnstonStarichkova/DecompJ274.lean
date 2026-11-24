@@ -46,6 +46,11 @@ theorem sieveRange_of_thm42 :
     X2 = Real.exp (Real.exp 7.9)) →
   SieveRange := by
   intro _
+  -- The antecedent is trivially inhabited, so the goal is SieveRange itself.
+  -- SieveRange is not proved anywhere in the lab; the nearest result,
+  -- Burst4Split.sieve_range, uses threshold exp(exp 7.9) (not exp(exp 7.816))
+  -- and is itself conditional on leaf_theorem42_positive (a sorry).
+  -- This sorry is BLOCKED: proving it requires the full Theorem 4.2 of P0019.
   sorry
 
 /-! ### The Assembly Theorem -/
