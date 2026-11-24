@@ -1,0 +1,192 @@
+import LeanLab.HelfgottMajor.SPLIT_positive_mass_window_one_le
+
+/-!
+Refutation of `positive_mass_window_one_high_half_le` in
+`LeanLab.HelfgottMajor.SPLIT_positive_mass_window_one_le`, burst 20261122.
+
+The leaf states that the zero mass in the band `(5 / 4, 3 / 2]` is at most one quarter of the
+mean weight integral `(1 / (2 * pi)) * integral over [1, T] of the critical line norm of the
+Gaussian Mellin transform times log (q * t / (2 * pi))`, with no endpoint term. The left side is a
+sum of norms and so is never negative, but the log weight is negative for `t < 2 * pi / q`.
+Take `q = 1`, `delta = 0` and `T = 5 / 4`. Every zero counted has ordinate at most `5 / 4`, so no
+zero lies in the band and the left side is zero. On `[1, 5 / 4]` the weight `log (t / (2 * pi))`
+is negative, and the Gaussian Mellin transform at `delta = 0` equals `2 ^ (s / 2 - 1) * Gamma (s / 2)`
+which never vanishes for `re s > 0`. So the right side is strictly negative and the leaf fails.
+The split of `positive_mass_window_one_le` that produced this leaf dropped the endpoint term
+from the upper half, and that is what breaks it; the parent statement keeps that term.
+AI wrote this Lean code. Binary Goldbach is open.
+-/
+
+namespace LeanLab.HelfgottMajor.Feed1122W2HighHalfFalse
+open Real LeanLab.HelfgottArcs LeanLab.HelfgottMajor.Decomp269a LeanLab.HelfgottMajor.Decomp269b
+  LeanLab.HelfgottMajor.Decomp389b LeanLab.HelfgottMajor.Decomp431a
+
+/-- Closed form of the Gaussian Mellin transform at `delta = 0`, valid for `re s > 0`. -/
+theorem gaussianMellin_zero_eq (s : ℂ) (hs : 0 < s.re) :
+    gaussianMellin 0 s =
+      ((|(2 : ℝ)|⁻¹ : ℝ) : ℂ) * ((((1 / 2 : ℝ) : ℂ) ^ (-(s / 2))) * Complex.Gamma (s / 2)) := by
+  have hre : 0 < (s / 2).re := by simp; linarith
+  have h2 := mellin_comp_mul_left (fun x : ℝ => ((exp (-x) : ℝ) : ℂ)) (s / 2)
+    (by norm_num : (0 : ℝ) < 1 / 2)
+  have hG : Complex.Gamma (s / 2) = mellin (fun x : ℝ => ((exp (-x) : ℝ) : ℂ)) (s / 2) := by
+    rw [Complex.Gamma_eq_integral hre, Complex.GammaIntegral_eq_mellin]
+  calc gaussianMellin 0 s
+      = mellin (fun t : ℝ => (fun u : ℝ => ((exp (-((1 / 2 : ℝ) * u)) : ℝ) : ℂ))
+          (t ^ (2 : ℝ))) s := by
+        unfold gaussianMellin
+        congr 1
+        funext t
+        simp only [e, zero_mul, Complex.ofReal_zero, mul_zero, Complex.exp_zero, mul_one,
+          Real.rpow_two]
+        congr 2
+        ring
+    _ = (|(2 : ℝ)|⁻¹ : ℝ) • mellin (fun u : ℝ => ((exp (-((1 / 2 : ℝ) * u)) : ℝ) : ℂ))
+          (s / ((2 : ℝ) : ℂ)) :=
+          mellin_comp_rpow (fun u : ℝ => ((exp (-((1 / 2 : ℝ) * u)) : ℝ) : ℂ)) s 2
+    _ = _ := by
+        rw [show ((2 : ℝ) : ℂ) = 2 by norm_num, h2, ← hG, Complex.real_smul, smul_eq_mul]
+
+theorem gaussianMellin_zero_ne (s : ℂ) (hs : 0 < s.re) : gaussianMellin 0 s ≠ 0 := by
+  have hre : 0 < (s / 2).re := by simp; linarith
+  rw [gaussianMellin_zero_eq s hs]
+  refine mul_ne_zero (by norm_num) (mul_ne_zero ?_ (Complex.Gamma_ne_zero_of_re_pos hre))
+  rw [Ne, Complex.cpow_eq_zero_iff]
+  intro h
+  norm_num at h
+
+theorem gaussianMellin_zero_line_continuous :
+    Continuous (fun t : ℝ => gaussianMellin 0 ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)) := by
+  have hre : ∀ t : ℝ, 0 < ((1 / 2 : ℂ) + (t : ℝ) * Complex.I).re := by
+    intro t; simp
+  have heq : (fun t : ℝ => gaussianMellin 0 ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)) =
+      fun t : ℝ => ((|(2 : ℝ)|⁻¹ : ℝ) : ℂ) * ((((1 / 2 : ℝ) : ℂ) ^
+        (-(((1 / 2 : ℂ) + (t : ℝ) * Complex.I) / 2))) *
+          Complex.Gamma (((1 / 2 : ℂ) + (t : ℝ) * Complex.I) / 2)) := by
+    funext t; exact gaussianMellin_zero_eq _ (hre t)
+  rw [heq]
+  have hlin : Continuous (fun t : ℝ => ((1 / 2 : ℂ) + (t : ℝ) * Complex.I) / 2) := by
+    fun_prop
+  refine continuous_const.mul (Continuous.mul ?_ ?_)
+  · exact Continuous.const_cpow hlin.neg (Or.inl (by norm_num))
+  · rw [continuous_iff_continuousAt]
+    intro t
+    refine (Complex.differentiableAt_Gamma _ ?_).continuousAt.comp hlin.continuousAt
+    intro m hm
+    have := congrArg Complex.re hm
+    simp at this
+    linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]
+
+/-- For the trivial character modulo one, `delta = 0` and `1 < T <= 5 / 4`, the mean weight
+integral is strictly negative, since the log weight is negative below `2 * pi` and the Gaussian
+Mellin norm is positive and continuous on the critical line. -/
+theorem mean_weight_integral_neg (T : ℝ) (hT1 : 1 < T) (hT2 : T ≤ 5 / 4) :
+    (∫ t in (1 : ℝ)..T, ‖gaussianMellin 0 ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
+        log (((1 : ℕ) : ℝ) * t / (2 * π))) < 0 := by
+  have hpi : (5 / 4 : ℝ) < 2 * π := by linarith [pi_gt_three]
+  have hneg : 0 < ∫ t in (1 : ℝ)..T,
+      -(‖gaussianMellin 0 ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
+        log (((1 : ℕ) : ℝ) * t / (2 * π))) := by
+    refine intervalIntegral.intervalIntegral_pos_of_pos_on ?_ ?_ hT1
+    · refine (ContinuousOn.intervalIntegrable ?_).neg
+      refine ContinuousOn.mul gaussianMellin_zero_line_continuous.norm.continuousOn ?_
+      refine ContinuousOn.log (by fun_prop) ?_
+      intro t ht
+      rw [Set.uIcc_of_le hT1.le] at ht
+      have : 0 < t := by linarith [ht.1]
+      positivity
+    · intro t ht
+      have hn : 0 < ‖gaussianMellin 0 ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ :=
+        norm_pos_iff.mpr (gaussianMellin_zero_ne _ (by simp))
+      have hlog : log (((1 : ℕ) : ℝ) * t / (2 * π)) < 0 := by
+        apply Real.log_neg
+        · have : 0 < t := by linarith [ht.1]
+          positivity
+        · rw [Nat.cast_one, one_mul, div_lt_one (by positivity)]
+          linarith [ht.2]
+      nlinarith
+  rw [intervalIntegral.integral_neg] at hneg
+  linarith
+
+/-- A band sum is zero when the band lies above the height cap of the zero family. -/
+theorem band_sum_eq_zero (T a b : ℝ) (hTa : T ≤ a) :
+    (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction (1 : DirichletCharacter ℂ 1) ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
+        Set.indicator {ρ | a < ρ.val.im ∧ ρ.val.im ≤ b}
+          (fun ρ => ‖mellinMassTerm (1 : DirichletCharacter ℂ 1) 0 ρ.val‖) ρ) = 0 := by
+  refine (tsum_congr fun ρ => ?_).trans tsum_zero
+  rw [Set.indicator_of_notMem]
+  intro hρ
+  have h1 := ρ.2.2.2.2
+  have h2 := ((le_abs_self ρ.val.im).trans h1).trans hTa
+  exact absurd hρ.1 (not_lt.mpr h2)
+
+/-- The negation of the leaf `positive_mass_window_one_high_half_le`, at `q = 1`, the trivial
+character, `delta = 0` and `T = 5 / 4`. -/
+theorem FALSE_positive_mass_window_one_high_half_le :
+    ¬ (∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (δ T : ℝ), 1 ≤ T →
+    (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
+        Set.indicator {ρ | 5 / 4 < ρ.val.im ∧ ρ.val.im ≤ 3 / 2}
+          (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ) ≤
+      (1 / 4) * ((1 / (2 * π)) * (∫ t in (1 : ℝ)..T,
+        ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
+          log ((q : ℝ) * t / (2 * π))))) := by
+  intro H
+  have h := H 1 (1 : DirichletCharacter ℂ 1) 0 (5 / 4) (by norm_num)
+  rw [band_sum_eq_zero (5 / 4) (5 / 4) (3 / 2) le_rfl] at h
+  have hI := mean_weight_integral_neg (5 / 4) (by norm_num) le_rfl
+  have hp : 0 < 1 / (2 * π) := by positivity
+  nlinarith
+
+/-- The negation of the deeper leaf `positive_mass_window_one_low_half_upper_quarter_le` in
+`SPLIT_positive_mass_window_one_low_half_le`, at `q = 1`, `delta = 0` and `T = 9 / 8`. -/
+theorem FALSE_positive_mass_window_one_low_half_upper_quarter_le :
+    ¬ (∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (δ T : ℝ), 1 ≤ T →
+    (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
+        Set.indicator {ρ | 9 / 8 < ρ.val.im ∧ ρ.val.im ≤ 5 / 4}
+          (fun ρ => ‖mellinMassTerm χ δ ρ.val‖) ρ) ≤
+      (1 / 8) * ((1 / (2 * π)) * (∫ t in (1 : ℝ)..T,
+        ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
+          log ((q : ℝ) * t / (2 * π))))) := by
+  intro H
+  have h := H 1 (1 : DirichletCharacter ℂ 1) 0 (9 / 8) (by norm_num)
+  rw [band_sum_eq_zero (9 / 8) (9 / 8) (5 / 4) le_rfl] at h
+  have hI := mean_weight_integral_neg (9 / 8) (by norm_num) (by norm_num)
+  have hp : 0 < 1 / (2 * π) := by positivity
+  nlinarith
+
+/-- The negation of the deeper leaf `high_half_weight_pos_part_le` in
+`SPLIT_positive_mass_window_one_high_half_le`, at `q = 1`, `delta = 0` and `T = 5 / 4`: the
+positive part integral vanishes there while the signed integral is negative. -/
+theorem FALSE_high_half_weight_pos_part_le :
+    ¬ (∀ (q : ℕ) [NeZero q] (_χ : DirichletCharacter ℂ q) (δ T : ℝ), 1 ≤ T →
+    (1 / 4) * ((1 / (2 * π)) * (∫ t in (1 : ℝ)..T,
+        ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
+          max (log ((q : ℝ) * t / (2 * π))) 0)) ≤
+      (1 / 4) * ((1 / (2 * π)) * (∫ t in (1 : ℝ)..T,
+        ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
+          log ((q : ℝ) * t / (2 * π))))) := by
+  intro H
+  have h := H 1 (1 : DirichletCharacter ℂ 1) 0 (5 / 4) (by norm_num)
+  have hpi : (5 / 4 : ℝ) < 2 * π := by linarith [pi_gt_three]
+  have hz : (∫ t in (1 : ℝ)..(5 / 4),
+      ‖gaussianMellin 0 ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
+        max (log (((1 : ℕ) : ℝ) * t / (2 * π))) 0) = 0 := by
+    rw [intervalIntegral.integral_congr (g := fun _ => (0 : ℝ)), intervalIntegral.integral_zero]
+    intro t ht
+    rw [Set.uIcc_of_le (by norm_num)] at ht
+    have ht0 : 0 < t := by linarith [ht.1]
+    have hlog : log (((1 : ℕ) : ℝ) * t / (2 * π)) ≤ 0 := by
+      apply Real.log_nonpos
+      · positivity
+      · rw [Nat.cast_one, one_mul, div_le_one (by positivity)]
+        linarith [ht.2]
+    simp only [max_eq_right hlog, mul_zero]
+  rw [hz] at h
+  have hI := mean_weight_integral_neg (5 / 4) (by norm_num) le_rfl
+  have hp : 0 < 1 / (2 * π) := by positivity
+  nlinarith
+
+
+end LeanLab.HelfgottMajor.Feed1122W2HighHalfFalse
