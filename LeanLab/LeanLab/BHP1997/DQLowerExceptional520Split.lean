@@ -22,6 +22,7 @@ book p. 60, display 3.12.1. Page 22 of P0069 calls it Theorem 3.19 of [30]. Read
 copies/Titchmarsh1986-chIII.pdf, page images. Below, [30] Lemma 3.19 replaces the printed label.
 -/
 import LeanLab.BHP1997.DQLowerExceptionalMeanSquareDecisions
+import LeanLab.BHP1997.DQ517WindowSplit
 
 namespace LeanLab.BHP1997.DQLowerExceptionalMeanSquare
 open Classical Complex Decomp132 DecompC165b DecompC165d LowerShortC165 LowerShortMeanSquare
@@ -75,8 +76,10 @@ theorem sub_517_window (ω : ℝ → ℝ)
             (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * perronZ0 x),
             ((lowerShortWeight ω ε x m : ℂ) -
               ((lowerV0 ω ε / Real.log (x ^ (11 / 20 + ε)) : ℝ) : ℂ))‖ ≤
-          C * x ^ (11 / 20 + ε) * ((perronT0 x ^ 5)⁻¹ + perronZ0 x ^ 2) := by
-  sorry
+          C * x ^ (11 / 20 + ε) * ((perronT0 x ^ 5)⁻¹ + perronZ0 x ^ 2) :=
+  -- Feed1122 S82: closed by the split in `DQ517WindowSplit`, CONDITIONAL on its LEAFs
+  -- `leaf_two_window` and `leaf_four_window`.
+  LeanLab.BHP1997.DQ517Window.sub_517_window_of_leaves ω hω hz hε hε8
 
 /-- `Q < Z^(c1')` and `Q < Y`: the modulus bound `q ≤ Q` of page 3 lies below the rough
 threshold of b0 used by `rawLower_coprime`, since `Q ≤ Y^(1/16)/2` and `Z = 4Y`. -/
