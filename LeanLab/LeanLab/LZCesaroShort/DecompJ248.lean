@@ -1,6 +1,7 @@
 import LeanLab.LZCesaroShort.Statements
 import LeanLab.LZCesaroShort.Lemma5
 import LeanLab.LZCesaroShort.Theorem1PProved
+import LeanLab.LZCesaroShort.DecompJ330
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 
 namespace LeanLab.LZCesaroShort
@@ -124,11 +125,14 @@ theorem theorem2a_partial_sum_bound_leaf (hRH : RiemannHypothesis) : ∃ K : ℝ
 the paper's Theorem 1 assumes RH, the old form had none; not a falsity. -/
 theorem theorem1_from_theorem2b_leaf (_hRH : RiemannHypothesis) : ∃ K : ℝ, ∀ N H : ℕ, 2 ≤ N → 1 ≤ H → H ≤ N →
     ‖((cesaro N H : ℝ) : ℂ) - (H : ℂ) * N + 2 / (H : ℂ) * ZH N H‖
-      ≤ K * (N * Real.log (2 * (N : ℝ) ^ 2 / H) + H * Real.log N ^ 2 * Real.log (2 * H)) := by sorry
+      ≤ K * (N * Real.log (2 * (N : ℝ) ^ 2 / H) + H * Real.log N ^ 2 * Real.log (2 * H)) :=
+  theorem1_assembly _hRH
 
 /-- The exact Theorem1 Prop is conditionally dependent on Theorem2b and Sec5. -/
 theorem lz_theorem1_decomp_assembly : RiemannHypothesis → Theorem1 := by
   intro hRH
   exact theorem1_from_theorem2b_leaf hRH
+
+#print axioms theorem1_from_theorem2b_leaf
 
 end LeanLab.LZCesaroShort

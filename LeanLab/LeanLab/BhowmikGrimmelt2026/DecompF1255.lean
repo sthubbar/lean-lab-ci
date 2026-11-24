@@ -6,6 +6,7 @@ weights. Each LEAF carries one open input; the assembly
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp508a
+import LeanLab.BhowmikGrimmelt2026.LEAF_feed1122_zero_reciprocal508
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -140,7 +141,7 @@ theorem zero_reciprocal_multiplicity508_F1255 (ε : ℝ) (hε : 0 < ε) :
         (∀ ρ : ℂ, ρ ∈ Z ↔ DirichletCharacter.LFunction χ ρ = 0 ∧
           0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T) →
         ∑ ρ ∈ Z, (mult χ ρ : ℝ) / ‖ρ‖ ≤ K * (X : ℝ) ^ ε := by
-  sorry
+  exact zero_reciprocal_multiplicity508_from_leaves ε hε
 
 /-- The sealed sharp oscillatory zero mode estimate, assembled from the three LEAF steps. -/
 theorem oscillatory_zero_modes508_F1255 (Θ : ℝ) (hΘ : Θ < 3 / 4) (hZ : ZeroBound Θ) :
