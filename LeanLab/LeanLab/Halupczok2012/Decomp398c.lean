@@ -1,5 +1,7 @@
 import LeanLab.Halupczok2012.Decomp398a
 import LeanLab.Halupczok2012.U1510Final
+import LeanLab.Halupczok2012.Feed1122SmallModuli
+import LeanLab.Halupczok2012.Feed1122LargeModuli
 
 /-!
 Supply decomposition for the sealed theorem_2.
@@ -30,8 +32,8 @@ theorem small_moduli :
       ∀ (a : ℕ → ℤ) (h z : ℕ → ℝ), (∀ q, Int.gcd (a q) q = 1) →
       (∀ q, 0 < h q ∧ h q ≤ y) → (∀ q, x / 2 < z q ∧ z q ≤ x) →
       ∑ q ∈ (Icc 1 ⌊Q⌋₊).filter (fun q : ℕ => (q : ℝ) ≤ x ^ (1 / 100 : ℝ)),
-        ppsTerm (z q) (h q) q (a q) ≤ C * y * Real.log x ^ (-A) := by
-  sorry
+        ppsTerm (z q) (h q) q (a q) ≤ C * y * Real.log x ^ (-A) :=
+  Feed1122SmallModuli.small_moduli_of_leaves
 
 /-- LEAF. PPS1984 page 531 display 6 through page 538, the remaining modulus range.
 The Heath Brown identity and the two polynomial estimates treat the moduli
@@ -43,8 +45,8 @@ theorem large_moduli :
       ∀ (a : ℕ → ℤ) (h z : ℕ → ℝ), (∀ q, Int.gcd (a q) q = 1) →
       (∀ q, 0 < h q ∧ h q ≤ y) → (∀ q, x / 2 < z q ∧ z q ≤ x) →
       ∑ q ∈ (Icc 1 ⌊Q⌋₊).filter (fun q : ℕ => x ^ (1 / 100 : ℝ) < (q : ℝ)),
-        ppsTerm (z q) (h q) q (a q) ≤ C * y * Real.log x ^ (-A) := by
-  sorry
+        ppsTerm (z q) (h q) q (a q) ≤ C * y * Real.log x ^ (-A) :=
+  Feed1122LargeModuli.large_moduli_of_leaves
 
 /-- The two disjoint modulus ranges give the existing uniform PPS input. -/
 theorem pps_uniform : PPS1984Uniform := by
