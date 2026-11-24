@@ -722,9 +722,11 @@ theorem c0_bound : 66 / 100 ≤ LeanLab.HeathBrownPuchta.Decomp130.C0 := by
   have h5 := mul_le_mul h1 h2 h3 h4
   nlinarith [h5]
 
-/-- LEAF. Paper page 26, display 41, upper bound for C2 using Liu, Liu and Wang. -/
-theorem c2_bound : LeanLab.HeathBrownPuchta.Lemma8Const.C2 ≤ 22141 / 10000 := by
-  sorry
+/-- Paper page 26, display 41, upper bound for C2 using Liu, Liu and Wang.
+CONDITIONAL ON the CITED leaf `Decomp130.liu_liu_wang215`, Liu, Liu and Wang 1999
+display 3.9, through `Decomp130.c2_bound215`, which has this exact statement. -/
+theorem c2_bound : LeanLab.HeathBrownPuchta.Lemma8Const.C2 ≤ 22141 / 10000 :=
+  LeanLab.HeathBrownPuchta.Decomp130.c2_bound215
 
 theorem constants_assembly : 66 / 100 ≤ LeanLab.HeathBrownPuchta.Decomp130.C0 ∧
     LeanLab.HeathBrownPuchta.Lemma8Const.C2 ≤ 22141 / 10000 :=
