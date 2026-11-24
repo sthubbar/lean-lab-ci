@@ -6,6 +6,7 @@ Two proper region estimates remain OPEN. The final assembly is CONDITIONAL.
 The sealed group4_lower is unchanged.
 -/
 import LeanLab.Languasco2004.GroupSplit548
+import LeanLab.Languasco2004.Decomp564a
 
 namespace LeanLab.Languasco2004.Decomp548d
 open Finset Real Decomp279a Decomp316c GroupSplit548
@@ -20,7 +21,8 @@ theorem region30_lower :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n => pieceSum 4 30 true N (localization N ε) n <
         0.000303 * scale N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B :=
+  Decomp564a.region30_lower_from_transfers
 
 /-- LEAF. Jia page 282, Lemma 27, supporting display 65 on page 286.
 Only group 4 with region 30 removed is bounded. The coefficient is 0.024279.
