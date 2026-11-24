@@ -2,6 +2,7 @@ import Mathlib
 import LeanLab.GoldbachGaps.Goldston1990Main
 import LeanLab.GoldbachGaps.Goldston1990Cor2
 import LeanLab.SchnirelmannGoldbach.Discharged
+import LeanLab.GoldbachGaps.Feed1122LeafCorollary1
 
 namespace LeanLab.GoldbachGaps.DecompJ610
 open Real Finset Filter Topology
@@ -9,7 +10,7 @@ open LeanLab.GoldbachGaps.Goldston1990
 open LeanLab.SchnirelmannGoldbach
 
 /-- LEAF p. 292: Corollary 1, display 7 -/
-theorem leaf_corollary1 : Corollary1 := sorry
+theorem leaf_corollary1 : Corollary1 := Feed1122Cor1.leaf_corollary1_of_leaves
 
 /-- LEAF p. 292: Cauchy's inequality for rg on [N, N+K] -/
 theorem leaf_cauchy_rg (N K : ℕ) :
