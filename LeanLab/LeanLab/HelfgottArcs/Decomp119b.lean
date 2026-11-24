@@ -6,6 +6,7 @@ The derived anchor proof uses rho equal to 4 and linearity in log rho.
 AI wrote the Lean code for CODEX task119. Binary Goldbach is open.
 -/
 import LeanLab.HelfgottArcs.FourierDecay
+import LeanLab.HelfgottArcs.Decomp119bLeavesA2
 
 namespace LeanLab.HelfgottArcs.Decomp119b
 open MeasureTheory Set Real
@@ -31,7 +32,7 @@ theorem a2_compact (δ : ℝ) (h0 : 0 ≤ δ) (h1 : δ ≤ 655) :
     have hf := norm_fhat_eta2_le_one δ
     have hm := mul_le_mul_of_nonneg_left hf (sq_nonneg (2 * π * |δ|))
     nlinarith
-  · sorry
+  · exact Decomp119bLeavesA2.a2_compact_mid δ h0 h1
 
 /-- LEAF. Page 76 equation A.12, the weight is affine in log rho. -/
 theorem weight_affine (ρ t : ℝ) (hρ : 4 ≤ ρ) :
