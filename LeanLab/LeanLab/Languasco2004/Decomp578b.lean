@@ -7,6 +7,8 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Languasco2004.Decomp578a
 import LeanLab.Languasco2004.Decomp565d
+import LeanLab.Languasco2004.Feed578bPair
+import LeanLab.Languasco2004.Feed578bTriple
 
 namespace LeanLab.Languasco2004.Decomp578b
 open Finset Real Decomp279a Decomp316a Source565
@@ -23,7 +25,7 @@ theorem pair_rough_transfer (h19 : type_of% Decomp565d.lemma19_rough_input) :
         0.00000005 * scale N (localization N ε) n <
           |pairRemoved false true N (localization N ε) n ((localization N ε) ^ delta ε) ((localization N ε) ^ (16 / 135 : ℝ)) -
             singular n / log N * pairRemoved true true N (localization N ε) n ((localization N ε) ^ delta ε) ((localization N ε) ^ (16 / 135 : ℝ))|)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := Feed578bPair.pair_rough_transfer_from_leaves h19
 
 /-- LEAF. Jia page 284 display 63, using Lemma 19 on page 260.
 CONDITIONAL ON the unchanged bounded rough weight input from Lemmas 5 and 18.
@@ -35,7 +37,7 @@ theorem triple_rough_transfer (h19 : type_of% Decomp565d.lemma19_rough_input) :
         0.00000005 * scale N (localization N ε) n <
           |tripleRemoved false true N (localization N ε) n ((localization N ε) ^ (16 / 135 : ℝ)) ((localization N ε) ^ delta ε) -
             singular n / log N * tripleRemoved true true N (localization N ε) n ((localization N ε) ^ (16 / 135 : ℝ)) ((localization N ε) ^ delta ε)|)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := Feed578bTriple.triple_rough_transfer_from_leaves h19
 
 /-- Jia displays 59 and 63: exact supplied type of the sealed lemma19_transfer.
 CONDITIONAL ON the two proper removed layer leaves and the unchanged Lemma 19 input. -/
