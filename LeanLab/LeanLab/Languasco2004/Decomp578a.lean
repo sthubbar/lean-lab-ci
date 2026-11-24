@@ -7,6 +7,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Languasco2004.Decomp565c
 import LeanLab.Languasco2004.Numeric565
+import LeanLab.Languasco2004.Feed578aPair
 
 namespace LeanLab.Languasco2004.Decomp578a
 open Finset Real Decomp279a Decomp316a Source565
@@ -104,7 +105,7 @@ theorem pair_sieve_transfer (h17 : type_of% Decomp565c.lemma17_progression_input
         0.00000005 * scale N (localization N ε) n <
           |pairMass false true N (localization N ε) n ((localization N ε) ^ delta ε) -
             singular n / log N * pairMass true true N (localization N ε) n ((localization N ε) ^ delta ε)|)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := Feed578aPair.pair_sieve_transfer_from_leaves h17
 
 /-- LEAF. Jia page 284 display 62, with the page 278 linear sieve comparison.
 CONDITIONAL ON the page 252 trilinear progression remainder of Lemma 16.
