@@ -7,6 +7,10 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Languasco2004.Source565
 import LeanLab.Languasco2004.Numeric565
+import LeanLab.Languasco2004.Feed565bA
+import LeanLab.Languasco2004.Feed565bB
+import LeanLab.Languasco2004.Feed565bC
+import LeanLab.Languasco2004.Feed565bD
 
 namespace LeanLab.Languasco2004.Decomp565b
 open Finset Real Decomp279a Decomp316a GroupSplit548 Source565 Numeric565
@@ -22,7 +26,8 @@ theorem iwaniec_transfer :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n =>
         0.0000001 * scale N (localization N ε) n < iwaniecError false N (localization N ε) n ε)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  exact Feed565bA.iwaniec_transfer_from_leaves
 
 /-- LEAF. Jia page 260 Lemma 19 and page 285 remaining region formula,
 using the argument of page 283 display 59 and page 284 display 63.
@@ -32,7 +37,8 @@ theorem lemma19_transfer :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n =>
         0.0000001 * scale N (localization N ε) n < lemma19Error false N (localization N ε) n ε)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  exact Feed565bB.lemma19_transfer_from_leaves
 
 /-- LEAF. Jia page 283 display 60 and page 285 remaining region formula.
 Only the model pair sum is compared with its Buchstab integral lower bound.
@@ -43,9 +49,7 @@ theorem model_pair_lower :
       (((window N ε).filter (fun n =>
         modelPair false N (localization N ε) n < (mainRest + 0.0000004) * scale N (localization N ε) n)).card : ℝ) ≤
       C * windowLength N ε / Real.log N ^ B := by
-  -- Deep analytic result: requires Iwaniec sieve lower bound for pair mass.
-  -- No existing lemma in the codebase provides this exceptional-set estimate.
-  sorry
+  exact Feed565bC.model_pair_lower_from_leaves
 
 /-- LEAF. Jia pages 284 and 285 after display 63, using Lemma 20 on pages 261 and 262.
 Only the model triple sum is bounded by its three reduced logarithmic integrals. -/
@@ -54,7 +58,8 @@ theorem model_triple_upper :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       (((window N ε).filter (fun n =>
         (restOne + restTwo + restThree + 0.0000001) * scale N (localization N ε) n < modelTriple false N (localization N ε) n)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B := by
+  exact Feed565bD.model_triple_upper_from_leaves
 
 /-- Jia page 285 display 64 and the remaining seven regions.
 CONDITIONAL ON the four analytic transfer and model leaves above.

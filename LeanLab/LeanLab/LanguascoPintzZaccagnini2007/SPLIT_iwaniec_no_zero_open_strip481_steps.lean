@@ -104,7 +104,121 @@ theorem iwaniec_closing_numeric1122 (q : ℕ) (hq : 3 ≤ q) (γ l η M θ : ℝ
       (l * Real.log (2 * l)) ^ (3 / 4 : ℝ)))) :
     6 * Real.log (5 * l) + (16 / η) * Real.log (M / (5 * θ)) +
       (8 / η) * Real.log (2 * M / (5 * θ)) ≤ 1 / (15 * θ) := by
-  sorry
+  have hq' : (3 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  have ht : 0 ≤ |γ| := abs_nonneg _
+  have hbase : (9 : ℝ) ≤ (q : ℝ) * (|γ| + 3) := by nlinarith
+  have he1 : Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
+  have he2 : Real.exp 2 < 9 := by
+    have : Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+    rw [this]; nlinarith [Real.exp_pos 1]
+  have hl2 : 2 ≤ l := by
+    rw [hl, Real.le_log_iff_exp_le (by linarith)]
+    linarith
+  have hl0 : 0 < l := by linarith
+  obtain ⟨L, hL⟩ : ∃ L, L = Real.log (2 * l) := ⟨_, rfl⟩
+  rw [← hL] at hη hθ
+  have hL1 : 1 ≤ L := by
+    rw [hL, Real.le_log_iff_exp_le (by linarith)]
+    linarith
+  obtain ⟨D, hD⟩ : ∃ D, D = Real.log ((∏ p ∈ q.primeFactors, p : ℕ) : ℝ) := ⟨_, rfl⟩
+  rw [← hD] at hθ
+  have hd : (1 : ℝ) ≤ ((∏ p ∈ q.primeFactors, p : ℕ) : ℝ) := by
+    have : 0 < ∏ p ∈ q.primeFactors, p :=
+      Finset.prod_pos (fun p hp => (Nat.prime_of_mem_primeFactors hp).pos)
+    exact_mod_cast this
+  have hD0 : 0 ≤ D := by rw [hD]; exact Real.log_nonneg hd
+  obtain ⟨u, hu⟩ : ∃ u, u = l ^ (1 / 4 : ℝ) := ⟨_, rfl⟩
+  have hu1 : 1 ≤ u := by rw [hu]; exact Real.one_le_rpow (by linarith) (by norm_num)
+  obtain ⟨E, hE⟩ : ∃ E, E = Real.sqrt l * L ^ (3 / 4 : ℝ) := ⟨_, rfl⟩
+  rw [← hE] at hη
+  have hsqrt1 : 1 ≤ Real.sqrt l := by
+    rw [Real.le_sqrt (by norm_num) hl0.le]; linarith
+  have hLp : 1 ≤ L ^ (3 / 4 : ℝ) := Real.one_le_rpow hL1 (by norm_num)
+  have hE1 : 1 ≤ E := by rw [hE]; exact one_le_mul_of_one_le_of_one_le hsqrt1 hLp
+  have hE0 : 0 < E := by linarith
+  have hηE : η * E = 1 := by rw [hη]; field_simp
+  -- P = E u
+  have hP : (l * L) ^ (3 / 4 : ℝ) = E * u := by
+    rw [Real.mul_rpow hl0.le (by linarith), hE, hu, Real.sqrt_eq_rpow]
+    have : l ^ (3 / 4 : ℝ) = l ^ (1 / 2 : ℝ) * l ^ (1 / 4 : ℝ) := by
+      rw [← Real.rpow_add hl0]; norm_num
+    rw [this]; ring
+  rw [hP] at hθ
+  obtain ⟨X, hX⟩ : ∃ X, X = D + E * u := ⟨_, rfl⟩
+  rw [← hX] at hθ
+  have hEu : 1 ≤ E * u := one_le_mul_of_one_le_of_one_le hE1 hu1
+  have hX1 : 1 ≤ X := by rw [hX]; linarith
+  have hX0 : 0 < X := by linarith
+  have hθpos : 0 < θ := by rw [hθ]; positivity
+  -- log M
+  have hdpos : (0 : ℝ) < ((∏ p ∈ q.primeFactors, p : ℕ) : ℝ) := by linarith
+  have hMpos : 0 < M := by rw [hM]; positivity
+  have hlogM : Real.log M = 100 * (η * D + u) := by
+    rw [hM, Real.log_pow, Real.log_mul (Real.rpow_pos_of_pos hdpos _).ne' (Real.exp_pos _).ne',
+      Real.log_rpow hdpos, Real.log_exp, ← hD, ← hu]
+    push_cast; ring
+  have h5θ : 5 * θ = 1 / (8000 * X) := by rw [hθ]; field_simp; ring
+  have hlog5θ : Real.log (5 * θ) = -Real.log (8000 * X) := by
+    rw [h5θ, one_div, Real.log_inv]
+  have hA : Real.log (M / (5 * θ)) = Real.log M + Real.log (8000 * X) := by
+    rw [Real.log_div hMpos.ne' (by positivity), hlog5θ]; ring
+  have hB : Real.log (2 * M / (5 * θ)) = Real.log 2 + Real.log M + Real.log (8000 * X) := by
+    rw [Real.log_div (by positivity) (by positivity), Real.log_mul (by norm_num) hMpos.ne',
+      hlog5θ]; ring
+  have h16 : 16 / η = 16 * E := by rw [hη]; field_simp
+  have h8 : 8 / η = 8 * E := by rw [hη]; field_simp
+  have hR : 1 / (15 * θ) = 40000 * X / 15 := by rw [hθ]; field_simp; ring
+  have hEM : E * Real.log M = 100 * X := by
+    rw [hlogM, hX]
+    have : E * (100 * (η * D + u)) = 100 * ((η * E) * D + E * u) := by ring
+    rw [this, hηE]; ring
+  -- scalar bounds
+  have hlog2 : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
+  have hlog2' : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hlog5 : Real.log 5 ≤ 3 * Real.log 2 := by
+    rw [← Real.log_rpow (by norm_num)]
+    exact Real.log_le_log (by norm_num) (by norm_num)
+  have hlog8000 : Real.log 8000 ≤ 13 * Real.log 2 := by
+    rw [← Real.log_rpow (by norm_num)]
+    exact Real.log_le_log (by norm_num) (by norm_num)
+  have hlu : Real.log u = (1 / 4) * Real.log l := by rw [hu, Real.log_rpow hl0]
+  have hlu' : Real.log u ≤ u - 1 := Real.log_le_sub_one_of_pos (by linarith)
+  have hll : Real.log l ≤ 4 * (u - 1) := by linarith
+  have hLL : Real.log L ≤ L - 1 := Real.log_le_sub_one_of_pos (by linarith)
+  have hLeq : L = Real.log 2 + Real.log l := by rw [hL, Real.log_mul (by norm_num) hl0.ne']
+  have h5l : Real.log (5 * l) = Real.log 5 + Real.log l := Real.log_mul (by norm_num) hl0.ne'
+  have h5l0 : 0 ≤ Real.log (5 * l) := Real.log_nonneg (by linarith)
+  have hlogP : Real.log (E * u) = (3 / 4) * (Real.log l + Real.log L) := by
+    rw [← hP, Real.log_rpow (by positivity), Real.log_mul hl0.ne' (by positivity)]
+  have hS : 6 * Real.log (5 * l) + 24 * (Real.log 8000 + Real.log (E * u)) + 8 * Real.log 2 ≤
+      (800 / 3) * u := by
+    rw [h5l, hlogP]; linarith
+  have hlam : Real.log (8000 * X) = Real.log 8000 + Real.log X :=
+    Real.log_mul (by norm_num) hX0.ne'
+  have hXP : Real.log X - Real.log (E * u) ≤ X / (E * u) - 1 := by
+    rw [← Real.log_div hX0.ne' (by positivity)]
+    exact Real.log_le_sub_one_of_pos (by positivity)
+  have hEX : E * (X / (E * u) - 1) ≤ D := by
+    have : E * (X / (E * u) - 1) = D / u := by
+      rw [hX]; field_simp; ring
+    rw [this]; exact div_le_self hD0 hu1
+  have hK : 6 * Real.log (5 * l) + 24 * E * Real.log (8000 * X) + 8 * E * Real.log 2 ≤
+      (800 / 3) * X := by
+    have h1 := mul_le_mul_of_nonneg_left hS hE0.le
+    have h2 : E * (Real.log X - Real.log (E * u)) ≤ E * (X / (E * u) - 1) :=
+      mul_le_mul_of_nonneg_left hXP hE0.le
+    have h3 : 6 * Real.log (5 * l) ≤ E * (6 * Real.log (5 * l)) := by
+      have := mul_le_mul_of_nonneg_right hE1 (by linarith : (0:ℝ) ≤ 6 * Real.log (5 * l))
+      linarith
+    rw [hlam]
+    linarith [h1, h2, hEX, h3, hX]
+  rw [hA, hB, h16, h8, hR]
+  have : 6 * Real.log (5 * l) + 16 * E * (Real.log M + Real.log (8000 * X)) +
+      8 * E * (Real.log 2 + Real.log M + Real.log (8000 * X)) =
+      6 * Real.log (5 * l) + 24 * E * Real.log (8000 * X) + 8 * E * Real.log 2 +
+        24 * (E * Real.log M) := by ring
+  rw [this, hEM]
+  linarith
 
 /-- The printed denominator of page 97 is positive for `q ≥ 3`. -/
 theorem iwaniec_printed_theta_pos1122 (q : ℕ) (hq : 3 ≤ q) (γ : ℝ) :
