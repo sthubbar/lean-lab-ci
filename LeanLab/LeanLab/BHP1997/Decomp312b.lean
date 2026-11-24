@@ -5,6 +5,7 @@ The exact assembly is CONDITIONAL. The sealed leaf declarations are unchanged.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp312a
+import LeanLab.BHP1997.Decomp312bFeed1122UpperSupply
 
 namespace LeanLab.BHP1997.Decomp312b
 open Classical Complex DecompC165b Decomp312a Decomp312c Decomp132
@@ -35,8 +36,8 @@ theorem upper_mean_value_supply (h4 : Thm4.Theorem4Paper) :
         MeanValue41 ε b ∧ ReferenceDensity u1 b ∧
         ShortApproximation ε (section4SiftedFamily c1) b ∧
         ∃ X : ℝ, ∀ x : ℝ, X ≤ x →
-          ∀ k ∈ leftInterval ε x, primeWeight k ≤ section4SiftedFamily c1 x k := by
-  sorry
+          ∀ k ∈ leftInterval ε x, primeWeight k ≤ section4SiftedFamily c1 x k :=
+  Decomp312bFeed1122.upper_mean_value_supply_of_leaves h4
 
 /-- Pages 41 and 42. The exact sealed upper leaf follows from the smaller
 upper supply and common Perron inputs. CONDITIONAL on those OPEN inputs.
