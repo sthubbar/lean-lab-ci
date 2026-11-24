@@ -69,10 +69,14 @@ theorem leaf_bad_character_removal (F : ℤ[X]) (hF : Admissible F)
 equations 21 through 26: the truncated explicit formula and the short interval
 smoothing for the good characters, with the density estimate 21, give
 q/φ(q) ∑_{χ good} ∫_{|η| ≤ 1/(qQ)} |W(χ,η)|² ≪ N L^(-B).
-Class HARD. CONDITIONAL ON display 21 through hDensity. -/
+The printed last step of 25 bounds this by L^(c₅) N L^(-12kB) + N L^(-B), which is
+≪ N L^(-B) once B ≥ B₀ with B₀ depending on c₅ and k, so the LEAF is stated for B ≥ B₀,
+as the paper uses it with B large in terms of A. Class HARD.
+CONDITIONAL ON display 21 through hDensity. -/
 theorem leaf_good_character_mean (F : ℤ[X]) (hF : Admissible F)
     (C d : ℝ) (hC : 0 < C) (hd : 0 < d) (hDensity : DensityInput C d)
-    (c : ℝ) (hc : 0 < c) (ε B : ℝ) (hε : 0 < ε) (hB : 0 < B) :
+    (c : ℝ) (hc : 0 < c) :
+    ∃ B₀ : ℝ, 0 < B₀ ∧ ∀ ε B : ℝ, 0 < ε → B₀ ≤ B →
     ∃ C' N₀ : ℝ, 0 < C' ∧ 3 ≤ N₀ ∧ ∀ N H : ℝ, N₀ ≤ N →
       N ^ (1 / (3 * (F.natDegree : ℝ)) + ε) ≤ H →
       H ≤ N ^ (1 / (F.natDegree : ℝ)) →
@@ -81,10 +85,12 @@ theorem leaf_good_character_mean (F : ℤ[X]) (hF : Admissible F)
   sorry
 
 /-- Pages 484 and 485 displays 16 through 25. The exact statement of
-Decomp88.leaf_character, CONDITIONAL ON Decomp582a.leaf_zero_density and the two
-LEAFs above. The assembly itself has no sorry. -/
+Decomp88.leaf_character, restricted to B ≥ B₀, CONDITIONAL ON Decomp582a.leaf_zero_density and the two
+LEAFs above, for B at least the B₀ of leaf_good_character_mean.
+The assembly itself has no sorry. -/
 theorem leaf_character_of_split (F : ℤ[X]) (hF : Admissible F)
-    (c : ℝ) (hc : 0 < c) (ε B : ℝ) (hε : 0 < ε) (hB : 0 < B) :
+    (c : ℝ) (hc : 0 < c) :
+    ∃ B₀ : ℝ, 0 < B₀ ∧ ∀ ε B : ℝ, 0 < ε → B₀ ≤ B →
     ∃ C N₀ : ℝ, 0 < C ∧ 3 ≤ N₀ ∧ ∀ N H : ℝ, N₀ ≤ N →
       N ^ (1 / (3 * (F.natDegree : ℝ)) + ε) ≤ H →
       H ≤ N ^ (1 / (F.natDegree : ℝ)) →
@@ -94,10 +100,13 @@ theorem leaf_character_of_split (F : ℤ[X]) (hF : Admissible F)
         (1 / ((q : ℝ) * fareyOrder F N H B)),
         ‖characterRemainder ⌊c * N⌋₊ q a η‖ ^ 2) ≤ C * N * Real.log N ^ (-B) := by
   obtain ⟨CD, d, hCD, hd, hDensity⟩ := leaf_zero_density
+  obtain ⟨B₀, hB₀, h25all⟩ := leaf_good_character_mean F hF CD d hCD hd hDensity c hc
+  refine ⟨B₀, hB₀, ?_⟩
+  intro ε B hε hBB
+  have hB : 0 < B := hB₀.trans_le hBB
   obtain ⟨C1, N1, hC1, hN1, h24⟩ :=
     leaf_bad_character_removal F hF CD d hCD hd hDensity c hc ε B hε hB
-  obtain ⟨C2, N2, hC2, hN2, h25⟩ :=
-    leaf_good_character_mean F hF CD d hCD hd hDensity c hc ε B hε hB
+  obtain ⟨C2, N2, hC2, hN2, h25⟩ := h25all ε B hε hBB
   refine ⟨C1 * (C2 + 1), max N1 N2, by positivity, hN1.trans (le_max_left _ _), ?_⟩
   intro N H hN hH hHu q hq hqQ a hcop
   haveI : NeZero q := ⟨hq.ne'⟩
