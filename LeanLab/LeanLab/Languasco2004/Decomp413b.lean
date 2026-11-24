@@ -8,6 +8,7 @@ The two analytic inputs stay OPEN. The rational partition is proved.
 Existing declarations stay sealed.
 -/
 import LeanLab.Languasco2004.RationalPartition413
+import LeanLab.Languasco2004.Decomp413b_remainder_bound_Leaves
 
 namespace LeanLab.Languasco2004.Decomp413b
 open Finset Real MeasureTheory Decomp279b
@@ -45,7 +46,8 @@ theorem remainder_bound :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       ∑ m ∈ window N η,
         ‖remainderCoefficient N (localization N η) (windowLength N η) (arcExponent η A) m‖ ^ 2 ≤
-        C * windowLength N η * localization N η ^ 2 / Real.log N ^ A := by sorry
+        C * windowLength N η * localization N η ^ 2 / Real.log N ^ A :=
+  Decomp413bRemainderLeaves.remainder_bound_from_leaves
 
 /-- Pages 45 and 46 displays 7 to 13 give the exact sealed major_bound.
 CONDITIONAL ON principal_bound and remainder_bound.
