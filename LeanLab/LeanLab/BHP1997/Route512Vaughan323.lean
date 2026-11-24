@@ -6,6 +6,8 @@ proof of 3.23 and a CONDITIONAL assembly theorem with the verbatim statement.
 Burst burst-20261122 session S64. AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp512a
+import LeanLab.BHP1997.RamanujanS72
+import LeanLab.BHP1997.TotientSqTail512
 
 namespace LeanLab.BHP1997.Section2MS
 open Classical
@@ -17,8 +19,8 @@ c_q(-m) = Σ_{(a,q)=1} e(-am/q) equals μ(q/(q,m)) φ((q,m)), so its absolute va
 Σ_{d|q} [q/d ∣ m] (q/d) μ(d), and for squarefree q = g r with g = (q,m) this is
 μ(r) Σ_{e|g} e μ(g/e) = μ(r) φ(g). -/
 theorem leaf_ramanujan_sqfree_norm512 (q N : ℕ) (hq : Squarefree q) :
-    ‖ramanujan512 q N‖ ≤ (Nat.totient (Nat.gcd q N) : ℝ) := by
-  sorry
+    ‖ramanujan512 q N‖ ≤ (Nat.totient (Nat.gcd q N) : ℝ) :=
+  ramanujan_sqfree_normS72 q N hq
 
 /-- LEAF: Vaughan 1981 chapter 3, book page 34, the elementary fact printed under display
 3.23: Σ_{q>Z} φ(q)^{-2} ≪ Z^{-1}, together with the convergence of Σ_q φ(q)^{-2}, which
@@ -28,8 +30,8 @@ q/φ(q) = Σ_{d|q} μ(d)²/φ(d), and partial summation. -/
 theorem leaf_totient_sq_tail512 :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ Z : ℝ, 0 < Z → ∀ R : ℕ,
       ∑ r ∈ (Finset.Icc 1 R).filter (fun r : ℕ => Z < (r : ℝ)),
-          1 / (Nat.totient r : ℝ) ^ 2 ≤ K * min (1 / Z) 1 := by
-  sorry
+          1 / (Nat.totient r : ℝ) ^ 2 ≤ K * min (1 / Z) 1 :=
+  leaf_totient_sq_tail512_leaf
 
 /-- Vaughan 1981 display 3.23 at m = N, verbatim statement of
 `Section2MS.leaf_vaughan_323_512`, CONDITIONAL ON the two LEAFs above. The proof is Vaughan's:
