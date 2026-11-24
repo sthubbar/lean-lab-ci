@@ -45,7 +45,67 @@ so `ζ'/ζ (σ) ≤ L'/L (σ, χ₀)`. -/
 theorem iwaniec_principal_ge_zeta1122 (q : ℕ) (hq : 1 ≤ q) (σ : ℝ) (hσ : 1 < σ) :
     (logDeriv riemannZeta (σ : ℂ)).re ≤
       (logDeriv (Lfun481 (1 : DirichletCharacter ℂ q)) (σ : ℂ)).re := by
-  sorry
+  have hq0 : q ≠ 0 := by omega
+  haveI : NeZero q := ⟨hq0⟩
+  have hσ1 : (σ : ℂ) ≠ 1 := by
+    intro h; have := congrArg Complex.re h; simp at this; linarith
+  set P : ℂ → ℂ := fun s => ∏ p ∈ q.primeFactors, (1 - (p : ℂ) ^ (-s)) with hP
+  have hev : Lfun481 (1 : DirichletCharacter ℂ q) =ᶠ[nhds (σ : ℂ)] (P * riemannZeta) := by
+    have hopen : IsOpen ({1}ᶜ : Set ℂ) := isOpen_compl_singleton
+    filter_upwards [hopen.mem_nhds (by simpa using hσ1)] with s hs
+    have hs' : s ≠ 1 := by simpa using hs
+    simp only [Lfun481, dif_neg hq0, Pi.mul_apply, hP]
+    exact DirichletCharacter.LFunctionTrivChar_eq_mul_riemannZeta hs'
+  rw [(logDeriv_congr_nhds hev).eq_of_nhds]
+  have hre : 1 < (σ : ℂ).re := by simpa using hσ
+  have hz : riemannZeta (σ : ℂ) ≠ 0 := riemannZeta_ne_zero_of_one_lt_re hre
+  -- each factor at a real point
+  have hfac : ∀ p ∈ q.primeFactors,
+      HasDerivAt (fun s : ℂ => 1 - (p : ℂ) ^ (-s))
+        (((p : ℝ) ^ (-σ) * Real.log p : ℝ) : ℂ) (σ : ℂ) ∧
+      (1 : ℂ) - (p : ℂ) ^ (-(σ : ℂ)) = ((1 - (p : ℝ) ^ (-σ) : ℝ) : ℂ) ∧
+      0 < (p : ℝ) ^ (-σ) ∧ (p : ℝ) ^ (-σ) < 1 ∧ 0 ≤ Real.log p := by
+    intro p hp
+    have hpp := Nat.prime_of_mem_primeFactors hp
+    have hp1 : (1 : ℝ) < p := by exact_mod_cast hpp.one_lt
+    have hc : (p : ℂ) ≠ 0 := by exact_mod_cast hpp.ne_zero
+    have hcp : ((p : ℝ) ^ (-σ) : ℝ) = ((p : ℂ) ^ (-(σ : ℂ))) := by
+      rw [Complex.ofReal_cpow (by positivity)]; push_cast; ring_nf
+    have hlog : ((Real.log p : ℝ) : ℂ) = Complex.log (p : ℂ) := by
+      rw [Complex.ofReal_log (by positivity)]; push_cast; rfl
+    refine ⟨?_, ?_, Real.rpow_pos_of_pos (by linarith) _, ?_, Real.log_nonneg hp1.le⟩
+    · have h1 : HasDerivAt (fun s : ℂ => -s) (-1) (σ : ℂ) := (hasDerivAt_id _).neg
+      have h2 := h1.const_cpow (c := (p : ℂ)) (Or.inl hc)
+      have h3 := h2.const_sub 1
+      convert h3 using 1
+      push_cast
+      rw [hcp]
+      ring
+    · push_cast; rw [hcp]
+    · exact Real.rpow_lt_one_of_one_lt_of_neg hp1 (by linarith)
+  have hPne : ∀ p ∈ q.primeFactors, (fun s : ℂ => 1 - (p : ℂ) ^ (-s)) (σ : ℂ) ≠ 0 := by
+    intro p hp
+    obtain ⟨_, h2, _, h4, _⟩ := hfac p hp
+    simp only [h2]; exact_mod_cast (by linarith : (1 : ℝ) - (p : ℝ) ^ (-σ) ≠ 0)
+  have hPd : ∀ p ∈ q.primeFactors, DifferentiableAt ℂ (fun s : ℂ => 1 - (p : ℂ) ^ (-s)) (σ : ℂ) :=
+    fun p hp => (hfac p hp).1.differentiableAt
+  have hP0 : P (σ : ℂ) ≠ 0 := by
+    simp only [hP]; exact Finset.prod_ne_zero_iff.mpr hPne
+  have hPdiff : DifferentiableAt ℂ P (σ : ℂ) := by
+    simp only [hP]; exact DifferentiableAt.fun_finsetProd hPd
+  have hzd : DifferentiableAt ℂ riemannZeta (σ : ℂ) := differentiableAt_riemannZeta hσ1
+  rw [logDeriv_mul (σ : ℂ) hP0 hz hPdiff hzd, Complex.add_re]
+  have hPeq : logDeriv P (σ : ℂ) =
+      ∑ p ∈ q.primeFactors, logDeriv (fun s : ℂ => 1 - (p : ℂ) ^ (-s)) (σ : ℂ) := by
+    simp only [hP]; exact logDeriv_fun_prod hPne hPd
+  have hnn : 0 ≤ (logDeriv P (σ : ℂ)).re := by
+    rw [hPeq, Complex.re_sum]
+    apply Finset.sum_nonneg
+    intro p hp
+    obtain ⟨h1, h2, h3, h4, h5⟩ := hfac p hp
+    rw [logDeriv_apply, h1.deriv, h2, ← Complex.ofReal_div, Complex.ofReal_re]
+    apply div_nonneg (mul_nonneg h3.le h5) (by linarith)
+  linarith
 
 /-- LEAF: Iwaniec 1974 page 102, the bound `|ζ'/ζ (s) + 1/(s - 1)| < 3` before display (15), at real `σ > 1`.
 Class: MEDIUM.
