@@ -28,6 +28,7 @@ false as cut rather than as work still to do.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Decomp556a
+import LeanLab.KumchevLiu2007.PrimeShortIntervalCharacter_Leaves
 
 namespace LeanLab.KumchevLiu2007.Task556a
 
@@ -49,8 +50,8 @@ theorem leaf_nonprincipal_prime_character_sum (B ε : ℝ) (hB : 0 < B) (hε : 0
         ‖∑ m ∈ (primeWindow X (windowY X ε)).filter
             (fun m : ℕ => u ≤ (m : ℝ) ∧ (m : ℝ) < v),
             (if m.Prime then χ m else 0)‖ ≤
-          C * windowY X ε * (Real.log X ^ B) ^ (-5 : ℤ) := by
-  sorry
+          C * windowY X ε * (Real.log X ^ B) ^ (-5 : ℤ) :=
+  leaf_nonprincipal_prime_character_sum_from_leaves B ε hB hε hε1
 
 /-- LEAF. Step two of the split, the trivial character at level one. Here the
 character is one on every integer, so the defect is the number of primes of
@@ -64,8 +65,8 @@ theorem leaf_principal_prime_count_level_one (B ε : ℝ) (hB : 0 < B) (hε : 0 
         ‖∑ m ∈ (primeWindow X (windowY X ε)).filter
             (fun m : ℕ => u ≤ (m : ℝ) ∧ (m : ℝ) < v),
             ((if m.Prime then (1 : ℂ) else 0) - ((1 / Real.log (m : ℝ) : ℝ) : ℂ))‖ ≤
-          C * windowY X ε * (Real.log X ^ B) ^ (-5 : ℤ) := by
-  sorry
+          C * windowY X ε * (Real.log X ^ B) ^ (-5 : ℤ) :=
+  leaf_principal_prime_count_level_one_from_leaves B ε hB hε hε1
 
 /-- LEAF. Step three of the split, the trivial character at level above one.
 Here the character is one exactly on the integers coprime to the level and
