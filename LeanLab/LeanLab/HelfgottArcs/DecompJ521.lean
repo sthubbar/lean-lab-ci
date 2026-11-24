@@ -4,6 +4,7 @@ AI wrote this Lean code for GEMINI task521. Binary Goldbach is open.
 -/
 import LeanLab.HelfgottArcs.Statements
 import LeanLab.HelfgottArcs.MajorAssembly
+import LeanLab.HelfgottArcs.DecompJ521LeavesProp48
 
 namespace LeanLab.HelfgottArcs.DecompJ521
 open Real
@@ -19,8 +20,8 @@ theorem major_1_2_leaf (hG : HelfgottInput) (x : ℝ) (hx : 10 ^ 8 ≤ x) (q : �
       (4.269e-14 / q +
         (1.22 * √(1e8 / q) * log (q * (1e8 / q)) + 5.056 * √(1e8 / q) +
           1.423 * log q + 37.19) / √x +
-        (3 + 11 * |δ|) / x + (log q + 6) * (1 + 6 * |δ|) / (x * √x)) := by
-  sorry
+        (3 + 11 * |δ|) / x + (log q + 6) * (1 + 6 * |δ|) / (x * √x)) :=
+  DecompJ521LeavesProp48.major_1_2_leaf_of_leaves hG x hx q hq χ hχ δ hδ
 
 /-- The exact cited theorem 1.2 assembled from the leaf. -/
 theorem major_1_2_assembled (hG : HelfgottInput) (x : ℝ) (hx : 10 ^ 8 ≤ x) (q : ℕ) [NeZero q]
