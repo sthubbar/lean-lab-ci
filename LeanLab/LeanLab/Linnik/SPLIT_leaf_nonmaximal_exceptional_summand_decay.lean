@@ -95,7 +95,7 @@ theorem leaf_exceptional_main_window (δ : ℝ) (hδ : 0 < δ) :
 /-! ### Proved helpers -/
 
 /-- Minkowski's inequality for a finite sum of squared complex norms. -/
-private lemma nmx_sqrt_sum_norm_add_sq_le (s : Finset ℕ) (a b : ℕ → ℂ) :
+lemma nmx_sqrt_sum_norm_add_sq_le (s : Finset ℕ) (a b : ℕ → ℂ) :
     Real.sqrt (∑ m ∈ s, ‖a m + b m‖ ^ 2) ≤
       Real.sqrt (∑ m ∈ s, ‖a m‖ ^ 2) + Real.sqrt (∑ m ∈ s, ‖b m‖ ^ 2) := by
   have hA : 0 ≤ ∑ m ∈ s, ‖a m‖ ^ 2 := sum_nonneg fun m _ => sq_nonneg _
@@ -128,7 +128,7 @@ private lemma nmx_sqrt_sum_norm_add_sq_le (s : Finset ℕ) (a b : ℕ → ℂ) :
     _ = _ := Real.sqrt_sq (by positivity)
 
 /-- The Gallagher window is additive in the coefficient sequence. -/
-private lemma nmx_win_add (f g : ℕ → ℂ) (N L m : ℕ) :
+lemma nmx_win_add (f g : ℕ → ℂ) (N L m : ℕ) :
     LeanLab.PNTPort.Gallagher.win (fun n => f n + g n) N L m =
       LeanLab.PNTPort.Gallagher.win f N L m + LeanLab.PNTPort.Gallagher.win g N L m := by
   unfold LeanLab.PNTPort.Gallagher.win
@@ -136,7 +136,7 @@ private lemma nmx_win_add (f g : ℕ → ℂ) (N L m : ℕ) :
 
 /-- Gallagher 1975 p.131: at a zero gamma, the corrected coefficient at conductor q + 1 is
 the uncorrected coefficient plus the exceptional main coefficient of gamma. -/
-private lemma nmx_correctedCoefficient_split {q : ℕ} (χ : DirichletCharacter ℂ (q + 1))
+lemma nmx_correctedCoefficient_split {q : ℕ} (χ : DirichletCharacter ℂ (q + 1))
     (γ : ℝ) (hz : χ.LFunction (γ : ℂ) = 0) :
     correctedCoefficient χ (q + 1) γ = fun m => correctedCoefficient χ 0 0 m +
       (if 1 < m then (((m : ℝ) ^ (γ - 1) / Real.log m : ℝ) : ℂ) else 0) := by
@@ -147,7 +147,7 @@ private lemma nmx_correctedCoefficient_split {q : ℕ} (χ : DirichletCharacter 
     _root_.if_neg h0, add_zero]
 
 /-- Adding two exponentially decaying bounds at a common rate. -/
-private lemma nmx_add_two_exponential_bounds {E₁ E₂ c c₁ c₂ C₁ C₂ θ s : ℝ} (hθ : 0 < θ)
+lemma nmx_add_two_exponential_bounds {E₁ E₂ c c₁ c₂ C₁ C₂ θ s : ℝ} (hθ : 0 < θ)
     (hs : 0 ≤ s) (hC₁ : 0 ≤ C₁) (hC₂ : 0 ≤ C₂) (hc₁ : c ≤ c₁) (hc₂ : c ≤ c₂)
     (h₁ : E₁ ≤ C₁ * Real.exp (-c₁ / θ) * s)
     (h₂ : E₂ ≤ C₂ * Real.exp (-c₂ / θ) * s) :
