@@ -57,7 +57,29 @@ theorem large_shift_near_sum_bound :
               ‖Sg N α‖ ^ 2 *
                 (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 9) := by
-  sorry
+  intro θ hθ hθ4 k hk δ hδ
+  have hδ9 : 0 < δ / 9 := by positivity
+  obtain ⟨N₁, hN₁⟩ := large_shift_minor_sum_bound θ hθ hθ4 k hk (δ / 9) hδ9
+  refine ⟨N₁, ?_⟩
+  intro N hN
+  have htotal := hN₁ N hN
+  calc
+    |(∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+        LeanLab.Linnik.Decomp1532a.dif x ≠ 0 ∧
+          (N : ℝ) < |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ∧
+          |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ 2 * (N : ℝ),
+        ∫ α in Set.Icc (0 : ℝ) 1 \ majorArcs N ((N : ℝ) ^ θ),
+          ‖Sg N α‖ ^ 2 *
+            (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re)|
+        ≤ |(∑ x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) with
+            LeanLab.Linnik.Decomp1532a.dif x ≠ 0 ∧
+              (N : ℝ) < |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)|,
+            ∫ α in Set.Icc (0 : ℝ) 1 \ majorArcs N ((N : ℝ) ^ θ),
+              ‖Sg N α‖ ^ 2 *
+                (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re)| := by
+      exact Finset.abs_sum_le_sum_abs _ _
+    _ ≤ (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) *
+        ((δ / 9) / 3) := htotal
 
 /-- `sv ν = 2 * ∑ 2^{ν_i}`. -/
 private lemma sv_eq_two_mul_sum {k L : ℕ} (ν : Fin k → Fin L) :
