@@ -4,28 +4,32 @@ Independent supply for the exceptional arc leaf.
 AI wrote this Lean code. Binary Goldbach is OPEN.
 -/
 import LeanLab.Hathi2021.Decomp577b
+import LeanLab.Hathi2021.Decomp577d
+import LeanLab.Hathi2021.Decomp577e
 
 open Finset Real MeasureTheory Filter Topology
 open LeanLab.Hathi2021.Decomp319a
 
 namespace LeanLab.Hathi2021.Decomp570b
 
-/-- LEAF. Hu page 195, Rieger reference 17.
+/-- Hu page 195, Rieger reference 17. Supplied by Decomp577d,
+CONDITIONAL ON its Rieger collision count leaf.
 This input involves only the fourth moment of the prime square sum. -/
 theorem rieger_fourth_moment_bound :
     ∃ K : ℝ, 0 ≤ K ∧ ∃ N₀ : ℕ, ∀ n₁ n : ℕ,
       N₀ ≤ n → n ≤ n₁ →
-      primeSquareFourthMoment n₁ n ≤ K * (n : ℝ) * Real.log n ^ 2 := by
-  sorry
+      primeSquareFourthMoment n₁ n ≤ K * (n : ℝ) * Real.log n ^ 2 :=
+  LeanLab.Hathi2021.Decomp577d.rieger_fourth_moment_bound
 
-/-- LEAF. Hu page 194 Lemma 2.3, Platt and Trudgian reference 16.
+/-- Hu page 194 Lemma 2.3, Platt and Trudgian reference 16. Supplied by
+Decomp577e, CONDITIONAL ON its unshifted exceptional measure leaf.
 The translated slice form is the periodic version used on page 195.
 This input contains no prime exponential sum. -/
 theorem platt_trudgian_slice_bound :
     ∃ E : ℝ, 3 / 4 + 1 / 10 ^ 10 < E ∧ ∃ K : ℝ, 0 ≤ K ∧
       ∃ N₀ : ℕ, ∀ n₁ : ℕ, N₀ ≤ n₁ → ∀ t : ℝ,
-        volume.real (exceptionalSlice n₁ t) ≤ K * (n₁ : ℝ) ^ (-E) := by
-  sorry
+        volume.real (exceptionalSlice n₁ t) ≤ K * (n₁ : ℝ) ^ (-E) :=
+  LeanLab.Hathi2021.Decomp577e.platt_trudgian_slice_bound
 
 /-- Helper for Hu pages 195 and 196. Swap the two coordinates in the
 second strip so that its minor coordinate comes first. -/
