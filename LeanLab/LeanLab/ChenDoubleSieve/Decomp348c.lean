@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp348a
+import LeanLab.ChenDoubleSieve.Feed1122_Decomp348c_main5_lower
 
 /-!
 Supply split for the F5 lower bound in Wu 2004.
@@ -5481,7 +5482,7 @@ theorem main5_lower (F f : ℝ → ℝ) (h : IsLinearSieve F f) :
     ∀ η : ℝ, 0 < η → ∃ B : ℝ, 0 < B ∧ ∃ N0 : ℕ,
       ∀ N : ℕ, Even N → N0 ≤ N →
         main5 f B N - η * Θ N ≤ sieveTerms N 5 := by
-  sorry
+  exact LeanLab.ChenDoubleSieve.Feed1122.Decomp348c.main5_lower_of_leaves F f h
 
 /-- LEAF. Wu 2004 page 39 equation 10.5, replacement of prime sums by integrals.
 The coprimality removal and finite logarithmic level loss belong to this limit.
