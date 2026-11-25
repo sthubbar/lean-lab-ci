@@ -13,6 +13,7 @@ assembly into the delay differential system 8 are proved here.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Cai2002.Split306Theorem6
+import LeanLab.Cai2002.Prove2672Series8
 
 open Finset Real
 noncomputable section
@@ -25,7 +26,26 @@ nonnegativity, leaf306_fn_nonneg. -/
 theorem leaf8_summable :
     (∀ s : ℝ, 1 ≤ s → Summable (fun n : ℕ => if Odd n then bjsF306 n s else 0)) ∧
     (∀ s : ℝ, 2 ≤ s → Summable (fun n : ℕ => if Even n then bjsF306 n s else 0)) := by
-  sorry
+  have hsum (P : ℕ → Prop) [DecidablePred P] (s : ℝ)
+      (hP : ∀ n, P n → (Odd n ∧ 1 ≤ s) ∨ (Even n ∧ 2 ≤ s)) :
+      Summable (fun n : ℕ => if P n then bjsF306 n s else 0) := by
+    rw [← summable_nat_add_iff 1]
+    refine Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_)
+      ((summable_geometric_of_lt_one (by norm_num : (0 : ℝ) ≤ 0.9607)
+        (by norm_num)).mul_left (2 * exp 2 * |LeanLab.ChenExplicit.hSieve s|))
+    · split_ifs with h
+      · exact leaf306_fn_nonneg _ s (hP _ h)
+      · exact le_rfl
+    · split_ifs with h
+      · have hb := key_l8306 (n + 1) (by omega) s (hP _ h)
+        rw [Nat.add_sub_cancel] at hb
+        calc bjsF306 (n + 1) s
+            ≤ 2 * exp 2 * (0.9607 : ℝ) ^ n * |LeanLab.ChenExplicit.hSieve s| :=
+              hb.trans (mul_le_mul_of_nonneg_left (le_abs_self _) (by positivity))
+          _ = _ := by ring
+      · positivity
+  exact ⟨fun s hs => hsum Odd s (fun _ h => Or.inl ⟨h, hs⟩),
+    fun s hs => hsum Even s (fun _ h => Or.inr ⟨h, hs⟩)⟩
 
 /-- LEAF: continuity of the sums of the series 13 and 14 of BJS page 6, Nathanson
 Theorem 9.4: each f_n is continuous where used, displays 15 to 17, and the bound 18
@@ -33,7 +53,21 @@ gives uniform convergence by the Weierstrass test. Class MEDIUM. -/
 theorem leaf8_continuous :
     ContinuousOn (fun s : ℝ => ∑' n : ℕ, if Odd n then bjsF306 n s else 0) (Set.Ici 1) ∧
     ContinuousOn (fun s : ℝ => ∑' n : ℕ, if Even n then bjsF306 n s else 0) (Set.Ici 2) := by
-  sorry
+  constructor
+  · refine continuousOn_tsum (u := Series8Proof2672.majU8) (fun n => ?_)
+      Series8Proof2672.majU8_summable
+      (fun n s hs => Series8Proof2672.term_le_majU8 Odd s
+        (fun _ h => Or.inl ⟨h, hs⟩) n)
+    by_cases h : Odd n
+    · simp only [h, ite_true]; exact (Series8Proof2672.contOn_fn_c8 n).1 h
+    · simp only [h, ite_false]; exact continuousOn_const
+  · refine continuousOn_tsum (u := Series8Proof2672.majU8) (fun n => ?_)
+      Series8Proof2672.majU8_summable
+      (fun n s hs => Series8Proof2672.term_le_majU8 Even s
+        (fun _ h => Or.inr ⟨h, hs⟩) n)
+    by_cases h : Even n
+    · simp only [h, ite_true]; exact (Series8Proof2672.contOn_fn_c8 n).2 h
+    · simp only [h, ite_false]; exact continuousOn_const
 
 /-- LEAF: display 16 for even n ≥ 2 differentiated and summed, BJS page 6, Nathanson
 Theorem 9.4: (s f_n(s))' = - f_(n-1)(s - 1) for s > 2, summed over even n, which needs
@@ -41,7 +75,48 @@ termwise differentiation justified by the bound 18. Class MEDIUM. -/
 theorem leaf8_deriv_even (s : ℝ) (hs : 2 < s) :
     HasDerivAt (fun t : ℝ => t * ∑' n : ℕ, if Even n then bjsF306 n t else 0)
       (-(∑' n : ℕ, if Odd n then bjsF306 n (s - 1) else 0)) s := by
-  sorry
+  set g : ℕ → ℝ → ℝ := fun n z => if Even n then z * bjsF306 n z else 0 with hg
+  set g' : ℕ → ℝ → ℝ := fun n y => if Even n then -bjsF306 (n - 1) (y - 1) else 0 with hg'
+  have hfun : (fun t : ℝ => t * ∑' n : ℕ, if Even n then bjsF306 n t else 0) =
+      fun z => ∑' n, g n z := by
+    funext t
+    rw [← tsum_mul_left]
+    congr 1; funext n
+    simp only [hg]
+    split_ifs <;> simp
+  have hderiv : ∀ n y, y ∈ Set.Ioi (2 : ℝ) → HasDerivAt (g n) (g' n y) y := by
+    intro n y hy
+    by_cases he : Even n
+    · match n, he with
+      | 0, _ =>
+        have h00 : ∀ x, bjsF306 0 x = 0 := fun _ => rfl
+        simpa [hg, hg', h00] using (hasDerivAt_const y (0 : ℝ))
+      | 1, he => exact absurd he (by decide)
+      | m + 2, he =>
+        simp only [hg, hg', if_pos he, show m + 2 - 1 = m + 1 by omega]
+        exact Series8Proof2672.deriv_term_even_d8 m he y hy
+    · simp only [hg, hg', if_neg he]
+      exact hasDerivAt_const y (0 : ℝ)
+  have hanchor : Summable (fun n => g n s) :=
+    ((leaf8_summable.2 s hs.le).mul_left s).congr (fun n => by
+      simp only [hg]
+      split_ifs <;> simp)
+  have hmain := hasDerivAt_tsum_of_isPreconnected Series8Proof2672.bound_summable_d8
+    isOpen_Ioi isPreconnected_Ioi hderiv
+    (fun n y hy => Series8Proof2672.deriv_bound_d8 n y hy)
+    (show s ∈ Set.Ioi (2 : ℝ) from hs) hanchor
+    (show s ∈ Set.Ioi (2 : ℝ) from hs)
+  rw [hfun]
+  convert hmain using 1
+  have hsum : Summable (fun n => g' n s) :=
+    Summable.of_norm_bounded Series8Proof2672.bound_summable_d8
+      (fun n => Series8Proof2672.deriv_bound_d8 n s hs)
+  rw [hsum.tsum_eq_zero_add]
+  have h0 : g' 0 s = 0 := by simp [hg', bjsF306]
+  rw [h0, zero_add, ← tsum_neg]
+  congr 1; funext k
+  simp only [hg', Nat.even_add_one, Nat.not_even_iff_odd, Nat.add_sub_cancel]
+  split_ifs <;> simp
 
 /-- LEAF: displays 15 and 16 for odd n differentiated and summed, BJS page 6, Nathanson
 Theorem 9.4: s f_1(s) = 0 for s > 3 and (s f_n(s))' = - f_(n-1)(s - 1) for odd n ≥ 3
@@ -52,7 +127,35 @@ theorem leaf8_deriv_odd :
         (-(∑' n : ℕ, if Even n then bjsF306 n (s - 1) else 0)) s) ∧
     HasDerivWithinAt (fun t : ℝ => t * ∑' n : ℕ, if Odd n then bjsF306 n t else 0)
         (-(∑' n : ℕ, if Even n then bjsF306 n 2 else 0)) (Set.Ici 3) 3 := by
-  sorry
+  have hF : ∀ t : ℝ, 3 ≤ t →
+      (t * ∑' n : ℕ, if Odd n then bjsF306 n t else 0) =
+        ∑' n, Series8Proof2672.gOdd_o8 n t := by
+    intro t ht
+    rw [← tsum_mul_left]
+    congr 1; funext n
+    rw [Series8Proof2672.gOdd_eq_o8 n t ht]
+    split_ifs <;> simp
+  have hanchor : Summable (fun n => Series8Proof2672.gOdd_o8 n 3) :=
+    ((leaf8_summable.1 3 (by norm_num)).mul_left 3).congr (fun n => by
+      rw [Series8Proof2672.gOdd_eq_o8 n 3 le_rfl]
+      split_ifs <;> simp)
+  have hd (y : ℝ) :
+      HasDerivAt (fun z => ∑' n, Series8Proof2672.gOdd_o8 n z)
+        (∑' n, Series8Proof2672.gOdd'_o8 n y) y :=
+    hasDerivAt_tsum_of_isPreconnected Series8Proof2672.bound_summable_d8
+      isOpen_univ isPreconnected_univ
+      (fun n y _ => Series8Proof2672.gOdd_deriv_o8 n y)
+      (fun n y _ => Series8Proof2672.gOdd_bound_o8 n y)
+      (Set.mem_univ 3) hanchor (Set.mem_univ y)
+  refine ⟨fun s hs => ?_, ?_⟩
+  · have h := hd s
+    rw [Series8Proof2672.gsum'_eq_o8 s hs.le] at h
+    refine h.congr_of_eventuallyEq ?_
+    filter_upwards [Ioi_mem_nhds hs] with z hz
+    exact hF z (le_of_lt hz)
+  · have h := (hd 3).hasDerivWithinAt (s := Set.Ici 3)
+    rw [Series8Proof2672.gsum'_eq_o8 3 le_rfl, show (3 : ℝ) - 1 = 2 by norm_num] at h
+    exact h.congr (fun t ht => hF t ht) (hF 3 le_rfl)
 
 /-- LEAF: the analytic core of Nathanson Theorem 9.4 as used by BJS page 6, display 13 at
 s = 3: 1 + the sum of f_n(3) over odd n equals F(3) = 2 e ^ γ / 3. With display 17 this
@@ -61,6 +164,7 @@ through the asymptotics F(s), f(s) → 1 and the adjoint function argument. -/
 theorem leaf8_F3 :
     HasSum (fun n : ℕ => if Odd n then bjsF306 n 3 else 0)
       (2 * exp eulerMascheroniConstant / 3 - 1) := by
+  convert (leaf8_summable.1 3 (by norm_num)).hasSum using 1
   sorry
 
 /-- LEAF: Nathanson Theorem 9.4 as used by BJS page 6, display 14 at s = 2: the sum of
@@ -68,6 +172,7 @@ f_n(2) over even n is 1, that is f(2) = 0, the continuity of f at 2 in display 8
 Class HARD: a boundary value of the series 14, part of the analytic core with leaf8_F3. -/
 theorem leaf8_f2 :
     HasSum (fun n : ℕ => if Even n then bjsF306 n 2 else 0) 1 := by
+  convert (leaf8_summable.2 2 (by norm_num)).hasSum using 1
   sorry
 
 /-- Odd n ≥ 2 is at least 3. Helper. -/
@@ -272,3 +377,8 @@ theorem leaf306_series_solve8_twin :
 end LeanLab.Cai2002
 
 #print axioms LeanLab.Cai2002.leaf306_series_solve8_twin
+
+#print axioms LeanLab.Cai2002.leaf8_summable
+#print axioms LeanLab.Cai2002.leaf8_continuous
+#print axioms LeanLab.Cai2002.leaf8_deriv_even
+#print axioms LeanLab.Cai2002.leaf8_deriv_odd
