@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le_card
+import LeanLab.HelfgottMajor.Feed1122ZetaAboveFourCard
 
 /-!
 # Split of `book_count_band_above_one_mult_le_card_level_one`
@@ -17,7 +18,7 @@ namespace LeanLab.HelfgottMajor.ZeroCount1623
 open Complex Set Filter Topology
 open scoped ComplexConjugate LSeries.notation
 
-/-- LEAF: zero data of ζ below height 2πe, the published first zeros. HARD, a certified count of
+/-- Split burst S126 at height `4` in `Feed1122ZetaAboveFourCard`, was a LEAF: zero data of ζ below height 2πe, the published first zeros. HARD, a certified count of
 the zeros of ζ up to height 18, by the argument principle with interval arithmetic.
 CITED: Gram 1903 and Backlund 1914, first zeros of ζ; Odlyzko's zero tables; LMFDB L-function
 1-1-1.1-r0-0-0, ordinates 14.134725… and 21.022039…. In this form: the nontrivial zeros of ζ
@@ -25,7 +26,7 @@ with ordinate in `(1, 2πe]`, `2πe < 17.08`, form a set with at most one elemen
 theorem zeta_strip_zeros_above_one_le_two_pi_e_subsingleton :
     {ρ : ℂ | riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ 1 < ρ.im ∧
       ρ.im ≤ 2 * Real.pi * Real.exp 1}.Subsingleton := by
-  sorry
+  exact LeanLab.HelfgottMajor.Feed1122ZetaAboveFourCard.zeta_strip_zeros_above_one_le_two_pi_e_subsingleton_split
 
 /-- Bridging, proved: for modulus `1` a strip zero of `L(·, χ)` in the window above height `1`
 up to `2πe` is a nontrivial zero of `ζ` with ordinate in `(1, 2πe]`. -/
