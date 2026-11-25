@@ -1,4 +1,6 @@
 import LeanLab.Halupczok2012.Decomp398a
+import LeanLab.Halupczok2012.B1btChebyshev
+import LeanLab.Halupczok2012.Split398aMajor
 import Mathlib.NumberTheory.LSeries.DirichletContinuation
 import Mathlib.Analysis.Analytic.Order
 
@@ -129,12 +131,13 @@ def badChar (N Y ε A : ℝ) {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q
 
 /-- LEAF: PP1993 p. 44 display 3, Brun Titchmarsh input of the Cauchy Schwarz step.
 Short interval upper bound `∑_{N-Y<h≤N} Λ(h) ≪ Y` for `Y ≥ N^(7/12+ε)`, and Chebyshev for S2.
-Class HARD. Citation wall: Brun Titchmarsh, Montgomery and Vaughan, Mathematika 20, 1973;
-no copy in papers/, INTAKE needed. Not in the note's list; split off from B1, see B1. -/
+Class HARD. PROVED by S135 in `B1btChebyshev`, from Mathlib's Chebyshev bounds and the lab's
+proved Brun Titchmarsh `PNTPort.LargeSieve.brun_titchmarsh_montgomery`; no cited input remains.
+Not in the note's list; split off from B1, see B1. -/
 theorem leaf_B1_bt : ∃ c : ℝ, 0 < c ∧ ∀ ε : ℝ, 0 < ε → ∃ N0 : ℝ, ∀ N Y : ℝ,
     N0 ≤ N → N ^ (7 / 12 + ε) ≤ Y → Y ≤ N →
-    (∑ h ∈ kRange (N - Y) Y, Λ h) ≤ c * Y ∧ (∑ j ∈ kRange 0 Y, Λ j) ≤ c * Y := by
-  sorry
+    (∑ h ∈ kRange (N - Y) Y, Λ h) ≤ c * Y ∧ (∑ j ∈ kRange 0 Y, Λ j) ≤ c * Y :=
+  B1btChebyshev.leaf_B1_bt
 
 /-- LEAF: PP1993 p. 44 display 3, Sigma_m is at most `(YL)^(3/2)` times the root of the
 supremum over ξ of the weighted integral of `|S2|^2`. Class MEDIUM.
@@ -420,6 +423,85 @@ theorem leaf_B3 : StmtB3 := by
     (harcsub p1 hp1) (harcsub p2 hp2) hsub
   linarith
 
+/-! ### Helpers for display 15, leaf B4, added by S135 -/
+
+/-- `n ≤ φ(n) d(n)`, from `∑_{d ∣ n} φ(d) = n` and `φ(d) ∣ φ(n)`. -/
+theorem b4_le_totient_mul_card (n : ℕ) (hn : 1 ≤ n) :
+    n ≤ n.totient * n.divisors.card := by
+  calc n = ∑ d ∈ n.divisors, d.totient := (Nat.sum_totient n).symm
+    _ ≤ ∑ _d ∈ n.divisors, n.totient := by
+        apply Finset.sum_le_sum
+        intro d hd
+        exact Nat.le_of_dvd (Nat.totient_pos.2 (by omega))
+          (Nat.totient_dvd_of_dvd (Nat.dvd_of_mem_divisors hd))
+    _ = n.divisors.card * n.totient := by rw [Finset.sum_const, smul_eq_mul]
+    _ = n.totient * n.divisors.card := mul_comm _ _
+
+/-- The number of divisors of `n` is at most `2 √n`. -/
+theorem b4_card_divisors_le (n : ℕ) :
+    (n.divisors.card : ℝ) ≤ 2 * Real.sqrt n := by
+  set S := n.divisors.filter (fun d => d * d ≤ n) with hSdef
+  have hsub : n.divisors ⊆ S ∪ S.image (fun d => n / d) := by
+    intro d hd
+    rw [Finset.mem_union]
+    by_cases h : d * d ≤ n
+    · exact Or.inl (Finset.mem_filter.2 ⟨hd, h⟩)
+    · right
+      have hn0 : n ≠ 0 := (Nat.mem_divisors.1 hd).2
+      obtain ⟨e, he⟩ := Nat.dvd_of_mem_divisors hd
+      have hd0 : 0 < d := Nat.pos_of_mem_divisors hd
+      have he0 : 0 < e := by
+        rcases Nat.eq_zero_or_pos e with h0 | h0
+        · rw [h0, mul_zero] at he; exact absurd he hn0
+        · exact h0
+      have hed : e < d := by
+        by_contra hc
+        push_neg at hc
+        apply h
+        rw [he]
+        exact Nat.mul_le_mul_left d hc
+      refine Finset.mem_image.2 ⟨e, Finset.mem_filter.2
+        ⟨Nat.mem_divisors.2 ⟨⟨d, by rw [he]; ring⟩, hn0⟩, ?_⟩, ?_⟩
+      · rw [he]; exact Nat.mul_le_mul_right e hed.le
+      · rw [he]; exact Nat.mul_div_cancel d he0
+  have hS : S ⊆ Finset.Icc 1 (Nat.sqrt n) := by
+    intro d hd
+    rw [hSdef, Finset.mem_filter] at hd
+    exact Finset.mem_Icc.2 ⟨Nat.pos_of_mem_divisors hd.1, Nat.le_sqrt.2 hd.2⟩
+  have h1 : n.divisors.card ≤ 2 * Nat.sqrt n := by
+    have hc := Finset.card_le_card hS
+    rw [Nat.card_Icc] at hc
+    calc n.divisors.card ≤ (S ∪ S.image (fun d => n / d)).card := Finset.card_le_card hsub
+      _ ≤ S.card + (S.image (fun d => n / d)).card := Finset.card_union_le _ _
+      _ ≤ S.card + S.card := Nat.add_le_add_left Finset.card_image_le _
+      _ ≤ 2 * Nat.sqrt n := by omega
+  calc (n.divisors.card : ℝ) ≤ ((2 * Nat.sqrt n : ℕ) : ℝ) := by exact_mod_cast h1
+    _ = 2 * (Nat.sqrt n : ℝ) := by push_cast; ring
+    _ ≤ 2 * Real.sqrt n := by
+        have := Real.nat_sqrt_le_real_sqrt (a := n)
+        linarith
+
+/-- `n ≤ 4 φ(n)^2`, the crude lower bound for `φ` used for the large moduli of display 15. -/
+theorem b4_le_four_totient_sq (n : ℕ) (hn : 1 ≤ n) : (n : ℝ) ≤ 4 * (n.totient : ℝ) ^ 2 := by
+  have h1 : (n : ℝ) ≤ n.totient * n.divisors.card := by exact_mod_cast b4_le_totient_mul_card n hn
+  have h2 := b4_card_divisors_le n
+  have hφ : (0 : ℝ) ≤ n.totient := by positivity
+  have h3 : (n : ℝ) ≤ n.totient * (2 * Real.sqrt n) := h1.trans (mul_le_mul_of_nonneg_left h2 hφ)
+  have hs : Real.sqrt n * Real.sqrt n = n := Real.mul_self_sqrt (by positivity)
+  have hs0 : 0 < Real.sqrt n := Real.sqrt_pos.2 (by exact_mod_cast hn)
+  have h4 : Real.sqrt n ≤ 2 * n.totient := by
+    by_contra hc
+    push_neg at hc
+    have : (n.totient : ℝ) * (2 * Real.sqrt n) < Real.sqrt n * Real.sqrt n := by nlinarith
+    linarith
+  nlinarith
+
+/-- Translation of a set integral by `c`. -/
+theorem b4_translate (F : ℝ → ℝ) (c : ℝ) (K : Set ℝ) :
+    ∫ α in (fun α => α - c) ⁻¹' K, F (α - c) = ∫ η in K, F η :=
+  (measurePreserving_sub_right volume c).setIntegral_preimage_emb
+    (Homeomorph.subRight c).measurableEmbedding F K
+
 /-- Statement of the next LEAF, PP1993 p. 47 display 15, the term `μ(q)/φ(q) T2` of `S2 = μ/φ T2 + R2` contributes
 `O(Y L^(-2A-3))` on `I''_{q,a}`: `|T2(η)| ≤ 1/(2‖η‖)` with `|η| ≥ L^(2B)/(qY)` for
 `q ≤ L^B`, Parseval and `φ(q) ≥ L^B / log L` for larger q. Class MEDIUM. -/
@@ -431,9 +513,261 @@ def StmtB4 : Prop :=
       ‖((ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ)) * T2 Y (α - (a : ℝ) / q)‖ ^ 2 ≤
       C * Y * Real.log N ^ (-(2 * A + 3))
 
-/-- LEAF: PP1993 p. 47 display 15, `StmtB4`. Class MEDIUM. -/
+set_option maxHeartbeats 1000000 in
+/-- LEAF: PP1993 p. 47 display 15, `StmtB4`. Class MEDIUM. PROVED by S135: for `q ≤ L^B` and
+`1 ≤ a ≤ q` the minor part of the arc has `|η| ≥ L^(2B)/(qY)`, so `|T2(η)| ≤ 1/(2|η|)` gives
+`O(Y L^(-B))`; for `q > L^B` Parseval and `q ≤ 4 φ(q)^2` give `O(Y L^(-B))`; the remaining
+residues `a = 0` and `a > q` meet the base interval in at most one point. `B ≥ 2A + 3`. -/
 theorem leaf_B4 : StmtB4 := by
-  sorry
+  intro ε A hε hA
+  set B := 3 / ε * (2 * A + 25) with hBdef
+  have hB0 : 0 < B := by positivity
+  obtain ⟨N1, hN1⟩ := Filter.eventually_atTop.mp
+    (((Split398aMajor.log_rpow_le_eventually (2 * B) (show (0 : ℝ) < 7 / 12 by norm_num)
+      (show (0 : ℝ) < 1 / 2 by norm_num)).and
+      (Split398aMajor.log_rpow_le_eventually B (show (0 : ℝ) < 7 / 72 by norm_num)
+      (show (0 : ℝ) < 1 / 8 by norm_num))).and
+      ((Filter.eventually_ge_atTop (Real.exp 1)).and (Filter.eventually_ge_atTop (2 ^ 24 : ℝ))))
+  refine ⟨8, N1, ?_⟩
+  intro N Y hN hY hYN q a hq1 hqQ hcop
+  obtain ⟨⟨hw2, hLB⟩, hNe, hN24⟩ := hN1 N hN
+  have hN1' : 1 ≤ N := le_trans (by norm_num) hN24
+  have hNpos : 0 < N := by linarith
+  set L := Real.log N with hLdef
+  have hL1 : 1 ≤ L := (Real.le_log_iff_exp_le hNpos).mpr hNe
+  have hL0 : 0 < L := by linarith
+  have hP : N ^ ((7 : ℝ) / 12) ≤ Y :=
+    (Real.rpow_le_rpow_of_exponent_le hN1' (by linarith)).trans hY
+  have hY1 : 1 ≤ Y := (Real.one_le_rpow hN1' (by norm_num)).trans hP
+  have hY0 : 0 < Y := by linarith
+  have hε5 : ε ≤ 5 / 12 := by
+    by_contra hc
+    push_neg at hc
+    have h1 : N ^ (1 : ℝ) < N ^ (7 / 12 + ε) :=
+      Real.rpow_lt_rpow_of_exponent_lt (by linarith) (by linarith)
+    rw [Real.rpow_one] at h1
+    linarith
+  have hBA : 2 * A + 3 ≤ B := by
+    rw [hBdef]
+    have : (1 : ℝ) ≤ 3 / ε := by rw [le_div_iff₀ hε]; linarith
+    nlinarith
+  have hLBpos : 0 < L ^ B := Real.rpow_pos_of_pos hL0 _
+  have hLBA : L ^ (-B) ≤ L ^ (-(2 * A + 3)) :=
+    Real.rpow_le_rpow_of_exponent_le hL1 (by linarith)
+  have hLnegB : L ^ (-B) = 1 / L ^ B := by rw [Real.rpow_neg hL0.le, one_div]
+  have hL2B : L ^ (2 * B) = L ^ B * L ^ B := by
+    rw [two_mul, Real.rpow_add hL0]
+  have hRHS0 : 0 ≤ 8 * Y * L ^ (-(2 * A + 3)) := by positivity
+  set Q := Qs Y ε with hQdef
+  have hQ2 : 2 ≤ Q := Qs_ge_two hε hN24 hY
+  have hQ0 : 0 < Q := by linarith
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast hq1
+  have hqQ1 : 1 / ((q : ℝ) * Q) ≤ 1 / 2 := by
+    have hq1r : (1 : ℝ) ≤ q := by exact_mod_cast hq1
+    apply one_div_le_one_div_of_le (by norm_num)
+    nlinarith
+  set c : ℝ := (a : ℝ) / q with hcdef
+  set m : ℂ := (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ) with hmdef
+  have hφ1 : (1 : ℝ) ≤ q.totient := by exact_mod_cast Nat.totient_pos.2 (by omega)
+  have hm : ‖m‖ ≤ 1 / (q.totient : ℝ) := by
+    rw [hmdef, norm_div, Complex.norm_natCast]
+    apply div_le_div_of_nonneg_right _ (by linarith)
+    rw [Complex.norm_intCast]
+    exact_mod_cast ArithmeticFunction.abs_moebius_le_one
+  have hm0 : 0 ≤ ‖m‖ := norm_nonneg _
+  have hm1 : ‖m‖ ≤ 1 := hm.trans (by rw [div_le_one (by linarith)]; exact hφ1)
+  set F : ℝ → ℝ := fun η => ‖m‖ ^ 2 * ‖T2 Y η‖ ^ 2 with hFdef
+  have hT2c : Continuous (fun η => T2 Y η) := by
+    unfold T2 phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+  have hFc : Continuous F := by rw [hFdef]; fun_prop
+  have hfun : (fun α => ‖m * T2 Y (α - c)‖ ^ 2) = fun α => F (α - c) := by
+    funext α; rw [hFdef, norm_mul, mul_pow]
+  change ∫ α in fareyArc Y ε q a ∩ minorArcs N Y ε A, ‖m * T2 Y (α - c)‖ ^ 2 ≤ _
+  rw [hfun]
+  set S := fareyArc Y ε q a ∩ minorArcs N Y ε A with hSdef
+  -- membership facts for α in S
+  have hSfar : ∀ α ∈ S, |α - c| ≤ 1 / ((q : ℝ) * Q) := by
+    intro α hα
+    have h := hα.1
+    simp only [fareyArc, Set.mem_Icc] at h
+    rw [abs_le]
+    constructor <;> linarith [h.1, h.2]
+  -- the general bound through a measurable compact `K` containing the shifted set
+  have hgen : ∀ K : Set ℝ, IsCompact K → (∀ α ∈ S, α - c ∈ K) →
+      ∫ α in S, F (α - c) ≤ ∫ η in K, F η := by
+    intro K hK hSK
+    have hTc : IsCompact ((fun α => α - c) ⁻¹' K) :=
+      (Homeomorph.subRight c).isCompact_preimage.2 hK
+    have hint : IntegrableOn (fun α => F (α - c)) ((fun α => α - c) ⁻¹' K) volume :=
+      (hFc.comp (continuous_sub_right c)).continuousOn.integrableOn_compact hTc
+    calc ∫ α in S, F (α - c) ≤ ∫ α in (fun α => α - c) ⁻¹' K, F (α - c) :=
+          setIntegral_mono_set hint (Filter.Eventually.of_forall fun _ => by positivity)
+            (Filter.Eventually.of_forall fun α hα => hSK α hα)
+      _ = ∫ η in K, F η := b4_translate F c K
+  have hFK : ∀ K : Set ℝ, MeasurableSet K →
+      ∫ η in K, F η = ‖m‖ ^ 2 * ∫ η in K, ‖T2 Y η‖ ^ 2 := by
+    intro K _
+    rw [hFdef]; exact integral_const_mul _ _
+  by_cases hbig : L ^ B < q
+  · -- large moduli: Parseval
+    have hK : ∀ α ∈ S, α - c ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2) := by
+      intro α hα
+      have := (hSfar α hα).trans hqQ1
+      exact ⟨by linarith [(abs_le.mp this).1], by linarith [(abs_le.mp this).2]⟩
+    refine (hgen _ isCompact_Icc hK).trans ?_
+    rw [hFK _ measurableSet_Icc]
+    have hpar : ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2), ‖T2 Y η‖ ^ 2 ≤ Y + 1 :=
+      Split398aMajor.parseval_window 0 Y hY0.le subset_rfl
+    have hφq : (q : ℝ) ≤ 4 * (q.totient : ℝ) ^ 2 := b4_le_four_totient_sq q hq1
+    have hm2 : ‖m‖ ^ 2 ≤ 4 / (q : ℝ) := by
+      calc ‖m‖ ^ 2 ≤ (1 / (q.totient : ℝ)) ^ 2 := pow_le_pow_left₀ hm0 hm 2
+        _ = 1 / (q.totient : ℝ) ^ 2 := by rw [one_div_pow]
+        _ ≤ 4 / (q : ℝ) := by
+            rw [div_le_div_iff₀ (by positivity) hq0]; linarith
+    have h4q : 4 / (q : ℝ) ≤ 4 * L ^ (-B) := by
+      rw [hLnegB, mul_one_div]
+      exact div_le_div_of_nonneg_left (by norm_num) hLBpos hbig.le
+    have hI0 : 0 ≤ ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2), ‖T2 Y η‖ ^ 2 :=
+      setIntegral_nonneg measurableSet_Icc (fun _ _ => by positivity)
+    calc ‖m‖ ^ 2 * ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2), ‖T2 Y η‖ ^ 2
+        ≤ (4 * L ^ (-B)) * (Y + 1) := mul_le_mul (hm2.trans h4q) hpar hI0 (by positivity)
+      _ ≤ (4 * L ^ (-(2 * A + 3))) * (2 * Y) := by
+          apply mul_le_mul (by linarith) (by linarith) (by linarith) (by positivity)
+      _ = 8 * Y * L ^ (-(2 * A + 3)) := by ring
+  push_neg at hbig
+  by_cases hagood : 1 ≤ a ∧ a ≤ q
+  · -- small moduli, a reduced residue: the arc minus the major arc
+    set w := L ^ (2 * B) / ((q : ℝ) * Y) with hwdef
+    have hW : 0 < L ^ (2 * B) := Real.rpow_pos_of_pos hL0 _
+    have hw0 : 0 < w := by rw [hwdef]; positivity
+    have hw : w ≤ 1 / 2 := by
+      rw [hwdef, div_le_iff₀ (by positivity)]
+      have hqY : Y ≤ (q : ℝ) * Y := le_mul_of_one_le_left hY0.le (by exact_mod_cast hq1)
+      nlinarith
+    have hK : ∀ α ∈ S, α - c ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w := by
+      intro α hα
+      have h1 := (hSfar α hα).trans hqQ1
+      refine ⟨⟨by linarith [(abs_le.mp h1).1], by linarith [(abs_le.mp h1).2]⟩, ?_⟩
+      rintro ⟨hlo, hhi⟩
+      have hmin := hα.2
+      simp only [minorArcs, Set.mem_diff] at hmin
+      apply hmin.2
+      refine ⟨hmin.1, q, a, hq1, ?_, hagood.1, hagood.2, hcop, ?_⟩
+      · exact hbig
+      · rw [abs_lt]; exact ⟨hlo, hhi⟩
+    have hKc : IsCompact (Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w) :=
+      isCompact_Icc.diff isOpen_Ioo
+    have hKm : MeasurableSet (Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w) :=
+      measurableSet_Icc.diff measurableSet_Ioo
+    refine (hgen _ hKc hK).trans ?_
+    rw [hFK _ hKm]
+    have hpt : ∀ η ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w,
+        ‖T2 Y η‖ ^ 2 ≤ 1 / (4 * η ^ 2) := by
+      intro η hη
+      have habs1 : |η| ≤ 1 / 2 := abs_le.mpr ⟨hη.1.1, hη.1.2⟩
+      have habs0 : w ≤ |η| := by
+        by_contra hc
+        rw [not_le, abs_lt] at hc
+        exact hη.2 hc
+      have hpos : 0 < |η| := by linarith
+      have b2 := Split398aMajor.window_bound 0 Y le_rfl hY0.le hpos habs1
+      have hT : ‖T2 Y η‖ ≤ 1 / (2 * |η|) := b2
+      calc ‖T2 Y η‖ ^ 2 ≤ (1 / (2 * |η|)) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) hT 2
+        _ = 1 / (4 * η ^ 2) := by
+            rw [show η ^ 2 = |η| ^ 2 from (sq_abs η).symm]; field_simp; ring
+    have hint2 : IntegrableOn (fun η : ℝ => 1 / (4 * η ^ 2))
+        (Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w) := by
+      apply ContinuousOn.integrableOn_compact hKc
+      apply ContinuousOn.div continuousOn_const (by fun_prop)
+      intro x hx
+      have : w ≤ |x| := by
+        by_contra hc
+        rw [not_le, abs_lt] at hc
+        exact hx.2 hc
+      have : x ≠ 0 := by intro h0; rw [h0, abs_zero] at this; linarith
+      positivity
+    have hTi : IntegrableOn (fun η => ‖T2 Y η‖ ^ 2)
+        (Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w) :=
+      (hT2c.norm.pow 2).continuousOn.integrableOn_compact hKc
+    have hI : ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w, ‖T2 Y η‖ ^ 2 ≤
+        1 / (2 * w) :=
+      (setIntegral_mono_on hTi hint2 hKm hpt).trans (Split398aMajor.tail_integral hw0 hw)
+    have hI0 : 0 ≤ ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w, ‖T2 Y η‖ ^ 2 :=
+      setIntegral_nonneg hKm (fun _ _ => by positivity)
+    have hm2 : ‖m‖ ^ 2 ≤ 1 := by nlinarith
+    have hw' : 1 / (2 * w) ≤ Y * L ^ (-B) / 2 := by
+      have hqne : (q : ℝ) ≠ 0 := hq0.ne'
+      have hYne : Y ≠ 0 := hY0.ne'
+      have hLne : L ^ B ≠ 0 := hLBpos.ne'
+      have e1 : 1 / (2 * w) = (q : ℝ) * Y / (2 * (L ^ B * L ^ B)) := by
+        rw [hwdef, hL2B]
+        first | (field_simp; done) | (field_simp; ring)
+      have e2 : L ^ B * Y / (2 * (L ^ B * L ^ B)) = Y * L ^ (-B) / 2 := by
+        rw [hLnegB]
+        first | (field_simp; done) | (field_simp; ring)
+      rw [e1, ← e2]
+      apply div_le_div_of_nonneg_right _ (by positivity)
+      exact mul_le_mul_of_nonneg_right hbig hY0.le
+    generalize hIg : (∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w, ‖T2 Y η‖ ^ 2) = I
+      at hI hI0 ⊢
+    have hIb : I ≤ Y * L ^ (-B) / 2 := hI.trans hw'
+    have hmI : ‖m‖ ^ 2 * I ≤ 1 * I := mul_le_mul_of_nonneg_right hm2 hI0
+    have h3 : Y * L ^ (-B) ≤ Y * L ^ (-(2 * A + 3)) :=
+      mul_le_mul_of_nonneg_left hLBA hY0.le
+    have h4 : 0 ≤ Y * L ^ (-(2 * A + 3)) := by positivity
+    linarith
+  · -- a = 0 or a > q: the arc meets the base interval in at most the point 1/Q
+    have hsing : S ⊆ {1 / Q} := by
+      intro α hα
+      have hfa := hα.1
+      have hbase := hα.2.1
+      simp only [fareyArc, Set.mem_Icc] at hfa
+      simp only [arcBase, Set.mem_Icc] at hbase
+      have hQe : Real.sqrt (Y ^ (1 / 3 + ε)) / 2 = Q := rfl
+      rw [hQe] at hbase
+      rcases Nat.eq_zero_or_pos a with ha0 | hapos
+      · -- a = 0 forces q = 1
+        have hq : q = 1 := by rw [ha0] at hcop; exact Nat.coprime_zero_left q |>.mp hcop
+        subst hq
+        rw [ha0] at hfa
+        simp only [Nat.cast_zero, Nat.cast_one, zero_div, zero_add, one_mul] at hfa
+        exact le_antisymm hfa.2 hbase.1
+      · exfalso
+        have haq : q + 1 ≤ a := by
+          by_contra hc; push_neg at hc; exact hagood ⟨hapos, by omega⟩
+        have haq' : ((q : ℝ) + 1) ≤ a := by exact_mod_cast haq
+        -- Q ≥ N^(7/72)/2 > 2 L^B ≥ 2 q, so q < Q - 1
+        have hQlow : N ^ ((7 : ℝ) / 72) / 2 ≤ Q := by
+          rw [hQdef]; unfold Qs Hs
+          have h1 : Y ^ ((1 : ℝ) / 3) ≤ Y ^ (1 / 3 + ε) :=
+            Real.rpow_le_rpow_of_exponent_le hY1 (le_add_of_nonneg_right hε.le)
+          have h2 : N ^ ((7 : ℝ) / 36) ≤ Y ^ ((1 : ℝ) / 3) := by
+            rw [show ((7 : ℝ) / 36) = 7 / 12 * (1 / 3) by norm_num, Real.rpow_mul hNpos.le]
+            exact Real.rpow_le_rpow (by positivity) hP (by norm_num)
+          have h3 : N ^ ((7 : ℝ) / 72) = Real.sqrt (N ^ ((7 : ℝ) / 36)) := by
+            rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hNpos.le]; norm_num
+          rw [h3]
+          have h4 := Real.sqrt_le_sqrt (h2.trans h1)
+          linarith only [h4]
+        have hqsmall : (q : ℝ) ≤ 1 / 8 * N ^ ((7 : ℝ) / 72) := hbig.trans hLB
+        have hNp : 0 < N ^ ((7 : ℝ) / 72) := Real.rpow_pos_of_pos hNpos _
+        have hq1r : (1 : ℝ) ≤ q := by exact_mod_cast hq1
+        have hlt : (q : ℝ) < Q - 1 := by linarith only [hq1r, hqsmall, hQlow]
+        -- from the two intervals: (q+1)/q - 1/(qQ) ≤ α ≤ 1 + 1/Q
+        have hle : (a : ℝ) / q - 1 / ((q : ℝ) * Q) ≤ 1 + 1 / Q := hfa.1.trans hbase.2
+        have hge : ((q : ℝ) + 1) / q ≤ (a : ℝ) / q := div_le_div_of_nonneg_right haq' hq0.le
+        have key : ((q : ℝ) + 1) / q - 1 / ((q : ℝ) * Q) ≤ 1 + 1 / Q := by linarith
+        have hqne : (q : ℝ) ≠ 0 := hq0.ne'
+        have hQne : Q ≠ 0 := hQ0.ne'
+        have hid : ((q : ℝ) + 1) / q - 1 / ((q : ℝ) * Q) - (1 + 1 / Q) =
+            (Q - 1 - q) / ((q : ℝ) * Q) := by
+          first | (field_simp; done) | (field_simp; ring)
+        have hpos : 0 < (Q - 1 - q) / ((q : ℝ) * Q) :=
+          div_pos (by linarith only [hlt]) (by positivity)
+        linarith only [key, hid, hpos]
+    have hnull : volume S = 0 := measure_mono_null hsing (Real.volume_singleton)
+    rw [setIntegral_measure_zero _ hnull]
+    exact hRHS0
 
 /-- PP1993 p. 47 display 15, the splitting `S2(a/q + η) = μ(q)/φ(q) T2(η) + R2(η, q, a)`.
 PROVED, by the definition of R2. -/
