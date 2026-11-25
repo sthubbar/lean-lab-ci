@@ -1,4 +1,5 @@
 import LeanLab.ChirreHagen2025.Decomp429e
+import LeanLab.ChirreHagen2025.Decomp429eSplitTransferP2
 
 /-!
 Split of `Decomp429e.mangoldt_psi_transfer`, burst-20261122, session S88.
@@ -11,16 +12,18 @@ AI wrote this Lean code. Goldbach is open.
 namespace LeanLab.ChirreHagen2025.Decomp429eSplitTransfer
 open ArithmeticFunction LeanLab.ChirreHagen2025.Decomp429e
 
-/-- LEAF: JRT 2023 page 3 proof of Lemma 9 and Ramare 2013 page 118, the exact
+/-- Formerly LEAF: JRT 2023 page 3 proof of Lemma 9 and Ramare 2013 page 118, the exact
 partial summation identity for the weighted Mangoldt sum, using
 1 + gamma + integral over [1, infinity) of (psi t - t)/t^2 = 0. Class HARD.
 The improper integral is the Bochner integral over Ioi x; the integrand is
-integrable there by the prime number theorem with error term. -/
+integrable there by the prime number theorem with error term. PROVED S132 from
+`Decomp429eSplitTransferP2.mangoldt_partial_summation_identity_of_leaves`, whose LEAFs are all
+proved; the import direction between the two files was reversed for this. -/
 theorem mangoldt_partial_summation_identity (x : ℝ) (hx : 100000 ≤ x) :
     (∑ n ∈ Finset.Icc 1 ⌊x⌋₊, vonMangoldt n / (n : ℝ)) =
       Real.log x - Real.eulerMascheroniConstant + (Chebyshev.psi x - x) / x -
-        ∫ t in Set.Ioi x, (Chebyshev.psi t - t) / t ^ 2 := by
-  sorry
+        ∫ t in Set.Ioi x, (Chebyshev.psi t - t) / t ^ 2 :=
+  LeanLab.ChirreHagen2025.Decomp429eSplitTransferP2.mangoldt_partial_summation_identity_of_leaves x hx
 
 /-- LEAF: Ramare 2013 pages 118 to 120, equation 5.1 and the estimates after it,
 the explicit formula bound for the tail integral: the low verified zeros give
@@ -33,7 +36,7 @@ theorem tail_integral_explicit_bound (x : ℝ) (hx : 100000 ≤ x) :
   sorry
 
 /-- Exact parent statement `Decomp429e.mangoldt_psi_transfer`.
-CONDITIONAL ON the two LEAFs above. -/
+CONDITIONAL ON the LEAF `tail_integral_explicit_bound` above. -/
 theorem mangoldt_psi_transfer_of_leaves (x : ℝ) (hx : 100000 ≤ x) :
     (∑ n ∈ Finset.Icc 1 ⌊x⌋₊, vonMangoldt n / (n : ℝ)) - Real.log x +
         Real.eulerMascheroniConstant ≤
@@ -48,3 +51,4 @@ theorem mangoldt_psi_transfer_of_leaves (x : ℝ) (hx : 100000 ≤ x) :
   linarith
 
 end LeanLab.ChirreHagen2025.Decomp429eSplitTransfer
+#print axioms LeanLab.ChirreHagen2025.Decomp429eSplitTransfer.mangoldt_partial_summation_identity
