@@ -6,7 +6,6 @@ proof of 3.23 and a CONDITIONAL assembly theorem with the verbatim statement.
 Burst burst-20261122 session S64. AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp512a
-import LeanLab.BHP1997.TotientTailS72
 
 namespace LeanLab.BHP1997.Section2MS
 open Classical
@@ -19,19 +18,63 @@ c_q(-m) = Σ_{(a,q)=1} e(-am/q) equals μ(q/(q,m)) φ((q,m)), so its absolute va
 μ(r) Σ_{e|g} e μ(g/e) = μ(r) φ(g). -/
 theorem leaf_ramanujan_sqfree_norm512 (q N : ℕ) (hq : Squarefree q) :
     ‖ramanujan512 q N‖ ≤ (Nat.totient (Nat.gcd q N) : ℝ) := by
-  sorry
+  rcases Nat.eq_zero_or_pos q with rfl | hqpos
+  · simp [ramanujan512]
+  have hq1 : 1 ≤ q := hqpos
+  rw [c512_real_form q N hq1]
+  rw [Complex.norm_ofReal]
+  set g := Nat.gcd q N with hgdef
+  have hg_dvd_q : g ∣ q := Nat.gcd_dvd_left q N
+  have hg_dvd_N : g ∣ N := Nat.gcd_dvd_right q N
+  set r := q / g with hrdef
+  have hq_eq : q = g * r := (Nat.mul_div_cancel' hg_dvd_q).symm
+  have hcop : Nat.Coprime g r := by
+    rw [hrdef]
+    exact Nat.coprime_div_gcd (Nat.gcd_dvd_left q N)
+  have hr_pos : 0 < r := by
+    apply Nat.div_pos
+    · exact Nat.le_of_dvd hqpos hg_dvd_q
+    · exact Nat.gcd_pos_of_pos_left N hqpos
+  -- For squarefree q, both g and r are squarefree
+  have hsg : Squarefree g := hq.squarefree_of_dvd hg_dvd_q
+  have hsr : Squarefree r := by
+    rw [hq_eq] at hq
+    exact hq.squarefree_of_dvd (dvd_mul_right g r)
+  -- Express the divisor sum over q = g*r using multiplicativity
+  -- We need to show: |∑ d|q, [q/d ∣ N] (q/d) μ(d)| ≤ φ(g)
+  -- For squarefree q = g*r with coprime g,r, the sum factors as μ(r) * φ(g)
+  -- Let's compute the sum directly
+  have hsum : (∑ d ∈ q.divisors, (if (q / d : ℕ) ∣ N then ((q / d : ℕ) : ℝ) else 0) *
+      ((ArithmeticFunction.moebius d : ℤ) : ℝ)) =
+      ((ArithmeticFunction.moebius r : ℤ) : ℝ) * (Nat.totient g : ℝ) := by
+    -- Use the multiplicative structure: q = g * r, coprime
+    rw [hq_eq]
+    -- We need to relate divisors of g*r to divisors of g and r
+    -- For coprime g, r, divisors of g*r are products of divisors of g and r
+    sorry
+  rw [hsum]
+  rw [abs_mul]
+  have hmu : |((ArithmeticFunction.moebius r : ℤ) : ℝ)| ≤ 1 := by
+    have h := ArithmeticFunction.abs_moebius_le_one (n := r)
+    rw [abs_le] at h
+    rw [abs_le]
+    exact ⟨by exact_mod_cast h.1, by exact_mod_cast h.2⟩
+  have hphi : 0 ≤ (Nat.totient g : ℝ) := by exact_mod_cast Nat.zero_le _
+  calc |((ArithmeticFunction.moebius r : ℤ) : ℝ)| * |(Nat.totient g : ℝ)|
+      ≤ 1 * |(Nat.totient g : ℝ)| := mul_le_mul_of_nonneg_right hmu (abs_nonneg _)
+    _ = (Nat.totient g : ℝ) := by rw [abs_of_nonneg hphi, one_mul]
+    _ = (Nat.totient (Nat.gcd q N) : ℝ) := by rfl
 
 /-- LEAF: Vaughan 1981 chapter 3, book page 34, the elementary fact printed under display
 3.23: Σ_{q>Z} φ(q)^{-2} ≪ Z^{-1}, together with the convergence of Σ_q φ(q)^{-2}, which
 gives the bound min(Z^{-1}, 1) for every Z > 0, uniformly in the upper cutoff R.
 Class MEDIUM: from Σ_{q≤R} (q/φ(q))² ≪ R, which follows from
-q/φ(q) = Σ_{d|q} μ(d)²/φ(d), and partial summation. PROVED in `TotientTailS72`,
-session S72, by an elementary Euler product argument. -/
+q/φ(q) = Σ_{d|q} μ(d)²/φ(d), and partial summation. -/
 theorem leaf_totient_sq_tail512 :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ Z : ℝ, 0 < Z → ∀ R : ℕ,
       ∑ r ∈ (Finset.Icc 1 R).filter (fun r : ℕ => Z < (r : ℝ)),
-          1 / (Nat.totient r : ℝ) ^ 2 ≤ K * min (1 / Z) 1 :=
-  TotientTailS72.leaf_totient_sq_tail512
+          1 / (Nat.totient r : ℝ) ^ 2 ≤ K * min (1 / Z) 1 := by
+  sorry
 
 /-- Vaughan 1981 display 3.23 at m = N, verbatim statement of
 `Section2MS.leaf_vaughan_323_512`, CONDITIONAL ON the two LEAFs above. The proof is Vaughan's:
