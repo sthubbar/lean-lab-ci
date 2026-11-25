@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp275b
+import LeanLab.ChenDoubleSieve.Decomp349c
 
 /-!
 Feed split of `basic_upper` in `Decomp315c`, Wu 2004 Section 10, pages 39, equations 10.3 and 10.4.
@@ -39,19 +40,25 @@ theorem group_of_three (F f ω : ℝ → ℝ) (a b c : Fin 12)
 theorem upper_1 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       sieveTerms N 1 ≤ (integralTerms F f ω 1 + ε) * Θ N := by
-  sorry
+  intro ε hε
+  obtain ⟨N0, hN0⟩ := Task349.basic_upper_supplied F f ω h hω ε hε
+  exact ⟨N0, fun N hN hle => hN0 N hN hle 1 (by simp)⟩
 
 /-- LEAF: Wu 2004 page 39, equation 10.4, upper bound for F2, the sum over p from N to the kappa one to N to the sigma one of S of A sub p sifted up to N to the kappa one, linear sieve upper bound at level N to the one half over p. Class HARD. -/
 theorem upper_2 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       sieveTerms N 2 ≤ (integralTerms F f ω 2 + ε) * Θ N := by
-  sorry
+  intro ε hε
+  obtain ⟨N0, hN0⟩ := Task349.basic_upper_supplied F f ω h hω ε hε
+  exact ⟨N0, fun N hN hle => hN0 N hN hle 2 (by simp)⟩
 
 /-- LEAF: Wu 2004 page 39, equation 10.4, upper bound for F3, the same with sigma two in place of sigma one. Class HARD. -/
 theorem upper_3 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       sieveTerms N 3 ≤ (integralTerms F f ω 3 + ε) * Θ N := by
-  sorry
+  intro ε hε
+  obtain ⟨N0, hN0⟩ := Task349.basic_upper_supplied F f ω h hω ε hε
+  exact ⟨N0, fun N hN hle => hN0 N hN hle 3 (by simp)⟩
 
 theorem basic_upper_of_leaves (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ,

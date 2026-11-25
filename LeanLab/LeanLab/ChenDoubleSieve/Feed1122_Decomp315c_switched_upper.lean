@@ -17,19 +17,25 @@ open Wu04Functional (IsLinearSieve IsBuchstab)
 theorem upper_6 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       sieveTerms N 6 ≤ (integralTerms F f ω 6 + ε) * Θ N := by
-  sorry
+  intro ε hε
+  obtain ⟨N0, hN0⟩ := Task349.switched_upper_supplied F f ω h hω ε hε
+  exact ⟨N0, fun N hN hle => hN0 N hN hle 6 (by simp)⟩
 
 /-- LEAF: Wu 2004 pages 40 and 41, equations 10.6 to 10.8, upper bound for F8 by the switching principle with sigma two. Class HARD. -/
 theorem upper_7 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       sieveTerms N 7 ≤ (integralTerms F f ω 7 + ε) * Θ N := by
-  sorry
+  intro ε hε
+  obtain ⟨N0, hN0⟩ := Task349.switched_upper_supplied F f ω h hω ε hε
+  exact ⟨N0, fun N hN hle => hN0 N hN hle 7 (by simp)⟩
 
 /-- LEAF: Wu 2004 page 41, equations 10.9 to 10.11, upper bound for F10 by the switching principle, the integral from kappa two to sigma two. Class HARD. -/
 theorem upper_9 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       sieveTerms N 9 ≤ (integralTerms F f ω 9 + ε) * Θ N := by
-  sorry
+  intro ε hε
+  obtain ⟨N0, hN0⟩ := Task349.switched_upper_supplied F f ω h hω ε hε
+  exact ⟨N0, fun N hN hle => hN0 N hN hle 9 (by simp)⟩
 
 theorem switched_upper_of_leaves (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ,

@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp275b
+import LeanLab.ChenDoubleSieve.Decomp348a
 
 /-!
 Feed split of `lower_F0` in `Decomp315b`, Wu 2004 Section 10, page 38, equation 10.2.
@@ -26,7 +27,47 @@ theorem linear_sieve_lower (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
       (f (1 / (2 * kappa1)) - ε) * (((N : ℝ) / Real.log N) *
         ∏ p ∈ PS N 0 ((N : ℝ) ^ kappa1), (1 - 1 / ((p : ℝ) - 1))) ≤
       (S (primeSequence N) 1 N ((N : ℝ) ^ kappa1) : ℝ) := by
-  sorry
+  intro ε hε
+  set c := 2 / (kappa1 * exp eulerMascheroniConstant) with hcdef
+  have hc : 0 < c := by rw [hcdef]; unfold kappa1; positivity
+  obtain ⟨B, _hB, N1, h1⟩ := Task348.main0_lower F f h (ε * c / 4) (by positivity)
+  have hfc : ContinuousAt f (6 : ℝ) :=
+    h.2.1.continuousAt (Ioi_mem_nhds (by norm_num))
+  have hf : Filter.Tendsto (fun N => f (Task348.lowerLevel B N 1)) Filter.atTop
+      (nhds (f 6)) := hfc.tendsto.comp (Task348.lowerLevel_one_tendsto B)
+  obtain ⟨K2, hK2⟩ := Filter.eventually_atTop.1
+    (hf.eventually (eventually_gt_nhds (by linarith : f 6 - ε / 2 < f 6)))
+  have hsd : ∀ᶠ N in Task348.evenAtTop, c / 2 < Task348.scaledDensity N :=
+    Task348.scaledDensity_tendsto.eventually (eventually_gt_nhds (by linarith))
+  rw [Task348.evenAtTop, Filter.eventually_inf_principal] at hsd
+  obtain ⟨K3, hK3⟩ := Filter.eventually_atTop.1 hsd
+  refine ⟨max 2 (max N1 (max K2 K3)), fun N hN hle => ?_⟩
+  have hN2 : 2 ≤ N := le_trans (le_max_left _ _) hle
+  have hθ := Θ_pos hN2
+  have hpos : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hlog : 0 < Real.log (N : ℝ) := Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  set X := ((N : ℝ) / Real.log N) *
+    ∏ p ∈ PS N 0 ((N : ℝ) ^ kappa1), (1 - 1 / ((p : ℝ) - 1)) with hX
+  have hXeq : X = Task348.scaledDensity N * Θ N := by
+    rw [hX]
+    unfold Task348.scaledDensity Task348.lowerDensity Θ
+    field_simp [(CN_pos N).ne', hlog.ne', hpos.ne']
+  have hs3 := hK3 N (by omega) hN
+  have hXc : c / 2 * Θ N ≤ X := by
+    rw [hXeq]; exact mul_le_mul_of_nonneg_right hs3.le hθ.le
+  have hfL := hK2 N (by omega)
+  have hm := h1 N hN (by omega)
+  have hmain : Task348.main0 f B N = X * f (Task348.lowerLevel B N 1) := by
+    rw [hX]; unfold Task348.main0 Task348.lowerDensity; ring
+  have hS : sieveTerms N 0 = (S (primeSequence N) 1 N ((N : ℝ) ^ kappa1) : ℝ) := by
+    simp [sieveTerms]
+  rw [hmain, hS] at hm
+  have h6 : (1 / (2 * kappa1) : ℝ) = 6 := by norm_num [kappa1]
+  rw [h6]
+  have hX0 : 0 ≤ X := le_trans (by positivity) hXc
+  have k1 : (f 6 - ε) * X ≤ (f (Task348.lowerLevel B N 1) - ε / 2) * X :=
+    mul_le_mul_of_nonneg_right (by linarith) hX0
+  nlinarith
 
 /-- LEAF: Wu 2004 page 38, main term of equation 10.2, Mertens product:
 `X V(N^{κ₁}) = (2 / (κ₁ e^γ) + o(1)) Θ(N)` for even `N`, since
@@ -36,7 +77,24 @@ theorem mertens_main_term : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ,
       |((N : ℝ) / Real.log N) *
         ∏ p ∈ PS N 0 ((N : ℝ) ^ kappa1), (1 - 1 / ((p : ℝ) - 1)) -
         2 / (kappa1 * exp eulerMascheroniConstant) * Θ N| ≤ ε * Θ N := by
-  sorry
+  intro ε hε
+  have hev := (Metric.tendsto_nhds.1 Task348.scaledDensity_tendsto) ε hε
+  rw [Task348.evenAtTop, Filter.eventually_inf_principal] at hev
+  obtain ⟨K, hK⟩ := Filter.eventually_atTop.1 hev
+  refine ⟨max 2 K, fun N hN hle => ?_⟩
+  have hN2 : 2 ≤ N := le_trans (le_max_left _ _) hle
+  have hθ := Θ_pos hN2
+  have hpos : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hlog : 0 < Real.log (N : ℝ) := Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hXeq : ((N : ℝ) / Real.log N) *
+      ∏ p ∈ PS N 0 ((N : ℝ) ^ kappa1), (1 - 1 / ((p : ℝ) - 1)) =
+      Task348.scaledDensity N * Θ N := by
+    unfold Task348.scaledDensity Task348.lowerDensity Θ
+    field_simp [(CN_pos N).ne', hlog.ne', hpos.ne']
+  have hd := hK N (le_trans (le_max_right _ _) hle) hN
+  rw [Real.dist_eq] at hd
+  rw [hXeq, ← sub_mul, abs_mul, abs_of_pos hθ]
+  exact mul_le_mul_of_nonneg_right hd.le hθ.le
 
 theorem Θ_nonneg (N : ℕ) : 0 ≤ Θ N := by
   unfold Θ CN oddFactor
