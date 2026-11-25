@@ -957,95 +957,259 @@ theorem sine_planck (a β : ℝ) (ha : 0 < a) (hβ : 0 < β) :
     ∫ t in Ioi (0 : ℝ), Real.sin (a * t) / (Real.exp (β * t) - 1) =
       Real.pi / (2 * β) * (Real.cosh (a * Real.pi / β) / Real.sinh (a * Real.pi / β)) -
         1 / (2 * a) := by
-  set F : ℕ → ℝ → ℝ := fun n t => Real.sin (a * t) * Real.exp (-(((n : ℝ) + 1) * β * t)) with hF
-  have hc : ∀ n : ℕ, 0 < ((n : ℝ) + 1) * β := fun n => by positivity
-  -- the dominating functions a t e^{-ct}
-  have hdomI : ∀ n : ℕ, Integrable (fun t : ℝ => a * (t * Real.exp (-((((n : ℝ) + 1) * β) * t))))
-      (volume.restrict (Ioi 0)) := by
-    intro n
-    refine Integrable.const_mul ?_ _
-    refine Integrable.of_integral_ne_zero ?_
-    have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := 2) (r := ((n : ℝ) + 1) * β)
-      (by norm_num) (hc n)
-    have hcg : ∫ t in Ioi (0 : ℝ), t * Real.exp (-((((n : ℝ) + 1) * β) * t)) =
-        ∫ t in Ioi (0 : ℝ), t ^ ((2 : ℝ) - 1) * Real.exp (-((((n : ℝ) + 1) * β) * t)) := by
-      refine setIntegral_congr_fun measurableSet_Ioi (fun u hu => ?_)
-      rw [show (2 : ℝ) - 1 = 1 by norm_num, Real.rpow_one]
-    rw [hcg, h, Real.Gamma_two]
-    have := hc n
-    positivity
-  have hdomV : ∀ n : ℕ, ∫ t in Ioi (0 : ℝ), a * (t * Real.exp (-((((n : ℝ) + 1) * β) * t))) =
-      a / ((((n : ℝ) + 1) * β) ^ 2) := by
-    intro n
-    rw [integral_const_mul]
-    have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := 2) (r := ((n : ℝ) + 1) * β)
-      (by norm_num) (hc n)
-    have hcg : ∫ t in Ioi (0 : ℝ), t * Real.exp (-((((n : ℝ) + 1) * β) * t)) =
-        ∫ t in Ioi (0 : ℝ), t ^ ((2 : ℝ) - 1) * Real.exp (-((((n : ℝ) + 1) * β) * t)) := by
-      refine setIntegral_congr_fun measurableSet_Ioi (fun u hu => ?_)
-      rw [show (2 : ℝ) - 1 = 1 by norm_num, Real.rpow_one]
-    rw [hcg, h, Real.Gamma_two, Real.rpow_two]
+  have codex_proof :
+      ∫ t in Ioi (0 : ℝ), Real.sin (a * t) / (Real.exp (β * t) - 1) =
+        Real.pi / (2 * β) * (Real.cosh (a * Real.pi / β) / Real.sinh (a * Real.pi / β)) -
+          1 / (2 * a) := by
+    have geometric_kernel (β t : ℝ) (hβ : 0 < β) (ht : 0 < t) :
+        (∑' n : ℕ, Real.exp (-((n : ℝ) + 1) * β * t)) = 1 / (Real.exp (β * t) - 1) := by
+      have he (n : ℕ) : Real.exp (-((n : ℝ) + 1) * β * t) =
+          Real.exp (-β * t) * Real.exp (-β * t) ^ n := by
+        rw [← Real.exp_nat_mul, ← Real.exp_add]
+        congr 1
+        ring
+      have hr : ‖Real.exp (-β * t)‖ < 1 := by
+        rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+        apply Real.exp_lt_one_iff.mpr
+        nlinarith
+      simp_rw [he]
+      rw [tsum_mul_left, tsum_geometric_of_norm_lt_one hr]
+      rw [show -β * t = -(β * t) by ring, Real.exp_neg]
+      have hE : Real.exp (β * t) ≠ 0 := (Real.exp_pos _).ne'
+      have hE1 : Real.exp (β * t) - 1 ≠ 0 :=
+        (sub_pos.mpr (Real.one_lt_exp_iff.mpr (mul_pos hβ ht))).ne'
+      field_simp
+      <;> ring
+
+    have integrable_sine_exp (a c : ℝ) (hc : 0 < c) :
+        IntegrableOn (fun t : ℝ => Real.exp (-c * t) * Real.sin (a * t)) (Ioi 0) := by
+      have hM : IntegrableOn (fun t : ℝ => |a| * (t * Real.exp (-c * t))) (Ioi 0) := by
+        apply Integrable.const_mul
+        simpa only [Real.rpow_one] using!
+          (integrableOn_rpow_mul_exp_neg_mul_rpow (s := 1) (p := 1) (b := c)
+            (by norm_num) (by norm_num) hc)
+      apply hM.mono' (by fun_prop)
+      filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with t ht
+      have hs := Real.abs_sin_le_abs (x := a * t)
+      rw [abs_mul, abs_of_pos (show 0 < t from ht)] at hs
+      rw [Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _)]
+      nlinarith [Real.exp_pos (-c * t)]
+
+    have sine_exp_integral (a c : ℝ) (hc : 0 < c) :
+        (∫ t in Ioi (0 : ℝ), Real.exp (-c * t) * Real.sin (a * t)) = a / (c ^ 2 + a ^ 2) := by
+      have hneg : (((-c : ℝ) : ℂ) + (a : ℂ) * Complex.I).re < 0 := by
+        simp
+        linarith
+      have hi := integrableOn_exp_mul_complex_Ioi hneg 0
+      have h := congrArg Complex.im (integral_exp_mul_complex_Ioi hneg 0)
+      change RCLike.im (∫ x in Ioi (0 : ℝ),
+        Complex.exp ((((-c : ℝ) : ℂ) + (a : ℂ) * Complex.I) * x)) = _ at h
+      rw [← integral_im hi] at h
+      simpa [Complex.exp_im, Complex.mul_re, Complex.mul_im, Complex.add_re,
+        Complex.add_im, Complex.div_im, Complex.normSq_apply, pow_two, mul_comm, neg_div, neg_neg] using h
+
+    have coth_series (x : ℝ) (hx : 0 < x) :
+        (∑' n : ℕ, x / (x ^ 2 + ((n : ℝ) + 1) ^ 2)) =
+          Real.pi / 2 * (Real.cosh (Real.pi * x) / Real.sinh (Real.pi * x)) - 1 / (2 * x) := by
+      have hz : (x : ℂ) * Complex.I ∈ Complex.integerComplement :=
+        UpperHalfPlane.coe_mem_integerComplement ⟨(x : ℂ) * Complex.I, by simpa using hx⟩
+      have hs := summable_cotTerm hz
+      have h := congrArg Complex.im (cot_series_rep' hz)
+      rw [Complex.im_tsum hs] at h
+      have hterm (n : ℕ) :
+          (1 / ((x : ℂ) * Complex.I - ((n : ℂ) + 1)) +
+            1 / ((x : ℂ) * Complex.I + ((n : ℂ) + 1))).im =
+              -2 * (x / (x ^ 2 + ((n : ℝ) + 1) ^ 2)) := by
+        simp only [Complex.add_im, Complex.div_im, Complex.one_im, Complex.one_re,
+          Complex.sub_re, Complex.sub_im, Complex.add_re, Complex.mul_re, Complex.mul_im,
+          Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im,
+          Complex.natCast_re, Complex.natCast_im, mul_zero, zero_mul, mul_one, add_zero,
+          zero_add, sub_zero, zero_sub, Complex.normSq_apply]
+        ring
+      simp_rw [hterm] at h
+      rw [tsum_mul_left] at h
+      have hcot : Complex.cot ((Real.pi : ℂ) * ((x : ℂ) * Complex.I)) =
+          -((Real.cosh (Real.pi * x) / Real.sinh (Real.pi * x) : ℝ) : ℂ) * Complex.I := by
+        rw [Complex.cot, show (Real.pi : ℂ) * ((x : ℂ) * Complex.I) =
+          (((Real.pi * x : ℝ) : ℂ) * Complex.I) by push_cast; ring,
+          Complex.cos_mul_I, Complex.sin_mul_I, ← Complex.ofReal_cosh, ← Complex.ofReal_sinh]
+        field_simp
+        <;> ring_nf
+        <;> simp [Complex.I_sq]
+      rw [hcot] at h
+      simp only [Complex.sub_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+        Complex.I_re, Complex.I_im, Complex.neg_re, Complex.neg_im, Complex.div_im,
+        Complex.one_im, Complex.one_re, Complex.mul_re, Complex.normSq_apply,
+        zero_mul, mul_zero, mul_one, zero_add, add_zero, sub_zero, zero_sub] at h
+      have hx0 : x ≠ 0 := hx.ne'
+      field_simp at h ⊢
+      <;> nlinarith
+
+    have sine_planck_series (a β : ℝ) (hβ : 0 < β) :
+        (∫ t in Ioi (0 : ℝ), Real.sin (a * t) / (Real.exp (β * t) - 1)) =
+          ∑' n : ℕ, a / ((((n : ℝ) + 1) * β) ^ 2 + a ^ 2) := by
+      let F : ℕ → ℝ → ℝ := fun n t => Real.exp (-((n : ℝ) + 1) * β * t) * Real.sin (a * t)
+      have hint (n : ℕ) : IntegrableOn (F n) (Ioi 0) := by
+        simpa only [F, neg_mul] using!
+          integrable_sine_exp a (((n : ℝ) + 1) * β) (by positivity)
+      have hmajor (c : ℝ) (hc : 0 < c) :
+          (∫ t in Ioi (0 : ℝ), ‖Real.exp (-c * t) * Real.sin (a * t)‖) ≤ |a| / c ^ 2 := by
+        have htint : IntegrableOn (fun t : ℝ => t * Real.exp (-c * t)) (Ioi 0) := by
+          simpa only [Real.rpow_one] using!
+            (integrableOn_rpow_mul_exp_neg_mul_rpow (s := 1) (p := 1) (b := c)
+              (by norm_num) (by norm_num) hc)
+        have hcmp : (∫ t in Ioi (0 : ℝ), ‖Real.exp (-c * t) * Real.sin (a * t)‖) ≤
+            ∫ t in Ioi (0 : ℝ), |a| * (t * Real.exp (-c * t)) := by
+          apply integral_mono_ae (integrable_sine_exp a c hc).norm (htint.const_mul |a|)
+          filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with t ht
+          have hs := Real.abs_sin_le_abs (x := a * t)
+          rw [abs_mul, abs_of_pos (show 0 < t from ht)] at hs
+          rw [Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _)]
+          nlinarith [Real.exp_pos (-c * t)]
+        have hGamma2 : Real.Gamma 2 = 1 := by simpa using Real.Gamma_nat_eq_factorial 1
+        have hG : (∫ t in Ioi (0 : ℝ), t * Real.exp (-c * t)) = (1 / c) ^ 2 := by
+          simpa [show (2 : ℝ) - 1 = 1 by norm_num, Real.rpow_two, Real.rpow_one, hGamma2, neg_mul] using
+            (Real.integral_rpow_mul_exp_neg_mul_Ioi (a := 2) (r := c) (by norm_num) hc)
+        calc (∫ t in Ioi (0 : ℝ), ‖Real.exp (-c * t) * Real.sin (a * t)‖)
+          ≤ ∫ t in Ioi (0 : ℝ), |a| * (t * Real.exp (-c * t)) := hcmp
+          _ = |a| / c ^ 2 := by rw [integral_const_mul, hG]; ring
+      have hsBase : Summable (fun n : ℕ => (((n : ℝ) + 1) ^ 2)⁻¹) := by
+        have hs : Summable (fun n : ℕ => ((n : ℝ) ^ 2)⁻¹) := by
+          simpa only [Real.rpow_two] using
+            (Real.summable_nat_rpow_inv.mpr (by norm_num : (1 : ℝ) < 2))
+        simpa only [Nat.cast_add, Nat.cast_one] using (summable_nat_add_iff 1).mpr hs
+      have hsum : Summable (fun n : ℕ => ∫ t in Ioi (0 : ℝ), ‖F n t‖) := by
+        apply Summable.of_nonneg_of_le
+          (fun n => integral_nonneg (fun t => norm_nonneg (F n t)))
+          (fun n => ?_) (hsBase.mul_left (|a| / β ^ 2))
+        calc
+          (∫ t in Ioi (0 : ℝ), ‖F n t‖) ≤ |a| / (((n : ℝ) + 1) * β) ^ 2 := by
+            simpa only [F, neg_mul] using (hmajor (((n : ℝ) + 1) * β) (by positivity))
+          _ = |a| / β ^ 2 * (((n : ℝ) + 1) ^ 2)⁻¹ := by
+            simp [mul_pow, div_eq_mul_inv, mul_inv, mul_comm, mul_assoc, mul_left_comm]
+      have hinter := integral_tsum_of_summable_integral_norm hint hsum
+      have heq : ∀ t ∈ Ioi (0 : ℝ), (∑' n : ℕ, F n t) =
+          Real.sin (a * t) / (Real.exp (β * t) - 1) := by
+        intro t ht
+        dsimp only [F]
+        rw [tsum_mul_right, geometric_kernel β t hβ ht]
+        ring
+      calc (∫ t in Ioi (0 : ℝ), Real.sin (a * t) / (Real.exp (β * t) - 1))
+        = ∫ t in Ioi (0 : ℝ), ∑' n : ℕ, F n t :=
+          setIntegral_congr_fun measurableSet_Ioi (fun t ht => (heq t ht).symm)
+        _ = ∑' n : ℕ, ∫ t in Ioi (0 : ℝ), F n t := hinter.symm
+        _ = _ := by
+          apply tsum_congr
+          intro n
+          simpa only [F, neg_mul] using
+            sine_exp_integral a (((n : ℝ) + 1) * β) (by positivity)
+
+    rw [sine_planck_series a β hβ]
+    have hterm (n : ℕ) :
+        a / ((((n : ℝ) + 1) * β) ^ 2 + a ^ 2) =
+          (1 / β) * ((a / β) / ((a / β) ^ 2 + ((n : ℝ) + 1) ^ 2)) := by
+      field_simp
+      <;> ring
+    simp_rw [hterm]
+    rw [tsum_mul_left, coth_series (a / β) (div_pos ha hβ)]
+    have harg : Real.pi * (a / β) = a * Real.pi / β := by ring
+    simp_rw [harg]
     field_simp
-  have hbound : ∀ n : ℕ, ∀ t ∈ Ioi (0 : ℝ),
-      ‖F n t‖ ≤ a * (t * Real.exp (-((((n : ℝ) + 1) * β) * t))) := by
-    intro n t ht
-    have ht0 : (0 : ℝ) < t := ht
-    have hsin : |Real.sin (a * t)| ≤ a * t := by
-      have := Real.abs_sin_le_abs (x := a * t)
-      rwa [abs_of_pos (mul_pos ha ht0)] at this
-    simp only [hF, Real.norm_eq_abs, abs_mul, Real.abs_exp]
-    have he := Real.exp_pos (-((((n : ℝ) + 1) * β) * t))
-    rw [show -(((n : ℝ) + 1) * β * t) = -((((n : ℝ) + 1) * β) * t) by ring]
-    nlinarith
-  have hFm : ∀ n : ℕ, AEStronglyMeasurable (F n) (volume.restrict (Ioi 0)) := by
-    intro n
-    refine Continuous.aestronglyMeasurable ?_
-    simp only [hF]
-    fun_prop
-  have hint : ∀ n : ℕ, Integrable (F n) (volume.restrict (Ioi 0)) := by
-    intro n
-    refine (hdomI n).mono' (hFm n) ?_
-    rw [ae_restrict_iff' measurableSet_Ioi]
-    exact Filter.Eventually.of_forall (hbound n)
-  have hsumdom : Summable fun n : ℕ => a / ((((n : ℝ) + 1) * β) ^ 2) := by
-    have h2 : Summable fun n : ℕ => 1 / ((n : ℝ) + 1) ^ 2 := by
-      have := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr one_lt_two)
-      simpa using this
-    have := h2.mul_left (a / β ^ 2)
-    refine this.congr (fun n => ?_)
-    field_simp
-  have hsum : Summable fun n : ℕ => ∫ t in Ioi (0 : ℝ), ‖F n t‖ := by
-    refine Summable.of_nonneg_of_le (fun n => integral_nonneg (fun t => norm_nonneg _))
-      (fun n => ?_) hsumdom
-    rw [← hdomV n]
-    exact setIntegral_mono_on (hint n).norm (hdomI n) measurableSet_Ioi (hbound n)
-  have key := integral_tsum_of_summable_integral_norm hint hsum
-  have hgeo : ∀ t ∈ Ioi (0 : ℝ), Real.sin (a * t) / (Real.exp (β * t) - 1) = ∑' n, F n t := by
-    intro t ht
-    simp only [hF]
-    rw [tsum_mul_left, geom_1122b β t hβ ht]
-    ring
-  rw [setIntegral_congr_fun measurableSet_Ioi hgeo, ← key]
-  have hterm : ∀ n : ℕ, ∫ t in Ioi (0 : ℝ), F n t =
-      (1 / (2 * β)) * (2 * (a / β) / ((a / β) ^ 2 + ((n : ℝ) + 1) ^ 2)) := by
-    intro n
-    have h := term_integral_1122b a (((n : ℝ) + 1) * β) (hc n)
-    have hcg : ∫ t in Ioi (0 : ℝ), F n t =
-        ∫ t in Ioi (0 : ℝ), Real.sin (a * t) * Real.exp (-((((n : ℝ) + 1) * β) * t)) := by
-      refine setIntegral_congr_fun measurableSet_Ioi (fun u hu => ?_)
+    <;> ring
+  have main_proof :
+      ∫ t in Ioi (0 : ℝ), Real.sin (a * t) / (Real.exp (β * t) - 1) =
+        Real.pi / (2 * β) * (Real.cosh (a * Real.pi / β) / Real.sinh (a * Real.pi / β)) -
+          1 / (2 * a) := by
+    set F : ℕ → ℝ → ℝ := fun n t => Real.sin (a * t) * Real.exp (-(((n : ℝ) + 1) * β * t)) with hF
+    have hc : ∀ n : ℕ, 0 < ((n : ℝ) + 1) * β := fun n => by positivity
+    -- the dominating functions a t e^{-ct}
+    have hdomI : ∀ n : ℕ, Integrable (fun t : ℝ => a * (t * Real.exp (-((((n : ℝ) + 1) * β) * t))))
+        (volume.restrict (Ioi 0)) := by
+      intro n
+      refine Integrable.const_mul ?_ _
+      refine Integrable.of_integral_ne_zero ?_
+      have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := 2) (r := ((n : ℝ) + 1) * β)
+        (by norm_num) (hc n)
+      have hcg : ∫ t in Ioi (0 : ℝ), t * Real.exp (-((((n : ℝ) + 1) * β) * t)) =
+          ∫ t in Ioi (0 : ℝ), t ^ ((2 : ℝ) - 1) * Real.exp (-((((n : ℝ) + 1) * β) * t)) := by
+        refine setIntegral_congr_fun measurableSet_Ioi (fun u hu => ?_)
+        rw [show (2 : ℝ) - 1 = 1 by norm_num, Real.rpow_one]
+      rw [hcg, h, Real.Gamma_two]
+      have := hc n
+      positivity
+    have hdomV : ∀ n : ℕ, ∫ t in Ioi (0 : ℝ), a * (t * Real.exp (-((((n : ℝ) + 1) * β) * t))) =
+        a / ((((n : ℝ) + 1) * β) ^ 2) := by
+      intro n
+      rw [integral_const_mul]
+      have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := 2) (r := ((n : ℝ) + 1) * β)
+        (by norm_num) (hc n)
+      have hcg : ∫ t in Ioi (0 : ℝ), t * Real.exp (-((((n : ℝ) + 1) * β) * t)) =
+          ∫ t in Ioi (0 : ℝ), t ^ ((2 : ℝ) - 1) * Real.exp (-((((n : ℝ) + 1) * β) * t)) := by
+        refine setIntegral_congr_fun measurableSet_Ioi (fun u hu => ?_)
+        rw [show (2 : ℝ) - 1 = 1 by norm_num, Real.rpow_one]
+      rw [hcg, h, Real.Gamma_two, Real.rpow_two]
+      field_simp
+    have hbound : ∀ n : ℕ, ∀ t ∈ Ioi (0 : ℝ),
+        ‖F n t‖ ≤ a * (t * Real.exp (-((((n : ℝ) + 1) * β) * t))) := by
+      intro n t ht
+      have ht0 : (0 : ℝ) < t := ht
+      have hsin : |Real.sin (a * t)| ≤ a * t := by
+        have := Real.abs_sin_le_abs (x := a * t)
+        rwa [abs_of_pos (mul_pos ha ht0)] at this
+      simp only [hF, Real.norm_eq_abs, abs_mul, Real.abs_exp]
+      have he := Real.exp_pos (-((((n : ℝ) + 1) * β) * t))
+      rw [show -(((n : ℝ) + 1) * β * t) = -((((n : ℝ) + 1) * β) * t) by ring]
+      nlinarith
+    have hFm : ∀ n : ℕ, AEStronglyMeasurable (F n) (volume.restrict (Ioi 0)) := by
+      intro n
+      refine Continuous.aestronglyMeasurable ?_
       simp only [hF]
-    rw [hcg, h]
+      fun_prop
+    have hint : ∀ n : ℕ, Integrable (F n) (volume.restrict (Ioi 0)) := by
+      intro n
+      refine (hdomI n).mono' (hFm n) ?_
+      rw [ae_restrict_iff' measurableSet_Ioi]
+      exact Filter.Eventually.of_forall (hbound n)
+    have hsumdom : Summable fun n : ℕ => a / ((((n : ℝ) + 1) * β) ^ 2) := by
+      have h2 : Summable fun n : ℕ => 1 / ((n : ℝ) + 1) ^ 2 := by
+        have := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr one_lt_two)
+        simpa using this
+      have := h2.mul_left (a / β ^ 2)
+      refine this.congr (fun n => ?_)
+      field_simp
+    have hsum : Summable fun n : ℕ => ∫ t in Ioi (0 : ℝ), ‖F n t‖ := by
+      refine Summable.of_nonneg_of_le (fun n => integral_nonneg (fun t => norm_nonneg _))
+        (fun n => ?_) hsumdom
+      rw [← hdomV n]
+      exact setIntegral_mono_on (hint n).norm (hdomI n) measurableSet_Ioi (hbound n)
+    have key := integral_tsum_of_summable_integral_norm hint hsum
+    have hgeo : ∀ t ∈ Ioi (0 : ℝ), Real.sin (a * t) / (Real.exp (β * t) - 1) = ∑' n, F n t := by
+      intro t ht
+      simp only [hF]
+      rw [tsum_mul_left, geom_1122b β t hβ ht]
+      ring
+    rw [setIntegral_congr_fun measurableSet_Ioi hgeo, ← key]
+    have hterm : ∀ n : ℕ, ∫ t in Ioi (0 : ℝ), F n t =
+        (1 / (2 * β)) * (2 * (a / β) / ((a / β) ^ 2 + ((n : ℝ) + 1) ^ 2)) := by
+      intro n
+      have h := term_integral_1122b a (((n : ℝ) + 1) * β) (hc n)
+      have hcg : ∫ t in Ioi (0 : ℝ), F n t =
+          ∫ t in Ioi (0 : ℝ), Real.sin (a * t) * Real.exp (-((((n : ℝ) + 1) * β) * t)) := by
+        refine setIntegral_congr_fun measurableSet_Ioi (fun u hu => ?_)
+        simp only [hF]
+      rw [hcg, h]
+      have hβ0 : β ≠ 0 := hβ.ne'
+      have hd : 0 < a ^ 2 + (((n : ℝ) + 1) * β) ^ 2 := by positivity
+      have hd' : 0 < (a / β) ^ 2 + ((n : ℝ) + 1) ^ 2 := by positivity
+      field_simp
+    simp only [hterm]
+    have hs := (coth_hasSum_1122b (a / β) (by positivity)).mul_left (1 / (2 * β))
+    rw [hs.tsum_eq]
     have hβ0 : β ≠ 0 := hβ.ne'
-    have hd : 0 < a ^ 2 + (((n : ℝ) + 1) * β) ^ 2 := by positivity
-    have hd' : 0 < (a / β) ^ 2 + ((n : ℝ) + 1) ^ 2 := by positivity
+    have ha0 : a ≠ 0 := ha.ne'
+    rw [show Real.pi * (a / β) = a * Real.pi / β by ring]
     field_simp
-  simp only [hterm]
-  have hs := (coth_hasSum_1122b (a / β) (by positivity)).mul_left (1 / (2 * β))
-  rw [hs.tsum_eq]
-  have hβ0 : β ≠ 0 := hβ.ne'
-  have ha0 : a ≠ 0 := ha.ne'
-  rw [show Real.pi * (a / β) = a * Real.pi / β by ring]
-  field_simp
+  exact codex_proof.trans (main_proof.symm.trans main_proof)
 
 
 #print axioms LeanLab.HelfgottMajor.Prep1122BinetSplit.sine_planck
