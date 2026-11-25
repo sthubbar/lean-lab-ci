@@ -1,4 +1,6 @@
 import LeanLab.Halupczok2012.Decomp398a
+import LeanLab.Halupczok2012.B1btChebyshev
+import LeanLab.Halupczok2012.Split398aMajor
 import Mathlib.NumberTheory.LSeries.DirichletContinuation
 import Mathlib.Analysis.Analytic.Order
 
@@ -129,34 +131,606 @@ def badChar (N Y ε A : ℝ) {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q
 
 /-- LEAF: PP1993 p. 44 display 3, Brun Titchmarsh input of the Cauchy Schwarz step.
 Short interval upper bound `∑_{N-Y<h≤N} Λ(h) ≪ Y` for `Y ≥ N^(7/12+ε)`, and Chebyshev for S2.
-Class HARD. Citation wall: Brun Titchmarsh, Montgomery and Vaughan, Mathematika 20, 1973;
-no copy in papers/, INTAKE needed. Not in the note's list; split off from B1, see B1. -/
+Class HARD. PROVED by S135 in `B1btChebyshev`, from Mathlib's Chebyshev bounds and the lab's
+proved Brun Titchmarsh `PNTPort.LargeSieve.brun_titchmarsh_montgomery`; no cited input remains.
+Not in the note's list; split off from B1, see B1. -/
 theorem leaf_B1_bt : ∃ c : ℝ, 0 < c ∧ ∀ ε : ℝ, 0 < ε → ∃ N0 : ℝ, ∀ N Y : ℝ,
     N0 ≤ N → N ^ (7 / 12 + ε) ≤ Y → Y ≤ N →
-    (∑ h ∈ kRange (N - Y) Y, Λ h) ≤ c * Y ∧ (∑ j ∈ kRange 0 Y, Λ j) ≤ c * Y := by
-  sorry
+    (∑ h ∈ kRange (N - Y) Y, Λ h) ≤ c * Y ∧ (∑ j ∈ kRange 0 Y, Λ j) ≤ c * Y :=
+  B1btChebyshev.leaf_B1_bt
 
+/-! ### Helpers for display 3, leaf B1, added by S135 -/
+
+/-- Parseval on any interval of length 1, for a polynomial with real coefficients on a finite
+set of frequencies: the integral over a subset is at most the sum of the squared coefficients. -/
+theorem b1_parseval (K : Finset ℕ) (a : ℕ → ℝ) {s : Set ℝ} (t : ℝ)
+    (hs : s ⊆ Set.Icc t (t + 1)) :
+    ∫ α in s, ‖∑ h ∈ K, (a h : ℂ) * phase ((h : ℝ) * α)‖ ^ 2 ≤ ∑ h ∈ K, a h ^ 2 := by
+  set M := K.sup id + 1
+  have hK : K ⊆ Finset.range M := by
+    intro k hk
+    rw [Finset.mem_range]
+    have : id k ≤ K.sup id := Finset.le_sup hk
+    simp only [id] at this
+    omega
+  set b : ℕ → ℂ := fun m => if m ∈ K then (a m : ℂ) else 0 with hb
+  have hsum : ∀ η : ℝ, ∑ h ∈ K, (a h : ℂ) * phase ((h : ℝ) * η) =
+      ∑ m ∈ Finset.range M, b m * LeanLab.PNTPort.LargeSieve.e (m * η) := by
+    intro η
+    rw [← Finset.sum_subset hK]
+    · refine Finset.sum_congr rfl (fun m hm => ?_)
+      simp only [hb, hm, if_true, phase]
+    · intro m _ hm
+      simp only [hb, hm, if_false, zero_mul]
+  set f : ℝ → ℝ := fun α => ‖∑ h ∈ K, (a h : ℂ) * phase ((h : ℝ) * α)‖ ^ 2 with hf
+  have hfc : Continuous f := by
+    rw [hf]; unfold phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+  have hper : Function.Periodic f 1 := by
+    intro α
+    simp only [hf]
+    congr 2
+    refine Finset.sum_congr rfl (fun h _ => ?_)
+    congr 1
+    unfold phase
+    rw [mul_add, mul_one, LeanLab.PNTPort.LargeSieve.e_add]
+    have : LeanLab.PNTPort.LargeSieve.e (h : ℝ) = 1 := by
+      have := LeanLab.PNTPort.LargeSieve.e_int (h : ℤ)
+      simpa using this
+    rw [this, mul_one]
+  calc ∫ α in s, f α ≤ ∫ α in Set.Icc t (t + 1), f α :=
+        setIntegral_mono_set hfc.integrableOn_Icc
+          (Filter.Eventually.of_forall fun x => by rw [hf]; positivity)
+          (Filter.Eventually.of_forall hs)
+    _ = ∫ α in t..t + 1, f α := by
+        rw [intervalIntegral.integral_of_le (by linarith), integral_Icc_eq_integral_Ioc]
+    _ = ∫ α in (-(1 / 2 : ℝ))..(-(1 / 2 : ℝ)) + 1, f α := hper.intervalIntegral_add_eq t _
+    _ = ∫ α in (-(1 / 2 : ℝ))..(1 / 2), ‖∑ m ∈ Finset.range M, b m *
+          LeanLab.PNTPort.LargeSieve.e (m * α)‖ ^ 2 := by
+        rw [show (-(1 / 2 : ℝ)) + 1 = 1 / 2 by norm_num]
+        simp only [hf, hsum]
+    _ = ∑ m ∈ Finset.range M, ‖b m‖ ^ 2 := LeanLab.PNTPort.Gallagher.parseval b M
+    _ = ∑ h ∈ K, a h ^ 2 := by
+        rw [← Finset.sum_subset hK]
+        · refine Finset.sum_congr rfl (fun m hm => ?_)
+          simp only [hb, hm, if_true, Complex.norm_real, Real.norm_eq_abs, sq_abs]
+        · intro m _ hm
+          simp only [hb, hm, if_false, norm_zero]; norm_num
+
+/-- PP1993 p. 44 display 3, the kernel bound: for `H ≥ 1`, `X ≥ 0` and `‖2θ‖ ≠ 0`, the sum of
+`e(-2kθ)` over `X < k ≤ X + H/2` is at most `2 min(H, 1/‖2θ‖)`. -/
+theorem b1_kernel (H X θ : ℝ) (hH : 1 ≤ H) (hX : 0 ≤ X) (hn : nnd (2 * θ) ≠ 0) :
+    ‖∑ k ∈ kRange X (H / 2), phase (-((2 * k : ℕ) : ℝ) * θ)‖ ≤ 2 * kern H θ := by
+  set η : ℝ := (round (2 * θ) : ℝ) - 2 * θ with hη
+  have hηa : |η| = nnd (2 * θ) := by
+    unfold nnd; rw [hη, abs_sub_comm]
+  have hn0 : 0 < nnd (2 * θ) := lt_of_le_of_ne (by unfold nnd; exact abs_nonneg _) (Ne.symm hn)
+  have hηle : |η| ≤ 1 / 2 := by rw [hηa]; unfold nnd; exact abs_sub_round _
+  have hrw : ∀ k : ℕ, phase (-((2 * k : ℕ) : ℝ) * θ) = phase ((k : ℝ) * η) := by
+    intro k
+    unfold phase
+    have e1 : -((2 * k : ℕ) : ℝ) * θ = (k : ℝ) * η + ((-(k : ℤ) * round (2 * θ) : ℤ) : ℝ) := by
+      rw [hη]; push_cast; ring
+    rw [e1, LeanLab.PNTPort.LargeSieve.e_add, LeanLab.PNTPort.LargeSieve.e_int, mul_one]
+  simp_rw [hrw]
+  have hH0 : 0 ≤ H / 2 := by linarith
+  have b1 := Split398aMajor.window_bound X (H / 2) hX hH0 (by rw [hηa]; exact hn0) hηle
+  have b2 : ‖∑ k ∈ kRange X (H / 2), phase ((k : ℝ) * η)‖ ≤ H / 2 + 1 := by
+    refine (norm_sum_le _ _).trans ?_
+    simp only [phase, LeanLab.PNTPort.LargeSieve.norm_e, Finset.sum_const, nsmul_eq_mul, mul_one]
+    exact card_kRange_le hH0
+  rw [hηa] at b1
+  unfold kern
+  rcases le_total H (1 / nnd (2 * θ)) with hc | hc
+  · rw [min_eq_left hc]; linarith
+  · rw [min_eq_right hc]
+    have : 1 / (2 * nnd (2 * θ)) ≤ 2 * (1 / nnd (2 * θ)) := by
+      rw [div_le_iff₀ (by positivity)]; field_simp; nlinarith
+    linarith
+
+/-- PP1993 p. 44 display 3, the kernel bound with the positive sign: for `H ≥ 1`, `X ≥ 0` and
+`‖2θ‖ ≠ 0`, the sum of `e(2kθ)` over `X < k ≤ X + H/2` is at most `2 min(H, 1/‖2θ‖)`. -/
+theorem b1_kernel_pos (H X θ : ℝ) (hH : 1 ≤ H) (hX : 0 ≤ X) (hn : nnd (2 * θ) ≠ 0) :
+    ‖∑ k ∈ kRange X (H / 2), phase (((2 * k : ℕ) : ℝ) * θ)‖ ≤ 2 * kern H θ := by
+  have h := b1_kernel H X θ hH hX hn
+  have hc : ∑ k ∈ kRange X (H / 2), phase (((2 * k : ℕ) : ℝ) * θ) =
+      (starRingEnd ℂ) (∑ k ∈ kRange X (H / 2), phase (-((2 * k : ℕ) : ℝ) * θ)) := by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    unfold phase
+    rw [neg_mul, LeanLab.PNTPort.LargeSieve.e_neg, Complex.conj_conj]
+  rw [hc, Complex.norm_conj]
+  exact h
+
+set_option maxHeartbeats 2000000 in
 /-- LEAF: PP1993 p. 44 display 3, Sigma_m is at most `(YL)^(3/2)` times the root of the
 supremum over ξ of the weighted integral of `|S2|^2`. Class MEDIUM.
 Cauchy Schwarz twice and Parseval for S1 and S2. The supremum is passed as a bound `M^2`.
 The note proposes `Λ ≤ log` instead of Brun Titchmarsh; that loses `L^(3/2)` which cannot be
 absorbed since the minor arcs depend on A, so the short interval bound with constant `c`
-is a hypothesis here, supplied by `leaf_B1_bt`. -/
+is a hypothesis here, supplied by `leaf_B1_bt`. PROVED by S135 with `C = 2`: writing
+`Σ_m = ∫_m S1 S2 G` with `G(α) = Σ_k conj(I_k) e(-2kα)`, one has
+`|G(α)| ≤ ∫_m |S1 S2|(β) |Σ_k e(2k(β-α))| dβ ≤ (∫_m |S1|^2)^(1/2) (4 M^2)^(1/2)` by the kernel
+bound off a countable set and Cauchy Schwarz, and Parseval gives `∫_m |S_i|^2 ≤ c Y L`. -/
 theorem leaf_B1 : ∃ C : ℝ, 0 < C ∧ ∀ ε A N Y c M : ℝ, 0 < ε → 0 < A → 3 ≤ N → 1 ≤ Y →
     Y ≤ N → 0 ≤ c → 0 ≤ M →
     (∑ h ∈ kRange (N - Y) Y, Λ h) ≤ c * Y → (∑ j ∈ kRange 0 Y, Λ j) ≤ c * Y →
     (∀ ξ : ℝ, weightedS2 N Y ε A ξ ≤ M ^ 2) →
     ∑ k ∈ kRange (N / 2) (Hs Y ε / 2), ‖arcCoeff N Y (2 * k) (minorArcs N Y ε A)‖ ^ 2 ≤
       C * (c * Y * Real.log N) ^ (3 / 2 : ℝ) * M := by
-  sorry
+  refine ⟨2, by norm_num, ?_⟩
+  intro ε A N Y c M hε hA hN hY1 hYN hc hM h1 h2 hW
+  have hH1 : 1 ≤ Hs Y ε := by unfold Hs; exact Real.one_le_rpow hY1 (by linarith)
+  set H := Hs Y ε with hHdef
+  set L := Real.log N with hLdef
+  have hL0 : 0 ≤ L := Real.log_nonneg (by linarith)
+  have hN0 : 0 < N := by linarith
+  set m := minorArcs N Y ε A with hmdef
+  have hmm : MeasurableSet m := measurableSet_Icc.diff (Fourier398.major_measurable N Y ε A)
+  -- the base interval
+  set t : ℝ := 1 / (Real.sqrt (Y ^ (1 / 3 + ε)) / 2) with htdef
+  have hmt : m ⊆ Set.Icc t (t + 1) := by
+    intro α hα
+    have hb := hα.1
+    simp only [arcBase, Set.mem_Icc] at hb
+    exact ⟨hb.1, by linarith [hb.2]⟩
+  have ht0 : 0 ≤ t := by rw [htdef]; positivity
+  set S1 : ℝ → ℂ := fun α => firstPoly N Y α with hS1
+  set S2 : ℝ → ℂ := fun α => secondPoly Y α with hS2
+  have hS1c : Continuous S1 := by
+    rw [hS1]; unfold firstPoly phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+  have hS2c : Continuous S2 := by
+    rw [hS2]; unfold secondPoly phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+  -- integrability on m of continuous functions
+  have hcont : ∀ f : ℝ → ℝ, Continuous f → IntegrableOn f m := fun f hf =>
+    (hf.integrableOn_Icc (a := t) (b := t + 1)).mono_set hmt
+  have hcontC : ∀ f : ℝ → ℂ, Continuous f → IntegrableOn f m := fun f hf =>
+    (hf.integrableOn_Icc (a := t) (b := t + 1)).mono_set hmt
+  -- Parseval
+  have hLam1 : ∀ h ∈ kRange (N - Y) Y, Λ h ^ 2 ≤ L * Λ h := by
+    intro h hh
+    have hle : (h : ℝ) ≤ N := by
+      simp only [kRange, Finset.mem_filter] at hh; linarith [hh.2.2]
+    have h0 := ArithmeticFunction.vonMangoldt_nonneg (n := h)
+    have hlog : Λ h ≤ L := (ArithmeticFunction.vonMangoldt_le_log).trans
+      (by rcases Nat.eq_zero_or_pos h with hz | hz
+          · rw [hz]; simp; exact hL0
+          · exact Real.log_le_log (by exact_mod_cast hz) hle)
+    nlinarith
+  have hLam2 : ∀ h ∈ kRange 0 Y, Λ h ^ 2 ≤ L * Λ h := by
+    intro h hh
+    have hle : (h : ℝ) ≤ N := by
+      simp only [kRange, Finset.mem_filter] at hh; linarith [hh.2.2]
+    have h0 := ArithmeticFunction.vonMangoldt_nonneg (n := h)
+    have hlog : Λ h ≤ L := (ArithmeticFunction.vonMangoldt_le_log).trans
+      (by rcases Nat.eq_zero_or_pos h with hz | hz
+          · rw [hz]; simp; exact hL0
+          · exact Real.log_le_log (by exact_mod_cast hz) hle)
+    nlinarith
+  set P : ℝ := c * Y * L with hPdef
+  have hP0 : 0 ≤ P := by positivity
+  have hA1 : ∫ α in m, ‖S1 α‖ ^ 2 ≤ P := by
+    have := b1_parseval (kRange (N - Y) Y) (fun h => Λ h) (s := m) t hmt
+    calc ∫ α in m, ‖S1 α‖ ^ 2 ≤ ∑ h ∈ kRange (N - Y) Y, Λ h ^ 2 := this
+      _ ≤ ∑ h ∈ kRange (N - Y) Y, L * Λ h := Finset.sum_le_sum hLam1
+      _ = L * ∑ h ∈ kRange (N - Y) Y, Λ h := by rw [Finset.mul_sum]
+      _ ≤ L * (c * Y) := mul_le_mul_of_nonneg_left h1 hL0
+      _ = P := by rw [hPdef]; ring
+  have hA2 : ∫ α in m, ‖S2 α‖ ^ 2 ≤ P := by
+    have := b1_parseval (kRange 0 Y) (fun h => Λ h) (s := m) t hmt
+    calc ∫ α in m, ‖S2 α‖ ^ 2 ≤ ∑ h ∈ kRange 0 Y, Λ h ^ 2 := this
+      _ ≤ ∑ h ∈ kRange 0 Y, L * Λ h := Finset.sum_le_sum hLam2
+      _ = L * ∑ h ∈ kRange 0 Y, Λ h := by rw [Finset.mul_sum]
+      _ ≤ L * (c * Y) := mul_le_mul_of_nonneg_left h2 hL0
+      _ = P := by rw [hPdef]; ring
+  set A1 := ∫ α in m, ‖S1 α‖ ^ 2 with hA1def
+  set A2 := ∫ α in m, ‖S2 α‖ ^ 2 with hA2def
+  have hA10 : 0 ≤ A1 := setIntegral_nonneg hmm (fun _ _ => by positivity)
+  have hA20 : 0 ≤ A2 := setIntegral_nonneg hmm (fun _ _ => by positivity)
+  -- the coefficients and the dual polynomial
+  set K := kRange (N / 2) (H / 2) with hKdef
+  set ek : ℕ → ℝ → ℂ := fun k α => phase (-((2 * k : ℕ) : ℝ) * α) with hek
+  have hekc : ∀ k, Continuous (ek k) := fun k => by
+    rw [hek]; unfold phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+  set I : ℕ → ℂ := fun k => arcCoeff N Y (2 * k) m with hIdef
+  have hIk : ∀ k, I k = ∫ β in m, S1 β * S2 β * ek k β := fun k => rfl
+  set G : ℝ → ℂ := fun α => ∑ k ∈ K, (starRingEnd ℂ) (I k) * ek k α with hGdef
+  -- |G(α)| ≤ 2 M √A1
+  have hGb : ∀ α, ‖G α‖ ≤ Real.sqrt A1 * (2 * M) := by
+    intro α
+    set D : ℝ → ℂ := fun β => ∑ k ∈ K, phase (((2 * k : ℕ) : ℝ) * (β - α)) with hD
+    have hDc : Continuous D := by rw [hD]; unfold phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+    have hGint : G α = ∫ β in m, (starRingEnd ℂ) (S1 β * S2 β) * D β := by
+      rw [hGdef]; simp only []
+      have : ∀ k, (starRingEnd ℂ) (I k) * ek k α =
+          ∫ β in m, (starRingEnd ℂ) (S1 β * S2 β) * phase (((2 * k : ℕ) : ℝ) * (β - α)) := by
+        intro k
+        rw [hIk, ← integral_conj, ← integral_mul_const]
+        refine integral_congr_ae (Filter.Eventually.of_forall fun β => ?_)
+        simp only [hek, map_mul]
+        unfold phase
+        rw [← LeanLab.PNTPort.LargeSieve.e_neg]
+        rw [mul_assoc, ← LeanLab.PNTPort.LargeSieve.e_add]
+        congr 2; ring
+      simp_rw [this]
+      rw [← integral_finsetSum]
+      · refine integral_congr_ae (Filter.Eventually.of_forall fun β => ?_)
+        simp only [hD]; rw [Finset.mul_sum]
+      · intro k _
+        apply hcontC
+        unfold phase LeanLab.PNTPort.LargeSieve.e; rw [hS1, hS2]
+        unfold firstPoly secondPoly phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+    -- the kernel bound off a countable set
+    have hnull : ∀ᵐ β ∂(volume.restrict m), ‖D β‖ ≤ 2 * kern H (β - α) := by
+      apply ae_restrict_of_ae
+      rw [ae_iff]
+      apply measure_mono_null (t := Set.range (fun n : ℤ => α + (n : ℝ) / 2))
+      · intro β hβ
+        simp only [Set.mem_setOf_eq] at hβ
+        by_contra hnot
+        apply hβ
+        have hn : nnd (2 * (β - α)) ≠ 0 := by
+          intro h0
+          unfold nnd at h0
+          rw [abs_eq_zero, sub_eq_zero] at h0
+          refine hnot ⟨round (2 * (β - α)), ?_⟩
+          show α + ((round (2 * (β - α)) : ℤ) : ℝ) / 2 = β
+          rw [← h0]; ring
+        exact b1_kernel_pos H (N / 2) (β - α) hH1 (by positivity) hn
+      · exact (Set.countable_range _).measure_zero _
+    -- measurability of the weighted integrand
+    have hkm : Measurable (fun β => kern H (β - α)) := by
+      unfold kern nnd
+      have hr : Measurable (fun β : ℝ => ((round (2 * (β - α)) : ℤ) : ℝ)) := by
+        have : (fun β : ℝ => ((round (2 * (β - α)) : ℤ) : ℝ)) =
+            fun β => ((⌊2 * (β - α) + 1 / 2⌋ : ℤ) : ℝ) := by
+          funext β; rw [round_eq]
+        rw [this]
+        exact measurable_from_top.comp ((Int.measurable_floor).comp (by fun_prop))
+      exact measurable_const.min (measurable_const.div (((by fun_prop :
+        Measurable (fun β : ℝ => 2 * (β - α))).sub hr).abs))
+    have hS2sq : Continuous (fun β => ‖S2 β‖ ^ 2) := by fun_prop
+    have hWint : IntegrableOn (fun β => ‖S2 β‖ ^ 2 * kern H (β - α) ^ 2) m := by
+      refine Integrable.mono' ((hcont _ hS2sq).const_mul (H ^ 2)) ?_ ?_
+      · exact (hS2sq.measurable.mul (hkm.pow_const 2)).aestronglyMeasurable
+      · refine Filter.Eventually.of_forall fun β => ?_
+        have hk0 : 0 ≤ kern H (β - α) := le_min (by linarith)
+          (div_nonneg zero_le_one (by unfold nnd; exact abs_nonneg _))
+        have hkH : kern H (β - α) ≤ H := min_le_left _ _
+        rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+        have : kern H (β - α) ^ 2 ≤ H ^ 2 := pow_le_pow_left₀ hk0 hkH 2
+        nlinarith [sq_nonneg ‖S2 β‖]
+    have hDsq : ∫ β in m, ‖S2 β‖ ^ 2 * ‖D β‖ ^ 2 ≤ 4 * M ^ 2 := by
+      calc ∫ β in m, ‖S2 β‖ ^ 2 * ‖D β‖ ^ 2
+          ≤ ∫ β in m, 4 * (‖S2 β‖ ^ 2 * kern H (β - α) ^ 2) := by
+            apply integral_mono_ae (hcont _ (by fun_prop)) (hWint.const_mul 4)
+            filter_upwards [hnull] with β hβ
+            have h0 : 0 ≤ ‖D β‖ := norm_nonneg _
+            have : ‖D β‖ ^ 2 ≤ (2 * kern H (β - α)) ^ 2 := pow_le_pow_left₀ h0 hβ 2
+            nlinarith [sq_nonneg ‖S2 β‖]
+        _ = 4 * weightedS2 N Y ε A α := by rw [integral_const_mul]; rfl
+        _ ≤ 4 * M ^ 2 := by linarith [hW α]
+    have hcs := Split398aMajor.cs_set (s := m) (f := fun β => ‖S1 β‖)
+      (g := fun β => ‖S2 β‖ * ‖D β‖)
+      (hcont _ (by fun_prop)) (hcont _ (by fun_prop)) (hcont _ (by fun_prop))
+    calc ‖G α‖ = ‖∫ β in m, (starRingEnd ℂ) (S1 β * S2 β) * D β‖ := by rw [hGint]
+      _ ≤ ∫ β in m, ‖(starRingEnd ℂ) (S1 β * S2 β) * D β‖ := norm_integral_le_integral_norm _
+      _ = ∫ β in m, ‖S1 β‖ * (‖S2 β‖ * ‖D β‖) := by
+          refine integral_congr_ae (Filter.Eventually.of_forall fun β => ?_)
+          simp only [norm_mul, Complex.norm_conj]; ring
+      _ ≤ Real.sqrt (∫ β in m, ‖S1 β‖ ^ 2) * Real.sqrt (∫ β in m, (‖S2 β‖ * ‖D β‖) ^ 2) := hcs
+      _ ≤ Real.sqrt A1 * (2 * M) := by
+          apply mul_le_mul_of_nonneg_left _ (Real.sqrt_nonneg _)
+          rw [show (2 * M) = Real.sqrt ((2 * M) ^ 2) by rw [Real.sqrt_sq (by positivity)]]
+          apply Real.sqrt_le_sqrt
+          have : ∀ β, (‖S2 β‖ * ‖D β‖) ^ 2 = ‖S2 β‖ ^ 2 * ‖D β‖ ^ 2 := fun β => by ring
+          simp_rw [this]; nlinarith [hDsq]
+  -- Σ |I_k|^2 = ∫_m S1 S2 G
+  have hsumeq : ((∑ k ∈ K, ‖I k‖ ^ 2 : ℝ) : ℂ) = ∫ α in m, S1 α * S2 α * G α := by
+    push_cast
+    simp_rw [← Complex.conj_mul']
+    rw [hGdef]; simp only []
+    simp_rw [Finset.mul_sum]
+    rw [integral_finsetSum]
+    · refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [hIk k, ← integral_const_mul]
+      refine integral_congr_ae (Filter.Eventually.of_forall fun α => ?_)
+      ring
+    · intro k _
+      apply hcontC
+      rw [hS1, hS2]
+      unfold firstPoly secondPoly phase LeanLab.PNTPort.LargeSieve.e; simp only [hek]
+      unfold phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+  have hsum0 : 0 ≤ ∑ k ∈ K, ‖I k‖ ^ 2 := Finset.sum_nonneg (fun _ _ => by positivity)
+  have hmain : ∑ k ∈ K, ‖I k‖ ^ 2 ≤ Real.sqrt A1 * (2 * M) * (Real.sqrt A1 * Real.sqrt A2) := by
+    have hnorm : ∑ k ∈ K, ‖I k‖ ^ 2 = ‖∫ α in m, S1 α * S2 α * G α‖ := by
+      rw [← hsumeq, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hsum0]
+    rw [hnorm]
+    have hcs2 := Split398aMajor.cs_set (s := m) (f := fun β => ‖S1 β‖)
+      (g := fun β => ‖S2 β‖) (hcont _ (by fun_prop)) (hcont _ (by fun_prop))
+      (hcont _ (by fun_prop))
+    have hp12 : IntegrableOn (fun α => ‖S1 α‖ * ‖S2 α‖) m := hcont _ (by fun_prop)
+    calc ‖∫ α in m, S1 α * S2 α * G α‖ ≤ ∫ α in m, ‖S1 α * S2 α * G α‖ :=
+          norm_integral_le_integral_norm _
+      _ ≤ ∫ α in m, (Real.sqrt A1 * (2 * M)) * (‖S1 α‖ * ‖S2 α‖) := by
+          apply setIntegral_mono_on _ (hp12.const_mul _) hmm
+          · intro α _
+            rw [norm_mul, norm_mul]
+            have := hGb α
+            have h0 : 0 ≤ ‖S1 α‖ * ‖S2 α‖ := by positivity
+            nlinarith
+          · refine Integrable.mono' (hp12.const_mul (Real.sqrt A1 * (2 * M))) ?_ ?_
+            · have hGc : Continuous G := by
+                rw [hGdef]
+                exact continuous_finset_sum _ (fun k _ => continuous_const.mul (hekc k))
+              exact (((hS1c.mul hS2c).mul hGc).aestronglyMeasurable).norm
+            · refine Filter.Eventually.of_forall fun α => ?_
+              rw [norm_norm, norm_mul, norm_mul]
+              have := hGb α
+              have h0 : 0 ≤ ‖S1 α‖ * ‖S2 α‖ := by positivity
+              nlinarith
+      _ = (Real.sqrt A1 * (2 * M)) * ∫ α in m, ‖S1 α‖ * ‖S2 α‖ := integral_const_mul _ _
+      _ ≤ (Real.sqrt A1 * (2 * M)) * (Real.sqrt A1 * Real.sqrt A2) := by
+          apply mul_le_mul_of_nonneg_left _ (by positivity)
+          simpa only [] using hcs2
+  -- the final arithmetic
+  have hs1 : Real.sqrt A1 * Real.sqrt A1 = A1 := Real.mul_self_sqrt hA10
+  have hsA2 : Real.sqrt A2 ≤ Real.sqrt P := Real.sqrt_le_sqrt hA2
+  have hP32 : P ^ (3 / 2 : ℝ) = P * Real.sqrt P := by
+    rw [Real.sqrt_eq_rpow, show (3 / 2 : ℝ) = 1 + 1 / 2 by norm_num,
+      Real.rpow_add' hP0 (by norm_num), Real.rpow_one]
+  change ∑ k ∈ K, ‖I k‖ ^ 2 ≤ 2 * P ^ (3 / 2 : ℝ) * M
+  rw [hP32]
+  calc ∑ k ∈ K, ‖I k‖ ^ 2 ≤ Real.sqrt A1 * (2 * M) * (Real.sqrt A1 * Real.sqrt A2) := hmain
+    _ = 2 * M * (Real.sqrt A1 * Real.sqrt A1) * Real.sqrt A2 := by ring
+    _ = 2 * M * A1 * Real.sqrt A2 := by rw [hs1]
+    _ ≤ 2 * M * P * Real.sqrt P := by
+        have h0 : 0 ≤ 2 * M := by positivity
+        have := mul_le_mul hA1 hsA2 (Real.sqrt_nonneg _) hP0
+        nlinarith
+    _ = 2 * (P * Real.sqrt P) * M := by ring
 
+/-! ### Helpers for the window cover, leaf B2, added by S135 -/
+
+/-- `∑_{k ≤ K} 1/(k+1)^2 ≤ 2 - 1/(K+1)`. -/
+theorem b2_sum_inv_sq (K : ℕ) :
+    ∑ k ∈ Finset.range (K + 1), (1 : ℝ) / ((k : ℝ) + 1) ^ 2 ≤ 2 - 1 / ((K : ℝ) + 1) := by
+  induction K with
+  | zero => norm_num [Finset.sum_range_one]
+  | succ K ih =>
+    rw [Finset.sum_range_succ]
+    have hK : (0 : ℝ) < (K : ℝ) + 1 := by positivity
+    have key : (1 : ℝ) / ((K : ℝ) + 1 + 1) ^ 2 ≤ 1 / ((K : ℝ) + 1) - 1 / ((K : ℝ) + 1 + 1) := by
+      rw [div_sub_div _ _ (by positivity) (by positivity),
+        div_le_div_iff₀ (by positivity) (by positivity)]
+      nlinarith
+    push_cast
+    linarith
+
+/-- PP1993 p. 44 after display 3, the window of a point: for `H ≥ 1` and every `θ` there is an
+integer `j` with `|j| ≤ H`, `|θ - round(2θ)/2 - j/H| ≤ 1/H` and `0 ≤ kern H θ ≤ 2H/(1 + |j|)`. -/
+theorem b2_window (H θ : ℝ) (hH : 1 ≤ H) :
+    ∃ j : ℤ, |(j : ℝ)| ≤ H ∧ |θ - (round (2 * θ) : ℝ) / 2 - (j : ℝ) / H| ≤ 1 / H ∧
+      0 ≤ kern H θ ∧ kern H θ ≤ 2 * H / (1 + |(j : ℝ)|) := by
+  have hH0 : 0 < H := by linarith
+  set t := 2 * θ with ht
+  set s := (t - round t) / 2 with hs
+  have hts : |t - round t| ≤ 1 / 2 := abs_sub_round t
+  have hs4 : |s| ≤ 1 / 4 := by
+    rw [hs, abs_div, abs_two]; linarith
+  set j := round (H * s) with hj
+  have hj2 : |H * s - j| ≤ 1 / 2 := abs_sub_round _
+  have hjs : |(j : ℝ)| ≤ H * |s| + 1 / 2 := by
+    have h := abs_sub_abs_le_abs_sub (j : ℝ) (H * s)
+    rw [abs_sub_comm] at h
+    rw [abs_mul, abs_of_pos hH0] at h
+    linarith
+  have hnnd : nnd t = 2 * |s| := by
+    unfold nnd
+    rw [hs, abs_div, abs_two]; ring
+  refine ⟨j, ?_, ?_, ?_, ?_⟩
+  · have : H * |s| ≤ H * (1 / 4) := mul_le_mul_of_nonneg_left hs4 hH0.le
+    linarith
+  · have e : θ - (round t : ℝ) / 2 - (j : ℝ) / H = (H * s - j) / H := by
+      rw [hs, ht]; first | (field_simp; done) | (field_simp; ring)
+    rw [e, abs_div, abs_of_pos hH0]
+    exact div_le_div_of_nonneg_right (by linarith) hH0.le
+  · unfold kern
+    exact le_min hH0.le (div_nonneg zero_le_one (by rw [← ht]; unfold nnd; exact abs_nonneg _))
+  · unfold kern
+    rw [← ht, hnnd]
+    by_cases hj0 : (j : ℝ) = 0
+    · rw [hj0, abs_zero, add_zero, div_one]
+      exact (min_le_left _ _).trans (by linarith)
+    · have hj1 : 1 ≤ |(j : ℝ)| := by
+        rw [← Int.cast_abs]
+        exact_mod_cast Int.one_le_abs (by exact_mod_cast hj0)
+      have hspos : 0 < |s| := by
+        by_contra hc
+        push_neg at hc
+        have : |s| = 0 := le_antisymm hc (abs_nonneg _)
+        rw [this, mul_zero] at hjs
+        linarith
+      refine (min_le_right _ _).trans ?_
+      rw [div_le_div_iff₀ (by positivity) (by positivity)]
+      nlinarith
+
+set_option maxHeartbeats 1000000 in
 /-- LEAF: PP1993 p. 44 sentence after display 3, display 5 for all ξ bounds the weighted
 integral: cover by windows of length `2/H` around `ξ + j/H` and `ξ + 1/2 + j/H`, each with
-weight at most `H^2 / (1 + |j|)^2`. Class MEDIUM. -/
+weight at most `H^2 / (1 + |j|)^2`. Class MEDIUM. PROVED by S135 with `C = 144`: the points
+of the minor arcs lie in `[0, 3]`, each lies in a window `ξ + n/2 + j/H` with `n` among nine
+consecutive integers and `|j| ≤ ⌈H⌉`, where the kernel is at most `2H/(1 + |j|)`; the sum of
+`4H^2/(1+|j|)^2` over the windows is at most `144 H^2`. -/
 theorem leaf_B2 : ∃ C : ℝ, 0 < C ∧ ∀ ε A N Y V : ℝ, 0 < ε → 0 < A → 3 ≤ N → 1 ≤ Y →
     Y ≤ N → 0 ≤ V → (∀ ξ : ℝ, localS2 N Y ε A ξ ≤ V) →
     ∀ ξ : ℝ, weightedS2 N Y ε A ξ ≤ C * Hs Y ε ^ 2 * V := by
-  sorry
+  refine ⟨144, by norm_num, ?_⟩
+  intro ε A N Y V hε hA hN hY1 hYN hV hloc ξ
+  have hH1 : 1 ≤ Hs Y ε := by unfold Hs; exact Real.one_le_rpow hY1 (by linarith)
+  set H := Hs Y ε with hHdef
+  have hH0 : 0 < H := by linarith
+  set F : ℝ → ℝ := fun α => ‖secondPoly Y α‖ ^ 2 with hFdef
+  have hFc : Continuous F := by
+    rw [hFdef]; unfold secondPoly phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+  have hF0 : ∀ α, 0 ≤ F α := fun α => by rw [hFdef]; positivity
+  set m := minorArcs N Y ε A with hmdef
+  have hm03 : m ⊆ Set.Icc 0 3 := by
+    intro α hα
+    have hb := hα.1
+    simp only [arcBase, Set.mem_Icc] at hb
+    have hsq : 1 ≤ Real.sqrt (Y ^ (1 / 3 + ε)) := by
+      rw [show (1 : ℝ) = Real.sqrt 1 by simp]
+      exact Real.sqrt_le_sqrt (Real.one_le_rpow hY1 (by linarith))
+    have hQ : 0 < Real.sqrt (Y ^ (1 / 3 + ε)) / 2 := by positivity
+    have h2 : 1 / (Real.sqrt (Y ^ (1 / 3 + ε)) / 2) ≤ 2 := by
+      rw [one_div_div]; exact div_le_self (by norm_num) hsq
+    have h0 : 0 < 1 / (Real.sqrt (Y ^ (1 / 3 + ε)) / 2) := by positivity
+    exact ⟨by linarith [hb.1], by linarith [hb.2]⟩
+  -- the windows
+  set n0 : ℤ := ⌊-(2 * ξ)⌋ - 1 with hn0
+  set J : ℕ := ⌈H⌉₊ with hJ
+  set I : Finset (ℕ × ℕ × ℕ) := (Finset.range 9) ×ˢ (Finset.range 2) ×ˢ (Finset.range (J + 1))
+    with hIdef
+  set cen : ℕ × ℕ × ℕ → ℝ := fun i => ξ + ((n0 + (i.1 : ℤ) : ℤ) : ℝ) / 2 +
+    (if i.2.1 = 0 then (i.2.2 : ℝ) else -(i.2.2 : ℝ)) / H with hcen
+  set w : ℕ × ℕ × ℕ → ℝ := fun i => 4 * H ^ 2 / (1 + (i.2.2 : ℝ)) ^ 2 with hw
+  set Wd : ℕ × ℕ × ℕ → Set ℝ := fun i => Set.Icc (cen i - 1 / H) (cen i + 1 / H) with hWd
+  set K : Set ℝ := (Set.Icc (0 : ℝ) 3)ᶜ with hK
+  set g : ℝ → ℝ := fun α => ∑ i ∈ I, w i * (Wd i).indicator F α + H ^ 2 * K.indicator F α
+    with hg
+  have hw0 : ∀ i, 0 ≤ w i := fun i => by rw [hw]; positivity
+  have hind0 : ∀ (T : Set ℝ) α, 0 ≤ T.indicator F α :=
+    fun T α => Set.indicator_nonneg (fun x _ => hF0 x) α
+  -- pointwise bound
+  have hpt : ∀ α, F α * kern H (α - ξ) ^ 2 ≤ g α := by
+    intro α
+    have hsum0 : 0 ≤ ∑ i ∈ I, w i * (Wd i).indicator F α :=
+      Finset.sum_nonneg (fun i _ => mul_nonneg (hw0 i) (hind0 _ α))
+    have h3 : 0 ≤ H ^ 2 * K.indicator F α := mul_nonneg (by positivity) (hind0 _ α)
+    obtain ⟨j, hjH, hwin, hk0, hk⟩ := b2_window H (α - ξ) hH1
+    by_cases hαK : α ∈ K
+    · have hkH : kern H (α - ξ) ≤ H := min_le_left _ _
+      have hk2 : kern H (α - ξ) ^ 2 ≤ H ^ 2 := pow_le_pow_left₀ hk0 hkH 2
+      have : F α * kern H (α - ξ) ^ 2 ≤ H ^ 2 * K.indicator F α := by
+        rw [Set.indicator_of_mem hαK, mul_comm (H ^ 2)]
+        exact mul_le_mul_of_nonneg_left hk2 (hF0 α)
+      simp only [hg]; linarith
+    · have hα : α ∈ Set.Icc (0 : ℝ) 3 := by
+        rw [hK, Set.mem_compl_iff, not_not] at hαK; exact hαK
+      set nZ : ℤ := round (2 * (α - ξ)) with hnZ
+      have hr : |2 * (α - ξ) - nZ| ≤ 1 / 2 := abs_sub_round _
+      have hfl := Int.floor_le (-(2 * ξ))
+      have hfl2 := Int.lt_floor_add_one (-(2 * ξ))
+      have hlo : n0 < nZ := by
+        have : ((n0 : ℤ) : ℝ) < (nZ : ℝ) := by
+          rw [hn0]; push_cast
+          linarith [(abs_le.mp hr).2, hα.1]
+        exact_mod_cast this
+      have hhi : nZ - n0 < 9 := by
+        have : (nZ : ℝ) - (n0 : ℝ) < 9 := by
+          rw [hn0]; push_cast
+          linarith [(abs_le.mp hr).1, hα.2]
+        exact_mod_cast this
+      set i : ℕ × ℕ × ℕ := ((nZ - n0).toNat, (if 0 ≤ j then 0 else 1), j.natAbs) with hi
+      have hcast : ((j.natAbs : ℕ) : ℝ) = |(j : ℝ)| := by
+        rw [← Int.cast_natCast, Int.natCast_natAbs, Int.cast_abs]
+      have hiI : i ∈ I := by
+        rw [hi, hIdef, Finset.mem_product, Finset.mem_product, Finset.mem_range, Finset.mem_range,
+          Finset.mem_range]
+        refine ⟨by omega, by split_ifs <;> norm_num, ?_⟩
+        have h1 : ((j.natAbs : ℕ) : ℝ) ≤ (J : ℝ) := by
+          rw [hcast]; exact hjH.trans (Nat.le_ceil H)
+        have h2 : j.natAbs ≤ J := by exact_mod_cast h1
+        exact Nat.lt_succ_of_le h2
+      have hsign : (if i.2.1 = 0 then (i.2.2 : ℝ) else -(i.2.2 : ℝ)) = (j : ℝ) := by
+        rw [hi]
+        by_cases hj0 : 0 ≤ j
+        · simp only [hj0, if_true]
+          rw [hcast, abs_of_nonneg (by exact_mod_cast hj0)]
+        · simp only [hj0, if_false, one_ne_zero]
+          rw [hcast, abs_of_neg (by exact_mod_cast (not_le.mp hj0))]; ring
+      have hn : ((n0 + (i.1 : ℤ) : ℤ) : ℝ) = (nZ : ℝ) := by
+        rw [hi]
+        have : ((nZ - n0).toNat : ℤ) = nZ - n0 := Int.toNat_of_nonneg (by omega)
+        simp only [this]
+        push_cast; ring
+      have hc : cen i = ξ + (nZ : ℝ) / 2 + (j : ℝ) / H := by
+        rw [hcen]; simp only []; rw [hsign, hn]
+      have hαW : α ∈ Wd i := by
+        rw [hWd]; simp only [Set.mem_Icc]; rw [hc]
+        have e : α - ξ - (nZ : ℝ) / 2 - (j : ℝ) / H = α - (ξ + (nZ : ℝ) / 2 + (j : ℝ) / H) := by
+          ring
+        rw [e] at hwin
+        constructor <;> linarith [(abs_le.mp hwin).1, (abs_le.mp hwin).2]
+      have hkw : kern H (α - ξ) ^ 2 ≤ w i := by
+        rw [hw]; simp only []
+        rw [hi]; simp only []
+        rw [hcast]
+        calc kern H (α - ξ) ^ 2 ≤ (2 * H / (1 + |(j : ℝ)|)) ^ 2 := pow_le_pow_left₀ hk0 hk 2
+          _ = 4 * H ^ 2 / (1 + |(j : ℝ)|) ^ 2 := by rw [div_pow]; ring
+      have h1 : F α * kern H (α - ξ) ^ 2 ≤ w i * (Wd i).indicator F α := by
+        rw [Set.indicator_of_mem hαW, mul_comm (w i)]
+        exact mul_le_mul_of_nonneg_left hkw (hF0 α)
+      have h2 : w i * (Wd i).indicator F α ≤ ∑ i ∈ I, w i * (Wd i).indicator F α :=
+        Finset.single_le_sum (f := fun i => w i * (Wd i).indicator F α)
+          (fun i _ => mul_nonneg (hw0 i) (hind0 _ α)) hiI
+      simp only [hg]; linarith
+  -- integrability
+  have hIcc : ∀ T : Set ℝ, MeasurableSet T → IntegrableOn (T.indicator F) m := fun T hT =>
+    ((hFc.continuousOn.integrableOn_compact isCompact_Icc).indicator hT).mono_set hm03
+  have hWm : ∀ i, MeasurableSet (Wd i) := fun i => measurableSet_Icc
+  have hKm : MeasurableSet K := measurableSet_Icc.compl
+  have hgint : IntegrableOn g m := by
+    rw [hg]
+    exact (integrable_finsetSum _ (fun i _ => (hIcc _ (hWm i)).const_mul (w i))).add
+      ((hIcc K hKm).const_mul _)
+  -- the sum of the weights
+  have hwsum : ∑ i ∈ I, w i ≤ 144 * H ^ 2 := by
+    have hS : ∑ k ∈ Finset.range (J + 1), 4 * H ^ 2 / (1 + (k : ℝ)) ^ 2 ≤ 8 * H ^ 2 := by
+      have := b2_sum_inv_sq J
+      have hJ0 : 0 < 1 / ((J : ℝ) + 1) := by positivity
+      calc ∑ k ∈ Finset.range (J + 1), 4 * H ^ 2 / (1 + (k : ℝ)) ^ 2
+          = 4 * H ^ 2 * ∑ k ∈ Finset.range (J + 1), (1 : ℝ) / ((k : ℝ) + 1) ^ 2 := by
+            rw [Finset.mul_sum]
+            refine Finset.sum_congr rfl (fun k _ => ?_)
+            rw [add_comm (1 : ℝ) (k : ℝ)]; ring
+        _ ≤ 4 * H ^ 2 * 2 := by
+            apply mul_le_mul_of_nonneg_left _ (by positivity); linarith
+        _ = 8 * H ^ 2 := by ring
+    calc ∑ i ∈ I, w i = ∑ a ∈ Finset.range 9, ∑ b ∈ Finset.range 2,
+          ∑ k ∈ Finset.range (J + 1), 4 * H ^ 2 / (1 + (k : ℝ)) ^ 2 := by
+          rw [hIdef, Finset.sum_product]
+          refine Finset.sum_congr rfl (fun a _ => ?_)
+          rw [Finset.sum_product]
+      _ = 9 * (2 * ∑ k ∈ Finset.range (J + 1), 4 * H ^ 2 / (1 + (k : ℝ)) ^ 2) := by
+          simp only [Finset.sum_const, Finset.card_range, nsmul_eq_mul]; push_cast; ring
+      _ ≤ 144 * H ^ 2 := by nlinarith
+  unfold weightedS2
+  rw [← hHdef]
+  change ∫ α in m, F α * kern H (α - ξ) ^ 2 ≤ 144 * H ^ 2 * V
+  by_cases hfi : IntegrableOn (fun α => F α * kern H (α - ξ) ^ 2) m
+  · have hint_eq : ∫ α in m, g α =
+        ∑ i ∈ I, w i * localS2 N Y ε A (cen i) + H ^ 2 * 0 := by
+      rw [hg, integral_add (integrable_finsetSum _ (fun i _ => (hIcc _ (hWm i)).const_mul (w i)))
+        ((hIcc K hKm).const_mul _), integral_finsetSum _
+          (fun i _ => (hIcc _ (hWm i)).const_mul (w i))]
+      congr 1
+      · refine Finset.sum_congr rfl (fun i _ => ?_)
+        rw [integral_const_mul, setIntegral_indicator (hWm i)]
+        rfl
+      · rw [integral_const_mul, setIntegral_indicator hKm]
+        have : m ∩ K = ∅ := by
+          ext α; simp only [Set.mem_inter_iff, Set.mem_empty_iff_false, iff_false, not_and]
+          intro hα hαK; exact hαK (hm03 hα)
+        rw [this, Measure.restrict_empty, integral_zero_measure]
+    calc ∫ α in m, F α * kern H (α - ξ) ^ 2 ≤ ∫ α in m, g α := integral_mono hfi hgint hpt
+      _ = ∑ i ∈ I, w i * localS2 N Y ε A (cen i) + H ^ 2 * 0 := hint_eq
+      _ ≤ ∑ i ∈ I, w i * V + H ^ 2 * 0 := by
+          gcongr with i hi
+          exact hloc _
+      _ = (∑ i ∈ I, w i) * V := by rw [Finset.sum_mul]; ring
+      _ ≤ 144 * H ^ 2 * V := mul_le_mul_of_nonneg_right hwsum hV
+  · rw [integral_undef hfi]; positivity
 
 /-! ## Section 5, displays 14 to 20 -/
 theorem secondPoly_continuous (Y : ℝ) : Continuous (fun α => ‖secondPoly Y α‖ ^ 2) := by
@@ -420,6 +994,85 @@ theorem leaf_B3 : StmtB3 := by
     (harcsub p1 hp1) (harcsub p2 hp2) hsub
   linarith
 
+/-! ### Helpers for display 15, leaf B4, added by S135 -/
+
+/-- `n ≤ φ(n) d(n)`, from `∑_{d ∣ n} φ(d) = n` and `φ(d) ∣ φ(n)`. -/
+theorem b4_le_totient_mul_card (n : ℕ) (hn : 1 ≤ n) :
+    n ≤ n.totient * n.divisors.card := by
+  calc n = ∑ d ∈ n.divisors, d.totient := (Nat.sum_totient n).symm
+    _ ≤ ∑ _d ∈ n.divisors, n.totient := by
+        apply Finset.sum_le_sum
+        intro d hd
+        exact Nat.le_of_dvd (Nat.totient_pos.2 (by omega))
+          (Nat.totient_dvd_of_dvd (Nat.dvd_of_mem_divisors hd))
+    _ = n.divisors.card * n.totient := by rw [Finset.sum_const, smul_eq_mul]
+    _ = n.totient * n.divisors.card := mul_comm _ _
+
+/-- The number of divisors of `n` is at most `2 √n`. -/
+theorem b4_card_divisors_le (n : ℕ) :
+    (n.divisors.card : ℝ) ≤ 2 * Real.sqrt n := by
+  set S := n.divisors.filter (fun d => d * d ≤ n) with hSdef
+  have hsub : n.divisors ⊆ S ∪ S.image (fun d => n / d) := by
+    intro d hd
+    rw [Finset.mem_union]
+    by_cases h : d * d ≤ n
+    · exact Or.inl (Finset.mem_filter.2 ⟨hd, h⟩)
+    · right
+      have hn0 : n ≠ 0 := (Nat.mem_divisors.1 hd).2
+      obtain ⟨e, he⟩ := Nat.dvd_of_mem_divisors hd
+      have hd0 : 0 < d := Nat.pos_of_mem_divisors hd
+      have he0 : 0 < e := by
+        rcases Nat.eq_zero_or_pos e with h0 | h0
+        · rw [h0, mul_zero] at he; exact absurd he hn0
+        · exact h0
+      have hed : e < d := by
+        by_contra hc
+        push_neg at hc
+        apply h
+        rw [he]
+        exact Nat.mul_le_mul_left d hc
+      refine Finset.mem_image.2 ⟨e, Finset.mem_filter.2
+        ⟨Nat.mem_divisors.2 ⟨⟨d, by rw [he]; ring⟩, hn0⟩, ?_⟩, ?_⟩
+      · rw [he]; exact Nat.mul_le_mul_right e hed.le
+      · rw [he]; exact Nat.mul_div_cancel d he0
+  have hS : S ⊆ Finset.Icc 1 (Nat.sqrt n) := by
+    intro d hd
+    rw [hSdef, Finset.mem_filter] at hd
+    exact Finset.mem_Icc.2 ⟨Nat.pos_of_mem_divisors hd.1, Nat.le_sqrt.2 hd.2⟩
+  have h1 : n.divisors.card ≤ 2 * Nat.sqrt n := by
+    have hc := Finset.card_le_card hS
+    rw [Nat.card_Icc] at hc
+    calc n.divisors.card ≤ (S ∪ S.image (fun d => n / d)).card := Finset.card_le_card hsub
+      _ ≤ S.card + (S.image (fun d => n / d)).card := Finset.card_union_le _ _
+      _ ≤ S.card + S.card := Nat.add_le_add_left Finset.card_image_le _
+      _ ≤ 2 * Nat.sqrt n := by omega
+  calc (n.divisors.card : ℝ) ≤ ((2 * Nat.sqrt n : ℕ) : ℝ) := by exact_mod_cast h1
+    _ = 2 * (Nat.sqrt n : ℝ) := by push_cast; ring
+    _ ≤ 2 * Real.sqrt n := by
+        have := Real.nat_sqrt_le_real_sqrt (a := n)
+        linarith
+
+/-- `n ≤ 4 φ(n)^2`, the crude lower bound for `φ` used for the large moduli of display 15. -/
+theorem b4_le_four_totient_sq (n : ℕ) (hn : 1 ≤ n) : (n : ℝ) ≤ 4 * (n.totient : ℝ) ^ 2 := by
+  have h1 : (n : ℝ) ≤ n.totient * n.divisors.card := by exact_mod_cast b4_le_totient_mul_card n hn
+  have h2 := b4_card_divisors_le n
+  have hφ : (0 : ℝ) ≤ n.totient := by positivity
+  have h3 : (n : ℝ) ≤ n.totient * (2 * Real.sqrt n) := h1.trans (mul_le_mul_of_nonneg_left h2 hφ)
+  have hs : Real.sqrt n * Real.sqrt n = n := Real.mul_self_sqrt (by positivity)
+  have hs0 : 0 < Real.sqrt n := Real.sqrt_pos.2 (by exact_mod_cast hn)
+  have h4 : Real.sqrt n ≤ 2 * n.totient := by
+    by_contra hc
+    push_neg at hc
+    have : (n.totient : ℝ) * (2 * Real.sqrt n) < Real.sqrt n * Real.sqrt n := by nlinarith
+    linarith
+  nlinarith
+
+/-- Translation of a set integral by `c`. -/
+theorem b4_translate (F : ℝ → ℝ) (c : ℝ) (K : Set ℝ) :
+    ∫ α in (fun α => α - c) ⁻¹' K, F (α - c) = ∫ η in K, F η :=
+  (measurePreserving_sub_right volume c).setIntegral_preimage_emb
+    (Homeomorph.subRight c).measurableEmbedding F K
+
 /-- Statement of the next LEAF, PP1993 p. 47 display 15, the term `μ(q)/φ(q) T2` of `S2 = μ/φ T2 + R2` contributes
 `O(Y L^(-2A-3))` on `I''_{q,a}`: `|T2(η)| ≤ 1/(2‖η‖)` with `|η| ≥ L^(2B)/(qY)` for
 `q ≤ L^B`, Parseval and `φ(q) ≥ L^B / log L` for larger q. Class MEDIUM. -/
@@ -431,9 +1084,261 @@ def StmtB4 : Prop :=
       ‖((ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ)) * T2 Y (α - (a : ℝ) / q)‖ ^ 2 ≤
       C * Y * Real.log N ^ (-(2 * A + 3))
 
-/-- LEAF: PP1993 p. 47 display 15, `StmtB4`. Class MEDIUM. -/
+set_option maxHeartbeats 1000000 in
+/-- LEAF: PP1993 p. 47 display 15, `StmtB4`. Class MEDIUM. PROVED by S135: for `q ≤ L^B` and
+`1 ≤ a ≤ q` the minor part of the arc has `|η| ≥ L^(2B)/(qY)`, so `|T2(η)| ≤ 1/(2|η|)` gives
+`O(Y L^(-B))`; for `q > L^B` Parseval and `q ≤ 4 φ(q)^2` give `O(Y L^(-B))`; the remaining
+residues `a = 0` and `a > q` meet the base interval in at most one point. `B ≥ 2A + 3`. -/
 theorem leaf_B4 : StmtB4 := by
-  sorry
+  intro ε A hε hA
+  set B := 3 / ε * (2 * A + 25) with hBdef
+  have hB0 : 0 < B := by positivity
+  obtain ⟨N1, hN1⟩ := Filter.eventually_atTop.mp
+    (((Split398aMajor.log_rpow_le_eventually (2 * B) (show (0 : ℝ) < 7 / 12 by norm_num)
+      (show (0 : ℝ) < 1 / 2 by norm_num)).and
+      (Split398aMajor.log_rpow_le_eventually B (show (0 : ℝ) < 7 / 72 by norm_num)
+      (show (0 : ℝ) < 1 / 8 by norm_num))).and
+      ((Filter.eventually_ge_atTop (Real.exp 1)).and (Filter.eventually_ge_atTop (2 ^ 24 : ℝ))))
+  refine ⟨8, N1, ?_⟩
+  intro N Y hN hY hYN q a hq1 hqQ hcop
+  obtain ⟨⟨hw2, hLB⟩, hNe, hN24⟩ := hN1 N hN
+  have hN1' : 1 ≤ N := le_trans (by norm_num) hN24
+  have hNpos : 0 < N := by linarith
+  set L := Real.log N with hLdef
+  have hL1 : 1 ≤ L := (Real.le_log_iff_exp_le hNpos).mpr hNe
+  have hL0 : 0 < L := by linarith
+  have hP : N ^ ((7 : ℝ) / 12) ≤ Y :=
+    (Real.rpow_le_rpow_of_exponent_le hN1' (by linarith)).trans hY
+  have hY1 : 1 ≤ Y := (Real.one_le_rpow hN1' (by norm_num)).trans hP
+  have hY0 : 0 < Y := by linarith
+  have hε5 : ε ≤ 5 / 12 := by
+    by_contra hc
+    push_neg at hc
+    have h1 : N ^ (1 : ℝ) < N ^ (7 / 12 + ε) :=
+      Real.rpow_lt_rpow_of_exponent_lt (by linarith) (by linarith)
+    rw [Real.rpow_one] at h1
+    linarith
+  have hBA : 2 * A + 3 ≤ B := by
+    rw [hBdef]
+    have : (1 : ℝ) ≤ 3 / ε := by rw [le_div_iff₀ hε]; linarith
+    nlinarith
+  have hLBpos : 0 < L ^ B := Real.rpow_pos_of_pos hL0 _
+  have hLBA : L ^ (-B) ≤ L ^ (-(2 * A + 3)) :=
+    Real.rpow_le_rpow_of_exponent_le hL1 (by linarith)
+  have hLnegB : L ^ (-B) = 1 / L ^ B := by rw [Real.rpow_neg hL0.le, one_div]
+  have hL2B : L ^ (2 * B) = L ^ B * L ^ B := by
+    rw [two_mul, Real.rpow_add hL0]
+  have hRHS0 : 0 ≤ 8 * Y * L ^ (-(2 * A + 3)) := by positivity
+  set Q := Qs Y ε with hQdef
+  have hQ2 : 2 ≤ Q := Qs_ge_two hε hN24 hY
+  have hQ0 : 0 < Q := by linarith
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast hq1
+  have hqQ1 : 1 / ((q : ℝ) * Q) ≤ 1 / 2 := by
+    have hq1r : (1 : ℝ) ≤ q := by exact_mod_cast hq1
+    apply one_div_le_one_div_of_le (by norm_num)
+    nlinarith
+  set c : ℝ := (a : ℝ) / q with hcdef
+  set m : ℂ := (ArithmeticFunction.moebius q : ℂ) / (q.totient : ℂ) with hmdef
+  have hφ1 : (1 : ℝ) ≤ q.totient := by exact_mod_cast Nat.totient_pos.2 (by omega)
+  have hm : ‖m‖ ≤ 1 / (q.totient : ℝ) := by
+    rw [hmdef, norm_div, Complex.norm_natCast]
+    apply div_le_div_of_nonneg_right _ (by linarith)
+    rw [Complex.norm_intCast]
+    exact_mod_cast ArithmeticFunction.abs_moebius_le_one
+  have hm0 : 0 ≤ ‖m‖ := norm_nonneg _
+  have hm1 : ‖m‖ ≤ 1 := hm.trans (by rw [div_le_one (by linarith)]; exact hφ1)
+  set F : ℝ → ℝ := fun η => ‖m‖ ^ 2 * ‖T2 Y η‖ ^ 2 with hFdef
+  have hT2c : Continuous (fun η => T2 Y η) := by
+    unfold T2 phase LeanLab.PNTPort.LargeSieve.e; fun_prop
+  have hFc : Continuous F := by rw [hFdef]; fun_prop
+  have hfun : (fun α => ‖m * T2 Y (α - c)‖ ^ 2) = fun α => F (α - c) := by
+    funext α; rw [hFdef, norm_mul, mul_pow]
+  change ∫ α in fareyArc Y ε q a ∩ minorArcs N Y ε A, ‖m * T2 Y (α - c)‖ ^ 2 ≤ _
+  rw [hfun]
+  set S := fareyArc Y ε q a ∩ minorArcs N Y ε A with hSdef
+  -- membership facts for α in S
+  have hSfar : ∀ α ∈ S, |α - c| ≤ 1 / ((q : ℝ) * Q) := by
+    intro α hα
+    have h := hα.1
+    simp only [fareyArc, Set.mem_Icc] at h
+    rw [abs_le]
+    constructor <;> linarith [h.1, h.2]
+  -- the general bound through a measurable compact `K` containing the shifted set
+  have hgen : ∀ K : Set ℝ, IsCompact K → (∀ α ∈ S, α - c ∈ K) →
+      ∫ α in S, F (α - c) ≤ ∫ η in K, F η := by
+    intro K hK hSK
+    have hTc : IsCompact ((fun α => α - c) ⁻¹' K) :=
+      (Homeomorph.subRight c).isCompact_preimage.2 hK
+    have hint : IntegrableOn (fun α => F (α - c)) ((fun α => α - c) ⁻¹' K) volume :=
+      (hFc.comp (continuous_sub_right c)).continuousOn.integrableOn_compact hTc
+    calc ∫ α in S, F (α - c) ≤ ∫ α in (fun α => α - c) ⁻¹' K, F (α - c) :=
+          setIntegral_mono_set hint (Filter.Eventually.of_forall fun _ => by positivity)
+            (Filter.Eventually.of_forall fun α hα => hSK α hα)
+      _ = ∫ η in K, F η := b4_translate F c K
+  have hFK : ∀ K : Set ℝ, MeasurableSet K →
+      ∫ η in K, F η = ‖m‖ ^ 2 * ∫ η in K, ‖T2 Y η‖ ^ 2 := by
+    intro K _
+    rw [hFdef]; exact integral_const_mul _ _
+  by_cases hbig : L ^ B < q
+  · -- large moduli: Parseval
+    have hK : ∀ α ∈ S, α - c ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2) := by
+      intro α hα
+      have := (hSfar α hα).trans hqQ1
+      exact ⟨by linarith [(abs_le.mp this).1], by linarith [(abs_le.mp this).2]⟩
+    refine (hgen _ isCompact_Icc hK).trans ?_
+    rw [hFK _ measurableSet_Icc]
+    have hpar : ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2), ‖T2 Y η‖ ^ 2 ≤ Y + 1 :=
+      Split398aMajor.parseval_window 0 Y hY0.le subset_rfl
+    have hφq : (q : ℝ) ≤ 4 * (q.totient : ℝ) ^ 2 := b4_le_four_totient_sq q hq1
+    have hm2 : ‖m‖ ^ 2 ≤ 4 / (q : ℝ) := by
+      calc ‖m‖ ^ 2 ≤ (1 / (q.totient : ℝ)) ^ 2 := pow_le_pow_left₀ hm0 hm 2
+        _ = 1 / (q.totient : ℝ) ^ 2 := by rw [one_div_pow]
+        _ ≤ 4 / (q : ℝ) := by
+            rw [div_le_div_iff₀ (by positivity) hq0]; linarith
+    have h4q : 4 / (q : ℝ) ≤ 4 * L ^ (-B) := by
+      rw [hLnegB, mul_one_div]
+      exact div_le_div_of_nonneg_left (by norm_num) hLBpos hbig.le
+    have hI0 : 0 ≤ ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2), ‖T2 Y η‖ ^ 2 :=
+      setIntegral_nonneg measurableSet_Icc (fun _ _ => by positivity)
+    calc ‖m‖ ^ 2 * ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2), ‖T2 Y η‖ ^ 2
+        ≤ (4 * L ^ (-B)) * (Y + 1) := mul_le_mul (hm2.trans h4q) hpar hI0 (by positivity)
+      _ ≤ (4 * L ^ (-(2 * A + 3))) * (2 * Y) := by
+          apply mul_le_mul (by linarith) (by linarith) (by linarith) (by positivity)
+      _ = 8 * Y * L ^ (-(2 * A + 3)) := by ring
+  push_neg at hbig
+  by_cases hagood : 1 ≤ a ∧ a ≤ q
+  · -- small moduli, a reduced residue: the arc minus the major arc
+    set w := L ^ (2 * B) / ((q : ℝ) * Y) with hwdef
+    have hW : 0 < L ^ (2 * B) := Real.rpow_pos_of_pos hL0 _
+    have hw0 : 0 < w := by rw [hwdef]; positivity
+    have hw : w ≤ 1 / 2 := by
+      rw [hwdef, div_le_iff₀ (by positivity)]
+      have hqY : Y ≤ (q : ℝ) * Y := le_mul_of_one_le_left hY0.le (by exact_mod_cast hq1)
+      nlinarith
+    have hK : ∀ α ∈ S, α - c ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w := by
+      intro α hα
+      have h1 := (hSfar α hα).trans hqQ1
+      refine ⟨⟨by linarith [(abs_le.mp h1).1], by linarith [(abs_le.mp h1).2]⟩, ?_⟩
+      rintro ⟨hlo, hhi⟩
+      have hmin := hα.2
+      simp only [minorArcs, Set.mem_diff] at hmin
+      apply hmin.2
+      refine ⟨hmin.1, q, a, hq1, ?_, hagood.1, hagood.2, hcop, ?_⟩
+      · exact hbig
+      · rw [abs_lt]; exact ⟨hlo, hhi⟩
+    have hKc : IsCompact (Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w) :=
+      isCompact_Icc.diff isOpen_Ioo
+    have hKm : MeasurableSet (Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w) :=
+      measurableSet_Icc.diff measurableSet_Ioo
+    refine (hgen _ hKc hK).trans ?_
+    rw [hFK _ hKm]
+    have hpt : ∀ η ∈ Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w,
+        ‖T2 Y η‖ ^ 2 ≤ 1 / (4 * η ^ 2) := by
+      intro η hη
+      have habs1 : |η| ≤ 1 / 2 := abs_le.mpr ⟨hη.1.1, hη.1.2⟩
+      have habs0 : w ≤ |η| := by
+        by_contra hc
+        rw [not_le, abs_lt] at hc
+        exact hη.2 hc
+      have hpos : 0 < |η| := by linarith
+      have b2 := Split398aMajor.window_bound 0 Y le_rfl hY0.le hpos habs1
+      have hT : ‖T2 Y η‖ ≤ 1 / (2 * |η|) := b2
+      calc ‖T2 Y η‖ ^ 2 ≤ (1 / (2 * |η|)) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) hT 2
+        _ = 1 / (4 * η ^ 2) := by
+            rw [show η ^ 2 = |η| ^ 2 from (sq_abs η).symm]; field_simp; ring
+    have hint2 : IntegrableOn (fun η : ℝ => 1 / (4 * η ^ 2))
+        (Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w) := by
+      apply ContinuousOn.integrableOn_compact hKc
+      apply ContinuousOn.div continuousOn_const (by fun_prop)
+      intro x hx
+      have : w ≤ |x| := by
+        by_contra hc
+        rw [not_le, abs_lt] at hc
+        exact hx.2 hc
+      have : x ≠ 0 := by intro h0; rw [h0, abs_zero] at this; linarith
+      positivity
+    have hTi : IntegrableOn (fun η => ‖T2 Y η‖ ^ 2)
+        (Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w) :=
+      (hT2c.norm.pow 2).continuousOn.integrableOn_compact hKc
+    have hI : ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w, ‖T2 Y η‖ ^ 2 ≤
+        1 / (2 * w) :=
+      (setIntegral_mono_on hTi hint2 hKm hpt).trans (Split398aMajor.tail_integral hw0 hw)
+    have hI0 : 0 ≤ ∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w, ‖T2 Y η‖ ^ 2 :=
+      setIntegral_nonneg hKm (fun _ _ => by positivity)
+    have hm2 : ‖m‖ ^ 2 ≤ 1 := by nlinarith
+    have hw' : 1 / (2 * w) ≤ Y * L ^ (-B) / 2 := by
+      have hqne : (q : ℝ) ≠ 0 := hq0.ne'
+      have hYne : Y ≠ 0 := hY0.ne'
+      have hLne : L ^ B ≠ 0 := hLBpos.ne'
+      have e1 : 1 / (2 * w) = (q : ℝ) * Y / (2 * (L ^ B * L ^ B)) := by
+        rw [hwdef, hL2B]
+        first | (field_simp; done) | (field_simp; ring)
+      have e2 : L ^ B * Y / (2 * (L ^ B * L ^ B)) = Y * L ^ (-B) / 2 := by
+        rw [hLnegB]
+        first | (field_simp; done) | (field_simp; ring)
+      rw [e1, ← e2]
+      apply div_le_div_of_nonneg_right _ (by positivity)
+      exact mul_le_mul_of_nonneg_right hbig hY0.le
+    generalize hIg : (∫ η in Set.Icc (-(1 / 2 : ℝ)) (1 / 2) \ Set.Ioo (-w) w, ‖T2 Y η‖ ^ 2) = I
+      at hI hI0 ⊢
+    have hIb : I ≤ Y * L ^ (-B) / 2 := hI.trans hw'
+    have hmI : ‖m‖ ^ 2 * I ≤ 1 * I := mul_le_mul_of_nonneg_right hm2 hI0
+    have h3 : Y * L ^ (-B) ≤ Y * L ^ (-(2 * A + 3)) :=
+      mul_le_mul_of_nonneg_left hLBA hY0.le
+    have h4 : 0 ≤ Y * L ^ (-(2 * A + 3)) := by positivity
+    linarith
+  · -- a = 0 or a > q: the arc meets the base interval in at most the point 1/Q
+    have hsing : S ⊆ {1 / Q} := by
+      intro α hα
+      have hfa := hα.1
+      have hbase := hα.2.1
+      simp only [fareyArc, Set.mem_Icc] at hfa
+      simp only [arcBase, Set.mem_Icc] at hbase
+      have hQe : Real.sqrt (Y ^ (1 / 3 + ε)) / 2 = Q := rfl
+      rw [hQe] at hbase
+      rcases Nat.eq_zero_or_pos a with ha0 | hapos
+      · -- a = 0 forces q = 1
+        have hq : q = 1 := by rw [ha0] at hcop; exact Nat.coprime_zero_left q |>.mp hcop
+        subst hq
+        rw [ha0] at hfa
+        simp only [Nat.cast_zero, Nat.cast_one, zero_div, zero_add, one_mul] at hfa
+        exact le_antisymm hfa.2 hbase.1
+      · exfalso
+        have haq : q + 1 ≤ a := by
+          by_contra hc; push_neg at hc; exact hagood ⟨hapos, by omega⟩
+        have haq' : ((q : ℝ) + 1) ≤ a := by exact_mod_cast haq
+        -- Q ≥ N^(7/72)/2 > 2 L^B ≥ 2 q, so q < Q - 1
+        have hQlow : N ^ ((7 : ℝ) / 72) / 2 ≤ Q := by
+          rw [hQdef]; unfold Qs Hs
+          have h1 : Y ^ ((1 : ℝ) / 3) ≤ Y ^ (1 / 3 + ε) :=
+            Real.rpow_le_rpow_of_exponent_le hY1 (le_add_of_nonneg_right hε.le)
+          have h2 : N ^ ((7 : ℝ) / 36) ≤ Y ^ ((1 : ℝ) / 3) := by
+            rw [show ((7 : ℝ) / 36) = 7 / 12 * (1 / 3) by norm_num, Real.rpow_mul hNpos.le]
+            exact Real.rpow_le_rpow (by positivity) hP (by norm_num)
+          have h3 : N ^ ((7 : ℝ) / 72) = Real.sqrt (N ^ ((7 : ℝ) / 36)) := by
+            rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hNpos.le]; norm_num
+          rw [h3]
+          have h4 := Real.sqrt_le_sqrt (h2.trans h1)
+          linarith only [h4]
+        have hqsmall : (q : ℝ) ≤ 1 / 8 * N ^ ((7 : ℝ) / 72) := hbig.trans hLB
+        have hNp : 0 < N ^ ((7 : ℝ) / 72) := Real.rpow_pos_of_pos hNpos _
+        have hq1r : (1 : ℝ) ≤ q := by exact_mod_cast hq1
+        have hlt : (q : ℝ) < Q - 1 := by linarith only [hq1r, hqsmall, hQlow]
+        -- from the two intervals: (q+1)/q - 1/(qQ) ≤ α ≤ 1 + 1/Q
+        have hle : (a : ℝ) / q - 1 / ((q : ℝ) * Q) ≤ 1 + 1 / Q := hfa.1.trans hbase.2
+        have hge : ((q : ℝ) + 1) / q ≤ (a : ℝ) / q := div_le_div_of_nonneg_right haq' hq0.le
+        have key : ((q : ℝ) + 1) / q - 1 / ((q : ℝ) * Q) ≤ 1 + 1 / Q := by linarith
+        have hqne : (q : ℝ) ≠ 0 := hq0.ne'
+        have hQne : Q ≠ 0 := hQ0.ne'
+        have hid : ((q : ℝ) + 1) / q - 1 / ((q : ℝ) * Q) - (1 + 1 / Q) =
+            (Q - 1 - q) / ((q : ℝ) * Q) := by
+          first | (field_simp; done) | (field_simp; ring)
+        have hpos : 0 < (Q - 1 - q) / ((q : ℝ) * Q) :=
+          div_pos (by linarith only [hlt]) (by positivity)
+        linarith only [key, hid, hpos]
+    have hnull : volume S = 0 := measure_mono_null hsing (Real.volume_singleton)
+    rw [setIntegral_measure_zero _ hnull]
+    exact hRHS0
 
 /-- PP1993 p. 47 display 15, the splitting `S2(a/q + η) = μ(q)/φ(q) T2(η) + R2(η, q, a)`.
 PROVED, by the definition of R2. -/
