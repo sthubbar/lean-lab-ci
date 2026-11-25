@@ -1,4 +1,6 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_near_zero_selected
+import LeanLab.ExceptionalSet.Feed1122_near_zero_page_bound_split
+import LeanLab.ExceptionalSet.Feed1122_near_zero_conductor_power_s134
 
 /-!
 Feed 1122, wave 2: a split of `leaf_near_zero_even_index` along the analytic chain of
@@ -61,8 +63,9 @@ is positive for every conductor. -/
 theorem leaf_near_zero_page_bound :
     ∃ c : ℝ, 0 < c ∧ ∀ (r : ℕ) (_ : NeZero r) (χ : DirichletCharacter ℂ r) (β : ℝ),
       χ.IsPrimitive → χ ^ 2 = 1 → χ ≠ 1 → 0 < β → β < 1 → χ.LFunction β = 0 →
-        c / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) ≤ 1 - β := by
-  sorry
+        c / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) ≤ 1 - β :=
+  -- CLOUD S134: proved in `Feed1122_near_zero_page_bound_split.lean` from the lab zero gap.
+  leaf_near_zero_page_bound_of_leaves
 
 /-- LEAF: P0082 page 364 last lines, the step from display 10 to `X calE^(-1/10)`. MEDIUM.
 For `1 ≤ r ≤ calE^(1/7)` one has `r^(-1/2) (log r)^(-2) ≥ calE^(-1/14) (log calE)^(-2)`, and this
@@ -70,8 +73,9 @@ is at least `calE^(-1/10)` once `N` is large, since `calE` tends to infinity for
 theorem leaf_near_zero_conductor_power (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
     (κ : ℝ) (hκ : 0 < κ) :
     ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ r : ℕ, 1 ≤ r → (r : ℝ) ≤ calE γ κ N ^ (1 / 7 : ℝ) →
-      calE γ κ N ^ (-(1 / 10 : ℝ)) ≤ 1 / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) := by
-  sorry
+      calE γ κ N ^ (-(1 / 10 : ℝ)) ≤ 1 / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) :=
+  -- CLOUD S134: proved in `Feed1122_near_zero_conductor_power_s134.lean`.
+  leaf_near_zero_conductor_power_s134 γ h1 h2 κ hκ
 
 /-- Proved helper: the branch of `SelectedRealZero` without an exceptional zero has `r = 1`,
 which is incompatible with a nontrivial common divisor. -/
