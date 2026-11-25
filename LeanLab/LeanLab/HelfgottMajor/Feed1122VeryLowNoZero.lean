@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_very_low_mult_le
+import LeanLab.HelfgottMajor.Feed1122ZetaLowBox
 
 /-!
 # `very_low_no_zero_of_im_pos_le_one` is FALSE; repaired split, burst 20261122
@@ -39,12 +40,17 @@ open LeanLab.HelfgottMajor.ZeroCount1623
 
 variable {q : ℕ} [NeZero q]
 
-/-- LEAF: Section 4.6 page 56 of arXiv 1305.2897v4, Platt's verification [Pla11], conductor 1. HARD.
+/-- Reduced burst S126 to the Euler Maclaurin leaf `riemannZeta_eq_EM2` of `Feed1122ZetaLowBox`; was a HARD LEAF, Section 4.6 page 56 of arXiv 1305.2897v4, conductor 1.
 The Riemann zeta function has no zero `ρ` with `0 < Re ρ < 1` and `0 < Im ρ ≤ 1`; its lowest
 nontrivial zero has height about `14.13`. -/
 theorem noLowZero_level_one (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hq : q = 1) :
     ∀ ρ : ℂ, DirichletCharacter.LFunction χ ρ = 0 → 0 < ρ.re → ρ.re < 1 → 0 < ρ.im → 1 < ρ.im := by
-  sorry
+  subst hq
+  intro ρ hL h0 h1 ht0
+  rw [DirichletCharacter.LFunction_modOne_eq] at hL
+  by_contra hle
+  exact LeanLab.HelfgottMajor.Feed1122ZetaLowBox.riemannZeta_ne_zero_lowbox ρ h0 h1 ht0
+    (not_lt.mp hle) hL
 
 /-- LEAF: Section 4.6 page 56 of arXiv 1305.2897v4, Platt's verification [Pla11], conductor 3. HARD.
 The primitive character of conductor `3` has no zero in `(0,1) × (0,1]`. -/
