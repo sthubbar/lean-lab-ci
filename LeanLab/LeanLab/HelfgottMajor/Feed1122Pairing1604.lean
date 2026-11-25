@@ -61,6 +61,75 @@ theorem leaf_pointwise_mass_bound_feed1122 (q : ℕ) [NeZero q] (χ : DirichletC
   unfold mellinMassTerm
   exact mul_le_mul_of_nonneg_left hn (Nat.cast_nonneg _)
 
+/-- Norm of a Dirichlet character value at a unit is one: the value is a root of unity. -/
+private lemma feed_norm_apply_unit {M : ℕ} [NeZero M] (ψ : DirichletCharacter ℂ M)
+    (u : (ZMod M)ˣ) : ‖ψ (u : ZMod M)‖ = 1 := by
+  have hcoe : ((ψ.toUnitHom u : ℂˣ) : ℂ) = ψ (u : ZMod M) := MulChar.coe_toUnitHom ψ u
+  have h1 : ψ.toUnitHom u ^ Fintype.card (ZMod M)ˣ = 1 := by
+    rw [← map_pow, pow_card_eq_one (x := u), map_one]
+  have hpow : ((ψ.toUnitHom u : ℂˣ) : ℂ) ^ Fintype.card (ZMod M)ˣ = 1 := by
+    rw [← Units.val_pow_eq_pow_val, h1, Units.val_one]
+  have hnorm : ‖((ψ.toUnitHom u : ℂˣ) : ℂ)‖ ^ Fintype.card (ZMod M)ˣ = 1 := by
+    rw [← norm_pow, hpow, norm_one]
+  have hcard : Fintype.card (ZMod M)ˣ ≠ 0 := (Fintype.card_pos (α := (ZMod M)ˣ)).ne'
+  rw [← hcoe]
+  exact (pow_eq_one_iff_of_nonneg (norm_nonneg _) hcard).mp hnorm
+
+/-- One Euler factor of a character of level `M` does not vanish in the open strip: at a prime
+dividing the level the character value is zero, and otherwise the factor vanishes only where
+`‖p^{-s}‖ = 1`, that is on the imaginary axis. -/
+private lemma feed_euler_factor_ne_zero {M : ℕ} [NeZero M] (ψ : DirichletCharacter ℂ M)
+    (p : ℕ) (hp : p.Prime) (s : ℂ) (h0 : 0 < s.re) (_h1 : s.re < 1) :
+    1 - ψ (p : ZMod M) * (p : ℂ) ^ (-s) ≠ 0 := by
+  intro hzero
+  by_cases hdvd : p ∣ M
+  · have hnu : ¬ IsUnit ((p : ZMod M)) := by
+      rw [ZMod.isUnit_prime_iff_not_dvd hp]; exact not_not.mpr hdvd
+    rw [MulChar.map_nonunit ψ hnu, zero_mul, sub_zero] at hzero
+    exact one_ne_zero hzero
+  · have hu : IsUnit ((p : ZMod M)) := (ZMod.isUnit_prime_iff_not_dvd hp).mpr hdvd
+    have hψ1 : ‖ψ (p : ZMod M)‖ = 1 := by
+      simpa only [hu.unit_spec] using feed_norm_apply_unit ψ hu.unit
+    have hcv : ((p : ℝ) : ℂ) = (p : ℂ) := by push_cast; ring
+    have hmul : ψ (p : ZMod M) * (p : ℂ) ^ (-s) = 1 := (sub_eq_zero.mp hzero).symm
+    have hn := congrArg norm hmul
+    rw [norm_mul, hψ1, one_mul, ← hcv,
+      Complex.norm_cpow_eq_rpow_re_of_pos (by exact_mod_cast hp.pos : (0 : ℝ) < (p : ℝ)),
+      Complex.neg_re, norm_one] at hn
+    have hp1 : (1 : ℝ) < (p : ℝ) := by exact_mod_cast hp.one_lt
+    have hlt : (p : ℝ) ^ (-s.re) < (p : ℝ) ^ (0 : ℝ) := by
+      rw [Real.rpow_lt_rpow_left_iff hp1]; linarith
+    rw [Real.rpow_zero] at hlt
+    linarith
+
+/-- The finite Euler product of the induced level is nonzero in the open strip. -/
+private lemma feed_euler_prod_ne_zero {M q : ℕ} [NeZero M] (ψ : DirichletCharacter ℂ M)
+    (s : ℂ) (h0 : 0 < s.re) (h1 : s.re < 1) :
+    (∏ p ∈ q.primeFactors, (1 - ψ (p : ZMod M) * (p : ℂ) ^ (-s))) ≠ 0 := by
+  rw [Finset.prod_ne_zero_iff]
+  intro p hp
+  exact feed_euler_factor_ne_zero ψ p (Nat.mem_primeFactors.mp hp).1 s h0 h1
+
+/-- The finite Euler product of the induced level is analytic. -/
+private lemma feed_analyticAt_euler_prod {M q : ℕ} [NeZero M] (ψ : DirichletCharacter ℂ M) (s : ℂ) :
+    AnalyticAt ℂ (fun z : ℂ => ∏ p ∈ q.primeFactors,
+      (1 - ψ (p : ZMod M) * (p : ℂ) ^ (-z))) s := by
+  have hd : ∀ z : ℂ, DifferentiableAt ℂ (fun w : ℂ => ∏ p ∈ q.primeFactors,
+      (1 - ψ (p : ZMod M) * (p : ℂ) ^ (-w))) z := by
+    intro z
+    refine .fun_finsetProd (fun p hp => ?_)
+    have hp' : p.Prime := (Nat.mem_primeFactors.mp hp).1
+    have hc : (p : ℂ) ≠ 0 := by
+      have h0 : (0 : ℕ) < p := hp'.pos
+      exact_mod_cast h0.ne'
+    have hc' : DifferentiableAt ℂ (fun w : ℂ => (p : ℂ) ^ (-w)) z :=
+      DifferentiableAt.const_cpow (by fun_prop) (Or.inl hc)
+    have h1 : DifferentiableAt ℂ (fun _ : ℂ => (1 : ℂ)) z := differentiableAt_const _
+    have h2 : DifferentiableAt ℂ (fun _ : ℂ => ψ (p : ZMod M)) z := differentiableAt_const _
+    exact DifferentiableAt.sub h1 (DifferentiableAt.mul h2 hc')
+  refine DifferentiableOn.analyticAt (s := Set.univ) (fun z _ => (hd z).differentiableWithinAt) ?_
+  exact Filter.univ_mem
+
 /-- LEAF: P0014 Lemma 4.5 page 41 with Lemma 4.3 pages 37 and 38, summability of the two
 sided envelope sum. MEDIUM. Over the strip zeros of L of s and chi above height T in absolute
 value, the multiplicity times the two branch envelope is summable. Route: reduce to the
@@ -74,7 +143,74 @@ theorem leaf_two_sided_envelope_summable (q : ℕ) [NeZero q] (χ : DirichletCha
         (ZeroCount1623.mult χ ρ.val : ℝ) *
           (Real.exp (-0.1598 * |ρ.val.im|) +
             if δ = 0 then 0 else Real.exp (-0.1065 * (ρ.val.im / (π * |δ|)) ^ 2))) := by
-  sorry
+  classical
+  haveI : NeZero χ.conductor := ⟨DirichletCharacter.conductor_ne_zero χ⟩
+  set ψ : DirichletCharacter ℂ χ.conductor := χ.primitiveCharacter with hψ
+  set E : ℂ → ℂ := fun z => ∏ p ∈ q.primeFactors,
+    (1 - ψ (p : ZMod χ.conductor) * (p : ℂ) ^ (-z)) with hEdef
+  have hψprim : ψ.IsPrimitive := by
+    rw [hψ]; exact DirichletCharacter.primitiveCharacter_isPrimitive χ
+  have hfactor : ∀ z : ℂ, z ≠ 1 → DirichletCharacter.LFunction χ z =
+      DirichletCharacter.LFunction ψ z * E z := by
+    intro z hz
+    have hch : DirichletCharacter.changeLevel χ.conductor_dvd_level ψ = χ := by
+      rw [hψ]; exact DirichletCharacter.changeLevel_primitiveCharacter χ
+    have h := DirichletCharacter.LFunction_changeLevel (M := χ.conductor) (N := q)
+      χ.conductor_dvd_level ψ (Or.inr hz)
+    rw [hch] at h
+    rw [h, hEdef]
+  have hEan : ∀ z : ℂ, AnalyticAt ℂ E z := by
+    intro z; rw [hEdef]; exact feed_analyticAt_euler_prod ψ z
+  have hEne : ∀ z : ℂ, 0 < z.re → z.re < 1 → E z ≠ 0 := by
+    intro z h0 h1; rw [hEdef]; exact feed_euler_prod_ne_zero ψ z h0 h1
+  have hmult : ∀ ρ : ℂ, 0 < ρ.re → ρ.re < 1 →
+      ZeroCount1623.mult χ ρ = ZeroCount1623.mult ψ ρ := by
+    intro ρ h0 h1
+    have hρ1 : ρ ≠ 1 := by intro h; rw [h] at h1; simp at h1
+    have hψan : AnalyticAt ℂ (DirichletCharacter.LFunction ψ) ρ :=
+      (by
+        refine DifferentiableOn.analyticAt (s := ({1}ᶜ : Set ℂ)) ?_ ?_
+        · intro w hw
+          exact (DirichletCharacter.differentiableAt_LFunction ψ w (Or.inl hw)).differentiableWithinAt
+        · exact isOpen_compl_singleton.mem_nhds hρ1)
+    have hev : DirichletCharacter.LFunction χ =ᶠ[nhds ρ]
+        (DirichletCharacter.LFunction ψ * E) := by
+      filter_upwards [isOpen_compl_singleton.mem_nhds hρ1] with z hz
+      exact hfactor z hz
+    have horders : analyticOrderAt (DirichletCharacter.LFunction χ) ρ =
+        analyticOrderAt (DirichletCharacter.LFunction ψ) ρ := by
+      rw [analyticOrderAt_congr hev]
+      by_cases htop : analyticOrderAt (DirichletCharacter.LFunction ψ) ρ = ⊤
+      · rw [analyticOrderAt_mul_eq_top_of_left htop, htop]
+      · have hE0 : analyticOrderAt E ρ = 0 :=
+          ((hEan ρ).analyticOrderAt_eq_zero).mpr (hEne ρ h0 h1)
+        rw [analyticOrderAt_mul hψan (hEan ρ), hE0, add_zero]
+    exact congrArg ENat.toNat horders
+  have hzero : ∀ ρ : ℂ, (DirichletCharacter.LFunction χ ρ = 0 ∧
+      0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|) ↔
+      (DirichletCharacter.LFunction ψ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ T < |ρ.im|) := by
+    intro ρ
+    have hstrip : 0 < ρ.re → ρ.re < 1 → (DirichletCharacter.LFunction χ ρ = 0 ↔
+        DirichletCharacter.LFunction ψ ρ = 0) := by
+      intro h0 h1
+      have hρ1 : ρ ≠ 1 := by intro h; rw [h] at h1; simp at h1
+      rw [hfactor ρ hρ1, mul_eq_zero]
+      constructor
+      · rintro (h | h)
+        · exact h
+        · exact absurd h (hEne ρ h0 h1)
+      · exact Or.inl
+    constructor
+    · rintro ⟨hz, h0, h1, hT'⟩; exact ⟨(hstrip h0 h1).mp hz, h0, h1, hT'⟩
+    · rintro ⟨hz, h0, h1, hT'⟩; exact ⟨(hstrip h0 h1).mpr hz, h0, h1, hT'⟩
+  have hT1 : 1 ≤ T := by have := (le_max_right _ _).trans hT; linarith
+  have hψsum := tail_envelope_summable_of_shell_count ψ δ T (2 * (χ.conductor : ℝ) + 18) hT1
+    (tail_shell_count_le_quadratic ψ hψprim T)
+  have h₁ := (Equiv.summable_iff (Equiv.subtypeEquivRight hzero)).mpr hψsum
+  refine h₁.congr (fun ρ => ?_)
+  rw [hmult ρ.val ρ.property.2.1 ρ.property.2.2.1]
+  simp only [Function.comp_apply, Equiv.subtypeEquivRight_apply, div_pow, sq_abs]
+
 
 /-- LEAF: P0014 Lemma 4.5 page 41, displays 4.33 to 4.35, the half plane comparison that
 replaces the printed pairing of rho with 1 - rho. HARD. The envelope sum over the strip zeros
