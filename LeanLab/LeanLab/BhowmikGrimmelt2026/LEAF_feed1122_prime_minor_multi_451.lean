@@ -23,6 +23,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp451a
 import LeanLab.BhowmikGrimmelt2026.SPLIT_minor_bare_family328
+import LeanLab.BhowmikGrimmelt2026.LEAF_feed1122_prime_minor_multi_451_p2
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -41,8 +42,8 @@ of X times log X over log two. -/
 theorem leaf_nonprime_partial_feed1122 {X m : ℕ} (hX : 2 ≤ X) (hm : m ≤ X) (α : ℝ) :
     ‖Ssum m α - ∑ n ∈ (Finset.Icc 1 m).filter (fun n => n.Prime),
         (vonMangoldt n : ℂ) * ee (α * n)‖ ≤
-      2 * (X : ℝ) ^ (4 / 5 : ℝ) * Real.log X ^ 2 := by
-  sorry
+      2 * (X : ℝ) ^ (4 / 5 : ℝ) * Real.log X ^ 2 :=
+  nonprime_partial_aux451 hX hm α
 
 /-- PROVED in this file, no sorry. P0029 page 27, proof of Lemma 7.3, display 7.8, minor arc
 part, the transfer of the minor arc estimate from S to the smoothed sum S_phi by summation by
@@ -167,8 +168,8 @@ theorem leaf_prime_family_feed1122 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) :
           (∑ k ∈ (Finset.range (X + 1)).filter (fun k => k.Prime),
             ((vonMangoldt k * ϕ (k / N) : ℝ) : ℂ) * ee (α * k)) ^ 2 * W α *
             ee (-(N * α))‖ ^ 2 ≤
-        K * B ^ 2 * U ^ 2 * X * Real.log X := by
-  sorry
+        K * B ^ 2 * U ^ 2 * X * Real.log X :=
+  prime_family_aux451 hϕ
 
 /-- Assembly: `prime_minor_multi_451` with exactly its statement, from the reused leaf
 `split_leaf_ssum_minor_log2` and the three leaves above. -/
