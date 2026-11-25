@@ -47,8 +47,9 @@ theorem leaf_near_zero_odd_main_term (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
                 (r : ℝ) ≤ calE γ κ N ^ (1 / 7 : ℝ) →
                 c * (1 - β) * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re +
-                    A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n + 1) := by
-  sorry
+                    A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n + 1) :=
+  -- CLOUD S134: CONDITIONAL ON leaf_exceptional_main_term_lower, see Feed1122_near_zero_main_term_reroute_s134.lean.
+  leaf_near_zero_odd_main_term_s134 γ h1 h2 a ha
 
 /-- Assembly: verbatim statement of `leaf_near_zero_odd_index`, proved from the leaves. -/
 theorem leaf_near_zero_odd_index_feed (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
