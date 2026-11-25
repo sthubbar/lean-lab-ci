@@ -19,6 +19,7 @@ tacit triangle step of page 44.
 AI wrote the Lean code. Binary Goldbach is open; nothing here changes that.
 -/
 import LeanLab.BHP1997.Prep1121LowExcLemma29
+import LeanLab.BHP1997.S72MellinMeanValue
 
 namespace LeanLab.BHP1997.S64LowExcCharNP
 open Classical Complex DecompC165b LowerShortC165
@@ -65,8 +66,8 @@ theorem leaf_mellin_mean_value :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ Y : ℝ, 0 < Y → ∀ T : ℝ, 0 ≤ T → ∀ g : ℝ → ℂ, Continuous g →
       ∫ y in (Y / 2)..(3 * Y),
           ‖∫ t in (-T)..T, g t * (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2 ≤
-        K * Y ^ 2 * ∫ t in (-T)..T, ‖g t‖ ^ 2 := by
-  sorry
+        K * Y ^ 2 * ∫ t in (-T)..T, ‖g t‖ ^ 2 :=
+  LeanLab.BHP1997.S72MellinMV.mellin_mean_value_of_leaves
 
 /-- Page 3, the definition of Q: `Q ≤ Y^(1/16)` when `Y ≥ 1`. -/
 theorem sieveQ_le_sixteenth {ε x : ℝ} (hY : 1 ≤ x ^ (11 / 20 + ε)) :

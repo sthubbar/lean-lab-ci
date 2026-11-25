@@ -18,7 +18,7 @@ The rest is PROVED here: the factor identity `lowerFactor * V(s) / log Z = v0 / 
 from the existing `factor_unclipped_near_one` and `leaf_density_slope`; the summation by parts
 against the factor, whose increments are at most `1 / (2 Y)` by `factor_increment_of_density`;
 and the window as an integer interval. `sub_517_window_of_leaves` has exactly the statement of
-`sub_517_window`, checked by `sub_517_window_split_twin` in `DQ517WindowTwin.lean`.
+`sub_517_window`, checked by `sub_517_window_split_twin`.
 
 The `z'^2` part of the printed error is not needed in the lab form: the lab main term is
 constant per integer, by the U-1624 normalization, so no variation of the main term over the
@@ -26,9 +26,10 @@ window arises. The printed bound is still the conclusion, since `z0^2 ≥ 0`.
 
 No new definition. AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BHP1997.DQLowerExceptionalMeanSquareDecisions
+import LeanLab.BHP1997.DQLowerExceptional520Split
 import LeanLab.BHP1997.LowerPrincipal517e
 import LeanLab.BHP1997.DQ517StrongPNTInput
+import LeanLab.BHP1997.DQ517WindowLeaves
 
 namespace LeanLab.BHP1997.DQ517Window
 open Classical Complex Decomp132 DecompC165b DecompC165d LowerShortC165 LowerShortMeanSquare
@@ -213,7 +214,8 @@ theorem theta_window {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1/10^8) :
     _ = (4 * Cp + 32) * Y * Tm := by ring
     _ ≤ _ := by gcongr
 
-/-- LEAF: page 51 display 5.17, the E2 term of b0, the sum over `p1 p2 n3 = m` of display 5.15
+/-- CONDITIONAL ON the three LEAFs of `DQ517WindowLeaves`, by `two_window_of_leaves`; was a LEAF.
+Page 51 display 5.17, the E2 term of b0, the sum over `p1 p2 n3 = m` of display 5.15
 with exponents in E2 of page 51. HARD. P0069: "a straightforward consequence of the prime
 number theorem, with error term `Y exp(-ε L^(1/2))`", for `p1`, `p2` and the primes of the rough
 `n3`, with the Buchstab identity. Local density `(1 / log Z) ∫∫_{E2} ω((s - β1 - β2) / β2) /
@@ -229,9 +231,10 @@ theorem leaf_two_window (ω : ℝ → ℝ)
           lowerTwoDensityAt ω ε (Real.log m / Real.log (scaleZ ε x)) /
             Real.log (scaleZ ε x))| ≤
         C * x ^ (11 / 20 + ε) * (perronT0 x ^ 5)⁻¹ := by
-  sorry
+  exact two_window_of_leaves ω hω hz hε hε8
 
-/-- LEAF: page 51 display 5.17, the E4 term of b0, the sum over `p1 p2 p3 p4 n5 = m` with
+/-- CONDITIONAL ON the three LEAFs of `DQ517WindowLeaves`, by `four_window_of_leaves`; was a LEAF.
+Page 51 display 5.17, the E4 term of b0, the sum over `p1 p2 p3 p4 n5 = m` with
 exponents in E4 of page 51, reached from display 5.15 on page 50 by two more Buchstab steps.
 HARD. P0069 Baker Harman Pintz 1997: "a straightforward consequence of the prime number
 theorem, with error term `Y exp(-ε L^(1/2))`", applied to `p1` to `p4` and each prime factor of
@@ -248,7 +251,7 @@ theorem leaf_four_window (ω : ℝ → ℝ)
           lowerFourDensityAt ω ε (Real.log m / Real.log (scaleZ ε x)) /
             Real.log (scaleZ ε x))| ≤
         C * x ^ (11 / 20 + ε) * (perronT0 x ^ 5)⁻¹ := by
-  sorry
+  exact four_window_of_leaves ω hω hz hε hε8
 
 /-! ### Proved steps -/
 
@@ -617,8 +620,7 @@ theorem sub_517_window_of_leaves (ω : ℝ → ℝ)
           gcongr; linarith
         exact this.trans (by gcongr)
 
-/- Feed1122 S82: the twin check `sub_517_window_split_twin` moved to `DQ517WindowTwin.lean`,
-so that this file no longer imports `DQLowerExceptional520Split` and that file can import this
-one and close `sub_517_window` with `sub_517_window_of_leaves`. -/
+/-- Twin check: `sub_517_window_of_leaves` has exactly the type of `sub_517_window`. -/
+theorem sub_517_window_split_twin : type_of% @sub_517_window := @sub_517_window_of_leaves
 
 end LeanLab.BHP1997.DQ517Window
