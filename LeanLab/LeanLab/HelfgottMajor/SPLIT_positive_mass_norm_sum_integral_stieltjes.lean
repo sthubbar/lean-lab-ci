@@ -1,4 +1,4 @@
-import LeanLab.HelfgottMajor.Decomp431a
+import LeanLab.HelfgottMajor.SPLIT_stieltjes_positive_zero_sum_parts
 
 /-!
 Faithful Stieltjes split of `positive_mass_norm_sum_integral` in
@@ -67,7 +67,32 @@ theorem stieltjes_positive_zero_sum (q : ℕ) [NeZero q] (χ : DirichletCharacte
               0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
               (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) + c -
             t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) := by
-  sorry
+  obtain ⟨hI1, hI2, hI3⟩ := stieltjes_integrability q χ δ T hT
+  rw [stieltjes_sum_by_parts_N q χ δ T hT hzeros]
+  have hsplit :
+      (∫ t in (1 : ℝ)..T,
+        deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t *
+          ((∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+              0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
+              (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) + c -
+            t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) =
+      (∫ t in (1 : ℝ)..T,
+        deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t *
+          (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+              0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
+              (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ))) +
+        c * (∫ t in (1 : ℝ)..T,
+          deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t) -
+        (∫ t in (1 : ℝ)..T,
+          deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t *
+            (t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) := by
+    rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_add hI1
+      (hI2.const_mul c), ← intervalIntegral.integral_sub (hI1.add (hI2.const_mul c)) hI3]
+    congr 1
+    funext t
+    ring
+  rw [hsplit, norm_gaussianMellin_ftc δ T hT, main_term_by_parts q δ T hT]
+  ring
 
 /-- LEAF: the zero counting bound of book display 3.95, section 3.7.3.3, in the per sign form
 `N(t, χ) = (t / 2 π) log (q t / 2 π e) + O*(g_χ(t))` with `g_χ(t) = 0.15 log q t + 3.389`,
