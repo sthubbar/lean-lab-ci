@@ -37,6 +37,49 @@ open LeanLab.Linnik.Decomp1532b (majorArcs)
 open LeanLab.Linnik.U7204 (Sg primesLe)
 open LeanLab.Linnik.U1426ChainWire (Gs continuous_Gs)
 
+
+/-- Gallagher 1975 p.127 Theorem 3 and p.138 before display 5.
+For any finite collection of tuple pairs, its signed correlation error is at most
+the sum of the complex frequency errors on that same collection.
+This reduction does not assert that the frequency errors vanish.
+AI wrote the Lean code. Binary Goldbach is open. -/
+theorem small_shift_error_le_complex_sum (k L N : ℕ) (θ : ℝ)
+    (s : Finset (LeanLab.Linnik.Decomp1532a.pairs k L)) :
+    |(∑ x ∈ s, ∫ α in majorArcs N ((N : ℝ) ^ θ),
+        ‖Sg N α‖ ^ 2 *
+          (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) -
+      (∑ x ∈ s,
+        LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
+          (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
+      ∑ x ∈ s, LeanLab.Linnik.Decomp466a.complexFrequencyError N θ
+        (LeanLab.Linnik.Decomp1532a.dif x) := by
+  rw [← sum_sub_distrib]
+  refine (abs_sum_le_sum_abs _ _).trans (sum_le_sum fun x _ => ?_)
+  exact LeanLab.Linnik.Decomp466a.frequencyError_le_complexFrequencyError N θ _
+
+/-- Gallagher 1975 p.127 Theorem 3 and p.138 before display 5.
+An eventual bound for the sum of complex errors on a chosen family of finite
+collections implies the same eventual bound for their signed correlation errors.
+CONDITIONAL ON the supplied bound for the complex errors.
+AI wrote the Lean code. Binary Goldbach is open. -/
+theorem small_shift_eventual_bound_of_complex_sum (k : ℕ) (θ : ℝ)
+    (s : (N : ℕ) → Finset (LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N)))
+    (B : ℕ → ℝ)
+    (h : ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
+      (∑ x ∈ s N, LeanLab.Linnik.Decomp466a.complexFrequencyError N θ
+        (LeanLab.Linnik.Decomp1532a.dif x)) ≤ B N) :
+    ∃ Nk : ℕ, ∀ N : ℕ, Nk ≤ N →
+      |(∑ x ∈ s N, ∫ α in majorArcs N ((N : ℝ) ^ θ),
+          ‖Sg N α‖ ^ 2 *
+            (LeanLab.PNTPort.LargeSieve.e ((LeanLab.Linnik.Decomp1532a.dif x : ℝ) * α)).re) -
+        (∑ x ∈ s N,
+          LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
+            (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
+        B N := by
+  obtain ⟨Nk, hNk⟩ := h
+  exact ⟨Nk, fun N hN =>
+    (small_shift_error_le_complex_sum k (Nat.log 2 N) N θ (s N)).trans (hNk N hN)⟩
+
 /-- LEAF, OPEN. Lower band of the oscillating phase range. These are the tuples of the sealed range
 whose shift lies in `N ^ (θ / 2) < |dif x| ≤ N ^ (3 * θ / 4)`, where the shift is small enough
 against the arc width `N ^ θ / (q * N)` that the phase `dif x * α` moves by at most a constant
@@ -61,6 +104,17 @@ theorem small_shift_oscillating_mid_band :
               LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
                 (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 12) := by
+  classical
+  intro θ hθ hθ4 k hk δ hδ
+  apply small_shift_eventual_bound_of_complex_sum k θ
+  · intro N
+    exact Finset.univ.filter (fun x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) =>
+      LeanLab.Linnik.Decomp1532a.dif x ≠ 0 ∧
+        ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) ^ (θ / 2)) ∧
+        |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) ^ (3 * θ / 4) ∧
+        |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) ^ θ)
+  · intro N
+    exact (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 12)
   sorry
 
 /-- LEAF, OPEN. Upper band of the oscillating phase range. These are the tuples of the sealed range
@@ -87,6 +141,17 @@ theorem small_shift_oscillating_top_band :
               LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
                 (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 12) := by
+  classical
+  intro θ hθ hθ4 k hk δ hδ
+  apply small_shift_eventual_bound_of_complex_sum k θ
+  · intro N
+    exact Finset.univ.filter (fun x : LeanLab.Linnik.Decomp1532a.pairs k (Nat.log 2 N) =>
+      LeanLab.Linnik.Decomp1532a.dif x ≠ 0 ∧
+        ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) ^ (θ / 2)) ∧
+        ¬(|(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) ^ (3 * θ / 4)) ∧
+        |(LeanLab.Linnik.Decomp1532a.dif x : ℝ)| ≤ (N : ℝ) ^ θ)
+  · intro N
+    exact (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 12)
   sorry
 
 /-- ASSEMBLY. The sealed statement `split_small_shift_oscillating_phase`, from the two bands of the
