@@ -1,5 +1,8 @@
 import Mathlib.Data.Finset.NatDivisors
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+import Mathlib.NumberTheory.Harmonic.Bounds
+import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+import Mathlib.Analysis.SpecificLimits.Basic
 import LeanLab.Halupczok2012.Feed1122SawtoothSumBound
 import LeanLab.Halupczok2012.Feed1122HyperbolaIdentity
 
@@ -15,7 +18,7 @@ AI wrote the Lean code. Goldbach is open.
 
 namespace LeanLab.Halupczok2012.Feed1122VoronoiDivisorSumAsymptotic
 
-open Finset
+open Finset Filter Topology
 
 /-- Dirichlet hyperbola identity, formerly a leaf, the first step of the classical proof of the
 Voronoi formula cited on Halupczok page 337. For every real x at least one,
@@ -28,7 +31,137 @@ theorem hyperbola_identity :
         2 * ∑ m ∈ Icc 1 ⌊Real.sqrt x⌋₊, (⌊x / m⌋₊ : ℝ) - (⌊Real.sqrt x⌋₊ : ℝ) ^ 2 :=
   Feed1122HyperbolaIdentity.hyperbola_identity_of_leaves
 
-/-- LEAF: harmonic sum reduction in the classical proof of the Voronoi formula cited on
+/-! Helpers for the harmonic sum reduction: the second order Euler Maclaurin asymptotic
+H_s = log s + gamma + 1/(2s) + O(1/s^2), proved by telescoping with the series of
+log(1 + 1/n) in powers of 1/(2n+1). -/
+
+lemma log_one_add_inv_bounds (n : ℕ) (hn : 1 ≤ n) :
+    1 / (2 * (n : ℝ)) + 1 / (2 * ((n : ℝ) + 1)) - 1 / (n : ℝ) ^ 3 ≤ Real.log (1 + (n : ℝ)⁻¹) ∧
+    Real.log (1 + (n : ℝ)⁻¹) ≤ 1 / (2 * (n : ℝ)) + 1 / (2 * ((n : ℝ) + 1)) := by
+  have hn' : (1 : ℝ) ≤ n := by exact_mod_cast hn
+  have hpos : (0 : ℝ) < n := by linarith
+  have hs := Real.hasSum_log_one_add_inv hpos
+  set y : ℝ := 1 / (2 * (n : ℝ) + 1) with hy
+  have hy0 : 0 ≤ y := by rw [hy]; positivity
+  have hy3 : y ≤ 1 / 3 := by
+    rw [hy, div_le_div_iff₀ (by linarith) (by norm_num)]; linarith
+  have hy1 : y ^ 2 < 1 := by nlinarith
+  have hgeo : HasSum (fun k : ℕ => 2 * y * (y ^ 2) ^ k) (2 * y * (1 - y ^ 2)⁻¹) :=
+    (hasSum_geometric_of_lt_one (by positivity) hy1).mul_left (2 * y)
+  have hval : 2 * y * (1 - y ^ 2)⁻¹ = 1 / (2 * (n : ℝ)) + 1 / (2 * ((n : ℝ) + 1)) := by
+    have hq : 1 - y ^ 2 = 4 * (n : ℝ) * ((n : ℝ) + 1) / (2 * (n : ℝ) + 1) ^ 2 := by
+      rw [hy]; field_simp; ring
+    rw [hq, inv_div, hy]; field_simp; ring
+  constructor
+  · have h0 := le_hasSum hs 0 (fun j _ => by positivity)
+    have e0 : (2 : ℝ) * (1 / (2 * ((0 : ℕ) : ℝ) + 1)) * y ^ (2 * 0 + 1) = 2 * y := by norm_num
+    rw [e0] at h0
+    have e : 1 / (2 * (n : ℝ)) + 1 / (2 * ((n : ℝ) + 1)) - 2 * y =
+        1 / (2 * (n : ℝ) * ((n : ℝ) + 1) * (2 * (n : ℝ) + 1)) := by
+      rw [hy]; field_simp; ring
+    have h3 : 1 / (2 * (n : ℝ) * ((n : ℝ) + 1) * (2 * (n : ℝ) + 1)) ≤ 1 / (n : ℝ) ^ 3 := by
+      apply one_div_le_one_div_of_le (by positivity)
+      nlinarith [pow_pos hpos 3, pow_pos hpos 2, hpos]
+    linarith
+  · have hle := hasSum_le (fun k => ?_) hs hgeo
+    · linarith
+    · have e : y ^ (2 * k + 1) = y * (y ^ 2) ^ k := by rw [← pow_mul, pow_succ]; ring
+      rw [e]
+      have h1 : 1 / (2 * (k : ℝ) + 1) ≤ 1 := by
+        rw [div_le_one (by positivity)]; linarith [k.cast_nonneg (α := ℝ)]
+      have h2 : 0 ≤ y * (y ^ 2) ^ k := by positivity
+      nlinarith
+
+lemma inv_sq_diff (n : ℝ) (hn : 1 ≤ n) : 1 / (2 * n ^ 3) ≤ 1 / n ^ 2 - 1 / (n + 1) ^ 2 := by
+  have hp : 0 < n := by linarith
+  have e : 1 / n ^ 2 - 1 / (n + 1) ^ 2 = (2 * n + 1) / (n ^ 2 * (n + 1) ^ 2) := by
+    field_simp; ring
+  rw [e, div_le_div_iff₀ (by positivity) (by positivity)]
+  nlinarith [pow_pos hp 2, pow_pos hp 3, pow_pos hp 4]
+
+lemma a_diff (n : ℕ) (hn : 1 ≤ n) :
+    ((harmonic n : ℝ) - Real.log n - 1 / (2 * (n : ℝ))) -
+      ((harmonic (n + 1) : ℝ) - Real.log ((n + 1 : ℕ) : ℝ) - 1 / (2 * ((n + 1 : ℕ) : ℝ))) =
+      Real.log (1 + (n : ℝ)⁻¹) - (1 / (2 * (n : ℝ)) + 1 / (2 * ((n : ℝ) + 1))) := by
+  have hpos : (0 : ℝ) < n := by exact_mod_cast hn
+  have hl : Real.log ((n : ℝ) + 1) = Real.log n + Real.log (1 + (n : ℝ)⁻¹) := by
+    rw [← Real.log_mul hpos.ne' (by positivity)]
+    congr 1; field_simp
+  rw [harmonic_succ]; push_cast
+  rw [hl]
+  field_simp; ring
+
+lemma harmonic_asymp (s : ℕ) (hs : 1 ≤ s) :
+    |(harmonic s : ℝ) - Real.log s - 1 / (2 * (s : ℝ)) - Real.eulerMascheroniConstant| ≤
+      2 / (s : ℝ) ^ 2 := by
+  set A : ℕ → ℝ := fun m => (harmonic m : ℝ) - Real.log m - 1 / (2 * (m : ℝ)) with hA
+  have hstep : ∀ k : ℕ, -1 / ((k : ℝ) + 1) ^ 3 ≤ A (k + 1) - A (k + 1 + 1) ∧
+      A (k + 1) - A (k + 1 + 1) ≤ 0 := by
+    intro k
+    have hd := a_diff (k + 1) (by omega)
+    have hb := log_one_add_inv_bounds (k + 1) (by omega)
+    simp only [hA]
+    push_cast at hd hb ⊢
+    rw [hd]
+    constructor
+    · have : -1 / ((k : ℝ) + 1) ^ 3 = -(1 / ((k : ℝ) + 1) ^ 3) := by ring
+      rw [this]; linarith [hb.1]
+    · linarith [hb.2]
+  have hz : Tendsto (fun k : ℕ => 1 / ((k : ℝ) + 1)) atTop (𝓝 0) :=
+    tendsto_one_div_add_atTop_nhds_zero_nat
+  have h1 : Tendsto (fun k : ℕ => (harmonic (k + 1) : ℝ) - Real.log ((k + 1 : ℕ) : ℝ)) atTop
+      (𝓝 Real.eulerMascheroniConstant) :=
+    Real.tendsto_harmonic_sub_log.comp (tendsto_add_atTop_nat 1)
+  have hlim : Tendsto (fun k : ℕ => A (k + 1)) atTop (𝓝 Real.eulerMascheroniConstant) := by
+    have := h1.sub (hz.const_mul (1 / 2))
+    rw [mul_zero, sub_zero] at this
+    refine this.congr (fun k => ?_)
+    have e : (1 : ℝ) / (2 * ((k : ℝ) + 1)) = 1 / 2 * (1 / ((k : ℝ) + 1)) := by
+      rw [one_div_mul_one_div]
+    simp only [hA]; push_cast; rw [e]
+  have hsq : Tendsto (fun k : ℕ => 2 * (1 / ((k : ℝ) + 1)) ^ 2) atTop (𝓝 0) := by
+    have := (hz.pow 2).const_mul 2
+    simpa using this
+  have hU : Monotone (fun k : ℕ => A (k + 1) - 2 * (1 / ((k : ℝ) + 1)) ^ 2) := by
+    refine monotone_nat_of_le_succ (fun k => ?_)
+    have h := (hstep k).2
+    have hk : (1 : ℝ) ≤ (k : ℝ) + 1 := by linarith [k.cast_nonneg (α := ℝ)]
+    have hi := inv_sq_diff ((k : ℝ) + 1) hk
+    have hp : 0 ≤ 1 / (2 * ((k : ℝ) + 1) ^ 3) := by positivity
+    push_cast
+    have e1 : (1 / ((k : ℝ) + 1)) ^ 2 = 1 / ((k : ℝ) + 1) ^ 2 := by rw [div_pow, one_pow]
+    have e2 : (1 / ((k : ℝ) + 1 + 1)) ^ 2 = 1 / ((k : ℝ) + 1 + 1) ^ 2 := by rw [div_pow, one_pow]
+    rw [e1, e2]
+    linarith
+  have hV : Antitone (fun k : ℕ => A (k + 1) + 2 * (1 / ((k : ℝ) + 1)) ^ 2) := by
+    refine antitone_nat_of_succ_le (fun k => ?_)
+    have h := (hstep k).1
+    have hk : (1 : ℝ) ≤ (k : ℝ) + 1 := by linarith [k.cast_nonneg (α := ℝ)]
+    have hi := inv_sq_diff ((k : ℝ) + 1) hk
+    push_cast
+    have e1 : (1 / ((k : ℝ) + 1)) ^ 2 = 1 / ((k : ℝ) + 1) ^ 2 := by rw [div_pow, one_pow]
+    have e2 : (1 / ((k : ℝ) + 1 + 1)) ^ 2 = 1 / ((k : ℝ) + 1 + 1) ^ 2 := by rw [div_pow, one_pow]
+    have e3 : -1 / ((k : ℝ) + 1) ^ 3 = - (2 * (1 / (2 * ((k : ℝ) + 1) ^ 3))) := by
+      field_simp
+    rw [e1, e2]
+    rw [e3] at h
+    linarith
+  have hUl : Tendsto (fun k : ℕ => A (k + 1) - 2 * (1 / ((k : ℝ) + 1)) ^ 2) atTop
+      (𝓝 Real.eulerMascheroniConstant) := by
+    simpa using hlim.sub hsq
+  have hVl : Tendsto (fun k : ℕ => A (k + 1) + 2 * (1 / ((k : ℝ) + 1)) ^ 2) atTop
+      (𝓝 Real.eulerMascheroniConstant) := by
+    simpa using hlim.add hsq
+  obtain ⟨k, rfl⟩ : ∃ k, s = k + 1 := ⟨s - 1, by omega⟩
+  have hu := hU.ge_of_tendsto hUl k
+  have hv := hV.le_of_tendsto hVl k
+  have e : 2 * (1 / ((k : ℝ) + 1)) ^ 2 = 2 / (((k + 1 : ℕ) : ℝ)) ^ 2 := by
+    push_cast; rw [div_pow, one_pow]; ring
+  rw [e] at hu hv
+  rw [abs_le]
+  constructor <;> simp only [hA] at hu hv <;> linarith
+
+/-- Formerly LEAF, now proved: harmonic sum reduction in the classical proof of the Voronoi formula cited on
 Halupczok page 337. Writing floor of x over m as x over m minus one half minus the
 sawtooth, and using the harmonic sum up to the square root with Euler's constant,
 the hyperbola expression differs from the main term plus minus twice the sawtooth sum by
@@ -40,7 +173,110 @@ theorem harmonic_reduction :
         (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x) +
         2 * ∑ m ∈ Icc 1 ⌊Real.sqrt x⌋₊, (Int.fract (x / m) - 1 / 2)| ≤
           C * x ^ (1 / 3 : ℝ) * Real.log x := by
-  sorry
+  refine ⟨28, max 16 (Real.exp 1), by norm_num, fun x hx => ?_⟩
+  have hx16 : 16 ≤ x := (le_max_left _ _).trans hx
+  have hxe : Real.exp 1 ≤ x := (le_max_right _ _).trans hx
+  have hx0 : 0 < x := by linarith
+  set s : ℕ := ⌊Real.sqrt x⌋₊ with hs_def
+  have hsq0 : 0 ≤ Real.sqrt x := Real.sqrt_nonneg x
+  have hs4 : 4 ≤ s := by
+    apply Nat.le_floor
+    rw [Real.le_sqrt (by norm_num) hx0.le]; push_cast; linarith
+  have hsR : (4 : ℝ) ≤ s := by exact_mod_cast hs4
+  have hs0 : (0 : ℝ) < s := by linarith
+  have hsle : (s : ℝ) ≤ Real.sqrt x := Nat.floor_le hsq0
+  have hslt : Real.sqrt x < (s : ℝ) + 1 := Nat.lt_floor_add_one _
+  have hsx : (s : ℝ) ^ 2 ≤ x := by
+    have := pow_le_pow_left₀ hs0.le hsle 2
+    rwa [Real.sq_sqrt hx0.le] at this
+  have hxs : x < ((s : ℝ) + 1) ^ 2 := by
+    have := pow_lt_pow_left₀ hslt hsq0 (by norm_num : (2 : ℕ) ≠ 0)
+    rwa [Real.sq_sqrt hx0.le] at this
+  -- the harmonic sum
+  set H : ℝ := ∑ m ∈ Icc 1 s, ((m : ℕ) : ℝ)⁻¹ with hH_def
+  have hsum : 2 * ∑ m ∈ Icc 1 s, (⌊x / m⌋₊ : ℝ) + 2 * ∑ m ∈ Icc 1 s, (Int.fract (x / m) - 1 / 2)
+      = 2 * x * H - s := by
+    rw [← mul_add, ← sum_add_distrib]
+    have hterm : ∀ m ∈ Icc 1 s, (⌊x / m⌋₊ : ℝ) + (Int.fract (x / m) - 1 / 2) =
+        x * ((m : ℕ) : ℝ)⁻¹ - 1 / 2 := by
+      intro m _
+      rw [natCast_floor_eq_intCast_floor (by positivity), ← Int.self_sub_fract]; ring
+    rw [sum_congr rfl hterm, sum_sub_distrib, ← mul_sum, sum_const, Nat.card_Icc,
+      Nat.add_sub_cancel, nsmul_eq_mul]
+    ring
+  have hH : (harmonic s : ℝ) = H := by
+    rw [harmonic_eq_sum_Icc]; push_cast; rfl
+  have hr := harmonic_asymp s (by omega)
+  rw [hH] at hr
+  set r : ℝ := H - Real.log s - 1 / (2 * (s : ℝ)) - Real.eulerMascheroniConstant with hr_def
+  -- the logarithm
+  set L : ℝ := Real.log (x / (s : ℝ) ^ 2) with hL_def
+  have hq : 0 < x / (s : ℝ) ^ 2 := by positivity
+  have hlogx : Real.log x = 2 * Real.log s + L := by
+    rw [hL_def, Real.log_div hx0.ne' (by positivity), Real.log_pow]; push_cast; ring
+  set u : ℝ := x / s - s with hu_def
+  have hxu : x = (s : ℝ) ^ 2 + s * u := by
+    have : (s : ℝ) * (x / s) = x := mul_div_cancel₀ x hs0.ne'
+    rw [hu_def, mul_sub, this]; ring
+  have hu0 : 0 ≤ u := by nlinarith
+  have hu3 : u < 3 := by nlinarith
+  have hLup : L ≤ u / s := by
+    have h1 := Real.log_le_sub_one_of_pos hq
+    have h2 : x / (s : ℝ) ^ 2 - 1 = u / s := by rw [hxu]; field_simp; ring
+    linarith
+  have hLlo : 1 - (s : ℝ) ^ 2 / x ≤ L := by
+    have h1 := Real.log_le_sub_one_of_pos (inv_pos.mpr hq)
+    rw [Real.log_inv, inv_div] at h1
+    linarith
+  have hxL1 : x * L ≤ s * u + u ^ 2 := by
+    have := mul_le_mul_of_nonneg_left hLup hx0.le
+    have e : x * (u / s) = s * u + u ^ 2 := by rw [hxu]; field_simp; try ring
+    linarith
+  have hxL2 : s * u ≤ x * L := by
+    have := mul_le_mul_of_nonneg_left hLlo hx0.le
+    have e : x * (1 - (s : ℝ) ^ 2 / x) = s * u := by
+      have : x * (1 - (s : ℝ) ^ 2 / x) = x - (s : ℝ) ^ 2 := by field_simp
+      rw [this, hxu]; ring
+    linarith
+  have hr2 : |2 * x * r| ≤ 7 := by
+    rw [abs_mul, abs_of_pos (by positivity : (0 : ℝ) < 2 * x)]
+    have h1 : 2 * x * |r| ≤ 2 * x * (2 / (s : ℝ) ^ 2) :=
+      mul_le_mul_of_nonneg_left hr (by positivity)
+    have h2 : 2 * x * (2 / (s : ℝ) ^ 2) = 4 + 4 * (u / s) := by rw [hxu]; field_simp; ring
+    have h3 : u / s ≤ 3 / 4 := by
+      rw [div_le_iff₀ hs0]; nlinarith
+    linarith
+  have hE : (2 * ∑ m ∈ Icc 1 s, (⌊x / m⌋₊ : ℝ) - (s : ℝ) ^ 2) -
+        (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x) +
+        2 * ∑ m ∈ Icc 1 s, (Int.fract (x / m) - 1 / 2) =
+      (x - (s : ℝ) ^ 2 - x * L) + (x / s - s) + 2 * x * r := by
+    have key : (2 * ∑ m ∈ Icc 1 s, (⌊x / m⌋₊ : ℝ) - (s : ℝ) ^ 2) -
+        (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x) +
+        2 * ∑ m ∈ Icc 1 s, (Int.fract (x / m) - 1 / 2) =
+        2 * x * H - s - (s : ℝ) ^ 2 -
+          (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x) := by
+      linarith [hsum]
+    have hHr : H = Real.log s + 1 / (2 * (s : ℝ)) + Real.eulerMascheroniConstant + r := by
+      rw [hr_def]; ring
+    rw [key, hlogx, hHr]
+    field_simp
+    ring
+  have hbound : |(2 * ∑ m ∈ Icc 1 s, (⌊x / m⌋₊ : ℝ) - (s : ℝ) ^ 2) -
+        (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x) +
+        2 * ∑ m ∈ Icc 1 s, (Int.fract (x / m) - 1 / 2)| ≤ 19 := by
+    rw [hE]
+    obtain ⟨a1, a2⟩ := abs_le.mp hr2
+    have hxs2 : x - (s : ℝ) ^ 2 = s * u := by rw [hxu]; ring
+    have hu2 : u ^ 2 ≤ 9 := by nlinarith
+    rw [hxs2, abs_le]; constructor <;> linarith
+  have hlog1 : 1 ≤ Real.log x := by
+    rw [← Real.log_exp 1]; exact Real.log_le_log (Real.exp_pos 1) hxe
+  have hpow1 : 1 ≤ x ^ (1 / 3 : ℝ) := Real.one_le_rpow (by linarith) (by norm_num)
+  have hprod : 1 ≤ x ^ (1 / 3 : ℝ) * Real.log x := one_le_mul_of_one_le_of_one_le hpow1 hlog1
+  calc _ ≤ (19 : ℝ) := hbound
+    _ ≤ 28 * (x ^ (1 / 3 : ℝ) * Real.log x) := by linarith
+    _ = 28 * x ^ (1 / 3 : ℝ) * Real.log x := by ring
+
 
 /-- Voronoi sawtooth bound, formerly a leaf, the analytic step of the classical proof of the
 Voronoi formula cited on Halupczok page 337. The sum over m up to the square root of x
@@ -88,5 +324,6 @@ theorem voronoi_divisor_sum_asymptotic_of_leaves :
 
 end LeanLab.Halupczok2012.Feed1122VoronoiDivisorSumAsymptotic
 
+#print axioms LeanLab.Halupczok2012.Feed1122VoronoiDivisorSumAsymptotic.harmonic_reduction
 #print axioms LeanLab.Halupczok2012.Feed1122VoronoiDivisorSumAsymptotic.divisor_sum_sawtooth_form
 #print axioms LeanLab.Halupczok2012.Feed1122VoronoiDivisorSumAsymptotic.voronoi_divisor_sum_asymptotic_of_leaves
