@@ -65,7 +65,16 @@ theorem split_small_shift_constant_phase :
               LeanLab.Linnik.Decomp1532b.Jn N (LeanLab.Linnik.Decomp1532a.dif x) *
                 (LeanLab.Linnik.Decomp1532b.singSeries (LeanLab.Linnik.Decomp1532a.dif x)).re)| ≤
           (2 * N * (Nat.log 2 N : ℝ) ^ (2 * k) / Real.log N ^ 2) * (δ / 6) := by
-  sorry
+  classical
+  intro θ hθ hθ4 k hk δ hδ
+  obtain ⟨c, C, θ₀, hc, hθ₀, hrem⟩ :=
+    LeanLab.Linnik.Decomp466c.major_arc_remainder_bound_split
+  have hθmax : θ ≤ θ₀ := hθ4.trans hθ₀
+  obtain ⟨Nk, hNk⟩ := hrem θ hθ hθmax k hk δ hδ
+  refine ⟨Nk, ?_⟩
+  intro N hN
+  have hbound := hNk N hN
+  simpa only [Finset.filter_filter] using hbound
 
 /-- LEAF, OPEN. Second piece of the small shift range, the upper one. These are the tuples of the
 sealed range with `N ^ (θ / 2) < |dif x| ≤ N ^ θ`, where the shift is largest against the arc
