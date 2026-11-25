@@ -1,57 +1,62 @@
-import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le_one
-import LeanLab.HelfgottMajor.Feed1122ZetaAboveFourOne
+import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le
+import LeanLab.HelfgottMajor.Feed1122ZetaEM4
 
 /-!
 # Split of `book_count_band_above_one_mult_le_one_level_one`
 
-AI wrote this Lean code. Binary Goldbach is open.
+At conductor `1` the character is trivial and `L(·, χ)` is the Riemann zeta function, by
+Mathlib `DirichletCharacter.LFunction_modOne_eq`; this reduction is proved below. The window
+`(1, 2πe]`, with `2πe < 17.08`, is then cut at height `14`:
 
-The level one leaf is about the Dirichlet `L`-function of the unique character of modulus `1`.
-Mathlib identifies that `L`-function with `riemannZeta`, `DirichletCharacter.LFunction_modOne_eq`,
-so the multiplicity `mult χ ρ` is the analytic order of `ζ` at `ρ`. The split separates that
-bridging, proved here, from the published fact in its own form: every nontrivial zero of `ζ`
-with ordinate in `(1, 2πe]`, `2πe ≈ 17.08`, is simple. The only such zero is `1/2 + 14.1347… i`,
-and its simplicity is part of every rigorous verification of the first zeros.
+* LEAF: `ζ` has no zero in the open strip with ordinate in `(1, 14]`, the classical fact that
+  the first zero of `ζ` above the real axis is at height `14.1347…`;
+* LEAF: on `(14, 2πe]` the zeros of `ζ` in the strip are simple, the zero
+  `1/2 + 14.1347… i` being the only one there.
+
+Numerically, burst S97 with mpmath: the only zero of `ζ` with ordinate in `(1, 17.08]` is at
+`14.134725`, and it is simple; the next one is at `21.022`. AI wrote this Lean code. Binary
+Goldbach is open.
 -/
 
 namespace LeanLab.HelfgottMajor.ZeroCount1623
 open Complex Set Filter Topology
 open scoped ComplexConjugate LSeries.notation
 
-/-- Split burst S126 at height `4` in `Feed1122ZetaAboveFourOne`, was a LEAF: simplicity of the zeros of ζ below height 2πe, the published first zero. HARD, a
-certified computation that `ζ'` does not vanish at the zero `1/2 + 14.1347… i`, together with
-the certified count that it is the only zero of ordinate in `(1, 2πe]`.
-CITED: Platt and Trudgian, The Riemann hypothesis is true up to 3·10^12, Bull. LMS 53, 2021,
-all zeros up to that height are simple; also Gram 1903, Backlund 1914, LMFDB L-function
-1-1-1.1-r0-0-0. In this form: every nontrivial zero of ζ with ordinate in `(1, 2πe]` has
-analytic order at most one. -/
-theorem zeta_strip_zero_above_one_le_two_pi_e_order_le_one :
-    ∀ ρ : ℂ, riemannZeta ρ = 0 → 0 < ρ.re → ρ.re < 1 → 1 < ρ.im →
-      ρ.im ≤ 2 * Real.pi * Real.exp 1 → (analyticOrderNatAt riemannZeta ρ : ℝ) ≤ 1 := by
-  exact LeanLab.HelfgottMajor.Feed1122ZetaAboveFourOne.zeta_strip_zero_above_one_le_two_pi_e_order_le_one_split
+variable {q : ℕ} [NeZero q]
 
-/-- Bridging, proved: for modulus `1` the multiplicity of a zero of `L(·, χ)` is the analytic
-order of `ζ` there, by `LFunction_modOne_eq`. -/
-lemma level_one_mult_eq_zeta_order (χ : DirichletCharacter ℂ 1) (ρ : ℂ) :
-    mult χ ρ = analyticOrderNatAt riemannZeta ρ := by
-  show analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ = _
-  rw [DirichletCharacter.LFunction_modOne_eq]
+/-- Split burst S126 in `Feed1122ZetaEM4` at height `4`, was a HARD LEAF: the first ordinate of the nontrivial zeros of `ζ` exceeds `14`, restricted to the
+window `(1, 14]` of the band at conductor `1`: no zero of `ζ` in the open strip has ordinate in
+`(1, 14]`. Class HARD: a certified zero free rectangle for `ζ`, by Backlund style argument
+principle or a Turing method computation. -/
+theorem one1_zeta_zero_free_below_fourteen (ρ : ℂ) (h0 : riemannZeta ρ = 0) (hre0 : 0 < ρ.re)
+    (hre1 : ρ.re < 1) (him1 : 1 < ρ.im) : 14 < ρ.im := by
+  exact LeanLab.HelfgottMajor.Feed1122ZetaEM4.card1_zeta_zero_free_below_fourteen_split ρ h0 hre0 hre1 him1
 
-/-- `book_count_band_above_one_mult_le_one_level_one`, with exactly its statement, from the
-ζ leaf and the proved bridging through `LFunction_modOne_eq`. -/
-theorem book_count_band_above_one_mult_le_one_level_one_split {q : ℕ} [NeZero q]
-    (χ : DirichletCharacter ℂ q)
+/-- LEAF: the zeros of `ζ` in the open strip with ordinate in `(14, 2πe]` are simple, the window
+holding only `1/2 + 14.1347… i`, a simple zero. Class HARD: a certified simplicity check, for
+instance a Turing method count matched against sign changes of Hardy's `Z` function. -/
+theorem one1_zeta_simple_fourteen_band (ρ : ℂ) (h0 : riemannZeta ρ = 0) (hre0 : 0 < ρ.re)
+    (hre1 : ρ.re < 1) (him : 14 < ρ.im) (him' : ρ.im ≤ 2 * Real.pi * Real.exp 1) :
+    analyticOrderNatAt riemannZeta ρ ≤ 1 := by
+  sorry
+
+/-- Assembly of `book_count_band_above_one_mult_le_one_level_one`: at conductor `1` the `L`-function is `ζ`; every element of the window
+has ordinate above `14` by the zero free leaf, and is then simple by the simplicity leaf. -/
+theorem book_count_band_above_one_mult_le_one_level_one_of_leaves (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (hq : q = 1) :
     ∀ ρ ∈ (stripZeros_finite χ (2 * Real.pi * Real.exp 1)).toFinset.filter
       (fun ρ => 0 ≤ ρ.im ∧ 1 < ρ.im), (mult χ ρ : ℝ) ≤ 1 := by
   subst hq
+  have hL : DirichletCharacter.LFunction χ = riemannZeta := DirichletCharacter.LFunction_modOne_eq
   intro ρ hρ
   have hp := Finset.mem_filter.mp hρ
-  have hz := (stripZeros_finite χ _).mem_toFinset.mp hp.1
-  obtain ⟨hL, hre0, hre1, him⟩ := hz
-  rw [DirichletCharacter.LFunction_modOne_eq] at hL
-  rw [level_one_mult_eq_zeta_order]
-  exact zeta_strip_zero_above_one_le_two_pi_e_order_le_one ρ hL hre0 hre1 hp.2.2
-    ((le_abs_self _).trans him)
+  have hz := (stripZeros_finite χ (2 * Real.pi * Real.exp 1)).mem_toFinset.mp hp.1
+  have hz0 : riemannZeta ρ = 0 := by rw [← hL]; exact hz.1
+  have h14 := one1_zeta_zero_free_below_fourteen ρ hz0 hz.2.1 hz.2.2.1 hp.2.2
+  have hs := one1_zeta_simple_fourteen_band ρ hz0 hz.2.1 hz.2.2.1 h14
+    ((le_abs_self ρ.im).trans hz.2.2.2)
+  have hm : mult χ ρ ≤ 1 := by
+    unfold mult; rw [hL]; exact hs
+  exact_mod_cast hm
 
 end LeanLab.HelfgottMajor.ZeroCount1623
