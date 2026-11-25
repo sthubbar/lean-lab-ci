@@ -7,6 +7,7 @@ The binary Goldbach conjecture is OPEN.
 -/
 import LeanLab.Teravainen2016.WeightedPrimeSplit
 import LeanLab.Teravainen2016.RoughDivisors
+import LeanLab.Teravainen2016.SieveResidues
 
 open Finset
 open scoped Classical

@@ -21,6 +21,23 @@ This is the analytic range and contains no finite range extension. -/
 theorem schoenfeld_psi_large (hRH : RiemannHypothesis) (y : ℝ)
     (hy : Real.exp 16 ≤ y) :
     |Chebyshev.psi y - y| ≤ Real.sqrt y * Real.log y ^ 2 / (8 * Real.pi) := by
+  have h₁ : 0 < y := by linarith [Real.exp_pos 16, hy]
+  have h₂ : (16 : ℝ) ≤ Real.log y := by
+    have h₃ : Real.log (Real.exp 16) = 16 := by rw [Real.log_exp]
+    have h₄ : Real.log (Real.exp 16) ≤ Real.log y := Real.log_le_log (Real.exp_pos 16) hy
+    linarith
+  -- Attempted analytic route (Schoenfeld 1976, Thm 10 (6.2)): under RH,
+  -- ψ(y) = y − Σ_ρ y^ρ/ρ − log(2π) − ½ log(1 − y^{−2}), and RH gives
+  -- Σ_ρ √y/|ρ| ≤ (√y (log y)²)/(8π) for y ≥ e^16.
+  -- None of these ingredients exists in Mathlib:
+  -- * no theorem in Mathlib mentions `RiemannHypothesis` except its definition
+  --   (Mathlib.NumberTheory.LSeries.RiemannZeta, line 185),
+  -- * `Chebyshev.psi` has only elementary bounds (`psi_le`, `psi_le_const_mul_self`,
+  --   `abs_psi_sub_theta_le_sqrt_mul_log`; LeanSearch/Loogle return no RH-dependent bound),
+  -- * ζ(0) = -1/2 (`riemannZeta_zero`) and the trivial zeros −2·(n+1) are excluded from
+  --   `RiemannHypothesis`, so there is no vacuous proof via ζ(0) = 0.
+  -- The required explicit formula for ψ and the sharp zero-sum estimate with constant
+  -- 1/(8π) are missing results; see the BLOCKED entry in PROGRESS.md.
   sorry
 
 /-- Schoenfeld 1976 page 337 Theorem 10 equation 6.2.
