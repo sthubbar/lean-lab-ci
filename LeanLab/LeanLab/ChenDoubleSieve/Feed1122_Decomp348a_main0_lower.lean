@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp275b
+import LeanLab.ChenDoubleSieve.Feed1122_S120_main0Pi_split
 import LeanLab.ChenDoubleSieve.Section3
 import LeanLab.BS2022GRH.PortedMertens
 
@@ -49,8 +50,8 @@ theorem main0Pi_lower (F f : ℝ → ℝ) (h : IsLinearSieve F f) :
             (∏ p ∈ Wu41.PS N 0 ((N : ℝ) ^ kappa1), (1 - 1 / ((p : ℝ) - 1))) *
             f (log (((N : ℝ) ^ (1 / 2 : ℝ) / (log N) ^ B) / (1 : ℕ)) /
               log ((N : ℝ) ^ kappa1))
-          - η * Θ N ≤ sieveTerms N 0 := by
-  sorry
+          - η * Θ N ≤ sieveTerms N 0 :=
+  LeanLab.ChenDoubleSieve.Feed1122.S120.main0Pi_lower_of_leaves F f h
 
 /-- LEAF: Wu 2004 page 38, the replacement of pi of N by N over log N in the main
 term, by the prime number theorem together with the Mertens bound on the Euler
