@@ -17,19 +17,25 @@ open Wu04Functional (IsLinearSieve IsBuchstab)
 theorem upper_8 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       sieveTerms N 8 ≤ (integralTerms F f ω 8 + ε) * Θ N := by
-  sorry
+  intro ε hε
+  obtain ⟨N0, hN0⟩ := Task349.refined_upper_supplied F f ω h hω ε hε
+  exact ⟨N0, fun N hN hle => hN0 N hN hle 8 (by simp)⟩
 
 /-- LEAF: Wu 2004 page 41, equation 10.12, upper bound for F13, the fourfold Buchstab integral with t four up to kappa two. Class HARD. -/
 theorem upper_10 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       sieveTerms N 10 ≤ (integralTerms F f ω 10 + ε) * Θ N := by
-  sorry
+  intro ε hε
+  obtain ⟨N0, hN0⟩ := Task349.refined_upper_supplied F f ω h hω ε hε
+  exact ⟨N0, fun N hN hle => hN0 N hN hle 10 (by simp)⟩
 
 /-- LEAF: Wu 2004 page 41, equation 10.12, upper bound for F14, the fourfold Buchstab integral with t four up to one half minus two kappa one minus t three. Class HARD. -/
 theorem upper_11 (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       sieveTerms N 11 ≤ (integralTerms F f ω 11 + ε) * Θ N := by
-  sorry
+  intro ε hε
+  obtain ⟨N0, hN0⟩ := Task349.refined_upper_supplied F f ω h hω ε hε
+  exact ⟨N0, fun N hN hle => hN0 N hN hle 11 (by simp)⟩
 
 theorem refined_upper_of_leaves (F f ω : ℝ → ℝ) (h : IsLinearSieve F f)
     (hω : IsBuchstab ω) : ∀ ε : ℝ, 0 < ε → ∃ N0 : ℕ,
