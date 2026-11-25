@@ -15,19 +15,219 @@ AI wrote this Lean code. Binary Goldbach is open.
 import LeanLab.HelfgottArcs.DecompJ409LeavesProp46
 import LeanLab.HelfgottArcs.HeartHat
 import LeanLab.HelfgottMajor.Lemma41Corrected123
+import LeanLab.ChebyshevExplicit.SharperConstants
 
 namespace LeanLab.HelfgottArcs.DecompJ409LeavesProp46S124Prop46
 open Real MeasureTheory
 open LeanLab.HelfgottArcs LeanLab.HelfgottMajor LeanLab.HelfgottMajor.SplitGaussian123
 open LeanLab.HelfgottArcs.DecompJ409LeavesProp46
+open scoped ArithmeticFunction
 
-/-- LEAF: the trivial bound for the twisted Gaussian sum of P0014 display 4.43, by partial
+section TrivialBound
+open Chebyshev
+open scoped ArithmeticFunction
+
+/-! PROVED helpers for `schi_etaHeart_trivial`, S152. Chebyshev psi n ≤ 1.59 n for every n:
+lcm of 1..n at most 4^n by a kernel table below 600, the lab bound
+`ChebyshevExplicit.psi_le_110556` above. Then Abel majorization and the sum integral
+comparison against the one sided Gaussian integral x sqrt(2π)/2. AI wrote this Lean code. -/
+
+
+def lcmRec : ℕ → ℕ
+  | 0 => 1
+  | n + 1 => Nat.lcm (lcmRec n) (n + 1)
+
+theorem lcmUpto_dvd_L (n : ℕ) : Nat.lcmUpto n ∣ lcmRec n := by
+  unfold Nat.lcmUpto
+  apply Finset.lcm_dvd
+  intro i hi
+  simp only [Finset.mem_Icc] at hi
+  induction n with
+  | zero => omega
+  | succ n ih =>
+    simp only [lcmRec]
+    rcases Nat.lt_or_ge i (n+1) with h | h
+    · exact (ih ⟨hi.1, by omega⟩).trans (Nat.dvd_lcm_left _ _)
+    · have : i = n + 1 := by omega
+      subst this; exact Nat.dvd_lcm_right _ _
+
+set_option maxRecDepth 100000 in
+theorem L_le : ∀ n < 600, lcmRec n ≤ 4 ^ n := by decide +kernel
+
+theorem L_pos (n : ℕ) : 0 < lcmRec n := by
+  induction n with
+  | zero => simp [lcmRec]
+  | succ n ih => simp only [lcmRec]; exact Nat.lcm_pos ih (Nat.succ_pos n)
+
+theorem psi_small (n : ℕ) (hn : n < 600) : ψ n ≤ 1.59 * n := by
+  rw [psi_eq_log_lcmUpto]
+  have h1 : (Nat.lcmUpto n : ℝ) ≤ (4 : ℝ) ^ n := by
+    have := Nat.le_of_dvd (L_pos n) (lcmUpto_dvd_L n)
+    exact_mod_cast this.trans (L_le n hn)
+  have h0 : (0 : ℝ) < Nat.lcmUpto n := by exact_mod_cast Nat.lcmUpto_pos n
+  have h2 := Real.log_le_log h0 h1
+  rw [Real.log_pow] at h2
+  have h4 : Real.log 4 = 2 * Real.log 2 := by
+    rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]; norm_num
+  have h5 := Real.log_two_lt_d9
+  have hn0 : (0 : ℝ) ≤ n := by positivity
+  nlinarith
+
+theorem log_le_quarter {x : ℝ} (hx : 0 < x) : Real.log x ≤ 1.4716 * √(√x) := by
+  set y := √(√x)
+  have hy : 0 < y := by positivity
+  have hly : Real.log y = Real.log x / 4 := by
+    simp only [y]; rw [Real.log_sqrt (Real.sqrt_nonneg _), Real.log_sqrt hx.le]; ring
+  have he := Real.exp_one_gt_d9
+  have he0 : 0 < Real.exp 1 := Real.exp_pos 1
+  have h1 := Real.log_le_sub_one_of_pos (div_pos hy he0)
+  rw [Real.log_div hy.ne' he0.ne', Real.log_exp] at h1
+  have h2 : y / Real.exp 1 ≤ 0.3679 * y := by
+    rw [div_le_iff₀ he0]; nlinarith
+  linarith
+
+theorem psi_large (n : ℕ) (hn : 600 ≤ n) : ψ n ≤ 1.59 * n := by
+  have h := LeanLab.ChebyshevExplicit.psi_le_110556 n
+  have hN' : (600 : ℝ) ≤ n := by exact_mod_cast hn
+  have hx : (0 : ℝ) < n := by linarith
+  have hl := log_le_quarter hx
+  have hl0 : 0 ≤ Real.log n := Real.log_nonneg (by linarith)
+  set s := √(n : ℝ)
+  have hs2 : s ^ 2 = n := Real.sq_sqrt hx.le
+  have hs : 24.49 ≤ s := Real.le_sqrt_of_sq_le (by nlinarith)
+  have hy2 : √s ^ 2 = s := Real.sq_sqrt (by positivity)
+  have hy0 : 0 ≤ √s := Real.sqrt_nonneg _
+  have hlog2 : Real.log n ^ 2 ≤ 1.4716 ^ 2 * s := by
+    have := pow_le_pow_left₀ hl0 hl 2
+    rw [mul_pow, hy2] at this; exact this
+  nlinarith
+
+theorem psi_le_159 (n : ℕ) : ψ n ≤ 1.59 * n := by
+  rcases Nat.lt_or_ge n 600 with h | h
+  · exact psi_small n h
+  · exact psi_large n h
+
+theorem abel_major (u v w : ℕ → ℝ) (hw : Antitone w) (hw0 : ∀ n, 0 ≤ w n)
+    (hUV : ∀ n, ∑ i ∈ Finset.range n, u i ≤ ∑ i ∈ Finset.range n, v i) (N : ℕ) :
+    ∑ i ∈ Finset.range N, u i * w i ≤ ∑ i ∈ Finset.range N, v i * w i := by
+  have key : ∀ N, (∑ i ∈ Finset.range N, v i - ∑ i ∈ Finset.range N, u i) * w N ≤
+      ∑ i ∈ Finset.range N, (v i - u i) * w i := by
+    intro N
+    induction N with
+    | zero => simp
+    | succ N ih =>
+      rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ]
+      have hD := hUV (N + 1)
+      rw [Finset.sum_range_succ, Finset.sum_range_succ] at hD
+      have hwN : w (N + 1) ≤ w N := hw (Nat.le_succ N)
+      nlinarith [mul_le_mul_of_nonneg_left hwN (sub_nonneg.mpr hD)]
+  have h1 := key N
+  have h2 : 0 ≤ (∑ i ∈ Finset.range N, v i - ∑ i ∈ Finset.range N, u i) * w N :=
+    mul_nonneg (sub_nonneg.mpr (hUV N)) (hw0 N)
+  have h3 : ∑ i ∈ Finset.range N, (v i - u i) * w i =
+      ∑ i ∈ Finset.range N, v i * w i - ∑ i ∈ Finset.range N, u i * w i := by
+    rw [← Finset.sum_sub_distrib]; congr 1; ext i; ring
+  linarith
+
+theorem sum_range_vonMangoldt_succ (n : ℕ) :
+    ∑ i ∈ Finset.range n, Λ (i + 1) = ψ n := by
+  induction n with
+  | zero => simp [psi]
+  | succ n ih =>
+    rw [Finset.sum_range_succ, ih, psi, psi, Nat.floor_natCast, Nat.floor_natCast,
+      Finset.sum_Ioc_succ_top (Nat.zero_le n)]
+
+theorem partial_le {x : ℝ} (hx : 1 ≤ x) (N : ℕ) :
+    ∑ i ∈ Finset.range N, Λ i * etaHeart (i / x) ≤ 2 * x := by
+  have hx0 : 0 < x := by linarith
+  set b : ℝ := 1 / (2 * x ^ 2) with hbdef
+  have hb : 0 < b := by positivity
+  set w : ℝ → ℝ := fun t => Real.exp (-b * t ^ 2) with hwdef
+  have heta : ∀ i : ℕ, etaHeart ((i + 1 : ℕ) / x) = w ((i + 1 : ℕ) : ℝ) := by
+    intro i
+    have hp : (0 : ℝ) < ((i + 1 : ℕ) : ℝ) / x := by positivity
+    simp only [etaHeart, hp, ite_true, hwdef, hbdef]
+    congr 1; field_simp
+  have hanti : AntitoneOn w (Set.Icc 0 (0 + (N : ℝ))) := by
+    intro s hs t ht hst
+    simp only [hwdef]
+    apply Real.exp_le_exp.mpr
+    have : s ^ 2 ≤ t ^ 2 := pow_le_pow_left₀ hs.1 hst 2
+    nlinarith
+  cases N with
+  | zero => simp; linarith
+  | succ M =>
+  rw [Finset.sum_range_succ']
+  simp only [Nat.cast_zero, zero_div, ArithmeticFunction.map_zero, zero_mul, add_zero]
+  have hrw : ∀ i ∈ Finset.range M, Λ (i + 1) * etaHeart (((i + 1 : ℕ) : ℝ) / x) =
+      Λ (i + 1) * w (((i + 1 : ℕ) : ℝ)) := by
+    intro i _; rw [heta]
+  rw [Finset.sum_congr rfl hrw]
+  have hwa : Antitone (fun i : ℕ => w ((i + 1 : ℕ) : ℝ)) := by
+    intro i j hij
+    simp only [hwdef]
+    apply Real.exp_le_exp.mpr
+    have hij' : ((i + 1 : ℕ) : ℝ) ≤ ((j + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.succ_le_succ hij
+    have : ((i + 1 : ℕ) : ℝ) ^ 2 ≤ ((j + 1 : ℕ) : ℝ) ^ 2 := pow_le_pow_left₀ (by positivity) hij' 2
+    nlinarith
+  have hmaj := abel_major (fun i => Λ (i + 1)) (fun _ => (1.59 : ℝ))
+    (fun i => w ((i + 1 : ℕ) : ℝ)) hwa (fun _ => by positivity)
+    (fun n => by
+      simp only [sum_range_vonMangoldt_succ, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+      have := psi_le_159 n; linarith) M
+  have hint : ∑ i ∈ Finset.range M, w (0 + ((i + 1 : ℕ) : ℝ)) ≤ ∫ t in (0 : ℝ)..0 + M, w t :=
+    (hanti.mono (by
+      intro t ht; refine ⟨ht.1, ht.2.trans ?_⟩; push_cast; linarith)).sum_le_integral
+  simp only [zero_add] at hint
+  have hInt : IntegrableOn w (Set.Ioi 0) := (integrable_exp_neg_mul_sq hb).integrableOn
+  have hle : ∫ t in (0 : ℝ)..M, w t ≤ ∫ t in Set.Ioi 0, w t := by
+    rw [intervalIntegral.integral_of_le (by positivity)]
+    apply setIntegral_mono_set hInt
+    · exact Filter.Eventually.of_forall (fun t => by simp only [hwdef]; positivity)
+    · exact Set.Ioc_subset_Ioi_self.eventuallyLE
+  have hg : ∫ t in Set.Ioi 0, w t = √(π / b) / 2 := integral_gaussian_Ioi b
+  have hsq : √(π / b) ≤ 2.51 * x := by
+    rw [show π / b = π * (2 * x ^ 2) by rw [hbdef]; field_simp]
+    rw [Real.sqrt_le_left (by positivity)]
+    nlinarith [Real.pi_lt_d2]
+  have hsum : ∑ i ∈ Finset.range M, (1.59 : ℝ) * w ((i + 1 : ℕ) : ℝ) =
+      1.59 * ∑ i ∈ Finset.range M, w ((i + 1 : ℕ) : ℝ) := by rw [Finset.mul_sum]
+  have hsum2 : ∑ i ∈ Finset.range M, w ((i + 1 : ℕ) : ℝ) ≤ 2.51 * x / 2 := by
+    linarith
+  linarith
+
+end TrivialBound
+
+/-- PROVED S152, was LEAF: the trivial bound for the twisted Gaussian sum of P0014 display 4.43, by partial
 summation from the Chebyshev bound psi of y below 1.03883 y of Rosser and Schoenfeld 1962,
 Theorem 12, the bound Helfgott uses for prime sums throughout P0014: the sum is at most
-1.03883 sqrt(π/2) x, below 2 x. Class MEDIUM, CITED input. -/
+1.03883 sqrt(π/2) x, below 2 x. Class MEDIUM. Proved in S152 with psi n at most 1.59 n in
+place of the cited 1.03883 n, so with no cited input. -/
 theorem schi_etaHeart_trivial {q : ℕ} (χ : DirichletCharacter ℂ q) (δ x : ℝ) (hx : 1 ≤ x) :
     ‖Schi etaHeart χ δ x‖ ≤ 2 * x := by
-  sorry
+  have hnn : ∀ y, 0 ≤ etaHeart y := by
+    intro y; unfold etaHeart; split_ifs <;> positivity
+  set g : ℕ → ℝ := fun n => Λ n * etaHeart (n / x) with hgdef
+  have hg0 : ∀ n, 0 ≤ g n := fun n =>
+    mul_nonneg ArithmeticFunction.vonMangoldt_nonneg (hnn _)
+  have hgs : Summable g := summable_of_sum_range_le hg0 (partial_le hx)
+  have hb : ∀ n : ℕ, ‖((Λ n : ℝ) : ℂ) * χ (n : ZMod q) * e (δ * n / x) *
+      (etaHeart (n / x) : ℂ)‖ ≤ g n := by
+    intro n
+    have h1 : ‖e (δ * n / x)‖ = 1 := by
+      simp [e, Complex.norm_exp, Complex.mul_re]
+    rw [norm_mul, norm_mul, norm_mul, h1, Complex.norm_real, Complex.norm_real,
+      Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg,
+      abs_of_nonneg (hnn _), mul_one]
+    have hc := DirichletCharacter.norm_le_one χ (n : ZMod q)
+    have he := hnn (n / x)
+    have hl := (ArithmeticFunction.vonMangoldt_nonneg (n := n))
+    simp only [hgdef]
+    have := mul_le_mul_of_nonneg_left hc (mul_nonneg hl he)
+    nlinarith
+  unfold Schi
+  calc _ ≤ ∑' n, g n := tsum_of_norm_bounded hgs.hasSum hb
+    _ ≤ 2 * x := Real.tsum_le_of_sum_range_le hg0 (partial_le hx)
 
 /-- PROVED. The main term of display 4.43 has norm at most the integral of the one sided
 Gaussian, sqrt(2π)/2, by display 4.42 on page 43. -/
