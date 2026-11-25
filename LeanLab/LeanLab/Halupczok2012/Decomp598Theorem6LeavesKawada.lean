@@ -2,6 +2,7 @@ import LeanLab.Halupczok2012.Statements
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.SpecialFunctions.Exp
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
 /-!
 Leaves for `kawada_thm22_display24`, Halupczok journal pages 338 to 339, Theorem 2.2,
@@ -56,6 +57,33 @@ noncomputable def majorArcs (Q1 Δ : ℝ) : Set ℝ :=
 noncomputable def kMajor (A C Y : ℝ) : Set ℝ :=
   majorArcs (Real.log Y ^ C) (Y⁻¹ * Real.log Y ^ (2 * A + 2 * C + 2))
 
+theorem eA_continuous : Continuous eA := by
+  unfold eA
+  fun_prop
+
+/-- `e(n(x+1)) = e(nx)` for an integer `n`. -/
+theorem eA_int_period (n : ℤ) (x : ℝ) : eA ((n : ℝ) * (x + 1)) = eA (n * x) := by
+  unfold eA
+  have : (2 * Real.pi * Complex.I * ((n * (x + 1) : ℝ) : ℂ)) =
+      2 * Real.pi * Complex.I * ((n * x : ℝ) : ℂ) + n * (2 * Real.pi * Complex.I) := by
+    push_cast; ring
+  rw [this, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
+
+/-- Orthogonality, Kawada page 47: `∫_a^{a+1} e(nα) dα = [n = 0]`. -/
+theorem integral_eA_int (a : ℝ) (n : ℤ) :
+    ∫ α in Set.Icc a (a + 1), eA (n * α) = if n = 0 then 1 else 0 := by
+  rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le (by linarith)]
+  split_ifs with hn
+  · subst hn; simp [eA]
+  · have hc : (2 * Real.pi * Complex.I * n : ℂ) ≠ 0 := by
+      have h1 : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+      have hpi : (Real.pi : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+      simp [hpi, Complex.I_ne_zero, h1]
+    have h : ∀ α : ℝ, eA (n * α) = Complex.exp ((2 * Real.pi * Complex.I * n) * α) := by
+      intro α; unfold eA; push_cast; ring_nf
+    simp_rw [h]
+    rw [integral_exp_mul_complex hc, ← h (a + 1), ← h a, eA_int_period, sub_self, zero_div]
+
 /-- LEAF: circle method identity, Kawada display 3.4 for k = 2 with the p3 window of
 Halupczok page 339. Class MEDIUM. P0077 page 338 display 2.4, Kawada 1993 page 47.
 Orthogonality of e(nα) on a unit interval; X2 ≤ 2X1 - Y puts every p3 = 2k - p2 in the window. -/
@@ -63,7 +91,83 @@ theorem leaf_circle_identity (X1 X2 Y : ℝ) (q2 : ℕ) (a2 : ℤ) (k : ℕ)
     (hY : 0 < Y) (hX2 : X2 ≤ 2 * X1 - Y) (hk : k ∈ kRange X1 Y) :
     (binSumAP X2 Y q2 a2 (2 * k) : ℂ) =
       ∫ α in unitDom X1, circF X1 X2 Y q2 a2 (2 * k) α := by
-  sorry
+  set S2 := (range (⌊X2 + Y⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ X2 < p ∧ (p : ℝ) ≤ X2 + Y ∧
+      (p : ℤ) ≡ a2 [ZMOD q2]) with hS2
+  set S3 := (range (⌊2 * X1 + 2 * Y - X2⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧
+      2 * X1 - X2 - Y < p ∧ (p : ℝ) ≤ 2 * X1 + 2 * Y - X2) with hS3
+  have hkr : X1 < k ∧ (k : ℝ) ≤ X1 + Y := (Finset.mem_filter.mp hk).2
+  have key : ∀ (p p' : ℕ) (α : ℝ), eA (p * α) * eA (p' * α) * eA (-((2 * k : ℕ) : ℝ) * α) =
+      eA ((((p : ℤ) + p' - (2 * k : ℕ) : ℤ) : ℝ) * α) := by
+    intro p p' α
+    simp only [eA, ← Complex.exp_add]
+    congr 1; push_cast; ring
+  have hexp : ∀ α, circF X1 X2 Y q2 a2 (2 * k) α = ∑ p ∈ S2, ∑ p' ∈ S3,
+      ((Real.log p : ℂ) * (Real.log p' : ℂ)) * eA ((((p : ℤ) + p' - (2 * k : ℕ) : ℤ) : ℝ) * α) := by
+    intro α
+    show (∑ p ∈ S2, _) * (∑ p ∈ S3, _) * _ = _
+    rw [Finset.sum_mul_sum, Finset.sum_mul]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun p' _ => ?_
+    rw [← key]; ring
+  have hcont : ∀ (p p' : ℕ), Continuous (fun α : ℝ => ((Real.log p : ℂ) * (Real.log p' : ℂ)) *
+      eA ((((p : ℤ) + p' - (2 * k : ℕ) : ℤ) : ℝ) * α)) := fun p p' =>
+    continuous_const.mul (eA_continuous.comp (by fun_prop))
+  simp_rw [hexp]
+  unfold unitDom
+  rw [integral_finset_sum _ (fun p _ => integrable_finset_sum _ fun p' _ =>
+    (hcont p p').integrableOn_Icc)]
+  have hI : ∀ p : ℕ, (∫ α in Set.Icc (X1 ^ (-(1 / 6) : ℝ)) (1 + X1 ^ (-(1 / 6) : ℝ)),
+      ∑ p' ∈ S3, ((Real.log p : ℂ) * (Real.log p' : ℂ)) *
+        eA ((((p : ℤ) + p' - (2 * k : ℕ) : ℤ) : ℝ) * α)) =
+      ∑ p' ∈ S3, (Real.log p : ℂ) * (Real.log p' : ℂ) *
+        (if (p : ℤ) + p' - ((2 * k : ℕ) : ℤ) = 0 then 1 else 0) := by
+    intro p
+    rw [integral_finset_sum _ (fun p' _ => (hcont p p').integrableOn_Icc)]
+    refine Finset.sum_congr rfl fun p' _ => ?_
+    rw [integral_const_mul, add_comm (1 : ℝ), integral_eA_int]
+  rw [Finset.sum_congr rfl (fun p _ => hI p)]
+  -- now combinatorics
+  have hp2k : ∀ p ∈ S2, p < 2 * k := by
+    intro p hp
+    have := (Finset.mem_filter.mp hp).2.2.2.1
+    have : (p : ℝ) < 2 * k := by linarith
+    exact_mod_cast this
+  have hinner : ∀ p ∈ S2, (∑ p' ∈ S3, (Real.log p : ℂ) * (Real.log p' : ℂ) *
+      (if (p : ℤ) + p' - ((2 * k : ℕ) : ℤ) = 0 then 1 else 0)) =
+      if (2 * k - p).Prime then (Real.log p : ℂ) * (Real.log ((2 * k - p : ℕ) : ℝ) : ℂ) else 0 := by
+    intro p hp
+    have h2 := hp2k p hp
+    have hiff : ∀ p' : ℕ, ((p : ℤ) + p' - ((2 * k : ℕ) : ℤ) = 0) ↔ (2 * k - p = p') := by
+      intro p'; push_cast; omega
+    simp_rw [mul_ite, mul_one, mul_zero, hiff]
+    rw [Finset.sum_ite_eq]
+    have hmem : (2 * k - p ∈ S3) ↔ (2 * k - p).Prime := by
+      have hpS := (Finset.mem_filter.mp hp).2
+      have hc : ((2 * k - p : ℕ) : ℝ) = 2 * (k : ℝ) - p := by
+        rw [Nat.cast_sub h2.le]; push_cast; ring
+      constructor
+      · intro h; exact (Finset.mem_filter.mp h).2.1
+      · intro h
+        have hle : ((2 * k - p : ℕ) : ℝ) ≤ 2 * X1 + 2 * Y - X2 := by rw [hc]; linarith
+        refine Finset.mem_filter.mpr ⟨Finset.mem_range.mpr (Nat.lt_succ_of_le (Nat.le_floor hle)),
+          h, ?_, hle⟩
+        rw [hc]; linarith
+    simp only [hmem]
+  rw [Finset.sum_congr rfl hinner, ← Finset.sum_filter]
+  unfold binSumAP
+  rw [Complex.ofReal_sum]
+  simp_rw [Complex.ofReal_mul]
+  refine Finset.sum_congr ?_ fun _ _ => rfl
+  ext p
+  simp only [Finset.mem_filter, Finset.mem_range, hS2]
+  constructor
+  · rintro ⟨-, hp, hq, h1, h2, h3⟩
+    exact ⟨⟨Nat.lt_succ_of_le (Nat.le_floor h2), hp, h1, h2, h3⟩, hq⟩
+  · rintro ⟨⟨-, hp, h1, h2, h3⟩, hq⟩
+    have : (p : ℝ) < 2 * k := by linarith
+    have : p < 2 * k := by exact_mod_cast this
+    exact ⟨by omega, hp, hq, h1, h2, h3⟩
 
 /-- LEAF: minor arc estimate, Kawada section 4 display 3.5 with Bessel's inequality and
 Cauchy Schwarz display 3.6, for k = 2. Class HARD. P0077 pages 338 to 339, display 2.4:
@@ -93,10 +197,6 @@ theorem leaf_major_arcs :
           (Sqa (2 * k) q2 a2 * Y : ℝ)‖ ≤
           K * Y ^ 2 * Real.log Y ^ (-A) := by
   sorry
-
-theorem eA_continuous : Continuous eA := by
-  unfold eA
-  fun_prop
 
 theorem circF_continuous (X1 X2 Y : ℝ) (q2 : ℕ) (a2 : ℤ) (m : ℕ) :
     Continuous (circF X1 X2 Y q2 a2 m) := by
