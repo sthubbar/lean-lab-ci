@@ -1,4 +1,6 @@
 import LeanLab.ChenDoubleSieve.Table1Algebra
+import LeanLab.ChenDoubleSieve.KernelIntegrability
+import LeanLab.ChenDoubleSieve.Feed1122_Burst9Matrix_entry_0_1_p4
 
 /-!
 # Feed 1122 split of `Burst9Matrix.entry_0_1`
@@ -24,19 +26,20 @@ open LeanLab.ChenDoubleSieve.Wu04Table
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 0) volume (11/5 : ℝ) (23/10 : ℝ) := by
-  sorry
+  exact (Burst8P2.table_kernel_integrable 0).mono_set
+    (Set.uIcc_subset_uIcc (by rw [Set.mem_uIcc]; norm_num) (by rw [Set.mem_uIcc]; norm_num))
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, left half panel `[11/5, 9/4]` of `a_{1,2}`:
 quadrature value 0.013027298436, stated bound leaves 3.40e-08. MEDIUM. -/
 theorem leaf_left :
     (1302726441/100000000000 : ℝ) ≤ ∫ t in (11/5 : ℝ)..(9/4 : ℝ), tableKernel 0 t := by
-  sorry
+  exact Feed1122_Burst9Matrix_entry_0_1_p4.half_left
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, right half panel `[9/4, 23/10]` of `a_{1,2}`:
 quadrature value 0.013163769615, stated bound leaves 3.40e-08. MEDIUM. -/
 theorem leaf_right :
     (13163735591/1000000000000 : ℝ) ≤ ∫ t in (9/4 : ℝ)..(23/10 : ℝ), tableKernel 0 t := by
-  sorry
+  exact Feed1122_Burst9Matrix_entry_0_1_p4.half_right
 
 /-- `Burst9Matrix.entry_0_1` from the three leaves: additivity of the integral at `9/4`. -/
 theorem entry_0_1_of_leaves : (candidateMatrixQ 0 1 : ℝ) ≤ integralMatrix 0 1 := by
