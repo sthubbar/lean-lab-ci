@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Feed1122VeryLowRepair
+import LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317
 
 /-!
 # Second repair of the very low band bound, burst 20261122 S126
@@ -40,7 +41,10 @@ theorem veryLow_level_seventeen_sum_le_one (χ : DirichletCharacter ℂ q) (hχ 
     (hq : q = 17) {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
     (∑ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 < ρ.im ∧ ρ.im ≤ 1),
       (mult χ ρ : ℝ)) ≤ 1 := by
-  sorry
+  exact LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317.sum_le_one_of_grh_count_simple χ T
+    (LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317.grh_box_level_seventeen χ hχ hq)
+    (LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317.critical_count_level_seventeen χ hχ hq)
+    (LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317.simple_level_seventeen χ hχ hq)
 
 /-- No zero of positive height at most `1` for the conductors other than `13` and `17`, from
 the per conductor S93 leaves, without `noLowZero_level_seventeen`. -/

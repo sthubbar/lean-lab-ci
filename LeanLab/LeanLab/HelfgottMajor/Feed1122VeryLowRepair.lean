@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Feed1122VeryLowNoZero
+import LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317
 
 /-!
 # Repaired route to `book_count_band_very_low_mult_le`, burst 20261122 S126
@@ -57,7 +58,10 @@ theorem veryLow_level_thirteen_sum_le_one (χ : DirichletCharacter ℂ q) (hχ :
     (hq : q = 13) {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
     (∑ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 < ρ.im ∧ ρ.im ≤ 1),
       (mult χ ρ : ℝ)) ≤ 1 := by
-  sorry
+  exact LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317.sum_le_one_of_grh_count_simple χ T
+    (LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317.grh_box_level_thirteen χ hχ hq)
+    (LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317.critical_count_level_thirteen χ hχ hq)
+    (LeanLab.HelfgottMajor.Feed1122VeryLowSplit1317.simple_level_thirteen χ hχ hq)
 
 /-- Twin of `book_count_band_very_low_mult_le`, exactly its statement, from the real axis fact,
 the S93 assembly for conductors other than `13`, and the conductor `13` leaf. It does not use the
