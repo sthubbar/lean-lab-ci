@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_near_zero_even_index
+import LeanLab.ExceptionalSet.Feed1122_exceptional_zero_page_bound_s134
 
 /-!
 Feed for `leaf_near_zero_even_large_prime_long` of
@@ -65,8 +66,8 @@ Davenport chapter 14; used in the weaker form `1 - β ≫ r^(-3/5)`. MEDIUM. -/
 theorem leaf_exceptional_zero_page_bound :
     ∃ c₀ : ℝ, 0 < c₀ ∧ ∀ (r : ℕ) (_ : NeZero r) (χ : DirichletCharacter ℂ r) (β : ℝ),
       χ.IsPrimitive → χ ^ 2 = 1 → χ ≠ 1 → 0 < β → β < 1 → χ.LFunction β = 0 →
-        c₀ * (r : ℝ) ^ (-(3 / 5 : ℝ)) ≤ 1 - β := by
-  sorry
+        c₀ * (r : ℝ) ^ (-(3 / 5 : ℝ)) ≤ 1 - β :=
+  leaf_exceptional_zero_page_bound_s134
 
 /-- Proved helper: `log P = 6 δ (log N)^γ` for `P = F γ N ^ (6 δ)`. -/
 theorem feed1122_log_P (γ δ : ℝ) (N : ℕ) :
