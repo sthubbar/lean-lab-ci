@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_leaf_odd_case_pomerance
+import LeanLab.HelfgottMajor.SPLIT_leaf_young_critical_value_odd
 
 /-!
 Split of `leaf_pomerance_cos_sum`, the cosine sum bound in the proof of Pomerance,
@@ -33,7 +34,7 @@ HARD: a genuine extremal problem for trigonometric polynomials. -/
 theorem leaf_young_critical_value_odd (n : ℕ) (hn : Odd n) (x : ℝ) (hx0 : 0 < x) (hxpi : x < π)
     (hcrit : ∑ j ∈ Icc 1 n, sin (j * x) = 0) :
     ∑ j ∈ Icc 1 n, (-1 : ℝ) ^ j / (j : ℝ) ≤ ∑ j ∈ Icc 1 n, cos (j * x) / (j : ℝ) := by
-  sorry
+  exact young_critical_value_odd_of_leaves n hn x hx0 hxpi hcrit
 
 /-- The derivative of `C_n x = sum_{j <= n} cos (j x) / j` is `- sum_{j <= n} sin (j x)`. -/
 theorem hasDerivAt_cos_sum (n : ℕ) (x : ℝ) :
