@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_book_zero_count_large_height_upper_short_level_one
+import LeanLab.HelfgottMajor.BookZeroSplit1122
 
 /-!
 # Split of `book_zero_count_large_height_upper_short_conductor_le_height`
@@ -168,7 +169,13 @@ theorem book_one_sided_count_short_nonreal (χ : DirichletCharacter ℂ q) (hχ 
     (hcx : χ⁻¹ ≠ χ) (hq2 : 2 ≤ q) {T : ℝ} (hT2 : 2 ≤ T) (hT20 : T ≤ 20)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  -- S138: reduced to the LEAF `BookZeroSplit1122.book_395_nontrivial` on main, display 3.95.
+  have hne : χ ≠ 1 := by
+    intro h
+    apply hcx
+    rw [h, inv_one]
+  exact (abs_le.mp (LeanLab.HelfgottMajor.BookZeroSplit1122.book_395_nontrivial χ hχ hne
+    (by linarith : (1 : ℝ) ≤ T))).2
 
 /-- Split of `book_zero_count_large_height_upper_short_conductor_le_height`, same statement:
 real characters from Bennett et al. and the conjugate symmetry, non real characters from the one
