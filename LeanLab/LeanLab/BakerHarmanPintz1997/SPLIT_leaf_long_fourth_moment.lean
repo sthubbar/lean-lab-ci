@@ -6,6 +6,7 @@ The assembly takes the fourth root, PROVED here from the leaf.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BakerHarmanPintz1997.SPLIT_lemma10_small_L_338
+import LeanLab.BakerHarmanPintz1997.SPLIT_leaf_long_fourth_moment_p2
 
 namespace LeanLab.BakerHarmanPintz1997
 open Finset
@@ -23,7 +24,14 @@ theorem leaf_lfm_fourth_power (h9 : Lemma9) :
     (∀ x, ∀ c ∈ 𝒮 x, Ll x ≤ (c.q : ℝ) * c.T) →
     ∃ B K X0 : ℝ, 0 ≤ K ∧ ∀ x, X0 ≤ x → ∀ c ∈ 𝒮 x,
       pnorm (longDP c1 c2 (Ll x)) c 4 ^ 4 ≤ K * (L x ^ B * (c.q * c.T)) := by
-  sorry
+  intro ε _ _ A0 c1 c2 Ll 𝒮 hc1 hc2 hcase hsmall
+  obtain ⟨B9, K9, h9i⟩ := Reflection425.interval_fourth_moment_of_lemma9 h9
+  refine ⟨|B9| + 4 + 2 * |A0|, |K9| * (3 ^ |B9| + 243 * (1 + c2 ^ 2) + 48 * c2 ^ 2),
+    max (c2 + 1) (Real.exp 1), by positivity, ?_⟩
+  intro x hx c hc
+  have hcx := hcase x c hc
+  exact lfm_fourth_power_core B9 K9 h9i A0 c1 c2 (Ll x) x hc1 hc2 c hx hcx.1 hcx.2.1
+    (fun e he hχ => (hcx.2.2.2.2 e he hχ).1) (hsmall x c hc)
 
 /-- `leaf_long_fourth_moment`, verbatim, CONDITIONAL ON `leaf_lfm_fourth_power`
 with the cited `lemma9`. -/
@@ -74,5 +82,6 @@ theorem leaf_long_fourth_moment_proof :
 
 end LeanLab.BakerHarmanPintz1997
 
+#print axioms LeanLab.BakerHarmanPintz1997.leaf_lfm_fourth_power
 #print axioms LeanLab.BakerHarmanPintz1997.leaf_long_fourth_moment_split
 #print axioms LeanLab.BakerHarmanPintz1997.leaf_long_fourth_moment_proof
