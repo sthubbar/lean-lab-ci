@@ -27,6 +27,7 @@ and is free of admitted steps. No statement on main is changed.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.SPLIT_mixed_pair_bound491
+import LeanLab.Linnik1951.SPLIT_gauss_phase491
 
 namespace LeanLab.Linnik1951
 
@@ -40,7 +41,13 @@ residue phase is at most the square root of the conductor times the Ramanujan fa
 the cofactor, whose size is at most the cofactor. -/
 theorem gauss_phase_product_le491 (q : ℕ) (hq : 1 ≤ q) (n : ℤ) (χ : DirichletCharacter ℂ q) :
     ‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖ ≤ (q : ℝ) := by
-  sorry
+  have hg := gauss_coefficient_le_sqrt_conductor491 q hq χ
+  have hr := residue_phase_mul_sqrt_conductor_le491 q hq n χ
+  calc ‖conjugateGauss491 q χ‖ * ‖residuePhase555 q n χ‖
+      ≤ Real.sqrt (χ.conductor : ℝ) * ‖residuePhase555 q n χ‖ :=
+        mul_le_mul_of_nonneg_right hg (norm_nonneg _)
+    _ = ‖residuePhase555 q n χ‖ * Real.sqrt (χ.conductor : ℝ) := mul_comm _ _
+    _ ≤ (q : ℝ) := hr
 
 /-- LEAF: P0093 page 160, the principal mass in equation 5.5. HARD. The mean square of
 the principal character prime series over the arc of radius one over q times N to the
