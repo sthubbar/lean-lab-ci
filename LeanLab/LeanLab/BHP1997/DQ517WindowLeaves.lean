@@ -20,10 +20,17 @@ PROVED here, from the three leaves: `two_window_of_leaves` and `four_window_of_l
 exactly the statements of `DQ517Window.leaf_two_window` and `DQ517Window.leaf_four_window`,
 which now close by them.
 
+Session S130: `leaf_rough_window_density` is PROVED by `S130RoughWindow`, the Buchstab
+induction redone with the error of 5.17 from `LeanLab.PNTPort.psi_explicit_strong`. The two
+main window leaves are SPLIT by `S130MainWindow`: window from prefixes, cofactor comparison
+PROVED, pointwise prime number theorem and Riemann sum steps left as LEAF pieces there.
+
 No new definition. AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.DQLowerExceptionalMeanSquareDecisions
 import LeanLab.BHP1997.LowerPrincipal517g
+import LeanLab.BHP1997.S130RoughWindow
+import LeanLab.BHP1997.S130MainWindow
 
 namespace LeanLab.BHP1997.DQ517Window
 open Classical Complex Decomp132 DecompC165b DecompC165d LowerShortC165 LowerShortMeanSquare
@@ -32,8 +39,10 @@ open scoped BigOperators
 
 /-! ### The three leaves -/
 
-/-- LEAF: page 51 display 5.17, the prime number theorem for the primes of the rough cofactor
-`n3` or `n5` of display 5.15. HARD. P0069: "a straightforward consequence of the prime number
+/-- PROVED by `S130RoughWindow.leaf_rough_window_density_of_s130`, session S130; was a LEAF,
+HARD.
+Page 51 display 5.17, the prime number theorem for the primes of the rough cofactor
+`n3` or `n5` of display 5.15. P0069: "a straightforward consequence of the prime number
 theorem, with error term `Y exp(-ε L^(1/2))`". On every integer interval `(a, b]` below `X`,
 numbers with no prime factor below `z ≥ X ^ c` have density `ω(log n / log z) / log z`, error
 `b exp(-N (log X)^(1/3))` for every `N`. Strong error form of
@@ -48,10 +57,12 @@ theorem leaf_rough_window_density (ω : ℝ → ℝ)
         |∑ n ∈ Finset.Ioc a b, (Task308.roughIndicator n z -
             ω (Real.log n / Real.log z) / Real.log z)| ≤
           C * b * Real.exp (-N * Real.log X ^ (1 / 3 : ℝ)) := by
-  sorry
+  exact S130RoughWindow.leaf_rough_window_density_of_s130 ω hω hz hc N hN
 
-/-- LEAF: page 51 display 5.17, the prime number theorem applied to the outer primes `p1`, `p2`
-of the E2 sum of display 5.15. HARD. P0069: "a straightforward consequence of the prime number
+/-- SPLIT in session S130: proved by `S130MainWindow.two_main_window_of_s130` from the LEAF
+pieces of `S130MainWindow.lean`; was a LEAF, HARD.
+Page 51 display 5.17, the prime number theorem applied to the outer primes `p1`, `p2`
+of the E2 sum of display 5.15. P0069: "a straightforward consequence of the prime number
 theorem, with error term `Y exp(-ε L^(1/2))`". With the rough cofactor `n3 = m / (p1 p2)`
 replaced by its Buchstab density at level `p2`, the sum over prime pairs with exponents in E2
 has local density `(1 / log Z) ∫∫_{E2} ω((s - β1 - β2) / β2) / (β1 β2^2)` at `m = Z^s`, with
@@ -74,10 +85,12 @@ theorem leaf_two_main_window (ω : ℝ → ℝ)
           lowerTwoDensityAt ω ε (Real.log m / Real.log (scaleZ ε x)) /
             Real.log (scaleZ ε x))| ≤
         C * x ^ (11 / 20 + ε) * (perronT0 x ^ 5)⁻¹ := by
-  sorry
+  exact S130MainWindow.two_main_window_of_s130 ω hω hz hε hε8
 
-/-- LEAF: page 51 display 5.17, the prime number theorem applied to the outer primes `p1` to
-`p4` of the E4 sum of display 5.15. HARD. P0069: "a straightforward consequence of the prime
+/-- SPLIT in session S130: proved by `S130MainWindow.four_main_window_of_s130` from the LEAF
+pieces of `S130MainWindow.lean`; was a LEAF, HARD.
+Page 51 display 5.17, the prime number theorem applied to the outer primes `p1` to
+`p4` of the E4 sum of display 5.15. P0069: "a straightforward consequence of the prime
 number theorem, with error term `Y exp(-ε L^(1/2))`". With the rough cofactor
 `n5 = m / (p1 p2 p3 p4)` replaced by its Buchstab density at level `p4`, the sum over prime
 quadruples with exponents in E4 has local density the E4 integral of page 51 with `1` replaced
@@ -105,7 +118,7 @@ theorem leaf_four_main_window (ω : ℝ → ℝ)
           lowerFourDensityAt ω ε (Real.log m / Real.log (scaleZ ε x)) /
             Real.log (scaleZ ε x))| ≤
         C * x ^ (11 / 20 + ε) * (perronT0 x ^ 5)⁻¹ := by
-  sorry
+  exact S130MainWindow.four_main_window_of_s130 ω hω hz hε hε8
 
 /-! ### Proved steps -/
 
