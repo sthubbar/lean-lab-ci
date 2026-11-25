@@ -4,6 +4,7 @@ import LeanLab.BS2022GRH.PaperInputs148
 import LeanLab.BS2022GRH.ModelC233
 import LeanLab.BS2022GRH.Theta332
 import LeanLab.BS2022GRH.Lemma5MuCdemNat
+import LeanLab.BS2022GRH.SchoenfeldCor1S63
 
 namespace LeanLab.BS2022GRH.PublishedInputs232
 open Real Finset ChenThresholdGRH
@@ -20,7 +21,7 @@ theorem lemma5_phi : PaperInputs148.Lemma5PhiJ := by
 
 /-- LEAF. Schoenfeld Corollary 1, journal Lemma 1 p. 1215. -/
 theorem lemma1_schoenfeld : PaperInputs148.Lemma1J := by
-  sorry
+  exact SchoenfeldCor1S63.cor1_6_18
 
 /-! ### Private development for `lemma4_robin` (Robin Theorem 11)
 
