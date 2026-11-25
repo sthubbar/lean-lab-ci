@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.ZeroCount1623
+import LeanLab.HelfgottMajor.BookZeroSplit1122
 
 /-!
 # Split of `book_zero_count_small_height_lower`
@@ -78,7 +79,24 @@ theorem book_zero_count_small_height_lower_large_conductor (χ : DirichletCharac
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T)
     (hlog : 21 < Real.log ((q : ℝ) * T)) :
     bookMain q T - bookCount χ T ≤ bookError q T := by
-  sorry
+  -- S138: reduced to the LEAF `BookZeroSplit1122.book_395_nontrivial` on main, display 3.95.
+  -- The character is non-trivial: a primitive trivial character has modulus one, and then
+  -- `log (q T) = log T ≤ log 2 < 21`.
+  have hne : χ ≠ 1 := by
+    rintro rfl
+    have hc : (1 : DirichletCharacter ℂ q).conductor = 1 :=
+      DirichletCharacter.conductor_one
+    have hp : (1 : DirichletCharacter ℂ q).conductor = q := hχ
+    have hq1 : (q : ℝ) = 1 := by
+      have : q = 1 := hp.symm.trans hc
+      rw [this]; norm_num
+    rw [hq1, one_mul] at hlog
+    have h1 : Real.log T ≤ Real.log 2 := Real.log_le_log (by linarith) hT2
+    have h2 := Real.log_two_lt_d9
+    linarith
+  have h := LeanLab.HelfgottMajor.BookZeroSplit1122.book_395_nontrivial χ hχ hne hT
+  have h' := (abs_le.mp h).1
+  linarith
 
 /-- Assembly, with the same statement as `book_zero_count_small_height_lower`: below
 `log (q T) = 21` the arithmetic part and the nonnegativity of the count, above it the leaf. -/
