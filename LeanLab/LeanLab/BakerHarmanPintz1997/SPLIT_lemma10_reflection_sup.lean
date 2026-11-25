@@ -54,7 +54,56 @@ theorem leaf_reflection_polar_size :
     ‖((Nat.totient q : ℂ) / (q : ℂ)) *
         ∫ y in (c1 * F)..(c2 * F), ((y : ℂ) ^ (-(half t)))‖ ≤
       K * (F ^ (1 / 2 : ℝ) / (1 + |t|)) := by
-  sorry
+  intro c1 c2 hc1 hc2
+  refine ⟨3 * (c2 ^ (1 / 2 : ℝ) + c1 ^ (1 / 2 : ℝ)), ?_, ?_⟩
+  · have := Real.rpow_nonneg hc1.le (1 / 2 : ℝ)
+    have := Real.rpow_nonneg (hc1.trans hc2).le (1 / 2 : ℝ)
+    linarith
+  intro F q hF hq t
+  have hF0 : 0 < F := by linarith
+  have hc20 : 0 < c2 := hc1.trans hc2
+  set r : ℂ := -(half t) with hr
+  have hr1 : r + 1 = 1 / 2 - t * Complex.I := by rw [hr, half]; ring
+  have hre : (r + 1).re = 1 / 2 := by rw [hr1]; simp
+  have him : (r + 1).im = -t := by rw [hr1]; simp
+  have hrre : -1 < r.re := by
+    have : r.re = (r + 1).re - 1 := by simp
+    rw [this, hre]; norm_num
+  have hn1 : (1 / 2 : ℝ) ≤ ‖r + 1‖ := by
+    have := Complex.abs_re_le_norm (r + 1); rw [hre] at this
+    linarith [le_abs_self (1 / 2 : ℝ)]
+  have hn2 : |t| ≤ ‖r + 1‖ := by
+    have := Complex.abs_im_le_norm (r + 1); rwa [him, abs_neg] at this
+  have hnpos : 0 < ‖r + 1‖ := by linarith
+  have hnorm : (1 + |t|) / 3 ≤ ‖r + 1‖ := by linarith
+  -- phi(q)/q has norm at most 1
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast hq
+  have hphi : ‖((Nat.totient q : ℂ) / (q : ℂ))‖ ≤ 1 := by
+    rw [norm_div, Complex.norm_natCast, Complex.norm_natCast, div_le_one hq0]
+    exact_mod_cast Nat.totient_le q
+  rw [integral_cpow (Or.inl hrre), norm_mul]
+  have hb : ‖((c2 * F : ℝ) : ℂ) ^ (r + 1)‖ = c2 ^ (1 / 2 : ℝ) * F ^ (1 / 2 : ℝ) := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos (by positivity), hre,
+      Real.mul_rpow hc20.le hF0.le]
+  have ha : ‖((c1 * F : ℝ) : ℂ) ^ (r + 1)‖ = c1 ^ (1 / 2 : ℝ) * F ^ (1 / 2 : ℝ) := by
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos (by positivity), hre,
+      Real.mul_rpow hc1.le hF0.le]
+  have hdiff : ‖((((c2 * F : ℝ) : ℂ) ^ (r + 1) - ((c1 * F : ℝ) : ℂ) ^ (r + 1)) / (r + 1))‖ ≤
+      (c2 ^ (1 / 2 : ℝ) + c1 ^ (1 / 2 : ℝ)) * F ^ (1 / 2 : ℝ) / ((1 + |t|) / 3) := by
+    rw [norm_div]
+    have hnum := norm_sub_le (((c2 * F : ℝ) : ℂ) ^ (r + 1)) (((c1 * F : ℝ) : ℂ) ^ (r + 1))
+    rw [hb, ha] at hnum
+    have h0 : 0 < (1 + |t|) / 3 := by positivity
+    calc _ ≤ (c2 ^ (1 / 2 : ℝ) * F ^ (1 / 2 : ℝ) + c1 ^ (1 / 2 : ℝ) * F ^ (1 / 2 : ℝ)) /
+          ‖r + 1‖ := div_le_div_of_nonneg_right hnum hnpos.le
+      _ ≤ (c2 ^ (1 / 2 : ℝ) * F ^ (1 / 2 : ℝ) + c1 ^ (1 / 2 : ℝ) * F ^ (1 / 2 : ℝ)) /
+          ((1 + |t|) / 3) := div_le_div_of_nonneg_left (by positivity) h0 hnorm
+      _ = _ := by ring
+  calc _ ≤ 1 * ((c2 ^ (1 / 2 : ℝ) + c1 ^ (1 / 2 : ℝ)) * F ^ (1 / 2 : ℝ) / ((1 + |t|) / 3)) :=
+        mul_le_mul hphi hdiff (norm_nonneg _) zero_le_one
+    _ = 3 * (c2 ^ (1 / 2 : ℝ) + c1 ^ (1 / 2 : ℝ)) * (F ^ (1 / 2 : ℝ) / (1 + |t|)) := by
+        have : 0 < 1 + |t| := by positivity
+        field_simp
 
 /-- `lemma10_reflection_sup`, verbatim. CONDITIONAL ON `leaf_reflection_nonprincipal`,
 `leaf_reflection_principal_error` and `leaf_reflection_polar_size`. -/
@@ -86,6 +135,7 @@ theorem lemma10_reflection_sup_split :
       rwa [sub_add_cancel] at this
     nlinarith
 
+#print axioms leaf_reflection_polar_size
 #print axioms lemma10_reflection_sup_split
 
 end LeanLab.BakerHarmanPintz1997
