@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp366a
+import LeanLab.ChenDoubleSieve.PairSieveLinearWeights1122
 
 /-!
 Split of Task366.pair_linear_sieve_with_remainder, the F4 lower sieve supply.
@@ -16,14 +17,16 @@ namespace LeanLab.ChenDoubleSieve.Task366
 open Task275 Task348
 open Wu04Functional (IsLinearSieve)
 
-/-- LEAF: Wu 2004 page 6 Lemma 2.2, the Rosser Iwaniec lower bound weights of
+/-- Wu 2004 page 6 Lemma 2.2, the Rosser Iwaniec lower bound weights of
 dimension one at level D = Q / (p1 p2) and sifting level z = N ^ kappa1, used on
-page 38 and page 39 equation 10.5 for each pair of Upsilon 4. Class HARD.
+page 38 and page 39 equation 10.5 for each pair of Upsilon 4.
 The weights are bounded by one, satisfy the lower bound sieve inequality for every
 integer when summed over the residual moduli, and their density sum is at least
 V(z) times f(s) minus an error delta uniform over the pairs, where
 s = lowerLevel B N (p1 p2) = log D / log z.
-The density 1 / phi q is the density of A_{dq} relative to A_d. -/
+The density 1 / phi q is the density of A_{dq} relative to A_d.
+PROVED from LinearSieveWeights.pair_weights_of_linear_sieve, so CONDITIONAL ON the
+pair free LEAF LinearSieveWeights.linear_sieve_lower_weights. -/
 theorem pair_lower_weights4 (F f : ℝ → ℝ) (h : IsLinearSieve F f) :
     ∀ δ : ℝ, 0 < δ → ∀ B : ℝ, 0 < B → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       ∀ p ∈ lowerPairs4 N, ∃ w : ℕ → ℝ, (∀ q, |w q| ≤ 1) ∧
@@ -31,7 +34,27 @@ theorem pair_lower_weights4 (F f : ℝ → ℝ) (h : IsLinearSieve F f) :
           if Wu41.Sifted N ((N : ℝ) ^ kappa1) n then 1 else 0) ∧
         lowerDensity N * (f (lowerLevel B N (p.1 * p.2)) - δ) ≤
           ∑ q ∈ pairModuli4 B N p, w q / (Nat.totient q : ℝ) := by
-  sorry
+  intro δ hδ B hB
+  obtain ⟨N0, hN0⟩ := LinearSieveWeights.pair_weights_of_linear_sieve F f h δ hδ B hB
+  refine ⟨N0, fun N hE hN p hp => ?_⟩
+  have hp' := hp
+  simp only [lowerPairs4, Wu08Sum.P2, Finset.mem_filter, Finset.mem_product,
+    Finset.mem_range] at hp'
+  obtain ⟨⟨h1N, _⟩, hp1, hp2, _, _, hz1, h12, h2k⟩ := hp'
+  have hNpos : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+  have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast (show 1 ≤ N by omega)
+  have h12r : (p.1 : ℝ) < p.2 := by exact_mod_cast h12
+  have hz2 : (N : ℝ) ^ kappa1 ≤ p.2 := by linarith
+  have hprod : ((p.1 * p.2 : ℕ) : ℝ) < (N : ℝ) ^ (1 / 2 - 2 * kappa1) := by
+    have h0 : (0 : ℝ) ≤ p.1 := Nat.cast_nonneg _
+    have hlt : (p.1 : ℝ) * p.2 < (N : ℝ) ^ kappa2 * (N : ℝ) ^ kappa2 :=
+      mul_lt_mul'' (h12r.trans h2k) h2k h0 (Nat.cast_nonneg _)
+    rw [← rpow_add hNpos] at hlt
+    have hle : (N : ℝ) ^ (kappa2 + kappa2) ≤ (N : ℝ) ^ (1 / 2 - 2 * kappa1) :=
+      rpow_le_rpow_of_exponent_le hN1 (by norm_num [kappa1, kappa2])
+    push_cast
+    linarith
+  exact hN0 N hE hN p hp1 hp2 hz1 hz2 hprod
 
 /-- Wu 2004 page 6 Lemma 2.2, the finite step of the lower bound sieve for
 A_d with d = p1 p2 as used on page 38 and page 39 equation 10.5. Proved here.

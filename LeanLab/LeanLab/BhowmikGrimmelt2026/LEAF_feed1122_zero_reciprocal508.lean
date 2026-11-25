@@ -27,6 +27,7 @@ import LeanLab.BhowmikGrimmelt2026.Decomp508a
 import LeanLab.BhowmikGrimmelt2026.Decomp541a
 import LeanLab.BhowmikGrimmelt2026.RouteWindow508
 import LeanLab.PNTPort.DirichletZF.ZeroFreeSiegel
+import LeanLab.BhowmikGrimmelt2026.LEAF_feed1122_zero_reciprocal508_p2_box
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -39,8 +40,8 @@ Function, chapter 15, or Davenport chapter 15. Class HARD, a numerical analytic 
 the zero free region already in PNTPort, `ZeroInequalitySpec` of StrongPNT, starts at
 height `2`. -/
 theorem leaf_zeta_no_low_zero508 :
-    ∀ ρ : ℂ, riemannZeta ρ = 0 → 0 < ρ.re → ρ.re < 1 → 1 < |ρ.im| := by
-  sorry
+    ∀ ρ : ℂ, riemannZeta ρ = 0 → 0 < ρ.re → ρ.re < 1 → 1 < |ρ.im| :=
+  zeta_no_low_zero_from_box508
 
 /-- At height at most one, every strip zero of a primitive character modulo `q` has
 `1 - Re ρ ≥ c q^(-ε)`, with `0 < c ≤ 1`. For a non principal character this is the

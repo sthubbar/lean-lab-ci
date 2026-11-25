@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp348a
+import LeanLab.ChenDoubleSieve.Feed1122_S120_main4_compare
 
 /-!
 Feed split of `main4_lower` in Decomp348b, Wu 2004 page 39 equation 10.5.
@@ -62,7 +63,7 @@ theorem main4_compare (F f : ℝ → ℝ) (h : IsLinearSieve F f) :
           - (Nat.primeCounting N : ℝ) * lowerDensity N *
             (∑ q ∈ Wu08Sum.P2 N (fun p q => (N : ℝ) ^ kappa1 ≤ p ∧ p < q ∧ (q : ℝ) < (N : ℝ) ^ kappa2),
               f (lowerLevel B N (q.1 * q.2)) / (Nat.totient (q.1 * q.2) : ℝ))| ≤ η * Θ N := by
-  sorry
+  exact LeanLab.ChenDoubleSieve.Feed1122.S120.main4_compare_of_leaves F f h
 
 /-- The parent statement of `main4_lower`, with `main4` unfolded, from the leaves. -/
 theorem main4_lower_of_leaves (F f : ℝ → ℝ) (h : IsLinearSieve F f) :
