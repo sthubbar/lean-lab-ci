@@ -17,6 +17,7 @@ and `jr_mainSum_lower_of_leaves`, with exactly the statements of the parents.
 AI-written Lean code, Claude, 2026-11-22. Binary Goldbach is OPEN; nothing here is progress on it.
 -/
 import LeanLab.AlmostPrimeSums.Decomp1527b
+import LeanLab.AlmostPrimeSums.Decomp1527bFeed1122JRP2
 
 namespace LeanLab.AlmostPrimeSums.Decomp1527bFeed1122JR
 open Finset Real ArithmeticFunction BoundingSieve LeanLab.AlmostPrimeSums.Decomp1527a
@@ -36,7 +37,7 @@ theorem rosser_mainSum_buchstab (s : BoundingSieve) (D : ℝ) (b : Bool) :
           (fun e => rosserWeight D b e = 0 ∧ rosserWeight D b (e / e.minFac) ≠ 0),
         (ArithmeticFunction.moebius e : ℝ) * s.nu e *
           ∏ q ∈ s.prodPrimes.primeFactors.filter (fun q => q < e.minFac), (1 - s.nu q) := by
-  sorry
+  exact LeanLab.AlmostPrimeSums.Decomp1527bFeed1122JRP2.rosser_mainSum_buchstab_of_leaves s D b
 
 /-- LEAF: Iwaniec-Kowalski (6.30) and the remark after it, parity of the first failure of the
 Rosser cut-off; Opera de Cribro Section 6.3. Class MEDIUM. If `e ∣ P` fails the cut-off while
