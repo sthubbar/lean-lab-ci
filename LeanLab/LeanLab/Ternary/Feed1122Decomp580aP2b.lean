@@ -12,11 +12,115 @@ import LeanLab.Ternary.Feed1122Decomp580aP2
 
 namespace LeanLab.Ternary.Task580
 
-/-- LEAF: the numerical value of `c_E`, Helfgott 1312.7748v2 page 37 display (5.14),
+/-- The terms of the prime sum in `c_E`, Helfgott 1312.7748v2 display (5.14), are nonnegative.
+Helper for `sieveConstant_le`, burst S144 wave 2. -/
+private lemma term_nonneg (p : ℕ) :
+    0 ≤ (if p.Prime then Real.log p / ((p : ℝ) * (p - 1 : ℝ)) else 0) := by
+  split_ifs with hp
+  · have h2 : (2:ℝ) ≤ p := by exact_mod_cast hp.two_le
+    apply div_nonneg (Real.log_nonneg (by linarith)); nlinarith
+  · exact le_rfl
+
+private lemma term_le (n : ℕ) (hn : 2 ≤ n) :
+    (if n.Prime then Real.log n / ((n : ℝ) * (n - 1 : ℝ)) else 0) ≤
+      (Real.log n + 1) / ((n:ℝ) - 1) - (Real.log (n + 1 : ℕ) + 1) / (n : ℝ) := by
+  have h2 : (2:ℝ) ≤ n := by exact_mod_cast hn
+  have hn0 : (0:ℝ) < n := by linarith
+  have hn1 : (0:ℝ) < (n:ℝ) - 1 := by linarith
+  have hlogn : 0 ≤ Real.log n := Real.log_nonneg (by linarith)
+  have hstep : Real.log ((n + 1 : ℕ) : ℝ) - Real.log n ≤ 1 / n := by
+    rw [← Real.log_div (by push_cast; linarith) hn0.ne']
+    have := Real.log_le_sub_one_of_pos (show (0:ℝ) < ((n + 1 : ℕ) : ℝ) / n by positivity)
+    have he : ((n + 1 : ℕ) : ℝ) / n - 1 = 1 / n := by push_cast; field_simp; ring
+    linarith
+  have key : Real.log n / ((n : ℝ) * (n - 1 : ℝ)) ≤
+      (Real.log n + 1) / ((n:ℝ) - 1) - (Real.log (n + 1 : ℕ) + 1) / (n : ℝ) := by
+    rw [div_sub_div _ _ hn1.ne' hn0.ne', div_le_div_iff₀ (by positivity) (by positivity)]
+    have h1 : ((n:ℝ) - 1) * (Real.log ((n + 1 : ℕ) : ℝ) - Real.log n) ≤ ((n:ℝ) - 1) * (1 / n) :=
+      mul_le_mul_of_nonneg_left hstep hn1.le
+    have h3 : ((n:ℝ) - 1) * (1 / n) ≤ 1 := by
+      rw [mul_one_div, div_le_one hn0]; linarith
+    have hpos : 0 ≤ (n:ℝ) * ((n:ℝ) - 1) := by positivity
+    nlinarith [mul_nonneg hpos hpos]
+  split_ifs
+  · exact key
+  · exact (div_nonneg hlogn (by positivity)).trans key
+
+private lemma log_le_small : Real.log 2 ≤ 0.6932 ∧ Real.log 3 ≤ 1.11 ∧ Real.log 5 ≤ 1.64 ∧
+    Real.log 7 ≤ 1.96 ∧ Real.log 8 ≤ 2.08 := by
+  have l2 := Real.log_two_lt_d9
+  have hb : ∀ a b : ℝ, 0 < a → 0 < b → Real.log b - Real.log a ≤ b / a - 1 := by
+    intro a b ha hb
+    rw [← Real.log_div hb.ne' ha.ne']; exact Real.log_le_sub_one_of_pos (by positivity)
+  have l4 : Real.log 4 = 2 * Real.log 2 := by
+    rw [show (4:ℝ) = 2 ^ 2 by norm_num, Real.log_pow]; norm_num
+  have l8 : Real.log 8 = 3 * Real.log 2 := by
+    rw [show (8:ℝ) = 2 ^ 3 by norm_num, Real.log_pow]; norm_num
+  have l3 := hb 2 3 (by norm_num) (by norm_num)
+  have l5 := hb 4 5 (by norm_num) (by norm_num)
+  have l7 := hb 4 7 (by norm_num) (by norm_num)
+  have l3' : Real.log 3 ≤ 1.11 := by
+    -- log 3 = log 9 / 2 and log 9 - log 8 ≤ 1/8
+    have l9 : Real.log 9 = 2 * Real.log 3 := by
+      rw [show (9:ℝ) = 3 ^ 2 by norm_num, Real.log_pow]; norm_num
+    have := hb 8 9 (by norm_num) (by norm_num)
+    norm_num at this l2 ⊢; linarith
+  have l7' : Real.log 7 ≤ 1.96 := by
+    have l49 : Real.log 49 = 2 * Real.log 7 := by
+      rw [show (49:ℝ) = 7 ^ 2 by norm_num, Real.log_pow]; norm_num
+    have l48 : Real.log 48 = 4 * Real.log 2 + Real.log 3 := by
+      rw [show (48:ℝ) = 2 ^ 4 * 3 by norm_num, Real.log_mul (by norm_num) (by norm_num),
+        Real.log_pow]; norm_num
+    have := hb 48 49 (by norm_num) (by norm_num)
+    norm_num at this l2 l3' ⊢; linarith
+  refine ⟨by norm_num at l2 ⊢; linarith, l3', ?_, l7', by norm_num at l2 ⊢; linarith⟩
+  norm_num at l5 l2 ⊢; linarith
+
+/-- PROVED in S144 wave 2, formerly a MEDIUM LEAF: the numerical value of `c_E`, Helfgott 1312.7748v2 page 37 display (5.14),
 `c_E = γ + Σ_p log p/(p(p-1)) = 1.3325822...`, used here only in the weak form `c_E ≤ 2`,
 which is what `c₊ ≥ ρ c_E` on page 39 needs for `ρ ≤ 0.6`. Class MEDIUM. -/
 theorem sieveConstant_le : sieveConstant ≤ 2 := by
-  sorry
+  set f : ℕ → ℝ := fun p => if p.Prime then Real.log p / ((p : ℝ) * (p - 1 : ℝ)) else 0 with hf
+  have hf0 : ∀ n, 0 ≤ f n := fun n => term_nonneg n
+  obtain ⟨l2, l3, l5, l7, l8⟩ := log_le_small
+  -- partial sums up to 8
+  have hS8 : ∑ n ∈ Finset.range 8, f n ≤ 0.68 := by
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero, hf]
+    norm_num [Nat.prime_two, Nat.prime_three, Nat.prime_five, Nat.prime_seven]
+    have h2 : Real.log 2 ≥ 0 := Real.log_nonneg (by norm_num)
+    linarith
+  have hind : ∀ k : ℕ, ∑ n ∈ Finset.range (k + 8), f n ≤
+      1.12 - (Real.log ((k + 8 : ℕ) : ℝ) + 1) / (((k + 8 : ℕ) : ℝ) - 1) := by
+    intro k
+    induction k with
+    | zero =>
+      simp only [zero_add]
+      have : (Real.log ((8 : ℕ) : ℝ) + 1) / (((8 : ℕ) : ℝ) - 1) ≤ 0.44 := by
+        rw [div_le_iff₀ (by norm_num)]; push_cast; linarith
+      linarith
+    | succ k ih =>
+      rw [show k + 1 + 8 = (k + 8) + 1 by ring, Finset.sum_range_succ]
+      have := term_le (k + 8) (by omega)
+      have e : ((k + 8 + 1 : ℕ) : ℝ) - 1 = ((k + 8 : ℕ) : ℝ) := by push_cast; ring
+      rw [e]
+      change _ + f (k + 8) ≤ _
+      linarith
+  have hall : ∀ N, ∑ n ∈ Finset.range N, f n ≤ 1.12 := by
+    intro N
+    have hmono : ∑ n ∈ Finset.range N, f n ≤ ∑ n ∈ Finset.range (N + 8), f n :=
+      Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono (by omega))
+        (fun i _ _ => hf0 i)
+    have h := hind N
+    have hpos : 0 ≤ (Real.log ((N + 8 : ℕ) : ℝ) + 1) / (((N + 8 : ℕ) : ℝ) - 1) := by
+      apply div_nonneg
+      · have := Real.log_nonneg (show (1:ℝ) ≤ ((N + 8 : ℕ) : ℝ) by push_cast; linarith); linarith
+      · push_cast; linarith
+    linarith
+  have htsum := Real.tsum_le_of_sum_range_le hf0 hall
+  have hγ := Real.eulerMascheroniConstant_lt_two_thirds
+  unfold sieveConstant
+  change Real.eulerMascheroniConstant + ∑' p : ℕ, f p ≤ 2
+  linarith
 
 /-- LEAF: display (5.26), Helfgott 1312.7748v2 page 39, proved on pages 39 to 44 by
 (5.27) to (5.31), Lemma 5.5 and an interval arithmetic computation over `q < 3.3·10⁹`.
