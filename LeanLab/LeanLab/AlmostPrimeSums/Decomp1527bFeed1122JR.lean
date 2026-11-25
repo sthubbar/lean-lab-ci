@@ -47,7 +47,62 @@ theorem moebius_of_first_failure (s : BoundingSieve) (D : ℝ) (b : Bool) {e : �
     (he : e ∈ s.prodPrimes.divisors.filter
       (fun e => rosserWeight D b e = 0 ∧ rosserWeight D b (e / e.minFac) ≠ 0)) :
     (ArithmeticFunction.moebius e : ℝ) = if b = true then -1 else 1 := by
-  sorry
+  obtain ⟨hediv, hw0, hw1⟩ := Finset.mem_filter.mp he
+  have hdvdP : e ∣ s.prodPrimes := Nat.dvd_of_mem_divisors hediv
+  have hsq : Squarefree e := Squarefree.squarefree_of_dvd hdvdP s.prodPrimes_squarefree
+  have hne1 : e ≠ 1 := by
+    rintro rfl
+    rw [Nat.minFac_one, Nat.div_one] at hw1
+    exact hw1 hw0
+  have hp : e.minFac.Prime := Nat.minFac_prime hne1
+  obtain ⟨d, hdef⟩ : ∃ d, d = e / e.minFac := ⟨_, rfl⟩
+  rw [← hdef] at hw1
+  have hed : e = d * e.minFac := by
+    rw [hdef]; exact (Nat.div_mul_cancel (Nat.minFac_dvd e)).symm
+  have hde : d ∣ e := ⟨e.minFac, hed⟩
+  have hdsq : Squarefree d := hsq.squarefree_of_dvd hde
+  have hmin : ∀ q ∈ d.primeFactors, e.minFac < q := by
+    intro q hq
+    have hqp := Nat.prime_of_mem_primeFactors hq
+    have hqd := Nat.dvd_of_mem_primeFactors hq
+    have hle : e.minFac ≤ q := Nat.minFac_le_of_dvd hqp.two_le (hqd.trans hde)
+    rcases hle.lt_or_eq with h | h
+    · exact h
+    · exfalso
+      have h2 : e.minFac * e.minFac ∣ d * e.minFac := Nat.mul_dvd_mul_right (h ▸ hqd) _
+      rw [← hed] at h2
+      have := Nat.isUnit_iff.mp (hsq _ h2)
+      exact hp.one_lt.ne' this
+  have hw := rosserWeight_mul_smallest D b hdsq hp hmin
+  rw [← hed] at hw
+  rw [hw] at hw0
+  by_cases hc : ((b = true ↔ (decPrimes d).length % 2 = 0) →
+      (d : ℝ) * (e.minFac : ℝ) ^ 3 < D)
+  · rw [if_pos hc, neg_eq_zero] at hw0
+    exact absurd hw0 hw1
+  obtain ⟨hpar, -⟩ := not_imp.mp hc
+  have hnot : ¬ e.minFac ∣ d := fun h =>
+    lt_irrefl _ (hmin _ (Nat.mem_primeFactors.mpr ⟨hp, h, hdsq.ne_zero⟩))
+  have hcop : d.Coprime e.minFac := (hp.coprime_iff_not_dvd.mpr hnot).symm
+  have hmue : (moebius e : ℝ) = -(moebius d : ℝ) := by
+    rw [hed, isMultiplicative_moebius.map_mul_of_coprime hcop, moebius_apply_prime hp]
+    push_cast
+    ring
+  have hcard : cardFactors d = (decPrimes d).length := by
+    have hh := (cardDistinctFactors_eq_cardFactors_iff_squarefree hdsq.ne_zero).mpr hdsq
+    rw [← hh]
+    simp only [decPrimes, Finset.length_sort, ← Nat.toFinset_factors,
+      List.card_toFinset, cardDistinctFactors_apply]
+  have hmu : (moebius d : ℝ) = (-1 : ℝ) ^ (decPrimes d).length := by
+    rw [moebius_apply_of_squarefree hdsq]
+    push_cast
+    rw [hcard]
+  rw [hmue, hmu, neg_one_pow_eq_pow_mod_two]
+  cases b
+  · have h1 : (decPrimes d).length % 2 = 1 := by simp at hpar; omega
+    simp [h1]
+  · have h0 : (decPrimes d).length % 2 = 0 := by simpa using hpar
+    simp [h0]
 
 /-- LEAF: Iwaniec-Kowalski Theorem 11.13 and its proof via the iterated
 Buchstab bounds `T_n` and the delay differential equations for `F`, `f`; Halberstam-Richert
