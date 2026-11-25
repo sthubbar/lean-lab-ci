@@ -15,7 +15,7 @@ Leaf 5, the exponent count from T <= T1 and (3.38). MEDIUM.
 Leaf 4 is reused by the split of `lemma10_small_L_339`.
 AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BakerHarmanPintz1997.DecompJ381
+import LeanLab.BakerHarmanPintz1997.SPLIT_lemma10_small_L_338_p2_square
 
 namespace LeanLab.BakerHarmanPintz1997
 open Finset
@@ -80,7 +80,35 @@ theorem leaf_338_mean_M :
     (∀ x, ∀ c ∈ 𝒮 x, max (Ml x) (x ^ (0.45 : ℝ)) * max (Nl x) (x ^ (0.225 : ℝ)) ≤ x ^ (0.775 + ε / 8)) →
     ∃ B' K X0 : ℝ, 0 ≤ K ∧ ∀ x, X0 ≤ x → ∀ c ∈ 𝒮 x,
       pnorm (M x) c 2 ≤ K * (L x ^ B' * (c.q * c.T + max (Ml x) 0) ^ (1 / 2 : ℝ)) := by
-  sorry
+  -- PROVED in burst-20261122 from `meanSquare_of_lemma1_P2`, CONDITIONAL ON the cited `lemma1`.
+  intro ε hε hε0 A0 B c1 c2 M N Ml Nl 𝒮 hc1 hc2 hfam hcase h338
+  obtain ⟨E, K, X0, hK, hb⟩ := meanSquare_of_lemma1_P2 lemma1 B c1 c2 1 hc1 hc2 le_rfl
+  refine ⟨E, K, max X0 1, hK, ?_⟩
+  intro x hx c hc
+  have hX0 : X0 ≤ x := (le_max_left _ _).trans hx
+  have hx1 : 1 ≤ x := (le_max_right _ _).trans hx
+  obtain ⟨-, hget⟩ := hfam x
+  have hM := hget 0 (by simp) (by simp)
+  have hMx : Ml x ≤ 1 * x := by
+    have h := h338 x c hc
+    have ha : Ml x ≤ max (Ml x) (x ^ (0.45 : ℝ)) := le_max_left _ _
+    have hb1 : 1 ≤ max (Nl x) (x ^ (0.225 : ℝ)) :=
+      (Real.one_le_rpow hx1 (by norm_num)).trans (le_max_right _ _)
+    have hpos : 0 ≤ max (Ml x) (x ^ (0.45 : ℝ)) :=
+      (Real.rpow_nonneg (by linarith) _).trans (le_max_right _ _)
+    have hprod : max (Ml x) (x ^ (0.45 : ℝ)) ≤
+        max (Ml x) (x ^ (0.45 : ℝ)) * max (Nl x) (x ^ (0.225 : ℝ)) :=
+      le_mul_of_one_le_right hpos hb1
+    have he : (0.775 : ℝ) + ε / 8 ≤ 1 := by
+      have : (0.775 : ℝ) = 775 / 1000 := by norm_num
+      rw [this]
+      linarith
+    have hx775 : x ^ (0.775 + ε / 8) ≤ x := by
+      calc x ^ (0.775 + ε / 8) ≤ x ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le hx1 he
+        _ = x := Real.rpow_one x
+    rw [one_mul]
+    linarith
+  exact hb x hX0 (Ml x) (M x) c hM.1 hM.2 (hcase x c hc).1 hMx
 
 /-- LEAF: page 24, ||N||_4 = ||N^2||_2^(1/2) << L^B' (qT + N^2)^(1/4), by Lemma 1, (3.3), for the
 polynomial N^2 of length N^2, whose coefficients satisfy (3.1) with a larger B. HARD. Under (3.38)
@@ -94,7 +122,74 @@ theorem leaf_338_fourth_N :
     (∀ x, ∀ c ∈ 𝒮 x, max (Ml x) (x ^ (0.45 : ℝ)) * max (Nl x) (x ^ (0.225 : ℝ)) ≤ x ^ (0.775 + ε / 8)) →
     ∃ B' K X0 : ℝ, 0 ≤ K ∧ ∀ x, X0 ≤ x → ∀ c ∈ 𝒮 x,
       pnorm (N x) c 4 ≤ K * (L x ^ B' * (c.q * c.T + max (Nl x) 0 ^ 2) ^ (1 / 4 : ℝ)) := by
-  sorry
+  -- PROVED in burst-20261122 from `meanSquare_of_lemma1_P2` applied to `DP.sqP2`,
+  -- CONDITIONAL ON the cited `lemma1`.
+  intro ε hε hε0 A0 B c1 c2 M N Ml Nl 𝒮 hc1 hc2 hfam hcase h338
+  have hc2p : 0 < c2 := by linarith
+  have hc12 : c1 ^ 2 < c2 ^ 2 := by nlinarith
+  obtain ⟨E, K, X0, hK, hb⟩ :=
+    meanSquare_of_lemma1_P2 lemma1 (1 + 2 * max B 0) (c1 ^ 2) (c2 ^ 2) 1 (by positivity) hc12 le_rfl
+  refine ⟨E * (1 / 2), K ^ (1 / 2 : ℝ), max X0 1, Real.rpow_nonneg hK _, ?_⟩
+  intro x hx c hc
+  have hX0 : X0 ≤ x := (le_max_left _ _).trans hx
+  have hx1 : 1 ≤ x := (le_max_right _ _).trans hx
+  have hx0 : 0 < x := by linarith
+  have hL0 : 0 ≤ L x := Real.log_nonneg hx1
+  obtain ⟨-, hget⟩ := hfam x
+  have hN := hget 1 (by simp) (by simp)
+  have hstd := (hcase x c hc).1
+  obtain ⟨-, hq1, -, hT2, -⟩ := hstd
+  have hq1' : (1 : ℝ) ≤ c.q := by exact_mod_cast hq1
+  have hqT : 0 ≤ (c.q : ℝ) * c.T := by nlinarith
+  rcases le_or_gt (Nl x) 0 with hneg | hNpos
+  · have hempty : (N x).supp = ∅ := by
+      ext n
+      simp only [Finset.notMem_empty, iff_false]
+      intro hn
+      have h2 : (n : ℝ) < c2 * Nl x := (hN.1 n hn).2
+      have : c2 * Nl x ≤ 0 := mul_nonpos_of_nonneg_of_nonpos hc2p.le hneg
+      have : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+      linarith
+    have h0 : pnorm (N x) c 4 = 0 := by
+      unfold pnorm DP.eval
+      simp [hempty]
+    rw [h0]
+    exact mul_nonneg (Real.rpow_nonneg hK _) (mul_nonneg (Real.rpow_nonneg hL0 _)
+      (Real.rpow_nonneg (by positivity) _))
+  · have hN2x : Nl x ^ 2 ≤ 1 * x := by
+      have h := h338 x c hc
+      have hp45 : 0 < x ^ (0.45 : ℝ) := Real.rpow_pos_of_pos hx0 _
+      have hA : x ^ (0.45 : ℝ) * Nl x ≤ x ^ (0.775 + ε / 8) :=
+        le_trans (mul_le_mul (le_max_right _ _) (le_max_left _ _) hNpos.le
+          (hp45.le.trans (le_max_right _ _))) h
+      have hB : (x ^ (0.45 : ℝ) * Nl x) ^ 2 ≤ (x ^ (0.775 + ε / 8)) ^ 2 :=
+        pow_le_pow_left₀ (mul_nonneg hp45.le hNpos.le) hA 2
+      have hC : (x ^ (0.775 + ε / 8)) ^ 2 ≤ x ^ (0.45 : ℝ) * x ^ (0.45 : ℝ) * x := by
+        have he : x ^ (0.45 : ℝ) * x ^ (0.45 : ℝ) * x = x ^ ((0.45 : ℝ) + 0.45 + 1) := by
+          rw [Real.rpow_add hx0, Real.rpow_add hx0, Real.rpow_one]
+        rw [he, sq, ← Real.rpow_add hx0]
+        exact Real.rpow_le_rpow_of_exponent_le hx1 (by norm_num <;> linarith)
+      have hD : x ^ (0.45 : ℝ) * x ^ (0.45 : ℝ) * Nl x ^ 2 ≤ x ^ (0.45 : ℝ) * x ^ (0.45 : ℝ) * x := by
+        have : (x ^ (0.45 : ℝ) * Nl x) ^ 2 = x ^ (0.45 : ℝ) * x ^ (0.45 : ℝ) * Nl x ^ 2 := by ring
+        linarith
+      rw [one_mul]
+      exact le_of_mul_le_mul_left hD (mul_pos hp45 hp45)
+    have hsq := hb x hX0 (Nl x ^ 2) (N x).sqP2 c (sqP2_hasLen _ _ _ _ hc1 hc2p hN.1)
+      (sqP2_coef _ _ _ _ _ hc1 hc2p hN.1 hN.2) (hcase x c hc).1 hN2x
+    rw [max_eq_left (sq_nonneg _)] at hsq
+    rw [pnorm4_eq_sqP2, max_eq_left hNpos.le]
+    have hw : 0 ≤ (c.q : ℝ) * c.T + Nl x ^ 2 := by positivity
+    have hp0 : 0 ≤ pnorm (N x).sqP2 c 2 :=
+      Real.rpow_nonneg (sum_nonneg fun _ _ => Real.rpow_nonneg (norm_nonneg _) _) _
+    calc pnorm (N x).sqP2 c 2 ^ (1 / 2 : ℝ)
+        ≤ (K * (L x ^ E * ((c.q : ℝ) * c.T + Nl x ^ 2) ^ (1 / 2 : ℝ))) ^ (1 / 2 : ℝ) :=
+          Real.rpow_le_rpow hp0 hsq (by norm_num)
+      _ = K ^ (1 / 2 : ℝ) * (L x ^ (E * (1 / 2)) *
+            ((c.q : ℝ) * c.T + Nl x ^ 2) ^ (1 / 4 : ℝ)) := by
+          rw [Real.mul_rpow hK (mul_nonneg (Real.rpow_nonneg hL0 _) (Real.rpow_nonneg hw _)),
+            Real.mul_rpow (Real.rpow_nonneg hL0 _) (Real.rpow_nonneg hw _),
+            ← Real.rpow_mul hL0, ← Real.rpow_mul hw]
+          norm_num
 
 /-- LEAF: page 24, ||L||_4^4 << L^B' qT when L <= qT, the paper's ||L||_4^4 << L^(3A) qT, from
 Lemma 9 for the interval L, the principal height condition |t| >= T/2 and |S| << qT. MEDIUM,
@@ -185,6 +280,8 @@ theorem lemma10_small_L_338_split :
 
 #print axioms split338_pnorm_nonneg
 #print axioms leaf_338_holder
+#print axioms leaf_338_mean_M
+#print axioms leaf_338_fourth_N
 #print axioms lemma10_small_L_338_split
 
 end LeanLab.BakerHarmanPintz1997

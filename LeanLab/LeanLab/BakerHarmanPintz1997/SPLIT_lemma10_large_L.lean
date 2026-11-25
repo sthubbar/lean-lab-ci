@@ -15,7 +15,7 @@ Leaf 3, the exponent count: (L^B + 2 L^(1/2)/T) times that bound is << x^(1/2) /
 T0 <= T <= T1, LMN = x, qT < L and (3.38) or (3.39). MEDIUM.
 The assembly multiplies the three bounds. AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BakerHarmanPintz1997.DecompJ381
+import LeanLab.BakerHarmanPintz1997.SPLIT_lemma10_large_L_p2_meansq
 
 namespace LeanLab.BakerHarmanPintz1997
 open Finset
@@ -74,7 +74,51 @@ theorem leaf_large_mean_square :
     ∃ B' K X0 : ℝ, 0 ≤ K ∧ ∀ x, X0 ≤ x → ∀ c ∈ 𝒮 x, 1 ≤ c2 * Ml x → 1 ≤ c2 * Nl x →
       pnorm (M x) c 2 * pnorm (N x) c 2 ≤
         K * (L x ^ B' * ((c.q * c.T + Ml x) ^ (1 / 2 : ℝ) * (c.q * c.T + Nl x) ^ (1 / 2 : ℝ))) := by
-  sorry
+  -- PROVED in burst-20261122 from `meanSquare_of_lemma1_P2`, CONDITIONAL ON the cited `lemma1`.
+  intro B c1 c2 M N Ml Nl Ll 𝒮 hc1 hc2 hfam hprod hstd hlarge
+  have hc2p : 0 < c2 := by linarith
+  obtain ⟨E, K, X0, hK, hb⟩ :=
+    meanSquare_of_lemma1_P2 lemma1 B c1 c2 (c2 + 1) hc1 hc2 (by linarith)
+  refine ⟨E + E, K * K, max X0 3, mul_nonneg hK hK, ?_⟩
+  intro x hx c hc hm hn
+  have hX0 : X0 ≤ x := (le_max_left _ _).trans hx
+  have hx3 : 3 ≤ x := (le_max_right _ _).trans hx
+  have hLpos : 0 < L x := Real.log_pos (by linarith)
+  obtain ⟨-, hget⟩ := hfam x
+  have hM := hget 0 (by simp) (by simp)
+  have hN := hget 1 (by simp) (by simp)
+  have hst := hstd x c hc
+  obtain ⟨-, hq1, -, hT2, -⟩ := hst
+  have hq1' : (1 : ℝ) ≤ c.q := by exact_mod_cast hq1
+  have hqT : 2 < (c.q : ℝ) * c.T := by nlinarith
+  have hLl : 2 < Ll x := lt_trans hqT (hlarge x c hc)
+  have hMpos : 0 < Ml x := pos_of_mul_pos_right (by linarith : 0 < c2 * Ml x) hc2p.le
+  have hNpos : 0 < Nl x := pos_of_mul_pos_right (by linarith : 0 < c2 * Nl x) hc2p.le
+  have hxe : (c2 + 1) * x = c2 * x + x := by ring
+  have hMl : Ml x ≤ (c2 + 1) * x := by
+    have h1 : 1 ≤ (c2 * Nl x) * Ll x := one_le_mul_of_one_le_of_one_le hn (by linarith)
+    have h2 : Ml x * ((c2 * Nl x) * Ll x) = c2 * x := by linear_combination c2 * hprod x
+    have h3 : Ml x ≤ Ml x * ((c2 * Nl x) * Ll x) := le_mul_of_one_le_right hMpos.le h1
+    linarith
+  have hNl : Nl x ≤ (c2 + 1) * x := by
+    have h1 : 1 ≤ (c2 * Ml x) * Ll x := one_le_mul_of_one_le_of_one_le hm (by linarith)
+    have h2 : Nl x * ((c2 * Ml x) * Ll x) = c2 * x := by linear_combination c2 * hprod x
+    have h3 : Nl x ≤ Nl x * ((c2 * Ml x) * Ll x) := le_mul_of_one_le_right hNpos.le h1
+    linarith
+  have h1 := hb x hX0 (Ml x) (M x) c hM.1 hM.2 (hstd x c hc) hMl
+  have h2 := hb x hX0 (Nl x) (N x) c hN.1 hN.2 (hstd x c hc) hNl
+  rw [max_eq_left hMpos.le] at h1
+  rw [max_eq_left hNpos.le] at h2
+  have hp0 : ∀ P : DP, 0 ≤ pnorm P c 2 := fun P =>
+    Real.rpow_nonneg (sum_nonneg fun _ _ => Real.rpow_nonneg (norm_nonneg _) _) _
+  calc pnorm (M x) c 2 * pnorm (N x) c 2
+      ≤ (K * (L x ^ E * (c.q * c.T + Ml x) ^ (1 / 2 : ℝ))) *
+          (K * (L x ^ E * (c.q * c.T + Nl x) ^ (1 / 2 : ℝ))) :=
+        mul_le_mul h1 h2 (hp0 _) ((hp0 _).trans h1)
+    _ = K * K * (L x ^ (E + E) * ((c.q * c.T + Ml x) ^ (1 / 2 : ℝ) *
+          (c.q * c.T + Nl x) ^ (1 / 2 : ℝ))) := by
+        rw [Real.rpow_add hLpos]
+        ring
 
 /-- LEAF: page 24, the exponent count of the case L > qT. MEDIUM.
 With MN = x/L, T0 <= T <= T1 = x^(0.45 - 2 eps/3), q <= L^A0, qT < L, M N >= T0 eventually and
@@ -174,6 +218,7 @@ theorem lemma10_large_L_split :
 
 #print axioms split_large_eval_zero
 #print axioms leaf_large_degenerate
+#print axioms leaf_large_mean_square
 #print axioms lemma10_large_L_split
 
 end LeanLab.BakerHarmanPintz1997
