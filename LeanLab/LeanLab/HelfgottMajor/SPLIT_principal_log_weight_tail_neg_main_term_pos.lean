@@ -1,4 +1,5 @@
 import Mathlib
+import LeanLab.HelfgottMajor.SPLIT_main_term_envelope_near_real
 
 /-!
 Split of the leaf `Decomp457b.tail_neg_digamma_main_term_envelope`, the elementary envelope
@@ -29,7 +30,8 @@ theorem main_term_envelope_near (t : ℝ) (ht : 2 ≤ t) (ht' : t ≤ 5 / 2) :
           1 / (12 * ((5 / 2 : ℂ) + t * I) ^ 2) -
         (((-1 / 2 : ℂ) + t * I)⁻¹ + ((1 / 2 : ℂ) + t * I)⁻¹ + ((3 / 2 : ℂ) + t * I)⁻¹)‖ +
       2 / 9375 ≤ Real.log t + 3 / 2 := by
-  sorry
+  rw [log_five_halves_real_form t]
+  exact main_term_envelope_near_real t ht ht'
 
 /-- LEAF: the elementary envelope of P0014 page 34 display 4.10 on the line of real part
 minus one half, far range `5/2 ≤ t`: the explicit Stirling main term at `w = 5/2 + it` minus
