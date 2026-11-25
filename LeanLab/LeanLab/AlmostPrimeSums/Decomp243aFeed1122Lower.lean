@@ -53,7 +53,139 @@ Class HARD. -/
 theorem leaf_remainder_BV (h : LevelBV) :
     ∃ B C : ℝ, 0 < B ∧ 0 < C ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
       sieveRemainder N B ≤ C * N / log N ^ 3 := by
-  sorry
+  obtain ⟨B0, C0, hBV⟩ := h 3 (by norm_num)
+  refine ⟨max B0 4, |C0| + 2, by positivity, by positivity, 3, fun N hN => ?_⟩
+  have hNr : (3 : ℝ) ≤ N := by exact_mod_cast hN
+  have hNpos : (0 : ℝ) < N := by linarith
+  have hL1 : 1 ≤ log (N : ℝ) := by
+    rw [← log_exp 1]
+    exact log_le_log (exp_pos 1) (by have := exp_one_lt_d9; linarith)
+  set L := log (N : ℝ) with hL
+  have hLpos : 0 < L := by linarith
+  set B := max B0 4 with hBdef
+  -- the residue choice
+  let a : ℕ → ℕ := fun q => if Nat.Coprime N q then N else 1
+  have ha : ∀ q, Nat.Coprime (a q) q := by
+    intro q; simp only [a]; split_ifs with hq
+    · exact hq
+    · exact Nat.coprime_one_left q
+  have hBV' := hBV N (by omega) (fun _ => N) a (fun _ => le_rfl) ha
+  have h3 : L ^ (3 : ℝ) = L ^ 3 := by exact_mod_cast Real.rpow_natCast L 3
+  rw [h3] at hBV'
+  -- the index set
+  set S := (sievePrimorial N ((1 : ℝ) / 8)).divisors.filter
+      (fun d : ℕ => (d : ℝ) < sieveLevel N B) with hS
+  have hcop : Nat.Coprime (sievePrimorial N ((1 : ℝ) / 8)) N := by
+    unfold sievePrimorial
+    apply Nat.Coprime.prod_left
+    intro p hp
+    have hp' := (mem_filter.mp hp).2
+    exact (Nat.Prime.coprime_iff_not_dvd hp'.1).mpr hp'.2.2.2
+  have hLB : L ^ B0 ≤ L ^ B := rpow_le_rpow_of_exponent_le hL1 (le_max_left _ _)
+  have hLB4 : L ^ (4 : ℕ) ≤ L ^ B := by
+    rw [← Real.rpow_natCast]; exact rpow_le_rpow_of_exponent_le hL1 (by simp [hBdef])
+  have hsqrt : 0 ≤ √(N : ℝ) := Real.sqrt_nonneg _
+  have hDle : sieveLevel N B ≤ √(N : ℝ) / L ^ B0 :=
+    div_le_div_of_nonneg_left hsqrt (rpow_pos_of_pos hLpos _) hLB
+  have hSsub : S ⊆ Icc 1 ⌊√(N : ℝ) / L ^ B0⌋₊ := by
+    intro d hd
+    obtain ⟨hd1, hd2⟩ := mem_filter.mp hd
+    have hdpos : 0 < d := Nat.pos_of_mem_divisors hd1
+    refine mem_Icc.mpr ⟨hdpos, Nat.le_floor ?_⟩
+    linarith
+  have hScard : (#S : ℝ) ≤ sieveLevel N B := by
+    have h1 : #S ≤ ⌊sieveLevel N B⌋₊ := by
+      have : S ⊆ Icc 1 ⌊sieveLevel N B⌋₊ := by
+        intro d hd
+        obtain ⟨hd1, hd2⟩ := mem_filter.mp hd
+        exact mem_Icc.mpr ⟨Nat.pos_of_mem_divisors hd1, Nat.le_floor hd2.le⟩
+      simpa using card_le_card this
+    have hD0 : 0 ≤ sieveLevel N B := by unfold sieveLevel; positivity
+    calc (#S : ℝ) ≤ (⌊sieveLevel N B⌋₊ : ℝ) := by exact_mod_cast h1
+      _ ≤ _ := Nat.floor_le hD0
+  -- prime divisors of N
+  set E := (range (N + 1)).filter (fun p => p.Prime ∧ p ∣ N) with hE
+  have hEsub : E ⊆ N.primeFactors := by
+    intro p hp
+    obtain ⟨-, hp1, hp2⟩ := mem_filter.mp hp
+    exact Nat.mem_primeFactors.mpr ⟨hp1, hp2, by omega⟩
+  have hEcard : (#E : ℝ) ≤ 2 * L := by
+    have h2 : 2 ^ #N.primeFactors ≤ N := by
+      calc 2 ^ #N.primeFactors = ∏ _p ∈ N.primeFactors, 2 := by simp
+        _ ≤ ∏ p ∈ N.primeFactors, p :=
+            Finset.prod_le_prod (fun p hp => (Nat.prime_of_mem_primeFactors hp).two_le)
+        _ ≤ N := Nat.le_of_dvd (by omega) (Nat.prod_primeFactors_dvd N)
+    have h2r : (2 : ℝ) ^ #N.primeFactors ≤ N := by exact_mod_cast h2
+    have hlog : (#N.primeFactors : ℝ) * log 2 ≤ L := by
+      rw [← Real.log_pow]; exact log_le_log (by positivity) h2r
+    have hl2 : (1 : ℝ) / 2 < log 2 := by have := Real.log_two_gt_d9; linarith
+    have hc : (#E : ℝ) ≤ #N.primeFactors := by exact_mod_cast card_le_card hEsub
+    nlinarith
+  -- termwise bound
+  have hterm : ∀ d ∈ S,
+      |(#((range N).filter (fun p => p.Prime ∧ ¬ p ∣ N ∧ d ∣ N - p)) : ℝ)
+        - (Nat.primeCounting N : ℝ) / (d.totient : ℝ)| ≤
+      |(primesAP N d (a d) : ℝ) - (Nat.primeCounting N : ℝ) / (d.totient : ℝ)| + 2 * L := by
+    intro d hd
+    have hdcop : Nat.Coprime N d :=
+      Nat.Coprime.coprime_dvd_left (Nat.dvd_of_mem_divisors (mem_filter.mp hd).1) hcop
+        |> Nat.coprime_comm.mp
+    have had : a d = N := by
+      show (if N.Coprime d then N else 1) = N
+      exact if_pos hdcop
+    rw [had]
+    set Ad := (range N).filter (fun p => p.Prime ∧ ¬ p ∣ N ∧ d ∣ N - p)
+    set AP := (range (N + 1)).filter (fun p => p.Prime ∧ p % d = N % d)
+    have hAP : primesAP N d N = #AP := rfl
+    have hsub1 : Ad ⊆ AP := by
+      intro p hp
+      obtain ⟨hp0, hp1, -, hp3⟩ := mem_filter.mp hp
+      have hpN : p < N := mem_range.mp hp0
+      refine mem_filter.mpr ⟨mem_range.mpr (by omega), hp1, ?_⟩
+      exact ((Nat.modEq_iff_dvd' hpN.le).mpr hp3)
+    have hsub2 : AP ⊆ Ad ∪ E := by
+      intro p hp
+      obtain ⟨hp0, hp1, hp3⟩ := mem_filter.mp hp
+      have hpN : p ≤ N := Nat.lt_succ_iff.mp (mem_range.mp hp0)
+      by_cases hpd : p ∣ N
+      · exact mem_union_right _ (mem_filter.mpr ⟨hp0, hp1, hpd⟩)
+      · have hpN' : p < N := lt_of_le_of_ne hpN (fun h => hpd (h ▸ dvd_rfl))
+        exact mem_union_left _ (mem_filter.mpr ⟨mem_range.mpr hpN', hp1, hpd,
+          (Nat.modEq_iff_dvd' hpN).mp hp3⟩)
+    have c1 : (#Ad : ℝ) ≤ #AP := by exact_mod_cast card_le_card hsub1
+    have c2 : (#AP : ℝ) ≤ #Ad + #E := by
+      exact_mod_cast (card_le_card hsub2).trans (card_union_le _ _)
+    rw [hAP]
+    have := abs_sub_le (#Ad : ℝ) (#AP) ((Nat.primeCounting N : ℝ) / (d.totient : ℝ))
+    have h4 : |(#Ad : ℝ) - #AP| ≤ #E := by
+      rw [abs_sub_le_iff]; constructor <;> linarith [(Nat.cast_nonneg (#E) : (0:ℝ) ≤ #E)]
+    linarith
+  -- assemble
+  have hsum1 : sieveRemainder N B ≤
+      ∑ d ∈ S, (|(primesAP N d (a d) : ℝ) - (Nat.primeCounting N : ℝ) / (d.totient : ℝ)|
+        + 2 * L) := by unfold sieveRemainder; exact sum_le_sum hterm
+  rw [sum_add_distrib, sum_const, nsmul_eq_mul] at hsum1
+  have hsum2 : ∑ d ∈ S, |(primesAP N d (a d) : ℝ) - (Nat.primeCounting N : ℝ) / (d.totient : ℝ)|
+      ≤ C0 * N / L ^ 3 :=
+    (sum_le_sum_of_subset_of_nonneg hSsub (fun _ _ _ => abs_nonneg _)).trans hBV'
+  have hL3 : 0 < L ^ 3 := by positivity
+  have hC0 : C0 * N / L ^ 3 ≤ |C0| * N / L ^ 3 := by
+    gcongr; exact le_abs_self C0
+  have hD2 : sieveLevel N B * (2 * L) ≤ 2 * N / L ^ 3 := by
+    have hLBpos : 0 < L ^ B := rpow_pos_of_pos hLpos _
+    have hsq : √(N : ℝ) ≤ N := by
+      exact Real.sqrt_le_iff.mpr ⟨hNpos.le, by nlinarith⟩
+    unfold sieveLevel
+    rw [← hL]
+    rw [div_mul_eq_mul_div, div_le_div_iff₀ hLBpos hL3]
+    have : L ^ 4 = L * L ^ 3 := by ring
+    calc √(N : ℝ) * (2 * L) * L ^ 3 = 2 * √(N : ℝ) * L ^ 4 := by ring
+      _ ≤ 2 * N * L ^ B := by gcongr
+  have hSL : (#S : ℝ) * (2 * L) ≤ sieveLevel N B * (2 * L) :=
+    mul_le_mul_of_nonneg_right hScard (by linarith)
+  calc sieveRemainder N B ≤ C0 * N / L ^ 3 + 2 * N / L ^ 3 := by linarith
+    _ ≤ |C0| * N / L ^ 3 + 2 * N / L ^ 3 := by linarith
+    _ = (|C0| + 2) * N / L ^ 3 := by ring
 
 /-- LEAF: Rosser and Schoenfeld 1962 Corollary 1, `π(x) > x / log x` for `x ≥ 17`,
 used to pass from `X = π(N)` to the ideal mass `N / log N` of BJS p. 43 equation 142.
@@ -66,7 +198,15 @@ theorem leaf_pi_lower : ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
 used to absorb the relative sieve error of BJS p. 44 equation 145. Class MEDIUM. -/
 theorem leaf_pi_upper : ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
     (Nat.primeCounting N : ℝ) ≤ 2 * N / log N := by
-  sorry
+  have hε : (0:ℝ) < 2 - log 4 := by
+    have : log 4 < 2 := by
+      rw [show (4:ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
+      have := Real.log_two_lt_d9; push_cast; linarith
+    linarith
+  obtain ⟨x0, hx0⟩ := eventually_atTop.mp (Chebyshev.eventually_primeCounting_le hε)
+  refine ⟨⌈x0⌉₊, fun N hN => ?_⟩
+  have := hx0 N (Nat.ceil_le.mp hN)
+  simpa [Nat.floor_natCast] using this
 
 /-- `f(s) ≥ 0` for the closed form lower sieve function. -/
 theorem fsieve_nonneg (s : ℝ) : 0 ≤ fsieve s := by
