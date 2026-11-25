@@ -21,6 +21,7 @@ from the identity and the new LEAF, with V = H / (Y^(1/2) L^B) > 1 for large X.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Eq33RouteD
+import LeanLab.KumchevLiu2007.SPLIT_case3_removal_D
 
 namespace LeanLab.KumchevLiu2007.Eq33RouteD.Case3Core1122
 
@@ -265,7 +266,10 @@ d1 p p' ≥ V. The left side is display 42 over m = e f k as in
 `moebius_block_case3_factor`, e = d1 p, f = p' d2, V = H / (Y^(1/2) L^B).
 The right side is the bound before "Thus, (42) follows from Lemma 3.2", with
 v = p d1 in [L^B, V], u = k p' d2, coefficients bounded by tau^c and not
-depending on t, see Q3 in the notes. Class HARD, cited input. -/
+depending on t, see Q3 in the notes. No longer a LEAF: proved in
+`Case3RemovalD1123.case3_removal_of_core`, the range D ≥ Y^(1/2) directly and
+the rest from the LEAF `Case3RemovalD1123.leaf_case3_lemma33_removal_core`.
+CONDITIONAL ON leaf_case3_lemma33_removal_core. -/
 theorem leaf_case3_lemma33_removal :
     ∃ c0 : ℕ, ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε →
       ∃ X0 : ℝ, 2 ≤ X0 ∧ ∀ X H : ℝ,
@@ -299,7 +303,9 @@ theorem leaf_case3_lemma33_removal :
               w d * v (m / d)) *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) +
             Real.log X ^ (c0 : ℝ) := by
-  sorry
+  exact Case3RemovalD1123.case3_removal_of_core
+
+example : type_of% @leaf_case3_lemma33_removal := @Case3RemovalD1123.case3_removal_of_core
 
 /-- P0088 page 12, Case 3 of the proof of Lemma 3.4, the display after the
 factorisation, in the statement of `leaf_case3_reduction_lemma33_core`:
