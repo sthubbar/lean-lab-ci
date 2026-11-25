@@ -16,6 +16,7 @@ T0 <= T <= T1, LMN = x, qT < L and (3.38) or (3.39). MEDIUM.
 The assembly multiplies the three bounds. AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BakerHarmanPintz1997.SPLIT_lemma10_large_L_p2_meansq
+import LeanLab.BakerHarmanPintz1997.SPLIT_lemma10_large_L_p3_exp
 
 namespace LeanLab.BakerHarmanPintz1997
 open Finset
@@ -139,7 +140,87 @@ theorem leaf_large_exponent :
       (L x ^ B + 2 * Ll x ^ (1 / 2 : ℝ) / c.T) *
         (L x ^ B' * ((c.q * c.T + Ml x) ^ (1 / 2 : ℝ) * (c.q * c.T + Nl x) ^ (1 / 2 : ℝ))) ≤
         C * x ^ (1 / 2 : ℝ) / L x ^ A := by
-  sorry
+  -- PROVED in burst-20261122 S147 from `p3_eventually` and `p3_alg` in SPLIT_lemma10_large_L_p3_exp.
+  intro ε hε hε1 A0 c2 Ml Nl Ll 𝒮 hc2 hprod hcase hlarge hor hMN B B' A hA
+  obtain ⟨X1, hX1⟩ := hMN
+  obtain ⟨X2, hX2⟩ := Filter.eventually_atTop.1
+    (p3_eventually (|A0| + |B| + |B'| + A) (ε / 2) (by linarith))
+  refine ⟨2 + 2 * √(2 + 2 * c2), max X1 X2, by positivity, ?_⟩
+  intro x hx c hc hm hn
+  obtain ⟨hl1, hx1, hG1, hG2⟩ := hX2 x (le_trans (le_max_right _ _) hx)
+  have hT0MN := hX1 x (le_trans (le_max_left _ _) hx)
+  obtain ⟨hstd, hqA, hT0T, hTT1⟩ := hcase x c hc
+  obtain ⟨-, hq1, -, hT2, -⟩ := hstd
+  have hq1' : (1 : ℝ) ≤ c.q := by exact_mod_cast hq1
+  have hx0 : 0 < x := by linarith
+  have hl0 : 0 < L x := by linarith
+  simp only [← Real.sqrt_eq_rpow]
+  have hMpos : 0 < Ml x := pos_of_mul_pos_right (by linarith : 0 < c2 * Ml x) hc2.le
+  have hNpos : 0 < Nl x := pos_of_mul_pos_right (by linarith : 0 < c2 * Nl x) hc2.le
+  have hab : ∀ y : ℝ, L x ^ y ≤ L x ^ |y| := fun y =>
+    Real.rpow_le_rpow_of_exponent_le hl1 (le_abs_self y)
+  have hone : ∀ y : ℝ, 1 ≤ L x ^ |y| := fun y => Real.one_le_rpow hl1 (abs_nonneg y)
+  have hqα : (c.q : ℝ) ≤ L x ^ |A0| := hqA.trans (hab A0)
+  have hαD : L x ^ |A0| * (L x ^ |B| * L x ^ |B'| * L x ^ A) = L x ^ (|A0| + |B| + |B'| + A) := by
+    simp only [Real.rpow_add hl0]; ring
+  -- sizes of qT, M, N
+  have hxp : ∀ y : ℝ, 0 < x ^ y := fun y => Real.rpow_pos_of_pos hx0 y
+  unfold T1 at hTT1
+  have hTpos : 0 ≤ c.T := by linarith
+  have hqT : (c.q : ℝ) * c.T ≤ L x ^ |A0| * x ^ (0.45 - 2 * ε / 3) :=
+    mul_le_mul hqα hTT1 hTpos (by linarith [hone A0])
+  have hMb : Ml x ≤ x ^ (0.55 + ε / 8) := by
+    rcases hor x with h | h
+    · have h1 : Ml x * x ^ (0.225 : ℝ) ≤ max (Ml x) (x ^ (0.45 : ℝ)) * max (Nl x) (x ^ (0.225 : ℝ)) :=
+        mul_le_mul (le_max_left _ _) (le_max_right _ _) (hxp _).le (hMpos.le.trans (le_max_left _ _))
+      have h2 : x ^ (0.775 + ε / 8) = x ^ (0.55 + ε / 8) * x ^ (0.225 : ℝ) := by
+        rw [← Real.rpow_add hx0]; congr 1; ring
+      exact le_of_mul_le_mul_right (by rw [← h2]; exact h1.trans h) (hxp _)
+    · exact (le_max_left _ _ |>.trans h).trans
+        (Real.rpow_le_rpow_of_exponent_le hx1 (by linarith))
+  have hNb : Nl x ≤ x ^ (0.55 + ε / 8) := by
+    rcases hor x with h | h
+    · have h1 : x ^ (0.45 : ℝ) * Nl x ≤ max (Ml x) (x ^ (0.45 : ℝ)) * max (Nl x) (x ^ (0.225 : ℝ)) :=
+        mul_le_mul (le_max_right _ _) (le_max_left _ _) hNpos.le ((hxp _).le.trans (le_max_right _ _))
+      have h2 : x ^ (0.775 + ε / 8) = x ^ (0.45 : ℝ) * x ^ (0.325 + ε / 8) := by
+        rw [← Real.rpow_add hx0]; congr 1; ring
+      have h3 : Nl x ≤ x ^ (0.325 + ε / 8) :=
+        le_of_mul_le_mul_left (by rw [← h2]; exact h1.trans h) (hxp _)
+      exact h3.trans (Real.rpow_le_rpow_of_exponent_le hx1 (by linarith))
+    · exact (le_max_right _ _ |>.trans h).trans
+        (Real.rpow_le_rpow_of_exponent_le hx1 (by linarith))
+  set α := L x ^ |A0|
+  set D := L x ^ |B| * L x ^ |B'| * L x ^ A
+  have hα1 : 1 ≤ α := hone A0
+  have hD0 : 0 ≤ D := by positivity
+  have hGa : (α * D) ^ 2 ≤ x ^ (ε / 2) := by rw [hαD]; exact hG1
+  have hGb : (α * D) ^ 2 ≤ T0 x := by rw [hαD]; exact hG2
+  have hαD2 : α * D ^ 2 ≤ (α * D) ^ 2 := by
+    calc α * D ^ 2 ≤ α * (α * D ^ 2) := le_mul_of_one_le_left (by positivity) hα1
+      _ = (α * D) ^ 2 := by ring
+  have hqT0 : 0 ≤ (c.q : ℝ) * c.T := by positivity
+  have hP2 : ((c.q : ℝ) * c.T) ^ 2 * D ^ 2 ≤ x := by
+    calc ((c.q : ℝ) * c.T) ^ 2 * D ^ 2 ≤ (α * x ^ (0.45 - 2 * ε / 3)) ^ 2 * D ^ 2 :=
+          mul_le_mul_of_nonneg_right (pow_le_pow_left₀ hqT0 hqT 2) (sq_nonneg _)
+      _ = (α * D) ^ 2 * x ^ (0.45 - 2 * ε / 3) * x ^ (0.45 - 2 * ε / 3) := by ring
+      _ ≤ x ^ (ε / 2) * x ^ (0.45 - 2 * ε / 3) * x ^ (0.45 - 2 * ε / 3) := by
+          gcongr
+      _ ≤ x ^ (1 : ℝ) := p3_xpow3 hx1 (by linarith)
+      _ = x := Real.rpow_one x
+  have hPY : ∀ Y : ℝ, 0 ≤ Y → Y ≤ x ^ (0.55 + ε / 8) → (c.q : ℝ) * c.T * Y * D ^ 2 ≤ x := by
+    intro Y hY0 hY
+    calc (c.q : ℝ) * c.T * Y * D ^ 2 ≤ α * x ^ (0.45 - 2 * ε / 3) * x ^ (0.55 + ε / 8) * D ^ 2 := by
+          gcongr
+      _ = (α * D ^ 2) * x ^ (0.45 - 2 * ε / 3) * x ^ (0.55 + ε / 8) := by ring
+      _ ≤ x ^ (ε / 2) * x ^ (0.45 - 2 * ε / 3) * x ^ (0.55 + ε / 8) := by
+          gcongr
+          exact hαD2.trans hGa
+      _ ≤ x ^ (1 : ℝ) := p3_xpow3 hx1 (by linarith)
+      _ = x := Real.rpow_one x
+  have hT0pos : 0 < T0 x := Real.exp_pos _
+  exact p3_alg (T0' := T0 x) hq1' hqα hT2 hc2 hm hn (hprod x) (hlarge x c hc) hT0MN hT0T
+    (Real.rpow_nonneg hl0.le _) (hab B) (Real.rpow_nonneg hl0.le _) (hab B') (hone B) (hone B')
+    (Real.rpow_pos_of_pos hl0 A) hGb hP2 (hPY _ hMpos.le hMb) (hPY _ hNpos.le hNb)
 
 /-- `lemma10_large_L`, verbatim. CONDITIONAL ON `leaf_large_mean_square` and `leaf_large_exponent`, and on the proved
 `leaf_large_degenerate` and `Reflection425.longSup_product_bound`. -/
@@ -219,6 +300,7 @@ theorem lemma10_large_L_split :
 #print axioms split_large_eval_zero
 #print axioms leaf_large_degenerate
 #print axioms leaf_large_mean_square
+#print axioms leaf_large_exponent
 #print axioms lemma10_large_L_split
 
 end LeanLab.BakerHarmanPintz1997
