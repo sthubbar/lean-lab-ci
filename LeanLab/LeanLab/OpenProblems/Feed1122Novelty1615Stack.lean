@@ -1,4 +1,5 @@
 import LeanLab.OpenProblems.Feed1122Novelty1615Split
+import LeanLab.OpenProblems.Feed1122Novelty1615StackS142All
 
 /-!
 # Erdős 273, Novelty1615: stacked split of `leaf_no_cover_bad`
@@ -203,8 +204,8 @@ cited to the U-1615 search. -/
 theorem leaf_no_cover_bad_high :
     ∀ S : Finset (ℕ × ℤ), Covers S → Set.InjOn Prod.fst (S : Set (ℕ × ℤ)) →
       (∀ s ∈ S, ∃ p : ℕ, p.Prime ∧ 5 ≤ p ∧ s.1 = p - 1) → S.lcm Prod.fst ∈ badList →
-        4000000 ≤ S.lcm Prod.fst → False := by
-  sorry
+        4000000 ≤ S.lcm Prod.fst → False :=
+  Feed1122StackS142.leaf_no_cover_bad_high_proved
 
 /-- Assembly, sorry free from the LEAF: the identical statement of
 `Feed1122Split.leaf_no_cover_bad`. -/
