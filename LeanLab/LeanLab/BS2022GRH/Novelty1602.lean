@@ -25,6 +25,7 @@ Named sorry `lemma7_sharp`, a true looking sharpening at one fixed large z, see 
 helps if the sieve needs one fixed z, the reading the sealed `LinearSieveT4` of ChenThresholdGRH.lean uses.
 -/
 import Mathlib
+import LeanLab.BS2022GRH.DecompC169c
 
 namespace LeanLab.BS2022GRH.Novelty1602
 
@@ -165,7 +166,27 @@ first line of Lemma 6, where E is 1.2·10⁻⁴, see bs_route_numbers.out.
 Do not use this to lower the threshold unless the sieve is shown to need only one fixed `z`:
 see `hyp2_fails_1628` and the triage. -/
 theorem lemma7_sharp : Lemma7Sharp := by
-  sorry
+  intro z hz u hu huz
+  have h := DecompC169c.lemma7J z 400 u hz (by norm_num) hu huz
+  have hprod : prod2 u z ≤
+      ∏ p ∈ (Finset.range ⌈z⌉₊).filter (fun p : ℕ => p.Prime ∧ u ≤ (p : ℝ) ∧ (p : ℝ) < z),
+        (1 - 1 / ((p : ℝ) - 1))⁻¹ := by
+    unfold prod2
+    apply Finset.prod_le_prod_of_subset_of_le
+    · intro p hp
+      rw [Finset.mem_filter] at hp ⊢
+      obtain ⟨hpI, hprime⟩ := hp
+      obtain ⟨h1, h2⟩ := Finset.mem_Ico.mp hpI
+      refine ⟨Finset.mem_range.mpr ?_, hprime, ?_, ?_⟩
+      · exact_mod_cast h2.trans_le (Nat.le_ceil z)
+      · exact_mod_cast h1.trans' (Nat.le_ceil u)
+      · exact_mod_cast h2
+    · intro p _ _; rfl
+    · intro p _ _; positivity
+  refine (hprod.trans h.1).trans ?_
+  have hq : 0 ≤ Real.log z / Real.log u :=
+    div_nonneg (Real.log_nonneg (by linarith)) (Real.log_nonneg (by linarith))
+  exact mul_le_mul_of_nonneg_right (by norm_num : ChenThresholdGRH.epsJ 400 ≤ 1 / 39500) hq
 
 /-- Vacuity for `Hyp2AtLevel`: it holds at `z = 1501`, `u₀ = 1500`, `ε = 1`, where no prime qualifies. -/
 theorem hyp2_instance : Hyp2AtLevel 1 1500 1501 := by
