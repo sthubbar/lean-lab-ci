@@ -1,4 +1,5 @@
 import LeanLab.RieselVaughan1983.Lemma6Theta
+import LeanLab.RieselVaughan1983.S143SplitPsiRows
 
 /-!
 Split for the Schoenfeld table leaf schoenfeld_relative_rows of Decomp426a,
@@ -15,15 +16,16 @@ open Real Chebyshev
 
 namespace LeanLab.RieselVaughan1983.S106SplitDecomp426a
 
-/-- LEAF: Buthe 2018 Theorem 2, display 1.5, arXiv 1511.02032 page 2:
+/-- Was LEAF, split by S143 in S143SplitPsiRows: Buthe 2018 Theorem 2, display 1.5, arXiv 1511.02032 page 2:
 the absolute value of x minus psi x is at most 0.94 sqrt x for 11 < x ≤ 10^19.
 A finite analytic computation, cited. The lab also has the narrower form
 ChirreHagen2025 Decomp429e.psi_finite_range from 100000 on. Class HARD for Codex. -/
 theorem buthe_psi_finite_range (x : ℝ) (hx : 11 < x) (hx1 : x ≤ 1e19) :
-    |x - psi x| ≤ 0.94 * sqrt x := by
-  sorry
+    |x - psi x| ≤ 0.94 * sqrt x :=
+  -- S143: split in S143SplitPsiRows, the shared leaf Decomp429e.psi_finite_range from 100000 on.
+  LeanLab.RieselVaughan1983.S143SplitPsiRows.buthe_psi_finite_range_of_leaves x hx hx1
 
-/-- LEAF: Schoenfeld 1976 page 358 table, epsilon column at b = 35 and b = 1000.
+/-- Was LEAF, split by S143 in S143SplitPsiRows: Schoenfeld 1976 page 358 table, epsilon column at b = 35 and b = 1000.
 Each fixed relative psi error is requested only on its bounded logarithmic band,
 as in Task426.schoenfeld_relative_rows; only these two of its four rows remain cited.
 Class HARD for Codex. -/
@@ -32,8 +34,9 @@ theorem schoenfeld_late_rows (b u ε t : ℝ)
       ([(35, 1000, 18314 / 1000000000), (1000, 1950, 70481 / 10000000000)] :
         List (ℝ × ℝ × ℝ)))
     (ht : 0 < t) (hb : b ≤ log t) (hu : log t ≤ u) :
-    |psi t - t| < ε * t := by
-  sorry
+    |psi t - t| < ε * t :=
+  -- S143: split in S143SplitPsiRows, row b = 1000 proved from the shared Broadbent row 40 leaf.
+  LeanLab.RieselVaughan1983.S143SplitPsiRows.schoenfeld_late_rows_of_leaves b u ε t hrow ht hb hu
 
 /-- Every t with log t at most 35 is below 10^19. -/
 theorem le_1e19_of_log_le_35 (t : ℝ) (ht : 0 < t) (h35 : log t ≤ 35) :
