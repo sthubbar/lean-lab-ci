@@ -16,7 +16,6 @@ margin is X^(eps (3/8 - eps/4)) against P^6.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Prep1121DKLRoughCut
-import LeanLab.KumchevLiu2007.Prep1122KLLemma34Cases
 
 namespace LeanLab.KumchevLiu2007.Split1122KLLemma34M1
 
@@ -24,9 +23,7 @@ open Real Complex MeasureTheory LeanLab.KumchevLiu2007 Task556a Task556d Eq33Rou
 open scoped BigOperators Topology
 attribute [local instance] Classical.propDecidable
 
-/-- Formerly a LEAF, class HARD. Proved by S81 in burst-20261122 from
-Prep1122KLLemma34Cases.lemma34_unit_of_cases, the dyadic cut of S39, so it now
-rests on the three case leaves of that file. P0088 page 11 Lemma 3.4 in the case M = 1, a_1 = 1, the case used on
+/-- LEAF: P0088 page 11 Lemma 3.4 in the case M = 1, a_1 = 1, the case used on
 page 15 for the first sum of display 52. Let A > 0, B >= B0(A), x^(1/2) <= y <= x
 with x sufficiently large, alpha, a, q with display 41: L^B <= q <= y L^(-B),
 (a, q) = 1, |alpha - a/q| < q^(-2), L = log x, and 2 <= z <= y x^(-1/2) L^(-2B).
@@ -49,10 +46,7 @@ theorem lemma34_unit_coefficient (A : ℝ) (hA : 0 < A) :
             roughWeight z k *
               fourier ((k ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
           C * y ^ 2 / Real.log x ^ A := by
-  obtain ⟨B0, hB0, h⟩ := Prep1122KLLemma34Cases.lemma34_unit_of_cases A hA
-  refine ⟨B0, hB0, fun B hB => ?_⟩
-  obtain ⟨C, x0, hC, -, hk⟩ := h B hB
-  exact ⟨C, x0, hC, hk⟩
+  sorry
 
 /-- PROVED. The summand of the short sum has modulus at most one: page 4
 display 10, Phi is 0 or 1, and e(alpha m^2) has modulus one. -/
