@@ -1,5 +1,6 @@
 import LeanLab.RieselVaughan1983.Lemma6Theta
 import LeanLab.BS2022GRH.ThetaInputs224
+import LeanLab.RieselVaughan1983.S143SplitDusartRows
 
 /-!
 Split for the two initial band leaves of Decomp426b, session S106, burst-20261122.
@@ -17,12 +18,13 @@ open Real Chebyshev
 
 namespace LeanLab.RieselVaughan1983.S106SplitDecomp426b
 
-/-- LEAF: Buthe 2018 Theorem 2, display 1.6, arXiv 1511.02032 page 2:
+/-- Was LEAF, wired by S143 to the shared lab leaf: Buthe 2018 Theorem 2, display 1.6, arXiv 1511.02032 page 2:
 x minus theta x is at most 1.95 sqrt x for 1423 ≤ x ≤ 10^19.
 A finite analytic computation, cited. Class HARD for Codex. -/
 theorem buthe_theta_gap_upper (x : ℝ) (hx : 1423 ≤ x) (hx1 : x ≤ 1e19) :
-    x - θ x ≤ 1.95 * sqrt x := by
-  sorry
+    x - θ x ≤ 1.95 * sqrt x :=
+  -- S143: this is the shared lab leaf for the same display, cited once.
+  LeanLab.BS2022GRH.ThetaLeavesS63.buthe2018_display16 x hx hx1
 
 /-- Every x with log x at most 32 is below 10^19. -/
 theorem le_1e19_of_log_le_32 (x : ℝ) (hx : 0 < x) (h32 : log x ≤ 32) :
@@ -96,7 +98,7 @@ theorem dusart_initial_lower (x : ℝ) (hx : 0 < x) (h22 : 22 ≤ log x)
   rw [this]
   linarith
 
-/-- LEAF: Dusart 2010 page 15, Table 6.3, theta column, rows b = 32 and b = 100.
+/-- Was LEAF, split by S143 in S143SplitDusartRows: Dusart 2010 page 15, Table 6.3, theta column, rows b = 32 and b = 100.
 Each estimate is restricted to the bounded interval ending at u, as in
 Task426.dusart_theta_relative_rows; only these two of its four rows remain cited.
 Class HARD for Codex. -/
@@ -105,8 +107,9 @@ theorem dusart_theta_late_rows (b u ε x : ℝ)
       ([(32, 100, 4057 / 1000000000), (100, 300, 2903 / 100000000000000)] :
         List (ℝ × ℝ × ℝ)))
     (hx : 0 < x) (hb : b ≤ log x) (hu : log x ≤ u) :
-    |θ x - x| < ε * x := by
-  sorry
+    |θ x - x| < ε * x :=
+  -- S143: split in S143SplitDusartRows, row b = 32 from shared lab leaves, row b = 100 a LEAF.
+  LeanLab.RieselVaughan1983.S143SplitDusartRows.dusart_theta_late_rows_of_leaves b u ε x hrow hx hb hu
 
 /-- The two early Table 6.3 theta rows on 27 ≤ log x ≤ 32 follow from both halves of
 Buthe 2018 Theorem 2, displays 1.6 and 1.7, since every such x is below 10^19.
