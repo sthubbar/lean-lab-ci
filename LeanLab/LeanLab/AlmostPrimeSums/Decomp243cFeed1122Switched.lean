@@ -57,7 +57,95 @@ below `D` are coprime to `N` and lie in `[1, ⌊D⌋]`, together with
 theorem leaf_switched_remainder (h : LevelBVTriples) :
     ∃ B C : ℝ, 0 < B ∧ 0 < C ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
       switchedRemainder N B ≤ C * N / log N ^ 3 := by
-  sorry
+  obtain ⟨K, hK, hA⟩ := remainder_bset_full_mass_of_levelBVTriples h
+  obtain ⟨B0, C0, hBC⟩ := hA 3 (by norm_num)
+  have hlo := (isLittleO_log_rpow_rpow_atTop (5 : ℝ)
+    (show (0 : ℝ) < 1 / 8 by norm_num)).bound one_pos
+  obtain ⟨x0, hx0⟩ := eventually_atTop.mp hlo
+  set c1 : ℝ := 1 / 2 + |B0| with hc1
+  have hc1pos : 0 < c1 := by positivity
+  refine ⟨max B0 1, |C0| + K * (1 + c1) ^ 2, by positivity, by positivity,
+    max 3 ⌈x0⌉₊, fun N hN => ?_⟩
+  have hN3 : 3 ≤ N := le_of_max_le_left hN
+  have hNx : x0 ≤ (N : ℝ) := Nat.ceil_le.mp (le_of_max_le_right hN)
+  have hNr : (3 : ℝ) ≤ N := by exact_mod_cast hN3
+  have hNpos : (0 : ℝ) < N := by linarith
+  have hL1 : 1 ≤ log (N : ℝ) := by
+    rw [← log_exp 1]
+    exact log_le_log (exp_pos 1) (by have := exp_one_lt_d9; linarith)
+  have hmain := hBC N (by omega)
+  simp only at hmain
+  have hlo' := hx0 N hNx
+  set L := log (N : ℝ) with hL
+  have hLpos : 0 < L := by linarith
+  set z : ℝ := (N : ℝ) ^ ((1 : ℝ) / 8) with hz
+  have hzpos : 0 < z := rpow_pos_of_pos hNpos _
+  have h5 : L ^ (5 : ℕ) ≤ z := by
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (rpow_nonneg hLpos.le _),
+      abs_of_nonneg hzpos.le, one_mul] at hlo'
+    have : L ^ (5 : ℝ) = L ^ (5 : ℕ) := by exact_mod_cast Real.rpow_natCast L 5
+    rw [← this]; exact hlo'
+  have h3 : L ^ (3 : ℝ) = L ^ 3 := by exact_mod_cast Real.rpow_natCast L 3
+  rw [h3] at hmain
+  set D0 := ⌊√(N : ℝ) / L ^ B0⌋₊ with hD0
+  have hcop : Nat.Coprime (switchedPrimorial N) N := by
+    unfold switchedPrimorial
+    apply Nat.Coprime.prod_left
+    intro p hp
+    have hp' := (mem_filter.mp hp).2
+    exact (Nat.Prime.coprime_iff_not_dvd hp'.1).mpr hp'.2.2.2
+  have hLB : L ^ B0 ≤ L ^ (max B0 1) := rpow_le_rpow_of_exponent_le hL1 (le_max_left _ _)
+  have hsub : (switchedPrimorial N).divisors.filter
+      (fun d : ℕ => (d : ℝ) < sieveLevel N (max B0 1)) ⊆
+      (Icc 1 D0).filter (fun d => Nat.Coprime d N) := by
+    intro d hd
+    obtain ⟨hd1, hd2⟩ := mem_filter.mp hd
+    refine mem_filter.mpr ⟨mem_Icc.mpr ⟨Nat.pos_of_mem_divisors hd1, Nat.le_floor ?_⟩,
+      Nat.Coprime.coprime_dvd_left (Nat.dvd_of_mem_divisors hd1) hcop⟩
+    have : sieveLevel N (max B0 1) ≤ √(N : ℝ) / L ^ B0 :=
+      div_le_div_of_nonneg_left (Real.sqrt_nonneg _) (rpow_pos_of_pos hLpos _) hLB
+    linarith
+  have hR : switchedRemainder N (max B0 1) ≤
+      C0 * N / L ^ 3 + K * ((N : ℝ) / z) * (1 + log (D0 : ℝ)) ^ 2 := by
+    unfold switchedRemainder
+    exact (sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => abs_nonneg _)).trans hmain
+  have hlogD : 0 ≤ log (D0 : ℝ) ∧ log (D0 : ℝ) ≤ c1 * L := by
+    rcases Nat.eq_zero_or_pos D0 with h0 | h0
+    · rw [h0]; simp only [Nat.cast_zero, log_zero, le_refl, true_and]; positivity
+    · have hD1 : (1 : ℝ) ≤ D0 := by exact_mod_cast h0
+      refine ⟨log_nonneg hD1, ?_⟩
+      have hfl : (D0 : ℝ) ≤ √(N : ℝ) / L ^ B0 := Nat.floor_le (by positivity)
+      have hl0 : 0 ≤ log L := log_nonneg hL1
+      have hlL : log L ≤ L := (log_le_sub_one_of_pos hLpos).trans (by linarith)
+      have hB : -B0 * log L ≤ |B0| * L := by
+        calc -B0 * log L ≤ |B0| * log L := by gcongr; exact neg_le_abs B0
+          _ ≤ |B0| * L := by gcongr
+      calc log (D0 : ℝ) ≤ log (√(N : ℝ) / L ^ B0) := log_le_log (by linarith) hfl
+        _ = log (√(N : ℝ)) - B0 * log L := by
+            rw [log_div (by positivity) (by positivity), log_rpow hLpos]
+        _ = L / 2 - B0 * log L := by rw [Real.log_sqrt hNpos.le]
+        _ ≤ c1 * L := by rw [hc1]; nlinarith
+  have hsq : (1 + log (D0 : ℝ)) ^ 2 ≤ (1 + c1) ^ 2 * L ^ 2 := by
+    have h1 : 0 ≤ 1 + log (D0 : ℝ) := by linarith [hlogD.1]
+    have h2 : 1 + log (D0 : ℝ) ≤ (1 + c1) * L := by nlinarith [hlogD.2]
+    calc (1 + log (D0 : ℝ)) ^ 2 ≤ ((1 + c1) * L) ^ 2 := pow_le_pow_left₀ h1 h2 2
+      _ = _ := by ring
+  have hL3 : 0 < L ^ 3 := by positivity
+  have hNz : (N : ℝ) / z * L ^ 2 ≤ N / L ^ 3 := by
+    rw [div_mul_eq_mul_div, div_le_div_iff₀ hzpos hL3]
+    have : (N : ℝ) * L ^ 2 * L ^ 3 = N * L ^ 5 := by ring
+    rw [this]; exact mul_le_mul_of_nonneg_left h5 hNpos.le
+  have hNz0 : 0 ≤ (N : ℝ) / z := by positivity
+  have hE : K * ((N : ℝ) / z) * (1 + log (D0 : ℝ)) ^ 2 ≤ K * (1 + c1) ^ 2 * (N / L ^ 3) := by
+    calc K * ((N : ℝ) / z) * (1 + log (D0 : ℝ)) ^ 2
+        ≤ K * ((N : ℝ) / z) * ((1 + c1) ^ 2 * L ^ 2) := by gcongr
+      _ = K * (1 + c1) ^ 2 * ((N : ℝ) / z * L ^ 2) := by ring
+      _ ≤ K * (1 + c1) ^ 2 * (N / L ^ 3) := by gcongr
+  have hC0 : C0 * N / L ^ 3 ≤ |C0| * N / L ^ 3 := by
+    gcongr; exact le_abs_self C0
+  calc switchedRemainder N (max B0 1) ≤ |C0| * N / L ^ 3 + K * (1 + c1) ^ 2 * (N / L ^ 3) := by
+        linarith
+    _ = (|C0| + K * (1 + c1) ^ 2) * N / L ^ 3 := by ring
 
 /-- A uniform positive lower bound for `U_N`. -/
 theorem U_ge'' (N : ℕ) : 2 * exp (-eulerMascheroniConstant) * twinC ≤ U N := by
