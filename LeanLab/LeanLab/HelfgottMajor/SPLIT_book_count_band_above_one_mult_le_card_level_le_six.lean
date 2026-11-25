@@ -40,12 +40,42 @@ theorem card6_no_primitive_two (χ : DirichletCharacter ℂ q) (hq : q = 2) : ¬
   rw [DirichletCharacter.isPrimitive_def, hc] at hp
   omega
 
-/-- LEAF: modulus `6` case of the conductor block `2` to `6`, the fact that every Dirichlet
+/-- PROVED burst S126: modulus `6` case of the conductor block `2` to `6`, the fact that every Dirichlet
 character modulo `6` factors through `ZMod 3`, since `(ZMod 6)ˣ → (ZMod 3)ˣ` is a bijection, so
 its conductor divides `3` and no character modulo `6` is primitive. Class MEDIUM: finite
 group facts about `(ZMod 6)ˣ` and `DirichletCharacter.FactorsThrough`. -/
 theorem card6_no_primitive_six (χ : DirichletCharacter ℂ q) (hq : q = 6) : ¬ χ.IsPrimitive := by
-  sorry
+  subst hq
+  intro hχ
+  have hmn : (3 : ℕ) ∣ 6 := by norm_num
+  have hinj : Function.Injective (ZMod.unitsMap hmn) := by
+    intro a b hab
+    have hcast : ((a : ZMod 6).cast : ZMod 3) = ((b : ZMod 6).cast : ZMod 3) := by
+      have h := congrArg (fun u : (ZMod 3)ˣ => ((u : ZMod 3))) hab
+      simpa only [ZMod.unitsMap_val] using h
+    rw [ZMod.cast_eq_val, ZMod.cast_eq_val] at hcast
+    have hmod : a.val.val % 3 = b.val.val % 3 := by
+      rw [← ZMod.natCast_eq_natCast_iff']
+      exact hcast
+    have hcop : ∀ u : (ZMod 6)ˣ, Nat.Coprime u.val.val 6 := by
+      intro u
+      have hu : IsUnit ((u.val.val : ZMod 6)) := by
+        rw [ZMod.natCast_zmod_val]
+        exact u.isUnit
+      exact (ZMod.isUnit_iff_coprime _ _).mp hu
+    have hres : ∀ x, x < 6 → ∀ y, y < 6 → Nat.Coprime x 6 → Nat.Coprime y 6 →
+        x % 3 = y % 3 → x = y := by decide
+    exact Units.ext (ZMod.val_injective 6
+      (hres _ (ZMod.val_lt _) _ (ZMod.val_lt _) (hcop a) (hcop b) hmod))
+  have hFT : DirichletCharacter.FactorsThrough χ 3 := by
+    rw [DirichletCharacter.factorsThrough_iff_ker_unitsMap hmn]
+    intro x hx
+    have hx1 : x = 1 := hinj (by rw [hx, map_one])
+    simp [hx1]
+  have hcond : χ.conductor ≤ 3 :=
+    Nat.sInf_le ((DirichletCharacter.mem_conductorSet_iff χ).mpr hFT)
+  have hone : χ.conductor = 6 := (DirichletCharacter.isPrimitive_def χ).mp hχ
+  omega
 
 /-- LEAF: zero free rectangle for the primitive character modulo `3`, the window
 `(1, 2πe / 3]` of the band at conductor `3` holds no strip zero of `L(·, χ)`. Numerically the
