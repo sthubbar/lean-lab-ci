@@ -10,15 +10,32 @@ import LeanLab.JohnstonStarichkova.SPLIT_sifted_count_lower_v3
 namespace LeanLab.JohnstonStarichkova
 open LeanLab.AlmostPrimes
 
-/-- LEAF: P0019 v3 page 3, the Euler product C_2 = prod_{p>2} (1 - 1/(p-1)^2)
-converges; here its tail over primes p > 50: factors lie in (0, 1) and the sum of
-1/(p-1)^2 is finite, so the tail product is multipliable in ℝ. Class MEDIUM. -/
+/-- P0019 v3 page 3, the Euler product C_2 = prod_{p>2} (1 - 1/(p-1)^2)
+converges; here its tail over primes p > 50: the sum of 1/(p-1)^2 is finite, so the
+tail product is multipliable in ℝ. PROVED, burst S153, was the S98 LEAF. -/
 theorem twin_prime_tail_multipliable :
     Multipliable (fun x : ((((Finset.range 51).subtype (fun p : ℕ => p.Prime ∧ 2 < p) :
         Finset {p : ℕ // p.Prime ∧ 2 < p}) : Set {p : ℕ // p.Prime ∧ 2 < p})ᶜ :
         Set {p : ℕ // p.Prime ∧ 2 < p}) =>
       (1 - 1 / ((((x : {p : ℕ // p.Prime ∧ 2 < p}) : ℕ) : ℝ) - 1) ^ 2)) := by
-  sorry
+  have hN : Summable (fun n : ℕ => ‖-(1 / ((n : ℝ) - 1) ^ 2)‖) := by
+    have h2 : Summable (fun n : ℕ => (1 : ℝ) / ((n : ℝ)) ^ 2) := by
+      simp
+    have h3 : Summable (fun n : ℕ => ‖-(1 / (((n + 1 : ℕ) : ℝ) - 1) ^ 2)‖) := by
+      refine h2.congr (fun n => ?_)
+      push_cast
+      rw [norm_neg, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      ring_nf
+    exact (summable_nat_add_iff 1).mp h3
+  let T := ((((Finset.range 51).subtype (fun p : ℕ => p.Prime ∧ 2 < p) :
+        Finset {p : ℕ // p.Prime ∧ 2 < p}) : Set {p : ℕ // p.Prime ∧ 2 < p})ᶜ :
+        Set {p : ℕ // p.Prime ∧ 2 < p})
+  have hinj : Function.Injective (fun x : T => (((x : {p : ℕ // p.Prime ∧ 2 < p}) : ℕ))) :=
+    Subtype.val_injective.comp Subtype.val_injective
+  have hS := hN.comp_injective hinj
+  have := multipliable_one_add_of_summable (R := ℝ) (f := fun x : T =>
+    -(1 / ((((x : {p : ℕ // p.Prime ∧ 2 < p}) : ℕ) : ℝ) - 1) ^ 2)) hS
+  simpa [sub_eq_add_neg] using this
 
 /-
 Numerics: the tail prod over primes p > 50 of (1 - 1/(p-1)^2) is 0.99604627...,
