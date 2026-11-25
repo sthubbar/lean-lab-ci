@@ -1,5 +1,6 @@
 import Mathlib
 import LeanLab.HelfgottMajor.PV420Split1122
+import LeanLab.HelfgottMajor.PVOddSmallS128
 
 /-!
 Route burst S58 round two, burst-20261122, tag pomerance-cases.
@@ -148,7 +149,14 @@ theorem odd_small {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (hq : q ≠ 1) (hq7 : q < 7) (hodd : χ (-1) ≠ 1) (M N : ℕ) :
     ‖∑ m ∈ Icc M N, χ (m : ZMod q)‖ ≤
       1 / (2 * π) * sqrt q * log q + 1 / π * sqrt q * log (log q) + sqrt q := by
-  sorry
+  interval_cases q
+  · exact absurd rfl (NeZero.ne (0 : ℕ))
+  · exact absurd rfl hq
+  · exact absurd (by rw [show (-1 : ZMod 2) = 1 from by decide, map_one]) hodd
+  · exact PVOddSmallS128.odd_small_q3 χ hχ rfl hodd M N
+  · exact PVOddSmallS128.odd_small_q4 χ hχ rfl hodd M N
+  · exact PVOddSmallS128.odd_small_q5 χ hχ rfl hodd M N
+  · exact PVOddSmallS128.odd_small_q6 χ hχ rfl hodd M N
 
 /-- Assembly: exactly `PV420Split1122.pomerance_odd_case`, from `odd_from_truncated` and the
 LEAF `odd_truncated` for q at least 7, and the LEAF `odd_small` below 7. -/
