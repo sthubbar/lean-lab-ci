@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Table1Algebra
+import LeanLab.ChenDoubleSieve.KernelIntegrability
 
 /-!
 # Feed 1122 split of `Burst9Matrix.entry_0_3`
@@ -24,7 +25,8 @@ open LeanLab.ChenDoubleSieve.Wu04Table
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 0) volume (12/5 : ℝ) (5/2 : ℝ) := by
-  sorry
+  exact (Burst8P2.table_kernel_integrable 0).mono_set
+    (Set.uIcc_subset_uIcc (by rw [Set.mem_uIcc]; norm_num) (by rw [Set.mem_uIcc]; norm_num))
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, left half panel `[12/5, 49/20]` of `a_{1,4}`:
 quadrature value 0.013443554130, stated bound leaves 4.53e-08. MEDIUM. -/
