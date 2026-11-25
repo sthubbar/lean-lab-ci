@@ -16,8 +16,8 @@ critical line. Class MEDIUM. P0014 display 4.42: for real part 1/2 the Gaussian 
 norm is at most the integral of exp of minus t squared over 2 times t to the minus 1/2,
 which equals 2 to the minus 3/4 times Gamma of 1/4, about 2.15581, for every delta. -/
 theorem gaussianMellin_half_line_le (δ : ℝ) (ρ : ℂ) (hre : ρ.re = 1 / 2) :
-    ‖gaussianMellin δ ρ‖ ≤ 2.15581 := by
-  sorry
+    ‖gaussianMellin δ ρ‖ ≤ 2.15581 :=
+  SplitGaussian123.mellin_critical_norm_le δ ρ hre
 
 /-- LEAF: P0014 page 39, displays 4.25, 4.26 and 4.30, the count of zeros of height at
 most 1 with multiplicity. Class HARD. P0014 display 4.30: N of 1 and chi is at most
@@ -32,8 +32,11 @@ theorem very_low_count_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q
         0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T},
       Set.indicator {ρ | |ρ.val.im| ≤ 1}
         (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) ρ) ≤
-      0.819 * log q + 16.8 := by
-  sorry
+      0.819 * log q + 16.8 :=
+  -- The index type is ZeroCount1623.ZeroIdx, finite by stripZeros_finite, so summability
+  -- is unconditional. The bound is ZeroCount1623.very_low_count, CONDITIONAL ON the shared
+  -- lab leaf ZeroCount1623.book_zero_count.
+  ⟨ZeroCount1623.summable_zeroIdx χ T _, ZeroCount1623.very_low_count χ hχ T hT⟩
 
 /-- Exactly Decomp269b.very_low_mass_bound, assembled from the two leaves above. -/
 theorem very_low_mass_bound_of_leaves (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
@@ -71,3 +74,4 @@ theorem very_low_mass_bound_of_leaves (q : ℕ) [NeZero q] (χ : DirichletCharac
     _ ≤ _ := by linarith
 
 end LeanLab.HelfgottMajor.Decomp269bLeavesVeryLow
+
