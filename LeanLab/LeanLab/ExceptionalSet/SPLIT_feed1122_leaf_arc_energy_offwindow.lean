@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_arc_energy
+import LeanLab.ExceptionalSet.SPLIT_feed1122_ofw_p2
 
 /-!
 Split of `LeanLab.ExceptionalSet.BG2026.Decomp522a.leaf_arc_energy_offwindow`, P0029 Bhowmik and
@@ -192,7 +193,7 @@ theorem leaf_ofw_short (Θ : ℝ) (hΘ1 : 1 / 2 ≤ Θ) (hΘ2 : Θ < 3 / 4)
           fourierCoeff (Vfun X (Nat.sqrt X) (Nat.sqrt X)) n‖ ^ 2
         else 0)
         ≤ C * (X : ℝ) ^ (3 / 2 + 2 * Θ + ε) := by
-  sorry
+  exact leaf_ofw_short_of_leaves Θ hΘ1 hΘ2 hZF ε hε hsublinear
 
 /-- LEAF: the damped middle frequencies `X < n ≤ X ^ 2`, where the truncation of `F_X` at `X ^ 2`
 plays no role and the coefficient of the squared generating function is exactly
