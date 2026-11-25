@@ -1,9 +1,3 @@
-import LeanLab.ExceptionalSet.Lu2010Orth
-import LeanLab.Perelli1996.PrincipalTail320
-import LeanLab.PNTPort.Gallagher.Basic
-import LeanLab.ExceptionalSet.MVArithmetic685
-import LeanLab.Perelli1996.Series320
-import LeanLab.Perelli1996.RamanujanInt400
 import LeanLab.ExceptionalSet.UpJ200.DQLeafAbsentSelectedDecisions
 
 /-!
@@ -103,31 +97,6 @@ noncomputable def sharpSum {r : ℕ} (P X : ℝ) (χ : DirichletCharacter ℂ r)
   ∑ n ∈ (Ioc ⌊P⌋₊ ⌊X⌋₊).filter (fun n : ℕ => x - h < (n : ℝ) ∧ (n : ℝ) ≤ x),
     ((if Nat.Prime n then (Real.log n : ℂ) * χ (n : ZMod r) else 0) - if χ = 1 then 1 else 0)
 
-/-- Montgomery and Vaughan page 363 display 6.16, the signed coefficient in the existing natural frequency normalization. -/
-theorem mainWeight_eq_coefficient685 (q n : ℕ) : mainWeight q n =
-    LeanLab.Perelli1996.Series320.coefficient n q := by
-  have hram (q : ℕ) : ramanujan q (-(n : ℤ)) =
-      LeanLab.Perelli1996.Ramanujan103.ramanujanSum q n := by
-    by_cases hq : q = 0
-    · subst q
-      simp [ramanujan, LeanLab.Perelli1996.Ramanujan103.ramanujanSum]
-    have heq (m : ℤ) : ramanujan q m =
-        LeanLab.Perelli1996.RamanujanInt400.ramanujanSumInt q m := by
-      unfold ramanujan LeanLab.Perelli1996.RamanujanInt400.ramanujanSumInt
-      apply Finset.sum_congr rfl
-      intro a _
-      unfold eC LeanLab.Perelli1996.Kernel.e
-      congr 1
-      push_cast
-      ring
-    rw [heq, LeanLab.Perelli1996.RamanujanInt400.ramanujanSumInt_eq_natAbs q
-      (-(n : ℤ)) (Nat.pos_of_ne_zero hq)]
-    simp
-  unfold mainWeight LeanLab.Perelli1996.Series320.coefficient
-  rw [hram]
-  push_cast
-  rfl
-
 /-! ### The leaves -/
 
 /-- LEAF: P0015 displays (6.1) to (6.9), pages 361 to 363, class HARD.
@@ -144,6 +113,489 @@ theorem mv_remainder_66_68 : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ → δ 
           (mvW (X ^ (6 * δ)) X * Real.sqrt X + mvW (X ^ (6 * δ)) X ^ 2) := by
   sorry
 
+/-! ### Private helpers for the arc main term, P0015 (6.10) and (6.11) -/
+
+private lemma eC_add (x y : ℝ) : eC (x + y) = eC x * eC y := by
+  unfold eC
+  rw [← Complex.exp_add]
+  congr 1
+  push_cast
+  ring
+
+private lemma eC_zero : eC 0 = 1 := by
+  unfold eC
+  simp
+
+private lemma eC_intCast (k : ℤ) : eC (k : ℝ) = 1 := by
+  unfold eC
+  have h : (2 * ↑Real.pi * Complex.I * ((k : ℝ) : ℂ)) = (k : ℂ) * (2 * ↑Real.pi * Complex.I) := by
+    push_cast
+    ring
+  rw [h, Complex.exp_int_mul_two_pi_mul_I]
+
+private lemma norm_eC (x : ℝ) : ‖eC x‖ = 1 := by
+  unfold eC
+  have h : (2 * ↑Real.pi * Complex.I * (x : ℂ)) = ((2 * Real.pi * x : ℝ) : ℂ) * Complex.I := by
+    push_cast
+    ring
+  rw [h, Complex.norm_exp_ofReal_mul_I]
+
+/-- `∫₀¹ e(ηk) dη` is `1` for `k = 0` and `0` otherwise. P0015 orthogonality. -/
+private lemma integral_eC_int (k : ℤ) :
+    (∫ η in (0 : ℝ)..1, eC (η * (k : ℝ))) = if k = 0 then 1 else 0 := by
+  rcases eq_or_ne k 0 with hk | hk
+  · subst hk
+    simp [eC_zero]
+  · have hk' : (k : ℂ) ≠ 0 := by exact_mod_cast hk
+    have h2pi : (2 : ℂ) * ↑Real.pi * Complex.I ≠ 0 :=
+      mul_ne_zero (mul_ne_zero two_ne_zero (by exact_mod_cast Real.pi_pos.ne')) Complex.I_ne_zero
+    have hc : (2 * ↑Real.pi * Complex.I * (k : ℂ)) ≠ 0 := mul_ne_zero h2pi hk' 
+    have hfun : (fun η : ℝ => eC (η * (k : ℝ))) =
+        fun η : ℝ => Complex.exp ((2 * ↑Real.pi * Complex.I * (k : ℂ)) * η) := by
+      funext η
+      unfold eC
+      congr 1
+      push_cast
+      ring
+    rw [hfun, integral_exp_mul_complex hc]
+    have h1 : (2 * ↑Real.pi * Complex.I * (k : ℂ)) = (k : ℂ) * (2 * ↑Real.pi * Complex.I) := by ring
+    rw [h1]
+    have hexp : Complex.exp ((k : ℂ) * (2 * ↑Real.pi * Complex.I)) = 1 :=
+      Complex.exp_int_mul_two_pi_mul_I k
+    simp [hexp, hk]
+
+private lemma continuous_eC : Continuous eC := by
+  unfold eC
+  fun_prop
+
+private lemma continuous_eC_mul (c : ℝ) : Continuous fun η : ℝ => eC (η * c) :=
+  continuous_eC.comp (continuous_id.mul continuous_const)
+
+/-- `arcIntegral` expanded over the pairs `(m, m')` of the sum `T`. P0015 display (6.4). -/
+private lemma arcIntegral_eq_double (P X : ℝ) (q n : ℕ) :
+    arcIntegral P X q n =
+      ∑ m ∈ Ioc ⌊P⌋₊ ⌊X⌋₊, ∑ m' ∈ Ioc ⌊P⌋₊ ⌊X⌋₊,
+        ∫ η in (-(P / (q * X)))..(P / (q * X)), eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ))) := by
+  have hpt : ∀ η : ℝ,
+      (∑ m ∈ Ioc ⌊P⌋₊ ⌊X⌋₊, eC (η * (m : ℝ))) ^ 2 * eC (-(η * (n : ℝ))) =
+        ∑ m ∈ Ioc ⌊P⌋₊ ⌊X⌋₊, ∑ m' ∈ Ioc ⌊P⌋₊ ⌊X⌋₊,
+          eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ))) := by
+    intro η
+    have hm : ∀ m m' : ℕ, eC (η * (m : ℝ)) * eC (η * (m' : ℝ)) * eC (-(η * (n : ℝ)))
+        = eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ))) := by
+      intro m m'
+      rw [← eC_add, ← eC_add]
+      congr 1
+      ring
+    simp only [pow_two, Finset.sum_mul, Finset.mul_sum, hm]
+    refine Finset.sum_congr rfl (fun x _ => Finset.sum_congr rfl (fun y _ => ?_))
+    congr 1
+    ring
+  unfold arcIntegral T
+  simp only [hpt]
+  rw [intervalIntegral.integral_finsetSum (f := fun (m : ℕ) η =>
+    ∑ m' ∈ Ioc ⌊P⌋₊ ⌊X⌋₊, eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ)))) (fun (m : ℕ) _ =>
+    (continuous_finsetSum _
+      (fun (m' : ℕ) _ => continuous_eC_mul ((m : ℝ) + (m' : ℝ) - (n : ℝ)))).intervalIntegrable _ _)]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [intervalIntegral.integral_finsetSum (f := fun (m' : ℕ) η =>
+    eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ)))) (fun (m' : ℕ) _ =>
+    (continuous_eC_mul ((m : ℝ) + (m' : ℝ) - (n : ℝ))).intervalIntegrable _ _)]
+
+/-- The integrand of the arc integral, expanded over pairs. P0015 display (6.4). -/
+private lemma T_sq_mul_eC (P X : ℝ) (n : ℕ) (η : ℝ) :
+    T P X η ^ 2 * eC (-(η * (n : ℝ))) =
+      ∑ m ∈ Ioc ⌊P⌋₊ ⌊X⌋₊, ∑ m' ∈ Ioc ⌊P⌋₊ ⌊X⌋₊,
+        eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ))) := by
+  have hm : ∀ m m' : ℕ, eC (η * (m : ℝ)) * eC (η * (m' : ℝ)) * eC (-(η * (n : ℝ)))
+      = eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ))) := by
+    intro m m'
+    rw [← eC_add, ← eC_add]
+    congr 1
+    ring
+  simp only [T, pow_two, Finset.sum_mul, Finset.mul_sum, hm]
+  refine Finset.sum_congr rfl (fun x _ => Finset.sum_congr rfl (fun y _ => ?_))
+  congr 1
+  ring
+
+/-- The single-period integral of one term of the pair expansion. -/
+private lemma integral_eC_pair (m m' n : ℕ) :
+    (∫ η in (0 : ℝ)..1, eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ)))) =
+      if m + m' = n then 1 else 0 := by
+  have harg : ∀ η : ℝ, η * ((m : ℝ) + (m' : ℝ) - (n : ℝ))
+      = η * ((((m : ℤ) + (m' : ℤ) - (n : ℤ) : ℤ)) : ℝ) := by
+    intro η
+    push_cast
+    ring
+  simp only [harg]
+  rw [integral_eC_int ((m : ℤ) + (m' : ℤ) - (n : ℤ))]
+  have hiff : ((m : ℤ) + (m' : ℤ) - (n : ℤ) = 0) ↔ (m + m' = n) := by omega
+  by_cases h : m + m' = n
+  · simp [hiff, h]
+  · simp [hiff, h]
+
+/-- The inner sum over `m'`: for `m` in the index, the pairs `m + m' = n` correspond to the
+values `m'` with `m + m' = n`, which exist exactly when `a < m ≤ n - 1 - a`. -/
+private lemma inner_pair_sum (P X : ℝ) (n m : ℕ) (hnX : n ≤ ⌊X⌋₊)
+    (hm : m ∈ Ioc ⌊P⌋₊ ⌊X⌋₊) :
+    (∑ m' ∈ Ioc ⌊P⌋₊ ⌊X⌋₊, (if m + m' = n then (1 : ℂ) else 0)) =
+      if m ∈ Ioc ⌊P⌋₊ (n - 1 - ⌊P⌋₊) then 1 else 0 := by
+  set a := ⌊P⌋₊ with ha
+  set B := ⌊X⌋₊ with hB
+  have ham : a < m := (mem_Ioc.mp hm).1
+  by_cases hcase : m ≤ n - 1 - a
+  · have hmn : m ≤ n := by omega
+    have hmem : n - m ∈ Ioc a B := mem_Ioc.mpr ⟨by omega, by omega⟩
+    refine (Finset.sum_eq_single (n - m) ?_ (fun h => absurd hmem h)).trans ?_
+    · intro m' _ hne
+      have hne' : m + m' ≠ n := by omega
+      simp [hne']
+    · have hsum : m + (n - m) = n := by omega
+      rw [if_pos hsum, if_pos (mem_Ioc.mpr ⟨ham, hcase⟩)]
+  · have hout : m ∉ Ioc a (n - 1 - a) := fun h => hcase (mem_Ioc.mp h).2
+    rw [if_neg hout]
+    refine Finset.sum_eq_zero (fun m' hm' => ?_)
+    have ham' : a < m' := (mem_Ioc.mp hm').1
+    have hne : m + m' ≠ n := by omega
+    simp [hne]
+
+/-- The single-period integral is the number of pairs `(m, m')` of the index with `m + m' = n`. -/
+private lemma integral_one_period (P X : ℝ) (n : ℕ) (hnX : n ≤ ⌊X⌋₊) :
+    (∫ η in (0 : ℝ)..1, T P X η ^ 2 * eC (-(η * (n : ℝ)))) =
+      (((Ioc ⌊P⌋₊ (n - 1 - ⌊P⌋₊)).card : ℕ) : ℂ) := by
+  set a := ⌊P⌋₊ with ha
+  set B := ⌊X⌋₊ with hB
+  have hstep : (∫ η in (0 : ℝ)..1, T P X η ^ 2 * eC (-(η * (n : ℝ))))
+      = ∑ m ∈ Ioc a B, ∑ m' ∈ Ioc a B, (if m + m' = n then (1 : ℂ) else 0) := by
+    simp only [T_sq_mul_eC]
+    rw [intervalIntegral.integral_finsetSum (f := fun (m : ℕ) η =>
+      ∑ m' ∈ Ioc a B, eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ)))) (fun (m : ℕ) _ =>
+      (continuous_finsetSum _ (fun (m' : ℕ) _ =>
+        continuous_eC_mul ((m : ℝ) + (m' : ℝ) - (n : ℝ)))).intervalIntegrable _ _)]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [intervalIntegral.integral_finsetSum (f := fun (m' : ℕ) η =>
+      eC (η * ((m : ℝ) + (m' : ℝ) - (n : ℝ)))) (fun (m' : ℕ) _ =>
+      (continuous_eC_mul ((m : ℝ) + (m' : ℝ) - (n : ℝ))).intervalIntegrable _ _)]
+    exact Finset.sum_congr rfl (fun m' _ => integral_eC_pair m m' n)
+  rw [hstep]
+  have hsub : Ioc a (n - 1 - a) ⊆ Ioc a B := by
+    intro x hx
+    exact mem_Ioc.mpr ⟨(mem_Ioc.mp hx).1, by have := (mem_Ioc.mp hx).2; omega⟩
+  calc ∑ m ∈ Ioc a B, ∑ m' ∈ Ioc a B, (if m + m' = n then (1 : ℂ) else 0)
+      = ∑ m ∈ Ioc a B, (if m ∈ Ioc a (n - 1 - a) then (1 : ℂ) else 0) :=
+        Finset.sum_congr rfl (fun m hm => inner_pair_sum P X n m (by simpa [hB] using hnX) (by simpa [ha, hB] using hm))
+    _ = ((Ioc a (n - 1 - a)).card : ℂ) := by
+        rw [Finset.sum_ite_mem]
+        rw [Finset.inter_eq_right.mpr hsub]
+        simp
+
+private lemma eC_pow (η : ℝ) (m : ℕ) : eC (η * (m : ℝ)) = eC η ^ m := by
+  induction m with
+  | zero => simp [eC_zero]
+  | succ k ih =>
+      rw [Nat.cast_succ, mul_add, mul_one, eC_add, ih, pow_succ]
+
+/-- `‖1 - e(η)‖ = 2|sin πη|`, hence at least `4|η|` for `|η| ≤ 1/2`. -/
+private lemma norm_one_sub_eC (t : ℝ) (ht : |t| ≤ 1 / 2) :
+    ‖1 - eC t‖ ^ 2 = 4 * Real.sin (Real.pi * t) ^ 2 := by
+  set θ := 2 * Real.pi * t with hθ
+  have hθ2 : θ = 2 * (Real.pi * t) := by rw [hθ]; ring
+  have hexp : eC t = Complex.exp ((θ : ℂ) * Complex.I) := by
+    unfold eC
+    rw [hθ]
+    congr 1
+    push_cast
+    ring
+  have hre : (Complex.exp ((θ : ℂ) * Complex.I)).re = Real.cos θ := by
+    rw [Complex.exp_mul_I]
+    simp [Complex.cos_ofReal_re]
+  have him : (Complex.exp ((θ : ℂ) * Complex.I)).im = Real.sin θ := by
+    rw [Complex.exp_mul_I]
+    simp [Complex.sin_ofReal_re]
+  have hcs : Real.cos (Real.pi * t) ^ 2 = 1 - Real.sin (Real.pi * t) ^ 2 := by
+    have := Real.cos_sq_add_sin_sq (Real.pi * t)
+    linarith
+  have hcos : Real.cos θ = 1 - 2 * Real.sin (Real.pi * t) ^ 2 := by
+    rw [hθ2]
+    rw [Real.cos_two_mul]
+    linarith
+  have hsin : Real.sin θ = 2 * Real.sin (Real.pi * t) * Real.cos (Real.pi * t) := by
+    rw [hθ2]
+    rw [Real.sin_two_mul]
+  rw [hexp, Complex.sq_norm, Complex.normSq_apply]
+  simp only [Complex.sub_re, Complex.sub_im, Complex.one_re, Complex.one_im, hre, him]
+  rw [hcos, hsin]
+  nlinarith [hcs]
+
+private lemma norm_one_sub_eC_ge (t : ℝ) (ht : |t| ≤ 1 / 2) :
+    4 * |t| ≤ ‖1 - eC t‖ := by
+  have hsq := norm_one_sub_eC t ht
+  have hsin : 2 * |t| ≤ |Real.sin (Real.pi * t)| := by
+    have hle : |Real.pi * t| ≤ Real.pi / 2 := by
+      rw [abs_mul, abs_of_pos Real.pi_pos]
+      calc Real.pi * |t| ≤ Real.pi * (1 / 2) := mul_le_mul_of_nonneg_left ht (le_of_lt Real.pi_pos)
+        _ = Real.pi / 2 := by ring
+    have h := Real.mul_abs_le_abs_sin (x := Real.pi * t) hle
+    have hpi : 2 / Real.pi * |Real.pi * t| = 2 * |t| := by
+      rw [abs_mul, abs_of_pos Real.pi_pos]
+      field_simp
+    linarith [h]
+  have h4 : (4 * |t|) ^ 2 ≤ Real.sin (Real.pi * t) ^ 2 * 4 := by
+    have h0 : (0:ℝ) ≤ 2 * |t| := by positivity
+    have h1 : (2 * |t|) ^ 2 ≤ Real.sin (Real.pi * t) ^ 2 := by
+      have h2 : (2 * |t|) ^ 2 ≤ |Real.sin (Real.pi * t)| ^ 2 := by
+        exact pow_le_pow_left₀ (by positivity) hsin 2
+      rwa [sq_abs] at h2
+    nlinarith [h1]
+  have hnn : (0:ℝ) ≤ 4 * |t| := by positivity
+  have := hsq
+  nlinarith [h4, this, hnn, norm_nonneg (1 - eC t : ℂ)]
+
+/-- The partial geometric sum: `‖Σ_{i<n} z^i‖ ≤ 2/‖1 - z‖` for `‖z‖ = 1`, `z ≠ 1`. -/
+private lemma norm_geom_sum_le (z : ℂ) (hz : ‖z‖ = 1) (hz1 : z ≠ 1) (n : ℕ) :
+    ‖∑ i ∈ Finset.range n, z ^ i‖ ≤ 2 / ‖1 - z‖ := by
+  have h1 : (1:ℂ) - z ≠ 0 := sub_ne_zero.mpr (Ne.symm hz1)
+  rw [geom_sum_eq hz1 n, div_eq_mul_inv, norm_mul, norm_inv]
+  have hnum : ‖z ^ n - 1‖ ≤ 2 := by
+    refine (norm_sub_le _ _).trans ?_
+    rw [norm_pow, hz, one_pow]
+    norm_num
+  have hnorm : ‖z - 1‖ = ‖1 - z‖ := by rw [← norm_neg]; ring_nf
+  rw [hnorm]
+  have hpos : (0:ℝ) < ‖1 - z‖ := norm_pos_iff.mpr h1
+  rw [div_eq_mul_inv]
+  calc ‖z ^ n - 1‖ * ‖1 - z‖⁻¹ ≤ 2 * ‖1 - z‖⁻¹ := by
+        have : (0:ℝ) ≤ ‖1 - z‖⁻¹ := by positivity
+        exact mul_le_mul_of_nonneg_right hnum this
+    _ = 2 / ‖1 - z‖ := by rw [div_eq_mul_inv]
+
+/-- The sum over `Ioc A B` is the difference of two partial sums, for `A ≤ B`. -/
+private lemma sum_Ioc_eq_range_sub (f : ℕ → ℂ) (A B : ℕ) (hAB : A ≤ B) :
+    (∑ m ∈ Ioc A B, f m) = ∑ m ∈ Finset.range (B + 1), f m - ∑ m ∈ Finset.range (A + 1), f m := by
+  have hsub : Finset.range (A + 1) ⊆ Finset.range (B + 1) := by
+    intro x hx
+    simp only [Finset.mem_range] at hx ⊢
+    omega
+  have hset : Ioc A B = Finset.range (B + 1) \ Finset.range (A + 1) := by
+    ext x
+    simp only [Finset.mem_Ioc, Finset.mem_sdiff, Finset.mem_range, not_lt]
+    omega
+  have hsdiff := Finset.sum_sdiff (f := f) hsub
+  rw [← hset] at hsdiff
+  rw [← hsdiff]
+  ring
+
+private lemma eC_sub_int (η : ℝ) (k : ℤ) : eC η = eC (η - k) := by
+  have h : η = (η - (k : ℝ)) + (k : ℝ) := by ring
+  conv_lhs => rw [h]
+  rw [eC_add, eC_intCast, mul_one]
+
+private lemma norm_one_sub_eC_ge_int (η : ℝ) (k : ℤ) (hk : |η - (k : ℝ)| ≤ 1 / 2) :
+    4 * |η - (k : ℝ)| ≤ ‖1 - eC η‖ := by
+  rw [eC_sub_int η k]
+  exact norm_one_sub_eC_ge (η - (k : ℝ)) hk
+
+/-- Dirichlet kernel bound: `‖T(η)‖ ≤ 4/‖1 - e(η)‖`. P0015 page 363. -/
+private lemma norm_T_le (P X η : ℝ) (hPX : ⌊P⌋₊ ≤ ⌊X⌋₊) (hη : eC η ≠ 1) :
+    ‖T P X η‖ ≤ 4 / ‖1 - eC η‖ := by
+  have hz : ‖eC η‖ = 1 := norm_eC η
+  have h1 := norm_geom_sum_le (eC η) hz hη (⌊X⌋₊ + 1)
+  have h2 := norm_geom_sum_le (eC η) hz hη (⌊P⌋₊ + 1)
+  have hT : T P X η = ∑ m ∈ Ioc ⌊P⌋₊ ⌊X⌋₊, eC η ^ m := by
+    simp only [T]
+    exact Finset.sum_congr rfl (fun m _ => eC_pow η m)
+  rw [hT, sum_Ioc_eq_range_sub (fun m => eC η ^ m) ⌊P⌋₊ ⌊X⌋₊ hPX]
+  calc ‖∑ m ∈ Finset.range (⌊X⌋₊ + 1), eC η ^ m - ∑ m ∈ Finset.range (⌊P⌋₊ + 1), eC η ^ m‖
+      ≤ ‖∑ m ∈ Finset.range (⌊X⌋₊ + 1), eC η ^ m‖ +
+          ‖∑ m ∈ Finset.range (⌊P⌋₊ + 1), eC η ^ m‖ := norm_sub_le _ _
+    _ ≤ 2 / ‖1 - eC η‖ + 2 / ‖1 - eC η‖ := add_le_add h1 h2
+    _ = 4 / ‖1 - eC η‖ := by ring
+
+private lemma integral_inv_sq (a b : ℝ) (ha : 0 < a) (hab : a ≤ b) :
+    (∫ x in a..b, 1 / x ^ 2) = 1 / a - 1 / b := by
+  have hderiv : ∀ x ∈ Set.uIcc a b, HasDerivAt (fun y : ℝ => -(1 / y)) (1 / x ^ 2) x := by
+    intro x hx
+    rw [Set.uIcc_of_le hab] at hx
+    have h0 : x ≠ 0 := ne_of_gt (lt_of_lt_of_le ha hx.1)
+    have h := (hasDerivAt_inv h0).const_mul (-1 : ℝ)
+    have hval : (-1 : ℝ) * (-(x ^ 2)⁻¹) = 1 / x ^ 2 := by
+      rw [one_div]
+      ring
+    rw [← hval]
+    simpa [neg_div, one_div] using h
+  have hcont : ContinuousOn (fun x : ℝ => 1 / x ^ 2) (Set.uIcc a b) := by
+    have hne : ∀ x ∈ Set.uIcc a b, x ≠ 0 := by
+      intro x hx
+      rw [Set.uIcc_of_le hab] at hx
+      exact ne_of_gt (lt_of_lt_of_le ha hx.1)
+    exact ContinuousOn.div continuousOn_const ((continuousOn_id).pow 2)
+      (fun x hx => pow_ne_zero 2 (hne x hx))
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hcont.intervalIntegrable]
+  ring
+
+private lemma card_bound (a B n : ℕ) (hnB : n ≤ B) :
+    ‖(((Ioc a (n - 1 - a)).card : ℕ) : ℂ) - (n : ℂ)‖ ≤ 2 * (a : ℝ) + 2 := by
+  have hcard : (Ioc a (n - 1 - a)).card = (n - 1 - a) - a := Nat.card_Ioc a (n - 1 - a)
+  rw [hcard]
+  have hle : (n - 1 - a) - a ≤ n := by omega
+  have hdif : n - ((n - 1 - a) - a) ≤ 2 * a + 2 := by omega
+  have hnorm : ‖(((n - 1 - a) - a : ℕ) : ℂ) - (n : ℂ)‖ = ((n - ((n - 1 - a) - a) : ℕ) : ℝ) := by
+    have hneg : ((((n - 1 - a) - a : ℕ) : ℂ) - (n : ℂ)) = -(((n - ((n - 1 - a) - a) : ℕ) : ℂ)) := by
+      push_cast [Nat.cast_sub hle]
+      ring
+    rw [hneg, norm_neg, Complex.norm_natCast]
+  rw [hnorm]
+  have hcast : ((n - ((n - 1 - a) - a) : ℕ) : ℝ) ≤ ((2 * a + 2 : ℕ) : ℝ) := by
+    exact_mod_cast hdif
+  have hR : ((2 * a + 2 : ℕ) : ℝ) = 2 * (a : ℝ) + 2 := by push_cast; ring
+  linarith [hcast, hR.le, hR.ge]
+
+private lemma eC_conj (x : ℝ) : eC (-x) = (starRingEnd ℂ) (eC x) := by
+  unfold eC
+  rw [← Complex.exp_conj]
+  congr 1
+  simp only [map_mul, map_ofNat, Complex.conj_ofReal, Complex.conj_I]
+  push_cast
+  ring
+
+private lemma T_neg (P X : ℝ) (t : ℝ) : T P X (-t) = (starRingEnd ℂ) (T P X t) := by
+  simp only [T, map_sum]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [show -t * (m : ℝ) = -(t * (m : ℝ)) by ring]
+  exact eC_conj (t * (m : ℝ))
+
+private lemma T_add_one (P X : ℝ) (t : ℝ) : T P X (t + 1) = T P X t := by
+  simp only [T]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [add_mul, one_mul, eC_add]
+  have hm : eC ((m : ℝ)) = 1 := by
+    have h := eC_intCast (m : ℤ)
+    simpa using h
+  rw [hm, mul_one]
+
+private lemma eC_neg_natCast (n : ℕ) : eC (-(n : ℝ)) = 1 := by
+  have h := eC_intCast (-(n : ℤ))
+  simpa using h
+
+/-- The integrand of the arc integral is `1`-periodic. -/
+private lemma F_add_one (P X : ℝ) (n : ℕ) (t : ℝ) :
+    T P X (t + 1) ^ 2 * eC (-((t + 1) * (n : ℝ))) =
+      T P X t ^ 2 * eC (-(t * (n : ℝ))) := by
+  rw [T_add_one]
+  have harg : -((t + 1) * (n : ℝ)) = -(t * (n : ℝ)) + -(n : ℝ) := by ring
+  rw [harg, eC_add, eC_neg_natCast, mul_one]
+
+private lemma eC_ne_one_of_between (η : ℝ) (h1 : 0 < η) (h2 : η < 1) : eC η ≠ 1 := by
+  intro h
+  unfold eC at h
+  rw [Complex.exp_eq_one_iff] at h
+  obtain ⟨m, hm⟩ := h
+  have h2pi : (2 : ℂ) * ↑Real.pi * Complex.I ≠ 0 :=
+    mul_ne_zero (mul_ne_zero two_ne_zero (by exact_mod_cast Real.pi_pos.ne')) Complex.I_ne_zero
+  have hkey : (η : ℂ) * (2 * ↑Real.pi * Complex.I) = (m : ℂ) * (2 * ↑Real.pi * Complex.I) := by
+    rw [← hm]
+    ring
+  have hc := mul_right_cancel₀ h2pi hkey
+  have hre : η = (m : ℝ) := by exact_mod_cast hc
+  rw [hre] at h1 h2
+  have h1' : (0 : ℤ) < m := by exact_mod_cast h1
+  have h2' : m < 1 := by exact_mod_cast h2
+  omega
+
+/-- `‖T(η)‖ ≤ 1/η` on `(0, 1/2]`. -/
+private lemma norm_T_le_inv (P X : ℝ) (η : ℝ) (hPX : ⌊P⌋₊ ≤ ⌊X⌋₊) (h1 : 0 < η)
+    (h2 : η ≤ 1 / 2) : ‖T P X η‖ ≤ 1 / η := by
+  have hne : eC η ≠ 1 := eC_ne_one_of_between η h1 (by linarith)
+  have hle := norm_T_le P X η hPX hne
+  have hge : 4 * η ≤ ‖1 - eC η‖ := by
+    have := norm_one_sub_eC_ge η (by rw [abs_of_pos h1]; exact h2)
+    rwa [abs_of_pos h1] at this
+  have hpos : (0:ℝ) < 4 * η := by linarith
+  calc ‖T P X η‖ ≤ 4 / ‖1 - eC η‖ := hle
+    _ ≤ 4 / (4 * η) := div_le_div_of_nonneg_left (by norm_num) hpos hge
+    _ = 1 / η := by field_simp
+
+/-- `‖T(η)‖ ≤ 1/(1-η)` on `[1/2, 1)`. -/
+private lemma norm_T_le_inv' (P X : ℝ) (η : ℝ) (hPX : ⌊P⌋₊ ≤ ⌊X⌋₊) (h1 : 1 / 2 ≤ η)
+    (h2 : η < 1) : ‖T P X η‖ ≤ 1 / (1 - η) := by
+  have hη0 : 0 < η := by linarith
+  have hne : eC η ≠ 1 := eC_ne_one_of_between η hη0 h2
+  have hle := norm_T_le P X η hPX hne
+  have hge : 4 * (1 - η) ≤ ‖1 - eC η‖ := by
+    rw [eC_sub_int η 1]
+    have habs : |η - ((1 : ℤ) : ℝ)| = 1 - η := by
+      rw [abs_of_neg (by push_cast; linarith)]
+      ring
+    have h := norm_one_sub_eC_ge (η - ((1 : ℤ) : ℝ)) (by rw [habs]; linarith)
+    rw [habs] at h
+    simpa using h
+  have hpos : (0:ℝ) < 4 * (1 - η) := by linarith
+  calc ‖T P X η‖ ≤ 4 / ‖1 - eC η‖ := hle
+    _ ≤ 4 / (4 * (1 - η)) := div_le_div_of_nonneg_left (by norm_num) hpos hge
+    _ = 1 / (1 - η) := by field_simp
+
+/-- The discarded part of the period: `∫_κ^{1-κ} |T|² ≤ 2/κ`, P0015 page 363. -/
+private lemma norm_integral_T_sq_le (P X : ℝ) (n : ℕ) (κ : ℝ) (hκ0 : 0 < κ) (hκ1 : κ ≤ 1 / 2)
+    (hPX : ⌊P⌋₊ ≤ ⌊X⌋₊) :
+    ‖∫ η in κ..(1 - κ), T P X η ^ 2 * eC (-(η * (n : ℝ)))‖ ≤ 2 / κ := by
+  have hκle : κ ≤ 1 - κ := by linarith
+  have hcontT : Continuous fun η : ℝ => ‖T P X η‖ ^ 2 := by
+    have hc : Continuous fun η : ℝ => T P X η := by
+      simp only [T]
+      exact continuous_finsetSum _ (fun m _ => continuous_eC_mul ((m : ℝ)))
+    exact hc.norm.pow 2
+  have hmain : ‖∫ η in κ..(1 - κ), T P X η ^ 2 * eC (-(η * (n : ℝ)))‖ ≤
+      ∫ η in κ..(1 - κ), ‖T P X η‖ ^ 2 := by
+    calc ‖∫ η in κ..(1 - κ), T P X η ^ 2 * eC (-(η * (n : ℝ)))‖
+        ≤ ∫ η in κ..(1 - κ), ‖T P X η ^ 2 * eC (-(η * (n : ℝ)))‖ :=
+          intervalIntegral.norm_integral_le_integral_norm hκle
+      _ = ∫ η in κ..(1 - κ), ‖T P X η‖ ^ 2 := by
+          refine intervalIntegral.integral_congr (fun η _ => ?_)
+          rw [norm_mul, norm_pow, norm_eC, mul_one]
+  refine hmain.trans ?_
+  have hInt : (∫ η in κ..(1 / 2), 1 / η ^ 2) = 1 / κ - 2 := by
+    rw [integral_inv_sq κ (1 / 2) hκ0 (by linarith)]
+    norm_num
+  have hsplit : (∫ η in κ..(1 - κ), ‖T P X η‖ ^ 2) =
+      (∫ η in κ..(1 / 2), ‖T P X η‖ ^ 2) + (∫ η in (1 / 2)..(1 - κ), ‖T P X η‖ ^ 2) := by
+    rw [← intervalIntegral.integral_add_adjacent_intervals (hcontT.intervalIntegrable _ _)
+      (hcontT.intervalIntegrable _ _)]
+  have hsubst : (∫ η in (1 / 2)..(1 - κ), ‖T P X η‖ ^ 2) = ∫ x in κ..(1 / 2), ‖T P X x‖ ^ 2 := by
+    have hcomp := intervalIntegral.integral_comp_sub_left (a := κ) (b := 1 / 2)
+      (f := fun η : ℝ => ‖T P X η‖ ^ 2) (1 : ℝ)
+    rw [show (1:ℝ) - 1 / 2 = 1 / 2 by norm_num] at hcomp
+    rw [← hcomp]
+    refine intervalIntegral.integral_congr (fun x _ => ?_)
+    have hper : T P X (1 - x) = T P X (-x) := by
+      rw [show 1 - x = -x + 1 by ring]
+      exact T_add_one P X (-x)
+    rw [hper, T_neg]
+    simp
+  have hb : (∫ η in κ..(1 / 2), ‖T P X η‖ ^ 2) ≤ 1 / κ - 2 := by
+    have hcontInv : ContinuousOn (fun x : ℝ => 1 / x ^ 2) (Set.uIcc κ (1 / 2)) := by
+      apply ContinuousOn.div continuousOn_const (continuousOn_id.pow 2)
+      intro x hx
+      rw [Set.uIcc_of_le (by linarith)] at hx
+      exact pow_ne_zero 2 (ne_of_gt (lt_of_lt_of_le hκ0 hx.1))
+    calc (∫ η in κ..(1 / 2), ‖T P X η‖ ^ 2) ≤ ∫ η in κ..(1 / 2), 1 / η ^ 2 := by
+          refine intervalIntegral.integral_mono_on (by linarith) (hcontT.intervalIntegrable _ _)
+            hcontInv.intervalIntegrable (fun x hx => ?_)
+          have hx1 : 0 < x := lt_of_lt_of_le hκ0 hx.1
+          have hb1 := norm_T_le_inv P X x hPX hx1 hx.2
+          have hnn : (0:ℝ) ≤ ‖T P X x‖ := norm_nonneg _
+          calc ‖T P X x‖ ^ 2 ≤ (1 / x) ^ 2 := pow_le_pow_left₀ hnn hb1 2
+            _ = 1 / x ^ 2 := by field_simp
+      _ = 1 / κ - 2 := hInt
+  rw [hsplit, hsubst]
+  have hb' : (∫ x in κ..(1 / 2), ‖T P X x‖ ^ 2) ≤ 1 / κ - 2 := hb
+  have hsum : (∫ x in κ..(1 / 2), ‖T P X x‖ ^ 2) + ∫ x in κ..(1 / 2), ‖T P X x‖ ^ 2 ≤
+      (1 / κ - 2) + (1 / κ - 2) := add_le_add hb' hb'
+  have hfin : (1 / κ - 2) + (1 / κ - 2) ≤ 2 / κ := by
+    have hk : (0:ℝ) < κ := hκ0
+    have htwo : 1 / κ + 1 / κ = 2 / κ := by ring
+    linarith
+  linarith [hsum, hfin]
+
 /-- LEAF: P0015 displays (6.10) and (6.11), page 363, class MEDIUM.
 `T(η) ≪ ‖η‖⁻¹` gives `∫_{1/qQ}^{1/2} |T|² ≪ qQ`, so the arc integral is
 `∫_0^1 T(η)² e(-nη) dη + O(qQ) = n + O(qQ)` for `n ≤ X`, with `qQ = qX/P`. -/
@@ -151,181 +603,110 @@ theorem mv_arc_main_611 : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ → δ < 1
     ∃ X₀ : ℝ, ∀ X : ℝ, X₀ ≤ X → ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ X ^ (6 * δ) →
       ∀ n : ℕ, 1 ≤ n → (n : ℝ) ≤ X →
         ‖arcIntegral (X ^ (6 * δ)) X q n - (n : ℂ)‖ ≤ C * q * (X / X ^ (6 * δ)) := by
-  classical
-  have coefficient_cut685 (A B n : ℕ) (hn : n ≤ B) :
-      (∫ α in (-1 / 2 : ℝ)..(1 / 2 : ℝ),
-        (∑ p ∈ Ioc A B, LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α)) ^ 2 * LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α)) =
-          (((n - A - 1 - A : ℕ) : ℕ) : ℂ) := by
-    classical
-    have hterm (p q : ℕ) :
-        (∫ α in (-1 / 2 : ℝ)..(1 / 2 : ℝ),
-          LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α) * LeanLab.Perelli1996.Kernel.e ((q : ℝ) * α) * LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α)) =
-        if p + q = n then 1 else 0 := by
-      have heq (α : ℝ) :
-          LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α) * LeanLab.Perelli1996.Kernel.e ((q : ℝ) * α) * LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α) =
-          LeanLab.ExceptionalSet.Lu2010Orth.ee ((((p : ℤ) + q - n : ℤ) : ℝ) * α) := by
-        rw [← LeanLab.Perelli1996.Parseval103.e_add, ← LeanLab.Perelli1996.Parseval103.e_add]
-        unfold LeanLab.Perelli1996.Kernel.e LeanLab.ExceptionalSet.Lu2010Orth.ee
-        congr 1
-        push_cast
-        ring
-      simp_rw [heq]
-      have h := LeanLab.ExceptionalSet.Lu2010Orth.integral_ee ((p : ℤ) + q - n) (-1 / 2)
-      norm_num only [show (-1 / 2 : ℝ) + 1 = 1 / 2 by norm_num] at h
-      rw [neg_div, h]
-      have hz : ((p : ℤ) + q - n = 0) ↔ p + q = n := by omega
-      rw [if_congr hz rfl rfl]
-    have hexpand (α : ℝ) :
-        (∑ p ∈ Ioc A B, LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α)) ^ 2 * LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α) =
-        ∑ p ∈ Ioc A B, ∑ q ∈ Ioc A B,
-          LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α) * LeanLab.Perelli1996.Kernel.e ((q : ℝ) * α) * LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α) := by
-      simp only [pow_two, Finset.sum_mul, Finset.mul_sum]
-      rw [Finset.sum_comm]
-    have hint (p q : ℕ) : IntervalIntegrable (fun α : ℝ =>
-        LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α) * LeanLab.Perelli1996.Kernel.e ((q : ℝ) * α) * LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α))
-        MeasureTheory.volume (-1 / 2) (1 / 2) := by
-      apply Continuous.intervalIntegrable
-      unfold LeanLab.Perelli1996.Kernel.e
-      fun_prop
-    simp_rw [hexpand]
-    rw [intervalIntegral.integral_finsetSum (fun p _ =>
-      (Continuous.intervalIntegrable (by unfold LeanLab.Perelli1996.Kernel.e; fun_prop)) (-1 / 2) (1 / 2))]
-    simp_rw [intervalIntegral.integral_finsetSum (fun q _ => hint _ q), hterm]
-    have hinner (p : ℕ) (hp : p ∈ Ioc A B) :
-        (∑ q ∈ Ioc A B, if p + q = n then (1 : ℂ) else 0) =
-          if p + A < n then 1 else 0 := by
-      simp only [mem_Ioc] at hp
-      by_cases h : p + A < n
-      · rw [if_pos h, Finset.sum_eq_single (n - p)]
-        · simp [Nat.add_sub_of_le (show p ≤ n by omega)]
-        · intro q hq hne
-          rw [if_neg (by omega)]
-        · intro hnot
-          have hmem : n - p ∈ Ioc A B := by simp only [mem_Ioc]; omega
-          exact (hnot hmem).elim
-      · rw [if_neg h]
-        apply Finset.sum_eq_zero
-        intro q hq
-        simp only [mem_Ioc] at hq
-        rw [if_neg (by omega)]
-    rw [Finset.sum_congr rfl hinner]
-    have hsub : Ioc A (n - A - 1) ⊆ Ioc A B := by
-      intro p hp
-      simp only [mem_Ioc] at hp ⊢
-      omega
-    rw [← Finset.sum_subset hsub]
-    · have heq : (∑ p ∈ Ioc A (n - A - 1), if p + A < n then (1 : ℂ) else 0) =
-          ∑ _p ∈ Ioc A (n - A - 1), (1 : ℂ) := by
-        apply Finset.sum_congr rfl
-        intro p hp
-        simp only [mem_Ioc] at hp
-        rw [if_pos (by omega)]
-      rw [heq]
-      simp
-    · intro p hp hpnot
-      simp only [mem_Ioc] at hp hpnot
-      rw [if_neg (by omega)]
-
-  have kernel_form685 (A B : ℕ) (α : ℝ) :
-      (∑ p ∈ Ioc A B, LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α)) = LeanLab.Perelli1996.Kernel.T (A + 1) (B - A) α := by
-    have hset : Ioc A B = Ico (A + 1) (B + 1) := by ext n; simp only [mem_Ioc, mem_Ico]; omega
-    rw [hset, Finset.sum_Ico_eq_sum_range]
-    have hlen : B + 1 - (A + 1) = B - A := by omega
-    rw [hlen]
-    rfl
-
-  have arc_cut_error685 (A B n : ℕ) (hn : n ≤ B) (δ : ℝ)
-      (hδ : 0 < δ) (hhalf : δ ≤ 1 / 2) :
-      ‖(∫ α in (-δ)..δ,
-        (∑ p ∈ Ioc A B, LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α)) ^ 2 * LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α)) - (n : ℂ)‖ ≤
-          2 * A + 1 + 1 / (2 * δ) := by
-    let f : ℝ → ℂ := fun α =>
-      (∑ p ∈ Ioc A B, LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α)) ^ 2 * LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α)
-    have hcont : Continuous f := by dsimp [f]; unfold LeanLab.Perelli1996.Kernel.e; fun_prop
-    have hnorm (α : ℝ) : ‖f α‖ = ‖LeanLab.Perelli1996.Kernel.T (A + 1) (B - A) α‖ ^ 2 := by
-      dsimp [f]
-      rw [kernel_form685, norm_mul, norm_pow]
-      simp [LeanLab.Perelli1996.Kernel.e, Complex.norm_exp]
-    have h12 := intervalIntegral.integral_add_adjacent_intervals (μ := MeasureTheory.volume)
-      (hcont.intervalIntegrable (-1 / 2) (-δ)) (hcont.intervalIntegrable (-δ) δ)
-    have h23 := intervalIntegral.integral_add_adjacent_intervals (μ := MeasureTheory.volume)
-      (hcont.intervalIntegrable (-1 / 2) δ) (hcont.intervalIntegrable δ (1 / 2))
-    let K : ℕ := n - A - 1 - A
-    have hs : ((∫ α in (-1 / 2 : ℝ)..(-δ), f α) + ∫ α in (-δ)..δ, f α) +
-        (∫ α in δ..(1 / 2 : ℝ), f α) = (K : ℂ) := by
-      rw [h12, h23]
-      exact coefficient_cut685 A B n hn
-    have heq : (∫ α in (-δ)..δ, f α) - (n : ℂ) =
-        ((K : ℂ) - n) - ((∫ α in (-1 / 2 : ℝ)..(-δ), f α) + ∫ α in δ..(1 / 2 : ℝ), f α) := by
-      linear_combination hs
-    have hK : K ≤ n := by dsimp [K]; omega
-    have hKn : n - K ≤ 2 * A + 1 := by dsimp [K]; omega
-    have hkd : ‖(K : ℂ) - n‖ ≤ (2 * A + 1 : ℝ) := by
-      rw [norm_sub_rev, ← Nat.cast_sub hK, Complex.norm_natCast]
-      exact_mod_cast hKn
-    have hl := intervalIntegral.norm_integral_le_integral_norm
-      (f := f) (μ := MeasureTheory.volume) (by linarith : (-1 / 2 : ℝ) ≤ -δ)
-    have hr := intervalIntegral.norm_integral_le_integral_norm
-      (f := f) (μ := MeasureTheory.volume) hhalf
-    simp_rw [hnorm] at hl hr
-    have htail := LeanLab.Perelli1996.Kernel.integral_norm_T_sq_two_tails (A + 1) (B - A) hδ hhalf
-    change ‖(∫ α in (-δ)..δ, f α) - (n : ℂ)‖ ≤ _
-    rw [heq]
-    calc
-      _ ≤ ‖(K : ℂ) - n‖ + ‖(∫ α in (-1 / 2 : ℝ)..(-δ), f α) +
-          ∫ α in δ..(1 / 2 : ℝ), f α‖ := norm_sub_le _ _
-      _ ≤ (2 * A + 1 : ℝ) + (‖∫ α in (-1 / 2 : ℝ)..(-δ), f α‖ +
-          ‖∫ α in δ..(1 / 2 : ℝ), f α‖) := by
-        have hnormadd := norm_add_le (∫ α in (-1 / 2 : ℝ)..(-δ), f α)
-          (∫ α in δ..(1 / 2 : ℝ), f α)
-        linarith
-      _ ≤ (2 * A + 1 : ℝ) + ((∫ α in (-1 / 2 : ℝ)..(-δ), ‖LeanLab.Perelli1996.Kernel.T (A + 1) (B - A) α‖ ^ 2) +
-          ∫ α in δ..(1 / 2 : ℝ), ‖LeanLab.Perelli1996.Kernel.T (A + 1) (B - A) α‖ ^ 2) := by linarith
-      _ ≤ _ := by linarith
-  refine ⟨4, by norm_num, fun δ hδ hδ' => ⟨16, fun X hX q hq _ n _ hnX => ?_⟩⟩
-  have hephase (α : ℝ) (p : ℕ) : eC (α * p) = LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α) := by
-    unfold eC LeanLab.Perelli1996.Kernel.e
-    congr 1
-    push_cast
-    ring
-  have hefreq (α : ℝ) : eC (-(α * n)) = LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α) := by
-    unfold eC LeanLab.Perelli1996.Kernel.e
-    congr 1
-    push_cast
-    ring
-  unfold arcIntegral T
-  simp_rw [hephase, hefreq]
-  let P : ℝ := X ^ (6 * δ)
-  have hXp : 0 < X := by linarith
-  have hX1 : 1 ≤ X := by linarith
-  have hP : 1 ≤ P := Real.one_le_rpow hX1 (by positivity)
-  have hPp : 0 < P := by linarith
-  have hPX : P ^ 2 ≤ X := by
-    dsimp [P]
-    rw [← Real.rpow_mul_natCast hXp.le]
-    calc
-      _ ≤ X ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le hX1 (by norm_num; linarith)
-      _ = X := Real.rpow_one X
-  have h4P : 4 * P ≤ X := by by_cases h : P ≤ 4 <;> nlinarith
-  have hqR : (1 : ℝ) ≤ q := by exact_mod_cast hq
-  have hqp : (0 : ℝ) < q := by linarith
-  have hd : 0 < P / ((q : ℝ) * X) := by positivity
-  have hhalf : P / ((q : ℝ) * X) ≤ 1 / 2 := by
-    rw [div_le_iff₀ (by positivity)]
-    nlinarith
-  have hnB : n ≤ ⌊X⌋₊ := Nat.le_floor hnX
-  have hb := arc_cut_error685 ⌊P⌋₊ ⌊X⌋₊ n hnB (P / ((q : ℝ) * X)) hd hhalf
-  have hPi : (⌊P⌋₊ : ℝ) ≤ P := Nat.floor_le hPp.le
-  have hPQ : P ≤ X / P := (le_div_iff₀ hPp).mpr (by nlinarith [hPX])
-  have hQ : 1 ≤ X / P := hP.trans hPQ
-  have hqQ : X / P ≤ (q : ℝ) * (X / P) := by nlinarith
-  have he : 1 / (2 * (P / ((q : ℝ) * X))) = (q : ℝ) * (X / P) / 2 := by field_simp
-  change ‖(∫ α in (-(P / ((q : ℝ) * X)))..(P / ((q : ℝ) * X)),
-      (∑ p ∈ Ioc ⌊P⌋₊ ⌊X⌋₊, LeanLab.Perelli1996.Kernel.e ((p : ℝ) * α)) ^ 2 *
-        LeanLab.Perelli1996.Kernel.e (-(n : ℝ) * α)) - (n : ℂ)‖ ≤ _
-  apply hb.trans
-  rw [he]
-  nlinarith
+  refine ⟨4, by norm_num, ?_⟩
+  intro δ hδ hδ1
+  refine ⟨32, ?_⟩
+  intro X hX q hq _ n hn1 hnX
+  set P := X ^ (6 * δ) with hPdef
+  set κ := P / (q * X) with hκdef
+  set F : ℝ → ℂ := fun η => T P X η ^ 2 * eC (-(η * (n : ℝ))) with hFdef
+  have hX0 : (0 : ℝ) < X := by linarith
+  have hX1 : (1 : ℝ) ≤ X := by linarith
+  have hP0 : (0 : ℝ) < P := Real.rpow_pos_of_pos hX0 _
+  have hq0 : (0 : ℝ) < (q : ℝ) := by exact_mod_cast hq
+  have hq1 : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq
+  have hqX : (0 : ℝ) < (q : ℝ) * X := mul_pos hq0 hX0
+  have hδ6 : 6 * δ ≤ 1 / 2 := by linarith
+  have hδ12 : 12 * δ ≤ 1 / 2 := by linarith
+  have hroot : X ^ (1 / 2 : ℝ) ≤ X / 5 := by
+    rw [← Real.sqrt_eq_rpow]
+    have h5 : (5 : ℝ) ≤ Real.sqrt X := by
+      have h25 : Real.sqrt 25 = 5 := by
+        have h : Real.sqrt 25 ^ 2 = 25 := Real.sq_sqrt (by norm_num)
+        have h0 : (0:ℝ) ≤ Real.sqrt 25 := Real.sqrt_nonneg 25
+        nlinarith
+      rw [← h25]
+      exact Real.sqrt_le_sqrt (by linarith)
+    have hs : Real.sqrt X ^ 2 = X := Real.sq_sqrt hX0.le
+    have ht : (0 : ℝ) ≤ Real.sqrt X := Real.sqrt_nonneg X
+    have hprod : 0 ≤ (Real.sqrt X - 5) * Real.sqrt X :=
+      mul_nonneg (by linarith) ht
+    nlinarith [hs, ht, hprod]
+  have hP5 : P ≤ X / 5 :=
+    le_trans (Real.rpow_le_rpow_of_exponent_le hX1 hδ6) hroot
+  have hP52 : P ^ 2 ≤ X / 5 := by
+    have hsq : P ^ 2 = X ^ (12 * δ) := by
+      rw [hPdef, ← Real.rpow_natCast, ← Real.rpow_mul hX0.le]
+      congr 1
+      ring
+    rw [hsq]
+    exact le_trans (Real.rpow_le_rpow_of_exponent_le hX1 hδ12) hroot
+  have hPXle : P ^ 2 + P ≤ (q : ℝ) * X := by
+    nlinarith [hP5, hP52, hX0, hq1]
+  have hκ0 : 0 < κ := by
+    rw [hκdef]
+    positivity
+  have hκ1 : κ ≤ 1 / 2 := by
+    rw [hκdef, div_le_iff₀ hqX]
+    nlinarith [hP5, hq1, hX0]
+  have hκle : κ ≤ 1 - κ := by linarith
+  -- the two halves of the period
+  have hcontF : Continuous F := by
+    rw [hFdef]
+    exact (Continuous.mul
+      ((by
+        have hc : Continuous fun η : ℝ => T P X η := by
+          simp only [T]
+          exact continuous_finsetSum _ (fun m _ => continuous_eC_mul ((m : ℝ)))
+        exact hc.pow 2) :
+        Continuous fun η : ℝ => T P X η ^ 2)
+      (by
+        have hc : Continuous fun η : ℝ => eC (-(η * (n : ℝ))) := by
+          apply continuous_eC.comp
+          fun_prop
+        exact hc))
+  have hper : Function.Periodic F 1 := fun t => by
+    rw [hFdef]
+    exact F_add_one P X n t
+  have hshift : (∫ η in (-κ)..(1 - κ), F η) = ∫ η in (0 : ℝ)..1, F η := by
+    have h := hper.intervalIntegral_add_eq (-κ) 0
+    simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using h
+  have hsplit : (∫ η in (-κ)..(1 - κ), F η) = (∫ η in (-κ)..κ, F η) + ∫ η in κ..(1 - κ), F η := by
+    rw [← intervalIntegral.integral_add_adjacent_intervals (hcontF.intervalIntegrable _ _)
+      (hcontF.intervalIntegrable _ _)]
+  have hnfloor : n ≤ ⌊X⌋₊ := Nat.le_floor hnX
+  have haB : ⌊P⌋₊ ≤ ⌊X⌋₊ := Nat.floor_mono (by linarith)
+  have hone : (∫ η in (0 : ℝ)..1, F η) = (((Ioc ⌊P⌋₊ (n - 1 - ⌊P⌋₊)).card : ℕ) : ℂ) := by
+    rw [hFdef]
+    exact integral_one_period P X n hnfloor
+  have hdecomp : (∫ η in (-κ)..κ, F η) =
+      (((Ioc ⌊P⌋₊ (n - 1 - ⌊P⌋₊)).card : ℕ) : ℂ) - ∫ η in κ..(1 - κ), F η := by
+    rw [hone] at hshift
+    linear_combination hshift - hsplit
+  have harc : arcIntegral P X q n = ∫ η in (-κ)..κ, F η := by
+    simp only [hFdef, hκdef, arcIntegral]
+  rw [harc, hdecomp]
+  have hrearr : (((((Ioc ⌊P⌋₊ (n - 1 - ⌊P⌋₊)).card : ℕ) : ℂ) - ∫ η in κ..(1 - κ), F η) - (n : ℂ)) =
+      ((((Ioc ⌊P⌋₊ (n - 1 - ⌊P⌋₊)).card : ℕ) : ℂ) - (n : ℂ)) - ∫ η in κ..(1 - κ), F η := by ring
+  rw [hrearr]
+  refine (norm_sub_le _ _).trans ?_
+  have h1 : ‖(((Ioc ⌊P⌋₊ (n - 1 - ⌊P⌋₊)).card : ℕ) : ℂ) - (n : ℂ)‖ ≤ 2 * (⌊P⌋₊ : ℝ) + 2 :=
+    card_bound ⌊P⌋₊ ⌊X⌋₊ n hnfloor
+  have h2 : ‖∫ η in κ..(1 - κ), F η‖ ≤ 2 / κ := by
+    rw [hFdef]
+    exact norm_integral_T_sq_le P X n κ hκ0 hκ1 haB
+  have hmain2 : 2 * (⌊P⌋₊ : ℝ) + 2 ≤ 2 * ((q : ℝ) * X / P) := by
+    have ha : (⌊P⌋₊ : ℝ) ≤ P := Nat.floor_le hP0.le
+    rw [show (2 : ℝ) * ((q : ℝ) * X / P) = (2 * ((q : ℝ) * X)) / P by ring, le_div_iff₀ hP0]
+    nlinarith [ha, hPXle, hP0]
+  have hkappa : 2 / κ = 2 * ((q : ℝ) * X / P) := by
+    rw [hκdef]
+    field_simp
+  have hfinal : 2 * (⌊P⌋₊ : ℝ) + 2 + 2 / κ ≤ 4 * (q : ℝ) * (X / P) := by
+    rw [hkappa]
+    have heq : 2 * ((q : ℝ) * X / P) + 2 * ((q : ℝ) * X / P) = 4 * (q : ℝ) * (X / P) := by ring
+    linarith [hmain2, heq.le, heq.ge]
+  linarith [h1, h2, hfinal]
 
 /-- LEAF: P0015 display (6.13), page 363, class MEDIUM.
 By (5.2), `Q Σ_{q≤P} μ(q)² φ(q)⁻² |c_q(n)| q ≪ Q n φ(n)⁻¹ d(n) log P ≪ X^{1+δ} P⁻¹`, with
@@ -334,98 +715,7 @@ theorem mv_truncation_613 : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ → δ <
     ∃ X₀ : ℝ, ∀ X : ℝ, X₀ ≤ X → ∀ n : ℕ, 1 ≤ n → (n : ℝ) ≤ X →
       (X / X ^ (6 * δ)) * ∑ q ∈ Icc 1 ⌊X ^ (6 * δ)⌋₊, ‖mainWeight q n‖ * q ≤
         C * (X ^ (1 + δ) / X ^ (6 * δ)) := by
-  have weighted_identity (a : ℕ → ℝ) (L : ℕ) :
-      (∑ q ∈ Icc 1 L, (q : ℝ) * a q) = ∑ r ∈ Icc 1 L, ∑ q ∈ Icc r L, a q := by
-    induction L with
-    | zero => simp
-    | succ L ih =>
-      have inner : (∑ r ∈ Icc 1 L, ∑ q ∈ Icc r (L + 1), a q) =
-          (∑ r ∈ Icc 1 L, ∑ q ∈ Icc r L, a q) + (L : ℝ) * a (L + 1) := by
-        calc
-          _ = ∑ r ∈ Icc 1 L, ((∑ q ∈ Icc r L, a q) + a (L + 1)) := by
-            apply Finset.sum_congr rfl
-            intro r hr
-            rw [Finset.sum_Icc_succ_top (by have := (Finset.mem_Icc.mp hr).2; omega)]
-          _ = _ := by simp [Finset.sum_add_distrib]
-      rw [Finset.sum_Icc_succ_top (by omega : 1 ≤ L + 1),
-        Finset.sum_Icc_succ_top (by omega : 1 ≤ L + 1), inner, ih]
-      simp
-      ring
-  obtain ⟨K, hK, ht⟩ := LeanLab.Perelli1996.InverseTotient320.inverse_totient_sq_tail
-  refine ⟨2 * K, by positivity, fun δ hδ hδhi => ?_⟩
-  have he : (0 : ℝ) < δ / 2 := by positivity
-  obtain ⟨X₀, hweight⟩ := LeanLab.ExceptionalSet.Task685.divisor_weight_eventually (δ / 2) he
-  obtain ⟨X₁, hloglim⟩ := eventually_atTop.mp
-    ((isLittleO_log_rpow_atTop he).bound (by norm_num : (0 : ℝ) < 1 / 2))
-  obtain ⟨X₂, hpowlim⟩ := eventually_atTop.mp
-    ((tendsto_rpow_atTop he).eventually_ge_atTop (2 : ℝ))
-  refine ⟨max 2 (max X₀ (max X₁ X₂)), fun X hX n hn hnX => ?_⟩
-  obtain ⟨hX2, hXrest⟩ := max_le_iff.mp hX
-  obtain ⟨hX0, hXrest⟩ := max_le_iff.mp hXrest
-  obtain ⟨hX1, hXpow⟩ := max_le_iff.mp hXrest
-  have hXp : 0 < X := by linarith
-  have hXone : 1 ≤ X := by linarith
-  have hlogX : 0 ≤ Real.log X := Real.log_nonneg hXone
-  have hXe : 0 ≤ X ^ (δ / 2) := by positivity
-  have hl : Real.log X ≤ (1 / 2 : ℝ) * X ^ (δ / 2) := by
-    simpa only [Real.norm_eq_abs, abs_of_nonneg hlogX, abs_of_nonneg hXe] using hloglim X hX1
-  have hp2 : 2 ≤ X ^ (δ / 2) := hpowlim X hXpow
-  let P : ℝ := X ^ (6 * δ)
-  have hP1 : 1 ≤ P := Real.one_le_rpow hXone (by positivity)
-  have hP : 0 < P := by linarith
-  have hlogP : Real.log P ≤ Real.log X := by
-    dsimp [P]
-    rw [Real.log_rpow hXp]
-    nlinarith
-  have hlogbound : 1 + Real.log P ≤ X ^ (δ / 2) := by linarith
-  have hwgt := hweight X hX0 n hn hnX
-  have hw0 : 0 ≤ (n : ℝ) * n.divisors.card / n.totient := by positivity
-  have hpart (r : ℕ) (hr : r ∈ Icc 1 ⌊P⌋₊) :
-      (∑ q ∈ Icc r ⌊P⌋₊, ‖mainWeight q n‖) ≤
-        2 * K * ((n : ℝ) * n.divisors.card / n.totient) / r := by
-    have hr1 : 1 ≤ r := (Finset.mem_Icc.mp hr).1
-    have hrp : (0 : ℝ) < r := by exact_mod_cast hr1
-    have hqp (q : ℕ) (hq : q ∈ Icc r ⌊P⌋₊) : 0 < q ∧ (r : ℝ) / 2 < q := by
-      have hrq : (r : ℝ) ≤ q := by exact_mod_cast (Finset.mem_Icc.mp hq).1
-      have hq0 : (0 : ℝ) < q := hrp.trans_le hrq
-      exact ⟨by exact_mod_cast hq0, by linarith⟩
-    calc
-      _ ≤ ∑ q ∈ Icc r ⌊P⌋₊, 1 / ((q.totient : ℝ) * (q / Nat.gcd q n).totient) := by
-        apply Finset.sum_le_sum
-        intro q hq
-        rw [mainWeight_eq_coefficient685]
-        exact LeanLab.Perelli1996.Ramanujan400.norm_weighted_ramanujanSum_le q n (hqp q hq).1
-      _ ≤ K / ((r : ℝ) / 2) * ((n : ℝ) * n.divisors.card / n.totient) :=
-        LeanLab.Perelli1996.Tail320.finite_totient_tail n (by omega) _ K (by positivity) ht _ hqp
-      _ = _ := by ring
-  have hh : (∑ r ∈ Icc 1 ⌊P⌋₊, 1 / (r : ℝ)) ≤ 1 + Real.log P := by
-    simpa only [harmonic_eq_sum_Icc, Rat.cast_sum, Rat.cast_inv, Rat.cast_natCast, one_div] using
-      harmonic_floor_le_one_add_log P hP1
-  have hsum : (∑ q ∈ Icc 1 ⌊P⌋₊, ‖mainWeight q n‖ * q) ≤ 2 * K * X ^ δ := by
-    calc
-      _ = ∑ r ∈ Icc 1 ⌊P⌋₊, ∑ q ∈ Icc r ⌊P⌋₊, ‖mainWeight q n‖ := by
-        rw [← weighted_identity]
-        apply Finset.sum_congr rfl
-        intro q _
-        ring
-      _ ≤ ∑ r ∈ Icc 1 ⌊P⌋₊, 2 * K * ((n : ℝ) * n.divisors.card / n.totient) / r :=
-        Finset.sum_le_sum hpart
-      _ = (2 * K * ((n : ℝ) * n.divisors.card / n.totient)) *
-          (∑ r ∈ Icc 1 ⌊P⌋₊, 1 / (r : ℝ)) := by
-        rw [Finset.mul_sum]
-        apply Finset.sum_congr rfl
-        intro r _
-        ring
-      _ ≤ (2 * K * ((n : ℝ) * n.divisors.card / n.totient)) * (1 + Real.log P) :=
-        mul_le_mul_of_nonneg_left hh (by positivity)
-      _ = 2 * K * (((n : ℝ) * n.divisors.card / n.totient) * (1 + Real.log P)) := by ring
-      _ ≤ 2 * K * (X ^ (δ / 2) * X ^ (δ / 2)) := by
-        apply mul_le_mul_of_nonneg_left _ (by positivity)
-        exact mul_le_mul hwgt hlogbound (by linarith [Real.log_nonneg hP1]) hXe
-      _ = 2 * K * X ^ δ := by rw [← Real.rpow_add hXp]; congr 2; ring
-  calc
-    _ ≤ (X / P) * (2 * K * X ^ δ) := mul_le_mul_of_nonneg_left hsum (by positivity)
-    _ = 2 * K * (X ^ (1 + δ) / P) := by rw [Real.rpow_add hXp, Real.rpow_one]; ring
+  sorry
 
 /-- LEAF: P0015 display (6.16), page 363, class MEDIUM.
 `𝔖(n) = Σ_{q≥1} μ(q)² φ(q)⁻² c_q(-n) = ∏_{p∤n} (1 - (p-1)⁻²) ∏_{p∣n} (1 + (p-1)⁻¹)`, by (5.2);
@@ -433,13 +723,7 @@ the series converges absolutely. The `q = 0` term is zero since `μ(0) = 0`. -/
 theorem mv_singular_series_616 (n : ℕ) (hn : 1 ≤ n) :
     Summable (fun q : ℕ => ‖mainWeight q n‖) ∧
       HasSum (fun q : ℕ => mainWeight q n) ((singularSeries n : ℝ) : ℂ) := by
-  have hs : singularSeries n = LeanLab.Perelli1996.Sing n := by
-    rfl
-  simp_rw [mainWeight_eq_coefficient685]
-  have hnorm := LeanLab.Perelli1996.Series320.summable_norm_coefficient n (by omega)
-  refine ⟨hnorm, ?_⟩
-  rw [hs, ← LeanLab.Perelli1996.Series320.tsum_coefficient n (by omega)]
-  exact hnorm.of_norm.hasSum
+  sorry
 
 /-- LEAF: P0015 display (6.14), page 363, class MEDIUM.
 Extending the main term to all `q ≥ 1` costs
@@ -448,40 +732,7 @@ theorem mv_tail_614 : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ → δ < 1 / 1
     ∃ X₀ : ℝ, ∀ X : ℝ, X₀ ≤ X → ∀ n : ℕ, 1 ≤ n → (n : ℝ) ≤ X →
       (n : ℝ) * ∑' q : ℕ, (if X ^ (6 * δ) < (q : ℝ) then ‖mainWeight q n‖ else 0) ≤
         C * (X ^ (1 + δ) / X ^ (6 * δ)) := by
-  obtain ⟨K, hK, ht⟩ := LeanLab.Perelli1996.InverseTotient320.inverse_totient_sq_tail
-  refine ⟨K, hK, fun δ hδ _ => ?_⟩
-  obtain ⟨X₀, hweight⟩ := LeanLab.ExceptionalSet.Task685.divisor_weight_eventually δ hδ
-  refine ⟨max X₀ 1, fun X hX n hn hnX => ?_⟩
-  have hX1 : 1 ≤ X := (le_max_right _ _).trans hX
-  have hXp : 0 < X := by linarith
-  have hP : 0 < X ^ (6 * δ) := Real.rpow_pos_of_pos hXp _
-  have hwgt := hweight X ((le_max_left _ _).trans hX) n hn hnX
-  have htail : (∑' q : ℕ, if X ^ (6 * δ) < (q : ℝ) then ‖mainWeight q n‖ else 0) ≤
-      K / X ^ (6 * δ) * ((n : ℝ) * n.divisors.card / n.totient) := by
-    apply Real.tsum_le_of_sum_le (fun q => by split_ifs <;> positivity)
-    intro s
-    rw [← Finset.sum_filter]
-    have hqpos (q : ℕ) (hq : q ∈ s.filter (fun q : ℕ => X ^ (6 * δ) < (q : ℝ))) : 0 < q := by
-      have hqR : (0 : ℝ) < q := hP.trans (Finset.mem_filter.mp hq).2
-      exact_mod_cast hqR
-    calc
-      _ ≤ ∑ q ∈ s.filter (fun q : ℕ => X ^ (6 * δ) < (q : ℝ)),
-          1 / ((q.totient : ℝ) * (q / Nat.gcd q n).totient) := by
-        apply Finset.sum_le_sum
-        intro q hq
-        rw [mainWeight_eq_coefficient685]
-        exact LeanLab.Perelli1996.Ramanujan400.norm_weighted_ramanujanSum_le q n (hqpos q hq)
-      _ ≤ _ := LeanLab.Perelli1996.Tail320.finite_totient_tail n (by omega) (X ^ (6 * δ)) K hP ht _
-        (fun q hq => ⟨hqpos q hq, (Finset.mem_filter.mp hq).2⟩)
-  calc
-    _ ≤ (n : ℝ) * (K / X ^ (6 * δ) * ((n : ℝ) * n.divisors.card / n.totient)) :=
-      mul_le_mul_of_nonneg_left htail (Nat.cast_nonneg n)
-    _ ≤ X * (K / X ^ (6 * δ) * X ^ δ) :=
-      mul_le_mul hnX (mul_le_mul_of_nonneg_left hwgt (by positivity))
-        (by positivity) (by positivity)
-    _ = K * (X ^ (1 + δ) / X ^ (6 * δ)) := by
-      rw [Real.rpow_add hXp, Real.rpow_one]
-      ring
+  sorry
 
 /-- LEAF: P0015 page 366, the first display of section 7, from Lemma 4.2 (Gallagher's Lemma 1),
 class MEDIUM. With `κ = 1/(rQ)`,
@@ -493,176 +744,7 @@ theorem mv_gallagher_lemma42_step : ∃ C : ℝ, 0 < C ∧ ∀ δ : ℝ, 0 < δ 
         (∀ x h : ℝ, 0 ≤ x → x ≤ 2 * X → 0 < h → h ≤ X →
           ‖sharpSum (X ^ (6 * δ)) X χ x h‖ ≤ M * (h + X / X ^ (6 * δ))) →
         Wnorm (X ^ (6 * δ)) X χ ≤ C * Real.sqrt X * M := by
-  classical
-  have sum_form685 {r : ℕ} (P X η : ℝ) (χ : DirichletCharacter ℂ r) :
-    Wchi P X χ η = ∑ n ∈ Ioc ⌊P⌋₊ ⌊X⌋₊,
-      ((if Nat.Prime n then (Real.log n : ℂ) * χ (n : ZMod r) else 0) -
-        if χ = 1 then 1 else 0) * eC (η * n) := by
-    classical
-    by_cases hχ : χ = 1
-    all_goals simp [Wchi, Schi, T, hχ, Finset.sum_sub_distrib, Finset.sum_filter,
-      sub_mul, ite_mul]
-
-  have window_form685 {r : ℕ} (P X : ℝ) (χ : DirichletCharacter ℂ r) (m L : ℕ) :
-    LeanLab.PNTPort.Gallagher.win (fun n => if n ∈ Ioc ⌊P⌋₊ ⌊X⌋₊ then
-      ((if Nat.Prime n then (Real.log n : ℂ) * χ (n : ZMod r) else 0) -
-        if χ = 1 then 1 else 0) else 0) (⌊X⌋₊ + 1) L m =
-      sharpSum P X χ (m : ℝ) L := by
-    classical
-    unfold LeanLab.PNTPort.Gallagher.win sharpSum
-    rw [Finset.sum_filter, Finset.sum_filter]
-    have hsub : Ioc ⌊P⌋₊ ⌊X⌋₊ ⊆ range (⌊X⌋₊ + 1) := by
-      intro n hn
-      simp only [mem_Ioc] at hn
-      simp only [mem_range]
-      omega
-    calc
-      _ = ∑ n ∈ Ioc ⌊P⌋₊ ⌊X⌋₊,
-          if n ≤ m ∧ m < n + L then
-            (if n ∈ Ioc ⌊P⌋₊ ⌊X⌋₊ then
-              ((if Nat.Prime n then (Real.log n : ℂ) * χ (n : ZMod r) else 0) -
-                if χ = 1 then 1 else 0) else 0) else 0 := by
-        exact (Finset.sum_subset hsub (by intro n hn hn'; simp [hn'])).symm
-      _ = _ := by
-        apply Finset.sum_congr rfl
-        intro n hn
-        simp only [hn, ite_true]
-        congr 1
-        apply propext
-        constructor
-        · intro h
-          constructor
-          · exact_mod_cast (show (m : ℤ) - L < n by omega)
-          · exact_mod_cast h.1
-        · intro h
-          have h₁ : (n : ℝ) + L > m := by linarith [h.1]
-          constructor
-          · exact_mod_cast h.2
-          · exact_mod_cast h₁
-
-  have wnorm_generic685 {r : ℕ} (P X M : ℝ) (χ : DirichletCharacter ℂ r)
-      (hX : 16 ≤ X) (hP : 1 ≤ P) (hPX : P ^ 2 ≤ X) (hr : 1 ≤ r)
-      (hsharp : ∀ x h : ℝ, 0 ≤ x → x ≤ 2 * X → 0 < h → h ≤ X →
-        ‖sharpSum P X χ x h‖ ≤ M * (h + X / P)) :
-      Wnorm P X χ ≤ 10 * Real.pi * Real.sqrt X * M := by
-    classical
-    have hXp : 0 < X := by linarith
-    have hPp : 0 < P := by linarith
-    have h4P : 4 * P ≤ X := by
-      by_cases h : P ≤ 4
-      · nlinarith
-      · nlinarith
-    let L : ℕ := ⌊X / (2 * P)⌋₊
-    have hratio : 2 ≤ X / (2 * P) := by rw [le_div_iff₀ (by positivity)]; linarith
-    have hLp : 0 < L := Nat.floor_pos.mpr (by linarith)
-    have hL1 : (1 : ℝ) ≤ L := by exact_mod_cast hLp
-    have hLle : (L : ℝ) ≤ X / (2 * P) := Nat.floor_le (by positivity)
-    have hLlt : X / (2 * P) < (L : ℝ) + 1 := Nat.lt_floor_add_one _
-    have hLlow : X / P ≤ 4 * L := by
-      have : X / P = 2 * (X / (2 * P)) := by field_simp
-      rw [this]
-      linarith
-    have hLX : (L : ℝ) ≤ X := by
-      apply hLle.trans
-      rw [div_le_iff₀ (by positivity)]
-      nlinarith
-    have hM : 0 ≤ M := by
-      have h := hsharp 0 1 (by norm_num) (by linarith) (by norm_num) (by linarith)
-      have hd : 0 < 1 + X / P := by positivity
-      nlinarith [norm_nonneg (sharpSum P X χ 0 1)]
-    let a : ℕ → ℂ := fun n => if n ∈ Ioc ⌊P⌋₊ ⌊X⌋₊ then
-      ((if Nat.Prime n then (Real.log n : ℂ) * χ (n : ZMod r) else 0) -
-        if χ = 1 then 1 else 0) else 0
-    let N : ℕ := ⌊X⌋₊ + 1
-    have hsum (η : ℝ) : Wchi P X χ η =
-        ∑ n ∈ range N, a n * LeanLab.PNTPort.LargeSieve.e (n * η) := by
-      rw [sum_form685]
-      have he (n : ℕ) : eC (η * n) = LeanLab.PNTPort.LargeSieve.e (n * η) := by
-        unfold eC LeanLab.PNTPort.LargeSieve.e
-        congr 1
-        push_cast
-        ring
-      simp_rw [he]
-      have hsub : Ioc ⌊P⌋₊ ⌊X⌋₊ ⊆ range N := by
-        intro n hn
-        simp only [mem_Ioc] at hn
-        simp only [mem_range, N]
-        omega
-      calc
-        _ = ∑ n ∈ Ioc ⌊P⌋₊ ⌊X⌋₊, a n * LeanLab.PNTPort.LargeSieve.e (n * η) := by
-          apply Finset.sum_congr rfl
-          intro n hn
-          simp only [a, if_pos hn]
-        _ = _ := Finset.sum_subset hsub (by intro n hn hn'; simp only [a, if_neg hn', zero_mul])
-    have hcount : ((N + L : ℕ) : ℝ) ≤ 3 * X := by
-      have hf := Nat.floor_le hXp.le
-      dsimp [N]
-      push_cast
-      linarith
-    have hwin (m : ℕ) (hm : m ∈ range (N + L)) : ‖LeanLab.PNTPort.Gallagher.win a N L m‖ ≤ 5 * L * M := by
-      have hmN : m ≤ ⌊X⌋₊ + L := by simp only [mem_range, N] at hm; omega
-      have hmx : (m : ℝ) ≤ 2 * X := by
-        have hmR : (m : ℝ) ≤ (⌊X⌋₊ : ℝ) + L := by exact_mod_cast hmN
-        have hf := Nat.floor_le hXp.le
-        linarith
-      have hw : LeanLab.PNTPort.Gallagher.win a N L m = sharpSum P X χ m L := window_form685 P X χ m L
-      rw [hw]
-      calc
-        _ ≤ M * ((L : ℝ) + X / P) := hsharp m L (Nat.cast_nonneg _) hmx (by exact_mod_cast hLp) hLX
-        _ ≤ 5 * L * M := by nlinarith
-    have hsumBound : ∑ m ∈ range (N + L), ‖LeanLab.PNTPort.Gallagher.win a N L m‖ ^ 2 ≤
-        (N + L : ℕ) * (5 * (L : ℝ) * M) ^ 2 := by
-      calc
-        _ ≤ ∑ _m ∈ range (N + L), (5 * (L : ℝ) * M) ^ 2 :=
-          Finset.sum_le_sum (fun m hm => pow_le_pow_left₀ (norm_nonneg _) (hwin m hm) 2)
-        _ = _ := by simp
-    have hb : P / X ≤ 1 / (2 * L) := by
-      rw [div_le_div_iff₀ hXp (by positivity)]
-      have hh := (le_div_iff₀ (show 0 < 2 * P by positivity)).mp hLle
-      nlinarith
-    have ha : 0 ≤ P / ((r : ℝ) * X) := by positivity
-    have hrR : (1 : ℝ) ≤ r := by exact_mod_cast hr
-    have hab : P / ((r : ℝ) * X) ≤ 1 / (2 * L) := by
-      apply le_trans _ hb
-      apply div_le_div_of_nonneg_left hPp.le hXp
-      nlinarith
-    have hc : Continuous (fun η : ℝ => ‖Wchi P X χ η‖ ^ 2) := by
-      simp_rw [hsum]
-      unfold LeanLab.PNTPort.LargeSieve.e
-      fun_prop
-    have hg := LeanLab.PNTPort.Gallagher.gallagher a N L hLp
-    simp_rw [← hsum] at hg
-    have hi : (∫ η in (-(P / ((r : ℝ) * X)))..(P / ((r : ℝ) * X)), ‖Wchi P X χ η‖ ^ 2) ≤
-        (Real.pi / (2 * L)) ^ 2 * ((N + L : ℕ) : ℝ) * (5 * (L : ℝ) * M) ^ 2 := by
-      calc
-        _ ≤ ∫ η in (-(1 / (2 * L) : ℝ))..(1 / (2 * L)), ‖Wchi P X χ η‖ ^ 2 :=
-          intervalIntegral.integral_mono_interval (neg_le_neg hab) (by linarith) hab
-            (Filter.Eventually.of_forall (fun _ => sq_nonneg _)) (hc.intervalIntegrable _ _)
-        _ ≤ _ := hg.trans (by nlinarith [mul_le_mul_of_nonneg_left hsumBound (sq_nonneg (Real.pi / (2 * L)))])
-    have hbound : (∫ η in (-(P / ((r : ℝ) * X)))..(P / ((r : ℝ) * X)), ‖Wchi P X χ η‖ ^ 2) ≤
-        (10 * Real.pi * Real.sqrt X * M) ^ 2 := by
-      calc
-        _ ≤ _ := hi
-        _ = (25 / 4 : ℝ) * Real.pi ^ 2 * ((N + L : ℕ) : ℝ) * M ^ 2 := by
-          field_simp
-          ring
-        _ ≤ (25 / 4 : ℝ) * Real.pi ^ 2 * (3 * X) * M ^ 2 := by gcongr
-        _ ≤ _ := by
-          rw [mul_pow, mul_pow, mul_pow, Real.sq_sqrt hXp.le]
-          have hz : 0 ≤ Real.pi ^ 2 * X * M ^ 2 := by positivity
-          nlinarith
-    unfold Wnorm
-    exact Real.sqrt_le_iff.mpr ⟨by positivity, hbound⟩
-  refine ⟨10 * Real.pi, by positivity, fun δ hδ hδ' => ⟨16, fun X hX r hr _ χ _ M hM => ?_⟩⟩
-  have hX1 : 1 ≤ X := by linarith
-  have hXp : 0 < X := by linarith
-  have hP : 1 ≤ X ^ (6 * δ) := Real.one_le_rpow hX1 (by positivity)
-  have hPX : (X ^ (6 * δ)) ^ 2 ≤ X := by
-    rw [← Real.rpow_mul_natCast hXp.le]
-    calc
-      _ ≤ X ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le hX1 (by norm_num; linarith)
-      _ = X := Real.rpow_one X
-  exact wnorm_generic685 _ _ _ χ hX hP hPX hr hM
+  sorry
 
 /-- LEAF: P0015 Lemma 4.3, pages 357 and 358, Gallagher 1970 Theorem 7 made effective, applied
 with `N = 2X`, class HARD, a citation wall. For each zero free constant `a > 0` there are
@@ -1071,8 +1153,10 @@ example (hL : Lemma2NoExcSmallDelta) (hS : SingularSeriesEvenLowerBP) : True :=
 
 #print axioms lemma2NoExcSmallDelta_of_BP
 #print axioms leaf_absent_selected_of_small
+#print axioms mv_arc_main_611
 #print axioms mv_617
 #print axioms mv_71
 #print axioms lemma2NoExcSmallDelta_of_leaves
 
 end LeanLab.ExceptionalSet.UpJ200.Lemma2MVSplit
+
