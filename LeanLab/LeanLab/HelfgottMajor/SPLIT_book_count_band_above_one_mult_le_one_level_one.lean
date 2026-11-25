@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le_one
+import LeanLab.HelfgottMajor.Feed1122ZetaAboveFourOne
 
 /-!
 # Split of `book_count_band_above_one_mult_le_one_level_one`
@@ -17,7 +18,7 @@ namespace LeanLab.HelfgottMajor.ZeroCount1623
 open Complex Set Filter Topology
 open scoped ComplexConjugate LSeries.notation
 
-/-- LEAF: simplicity of the zeros of ζ below height 2πe, the published first zero. HARD, a
+/-- Split burst S126 at height `4` in `Feed1122ZetaAboveFourOne`, was a LEAF: simplicity of the zeros of ζ below height 2πe, the published first zero. HARD, a
 certified computation that `ζ'` does not vanish at the zero `1/2 + 14.1347… i`, together with
 the certified count that it is the only zero of ordinate in `(1, 2πe]`.
 CITED: Platt and Trudgian, The Riemann hypothesis is true up to 3·10^12, Bull. LMS 53, 2021,
@@ -27,7 +28,7 @@ analytic order at most one. -/
 theorem zeta_strip_zero_above_one_le_two_pi_e_order_le_one :
     ∀ ρ : ℂ, riemannZeta ρ = 0 → 0 < ρ.re → ρ.re < 1 → 1 < ρ.im →
       ρ.im ≤ 2 * Real.pi * Real.exp 1 → (analyticOrderNatAt riemannZeta ρ : ℝ) ≤ 1 := by
-  sorry
+  exact LeanLab.HelfgottMajor.Feed1122ZetaAboveFourOne.zeta_strip_zero_above_one_le_two_pi_e_order_le_one_split
 
 /-- Bridging, proved: for modulus `1` the multiplicity of a zero of `L(·, χ)` is the analytic
 order of `ζ` there, by `LFunction_modOne_eq`. -/
