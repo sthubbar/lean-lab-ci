@@ -1,4 +1,5 @@
 import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_display16_17_1122
+import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_lemma9_numeric1122
 
 /-!
 A further split of the two HARD leaves `iwaniec_lemma9_circle16_1122` and
@@ -63,8 +64,8 @@ theorem iwaniec_lemma8_circle17_1122 (q : ℕ) (hq : 3 ≤ q) (ψ : DirichletCha
         Real.exp (60 * l ^ (1 / 4 : ℝ))) := by
   sorry
 
-/-- LEAF: Iwaniec 1974 page 102, the closing inequality of the proof of Lemma 9.
-Class: MEDIUM.
+/-- Iwaniec 1974 page 102, the closing inequality of the proof of Lemma 9, proved from the
+split in `SPLIT_iwaniec_lemma9_numeric1122`.
 H. Iwaniec, On zeros of Dirichlet's L series, Invent. Math. 23, 1974, page 102, proof of
 Lemma 9: `η⁻¹ ∏_{p ∣ d} (1 + p^(η-1)) (d^(100η) + exp (60 l^(1/4))) < M` with
 `M = (d^η exp l^(1/4))^100`. A floating point check over all `q < 3000`, the primorials up to
@@ -77,7 +78,39 @@ theorem iwaniec_lemma9_numeric1122 (q : ℕ) (hq : 3 ≤ q) (γ l η M : ℝ)
     η⁻¹ * (∏ p ∈ q.primeFactors, (1 + (p : ℝ) ^ (η - 1))) *
       (((∏ p ∈ q.primeFactors, p : ℕ) : ℝ) ^ (100 * η) + Real.exp (60 * l ^ (1 / 4 : ℝ))) ≤
       M := by
-  sorry
+  have hl2 := iwaniec_l_gt_two1122 q hq γ l hl
+  have hηpos : 0 < η := by
+    rw [hη]
+    have h1 : 0 < Real.sqrt l := Real.sqrt_pos.mpr (by linarith)
+    have h2 : 0 < Real.log (2 * l) := Real.log_pos (by linarith)
+    have h3 : 0 < Real.log (2 * l) ^ (3 / 4 : ℝ) := Real.rpow_pos_of_pos h2 _
+    positivity
+  set D : ℝ := ((∏ p ∈ q.primeFactors, p : ℕ) : ℝ) with hD
+  have hD1 : 1 ≤ D := by
+    rw [hD]
+    have : 0 < ∏ p ∈ q.primeFactors, p :=
+      Finset.prod_pos (fun p hp => (Nat.prime_of_mem_primeFactors hp).pos)
+    exact_mod_cast this
+  set E := Real.exp (60 * l ^ (1 / 4 : ℝ))
+  set P := ∏ p ∈ q.primeFactors, (1 + (p : ℝ) ^ (η - 1))
+  have hDp : 1 ≤ D ^ (100 * η) := Real.one_le_rpow hD1 (by positivity)
+  have hE0 : 0 ≤ E := (Real.exp_pos _).le
+  have hP0 : 0 ≤ P := Finset.prod_nonneg (fun p _ => by positivity)
+  have hP : P ≤ Real.exp (5 + 2 * Real.log l) :=
+    (iwaniec_lemma9_euler_exp1122 q η).trans (Real.exp_le_exp.mpr (iwaniec_lemma9_primesum1122 q hq γ l η hl hη))
+  have hC := iwaniec_lemma9_final1122 q hq γ l η hl hη
+  have hMeq : M = D ^ (100 * η) * Real.exp (100 * l ^ (1 / 4 : ℝ)) := by
+    rw [hM, mul_pow, ← Real.rpow_mul_natCast (by linarith), ← Real.exp_nat_mul]
+    norm_num [mul_comm]
+  rw [hMeq]
+  have hsum : D ^ (100 * η) + E ≤ D ^ (100 * η) * (1 + E) := by nlinarith
+  calc η⁻¹ * P * (D ^ (100 * η) + E)
+      ≤ η⁻¹ * Real.exp (5 + 2 * Real.log l) * (D ^ (100 * η) * (1 + E)) := by
+        apply mul_le_mul _ hsum (by positivity) (by positivity)
+        exact mul_le_mul_of_nonneg_left hP (by positivity)
+    _ = D ^ (100 * η) * (η⁻¹ * Real.exp (5 + 2 * Real.log l) * (1 + E)) := by ring
+    _ ≤ D ^ (100 * η) * Real.exp (100 * l ^ (1 / 4 : ℝ)) :=
+        mul_le_mul_of_nonneg_left hC (by linarith)
 
 /-- Iwaniec 1974 page 102, proof of Lemma 9, the Euler factors: for `Re s > 1 - η`,
 `|L(s, χ)| ≤ |L(s, χ*)| ∏_{p ∣ q} (1 + p^(η-1))`, from Mathlib's `LFunction_changeLevel`. -/
