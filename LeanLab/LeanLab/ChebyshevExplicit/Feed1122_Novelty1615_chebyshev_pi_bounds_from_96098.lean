@@ -1,4 +1,5 @@
 import Mathlib
+import LeanLab.ChebyshevExplicit.Feed1122_Novelty1615_chebyshev_pi_bounds_from_96098_p2_upper
 
 /-!
 # ChebyshevExplicit, feed 1122 split of `chebyshev_pi_bounds_from_96098`
@@ -29,10 +30,15 @@ theorem rs_pi_lt_div_log_mul (n : ℕ) (hn : 2 ≤ n) :
 
 /-- LEAF: the finite check of the upper half on `96098 ≤ n < 3300000`, the range below the point
 where `log n ≥ 15` makes display (3.2) of Rosser and Schoenfeld sufficient. Numerics of unit U-1615:
-the last integer with `π n > 1.10555 n / log n` is 96097. HARD, a large verified computation. -/
+the last integer with `π n > 1.10555 n / log n` is 96097. HARD, a large verified computation.
+PROVED in burst 1122 from the kernel certificates of `..._p2_cert.lean` and `..._p2_upper.lean`. -/
 theorem pi_upper_finite_96098_3300000 (n : ℕ) (h1 : 96098 ≤ n) (h2 : n < 3300000) :
     (Nat.primeCounting n : ℝ) ≤ 1.10555 * n / Real.log n := by
-  sorry
+  have h := P2Cert.pi_upper_mul_96098_3300000 n h1 h2
+  have hn1 : (1 : ℝ) < n := by exact_mod_cast (by omega : 1 < n)
+  have hlog : 0 < Real.log n := Real.log_pos hn1
+  rw [le_div_iff₀ hlog]
+  linarith
 
 /-- PROVED from the leaves: `exp 15 < 3300000`. -/
 private theorem exp15_lt : Real.exp 15 < 3300000 := by
