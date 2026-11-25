@@ -9,8 +9,10 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Teravainen2016.MainInputsRestriction
 import LeanLab.AlmostPrimes.Decomp1528b
+import LeanLab.PNTPort.PsiChi.Final
 
 open Finset
+open Real
 open scoped Classical
 
 namespace LeanLab.Teravainen2016
@@ -500,6 +502,777 @@ private theorem rankin_tail_of_leaves :
 
 
 
+/-- A nonprincipal Dirichlet character mod 4, with its values on the integers. -/
+private theorem chi4_exists :
+    ∃ χ : DirichletCharacter ℂ 4, χ ≠ 1 ∧ χ (3 : ZMod 4) = -1 ∧ χ (2 : ZMod 4) = 0 ∧
+      ∀ n : ℕ, χ (n : ZMod 4) = if n % 4 = 1 then 1 else if n % 4 = 3 then -1 else 0 := by
+  haveI : Fact (1 < 4) := ⟨by norm_num⟩
+  obtain ⟨χ, hχ⟩ := MulChar.exists_apply_ne_one_of_hasEnoughRootsOfUnity
+    (M := ZMod 4) (R := ℂ) (a := (3 : ZMod 4)) (by decide)
+  have hone : (1 : DirichletCharacter ℂ 4) (3 : ZMod 4) = 1 :=
+    MulChar.one_apply ((ZMod.isUnit_iff_coprime 3 4).mpr (by decide))
+  have hne : χ ≠ 1 := fun h => hχ (by rw [h]; exact hone)
+  have hsq : χ (3 : ZMod 4) ^ 2 = 1 := by
+    rw [pow_two, ← map_mul, show (3 : ZMod 4) * 3 = 1 by decide, map_one]
+  have h3 : χ (3 : ZMod 4) = -1 := by
+    rcases sq_eq_one_iff.mp hsq with h | h
+    · exact absurd h hχ
+    · exact h
+  have h2 : ¬ IsUnit (2 : ZMod 4) := by
+    intro h
+    have hc : Nat.Coprime 2 4 := (ZMod.isUnit_iff_coprime 2 4).mp h
+    exact absurd hc (by decide)
+  have v0 : χ (0 : ZMod 4) = 0 := MulChar.map_zero χ
+  have v1 : χ (1 : ZMod 4) = 1 := map_one χ
+  have v2 : χ (2 : ZMod 4) = 0 := MulChar.map_nonunit χ h2
+  refine ⟨χ, hne, h3, v2, ?_⟩
+  intro n
+  have hmod : (n : ZMod 4) = ((n % 4 : ℕ) : ZMod 4) :=
+    (ZMod.natCast_eq_natCast_iff' n (n % 4) 4).mpr (by rw [Nat.mod_mod])
+  rw [hmod]
+  have hlt : n % 4 < 4 := Nat.mod_lt _ (by norm_num)
+  interval_cases h : n % 4
+  · simpa using v0
+  · simpa using v1
+  · simpa using v2
+  · simpa using h3
+
+/-- The Siegel-Walfisz bound for ψ(x, χ) at level 4, made uniform over all x ≥ 2. -/
+private theorem psi_chi4_bound {χ : DirichletCharacter ℂ 4} (hχ : χ ≠ 1) :
+    ∃ c K : ℝ, 0 < c ∧ ∀ x : ℝ, 2 ≤ x →
+      ‖LeanLab.PNTPort.BV.psiChi x χ‖ ≤ K * x * Real.exp (-c * Real.sqrt (Real.log x)) := by
+  haveI : NeZero (4 : ℕ) := ⟨by norm_num⟩
+  obtain ⟨c, K, hc, H⟩ := LeanLab.PNTPort.PsiChi.psiChi_nonprincipal_bound 1 one_pos
+  refine ⟨c, max K (4 * Real.exp (2 * c)), hc, ?_⟩
+  intro x hx
+  have hKle : K ≤ max K (4 * Real.exp (2 * c)) := le_max_left _ _
+  rcases le_or_gt (Real.exp 4) x with hbig | hsmall
+  · have hlog : (4 : ℝ) ≤ Real.log x ^ (1 : ℝ) := by
+      rw [Real.rpow_one]
+      calc (4 : ℝ) = Real.log (Real.exp 4) := (Real.log_exp 4).symm
+        _ ≤ Real.log x := Real.log_le_log (Real.exp_pos 4) hbig
+    have h := H x hx 4 χ hχ hlog
+    refine h.trans ?_
+    apply mul_le_mul_of_nonneg_right _ (le_of_lt (Real.exp_pos _))
+    exact mul_le_mul_of_nonneg_right hKle (by linarith : (0:ℝ) ≤ x)
+  · have hlogx : Real.log x ≤ 4 := by
+      calc Real.log x ≤ Real.log (Real.exp 4) := Real.log_le_log (by linarith) hsmall.le
+        _ = 4 := Real.log_exp 4
+    have hlog0 : 0 ≤ Real.log x := Real.log_nonneg (by linarith)
+    have hsqrt : Real.sqrt (Real.log x) ≤ 2 := by
+      have h := Real.sqrt_le_sqrt hlogx
+      have h4 : Real.sqrt 4 = 2 := by
+        rw [show (4:ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]
+      rwa [h4] at h
+    have hexp : Real.exp (-c * Real.sqrt (Real.log x)) ≥ Real.exp (-(2 * c)) := by
+      apply Real.exp_le_exp.mpr
+      nlinarith [hc]
+    have hpsi : ‖LeanLab.PNTPort.BV.psiChi x χ‖ ≤ 4 * x := by
+      unfold LeanLab.PNTPort.BV.psiChi
+      have h1 : ‖∑ n ∈ Icc 1 ⌊x⌋₊, (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4)‖ ≤
+          ∑ n ∈ Icc 1 ⌊x⌋₊, ArithmeticFunction.vonMangoldt n := by
+        refine (norm_sum_le _ _).trans ?_
+        apply Finset.sum_le_sum
+        intro n _
+        rw [norm_mul, Complex.norm_real, Real.norm_eq_abs,
+          abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg]
+        have hχ1 := DirichletCharacter.norm_le_one χ (n : ZMod 4)
+        have hΛ := ArithmeticFunction.vonMangoldt_nonneg (n := n)
+        nlinarith
+      have h2 : ∑ n ∈ Icc 1 ⌊x⌋₊, ArithmeticFunction.vonMangoldt n ≤
+          (⌊x⌋₊ : ℝ) * Real.log ⌊x⌋₊ := by
+        have hcard : (∑ _n ∈ Icc 1 ⌊x⌋₊, (1 : ℝ)) = (⌊x⌋₊ : ℝ) := by
+          rw [Finset.sum_const, Nat.card_Icc, nsmul_eq_mul]
+          norm_num
+        have hm2 : 2 ≤ ⌊x⌋₊ := Nat.le_floor hx
+        calc ∑ n ∈ Icc 1 ⌊x⌋₊, ArithmeticFunction.vonMangoldt n
+            ≤ ∑ _n ∈ Icc 1 ⌊x⌋₊, Real.log ⌊x⌋₊ := by
+              apply Finset.sum_le_sum
+              intro n hn
+              have hnm : n ≤ ⌊x⌋₊ := (Finset.mem_Icc.mp hn).2
+              have hle := ArithmeticFunction.vonMangoldt_le_log (n := n)
+              have hn1 : 0 < n := (Finset.mem_Icc.mp hn).1
+              have hl : Real.log n ≤ Real.log ⌊x⌋₊ :=
+                Real.log_le_log (by exact_mod_cast hn1) (by exact_mod_cast hnm)
+              linarith
+          _ = (⌊x⌋₊ : ℝ) * Real.log ⌊x⌋₊ := by
+              rw [Finset.sum_const, Nat.card_Icc, nsmul_eq_mul]
+              norm_num
+      have hfloor : (⌊x⌋₊ : ℝ) ≤ x := Nat.floor_le (by linarith)
+      have hm2 : 2 ≤ ⌊x⌋₊ := Nat.le_floor hx
+      have hlogm : Real.log ⌊x⌋₊ ≤ 4 :=
+        le_trans (Real.log_le_log (by positivity) hfloor) hlogx
+      have hm0 : (0 : ℝ) ≤ ⌊x⌋₊ := Nat.cast_nonneg _
+      calc ‖∑ n ∈ Icc 1 ⌊x⌋₊, (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4)‖
+          ≤ ∑ n ∈ Icc 1 ⌊x⌋₊, ArithmeticFunction.vonMangoldt n := h1
+        _ ≤ (⌊x⌋₊ : ℝ) * Real.log ⌊x⌋₊ := h2
+        _ ≤ x * 4 := by nlinarith
+        _ = 4 * x := by ring
+    calc ‖LeanLab.PNTPort.BV.psiChi x χ‖ ≤ 4 * x := hpsi
+      _ = (4 * Real.exp (2 * c)) * x * Real.exp (-(2 * c)) := by
+          have he : Real.exp (2 * c) * Real.exp (-(2 * c)) = 1 := by
+            rw [← Real.exp_add, show 2 * c + -(2 * c) = 0 by ring, Real.exp_zero]
+          calc 4 * x = 4 * x * 1 := by ring
+            _ = 4 * x * (Real.exp (2 * c) * Real.exp (-(2 * c))) := by rw [he]
+            _ = (4 * Real.exp (2 * c)) * x * Real.exp (-(2 * c)) := by ring
+      _ ≤ max K (4 * Real.exp (2 * c)) * x * Real.exp (-c * Real.sqrt (Real.log x)) := by
+          have h4 : (4 : ℝ) * Real.exp (2 * c) ≤ max K (4 * Real.exp (2 * c)) := le_max_right _ _
+          have hx0 : (0 : ℝ) < x := by linarith
+          have he : Real.exp (-(2 * c)) ≤ Real.exp (-c * Real.sqrt (Real.log x)) := by
+            apply Real.exp_le_exp.mpr
+            nlinarith [hc]
+          have hleft : (4 * Real.exp (2 * c)) * x * Real.exp (-(2 * c)) ≤
+              max K (4 * Real.exp (2 * c)) * x * Real.exp (-c * Real.sqrt (Real.log x)) := by
+            have hA : (0:ℝ) ≤ (4 * Real.exp (2 * c)) * x := by positivity
+            have hB : (4 * Real.exp (2 * c)) * x ≤ max K (4 * Real.exp (2 * c)) * x :=
+              mul_le_mul_of_nonneg_right h4 hx0.le
+            calc (4 * Real.exp (2 * c)) * x * Real.exp (-(2 * c))
+                ≤ max K (4 * Real.exp (2 * c)) * x * Real.exp (-(2 * c)) :=
+                  mul_le_mul_of_nonneg_right hB (Real.exp_pos _).le
+              _ ≤ max K (4 * Real.exp (2 * c)) * x * Real.exp (-c * Real.sqrt (Real.log x)) :=
+                  mul_le_mul_of_nonneg_left he (by positivity)
+          exact hleft
+
+/-- The integral of `exp (-c √log t) / t` over `[a, b]` for `1 < a ≤ b`, bounded by the
+antiderivative `-(2/c²)(c√log t + 1) exp (-c√log t)` evaluated at `a`. -/
+private theorem integral_exp_sqrtlog_div {c : ℝ} (hc : 0 < c) {a b : ℝ} (ha : 1 < a) (hab : a ≤ b) :
+    ∫ t in a..b, Real.exp (-c * Real.sqrt (Real.log t)) / t ≤
+      2 / c ^ 2 * (c * Real.sqrt (Real.log a) + 1) *
+        Real.exp (-c * Real.sqrt (Real.log a)) := by
+  set G : ℝ → ℝ := fun t => -(2 / c ^ 2) * ((c * Real.sqrt (Real.log t) + 1) *
+    Real.exp (-c * Real.sqrt (Real.log t))) with hG
+  have ha0 : (0 : ℝ) < a := by linarith
+  have ht1 : ∀ t ∈ Set.uIcc a b, 1 < t := by
+    intro t ht
+    rw [Set.uIcc_of_le hab] at ht
+    linarith [ht.1]
+  have hderiv : ∀ t ∈ Set.uIcc a b,
+      HasDerivAt G (Real.exp (-c * Real.sqrt (Real.log t)) / t) t := by
+    intro t ht
+    have ht1' := ht1 t ht
+    have ht0 : (0 : ℝ) < t := by linarith
+    have hlpos : 0 < Real.log t := Real.log_pos ht1'
+    have hsq : HasDerivAt (fun t : ℝ => Real.sqrt (Real.log t))
+        ((1 : ℝ) / (2 * Real.sqrt (Real.log t)) * (1 / t)) t := by
+      have h1 : HasDerivAt Real.log ((t : ℝ)⁻¹) t := Real.hasDerivAt_log ht0.ne'
+      have h2 := h1.sqrt hlpos.ne'
+      convert h2 using 1
+      field_simp
+    have hinner : HasDerivAt (fun t : ℝ => (c * Real.sqrt (Real.log t) + 1) *
+        Real.exp (-c * Real.sqrt (Real.log t)))
+        ((c * (1 / (2 * Real.sqrt (Real.log t)) * (1 / t))) *
+          Real.exp (-c * Real.sqrt (Real.log t)) +
+          (c * Real.sqrt (Real.log t) + 1) *
+            (Real.exp (-c * Real.sqrt (Real.log t)) *
+              (-c * (1 / (2 * Real.sqrt (Real.log t)) * (1 / t))))) t := by
+      have hA : HasDerivAt (fun t : ℝ => c * Real.sqrt (Real.log t) + 1)
+          (c * (1 / (2 * Real.sqrt (Real.log t)) * (1 / t)) + 0) t := by
+        simpa using (hsq.const_mul c).add_const 1
+      have hB : HasDerivAt (fun t : ℝ => Real.exp (-c * Real.sqrt (Real.log t)))
+          (Real.exp (-c * Real.sqrt (Real.log t)) *
+            (-c * (1 / (2 * Real.sqrt (Real.log t)) * (1 / t)))) t := by
+        have h3 : HasDerivAt (fun t : ℝ => -c * Real.sqrt (Real.log t))
+            (-c * (1 / (2 * Real.sqrt (Real.log t)) * (1 / t))) t := hsq.const_mul (-c)
+        simpa using h3.exp
+      have hmul := hA.mul hB
+      convert hmul using 1
+      ring
+    have hfin := hinner.const_mul (-(2 / c ^ 2))
+    refine hfin.congr_deriv ?_
+    have hs : Real.sqrt (Real.log t) ≠ 0 := (Real.sqrt_pos.mpr hlpos).ne'
+    have hcne : c ≠ 0 := hc.ne'
+    have he : Real.exp (-c * Real.sqrt (Real.log t)) ≠ 0 := (Real.exp_pos _).ne'
+    field_simp
+    ring
+  have hcont : ContinuousOn (fun t : ℝ => Real.exp (-c * Real.sqrt (Real.log t)) / t)
+      (Set.uIcc a b) := by
+    rw [Set.uIcc_of_le hab]
+    intro t ht
+    have ht1' : 1 < t := by linarith [ht.1]
+    apply ContinuousAt.continuousWithinAt
+    fun_prop (disch := first | positivity | linarith)
+  have hInt : IntervalIntegrable (fun t : ℝ => Real.exp (-c * Real.sqrt (Real.log t)) / t)
+      MeasureTheory.volume a b := hcont.intervalIntegrable
+  have hfun : (∫ t in a..b, Real.exp (-c * Real.sqrt (Real.log t)) / t) = G b - G a :=
+    intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hInt
+  have hGb : G b ≤ 0 := by
+    have hb1 : 1 < b := lt_of_lt_of_le ha hab
+    have hpos : 0 < 2 / c ^ 2 := by positivity
+    have harg : 0 < (c * Real.sqrt (Real.log b) + 1) * Real.exp (-c * Real.sqrt (Real.log b)) := by
+      have : 0 < Real.sqrt (Real.log b) := Real.sqrt_pos.mpr (Real.log_pos hb1)
+      positivity
+    simp only [hG]
+    nlinarith
+  have hGa : G a = -(2 / c ^ 2 * (c * Real.sqrt (Real.log a) + 1) *
+      Real.exp (-c * Real.sqrt (Real.log a))) := by
+    simp only [hG]; ring
+  rw [hfun, hGa]
+  linarith
+
+/-- Abel summation turns the Siegel-Walfisz bound for `ψ(x, χ)` into a uniform bound for the
+`χ`-twisted von Mangoldt sum `∑_{n ≤ x} Λ(n) χ(n) / n`. -/
+private theorem sum_chi_mangoldt_div_bound {χ : DirichletCharacter ℂ 4} (hχ : χ ≠ 1) :
+    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 2 ≤ x →
+      ‖∑ n ∈ Icc 1 ⌊x⌋₊, (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n‖ ≤ C := by
+  haveI : Fact (1 < 4) := ⟨by norm_num⟩
+  haveI : NeZero (4 : ℕ) := ⟨by norm_num⟩
+  obtain ⟨c₀, K, hc, hK⟩ := psi_chi4_bound hχ
+  have h2nu : ¬ IsUnit (2 : ZMod 4) := by
+    intro h
+    have hc2 : Nat.Coprime 2 4 := (ZMod.isUnit_iff_coprime 2 4).mp h
+    exact absurd hc2 (by decide)
+  set K' := max K 1 with hK'def
+  have hK'K : K ≤ K' := le_max_left _ _
+  have hK'1 : (1 : ℝ) ≤ K' := le_max_right _ _
+  have hK'0 : (0 : ℝ) < K' := lt_of_lt_of_le one_pos hK'1
+  have hK'b : ∀ x : ℝ, 2 ≤ x →
+      ‖LeanLab.PNTPort.BV.psiChi x χ‖ ≤ K' * x * Real.exp (-c₀ * Real.sqrt (Real.log x)) := by
+    intro x hx
+    refine (hK x hx).trans ?_
+    apply mul_le_mul_of_nonneg_right _ (le_of_lt (Real.exp_pos _))
+    exact mul_le_mul_of_nonneg_right hK'K (by linarith)
+  set B : ℝ := 2 / c₀ ^ 2 * (c₀ * Real.sqrt (Real.log 2) + 1) *
+    Real.exp (-c₀ * Real.sqrt (Real.log 2)) with hBdef
+  have hBle : B ≤ 2 / c₀ ^ 2 * (c₀ * Real.sqrt (Real.log 2) + 1) *
+      Real.exp (-c₀ * Real.sqrt (Real.log 2)) := le_of_eq hBdef
+  refine ⟨2 * K' + K' * B, by positivity, ?_⟩
+  intro x hx
+  have hx0 : (0 : ℝ) < x := by linarith
+  set f : ℝ → ℂ := fun t => ((t : ℂ))⁻¹ with hf
+  set cc : ℕ → ℂ := fun k => (ArithmeticFunction.vonMangoldt k : ℂ) * χ (k : ZMod 4) with hcdef
+  -- the summatory function is psi
+  have hA : ∀ t : ℝ, ∑ k ∈ Icc 0 ⌊t⌋₊, cc k = LeanLab.PNTPort.BV.psiChi t χ := by
+    intro t
+    have h0 : ArithmeticFunction.vonMangoldt 0 = 0 := by
+      rw [ArithmeticFunction.vonMangoldt_eq_zero_iff, isPrimePow_nat_iff]
+      rintro ⟨p, k, hp, hk, hpk⟩
+      have hpos : 0 < p ^ k := pow_pos (by have := hp.two_le; omega) k
+      omega
+    have hset : Ioc 0 ⌊t⌋₊ = Icc 1 ⌊t⌋₊ := by
+      ext n; simp [Finset.mem_Ioc, Finset.mem_Icc]; omega
+    simp only [hcdef]
+    unfold LeanLab.PNTPort.BV.psiChi
+    rw [Finset.Icc_eq_cons_Ioc (Nat.zero_le _), Finset.sum_cons, hset]
+    simp only [h0, Complex.ofReal_zero, zero_mul, zero_add]
+  have hdiff : ∀ t ∈ Set.Icc (2 : ℝ) x, DifferentiableAt ℝ f t := by
+    intro t ht
+    have ht0 : (t : ℂ) ≠ 0 := by
+      have hpos : (0 : ℝ) < t := by linarith [ht.1]
+      exact_mod_cast hpos.ne'
+    simp only [hf]
+    have h1 : HasDerivAt (fun t : ℝ => (t : ℂ)) 1 t := Complex.ofRealCLM.hasDerivAt
+    exact (h1.inv ht0).differentiableAt
+  have hderivval : ∀ t ∈ Set.Icc (2 : ℝ) x, deriv f t = -1 / ((t : ℂ) ^ 2) := by
+    intro t ht
+    have ht0 : (t : ℂ) ≠ 0 := by
+      have hpos : (0 : ℝ) < t := by linarith [ht.1]
+      exact_mod_cast hpos.ne'
+    simp only [hf]
+    have h1 : HasDerivAt (fun t : ℝ => (t : ℂ)) 1 t := Complex.ofRealCLM.hasDerivAt
+    exact (h1.inv ht0).deriv
+  have hIntF : MeasureTheory.IntegrableOn (deriv f) (Set.Icc (2 : ℝ) x) := by
+    simp only [hf]
+    apply ContinuousOn.integrableOn_Icc
+    intro t ht
+    have ht0r : (0 : ℝ) < t := by linarith [ht.1]
+    have ht0c : (t : ℂ) ≠ 0 := by exact_mod_cast ht0r.ne'
+    have hev : ∀ᶠ s : ℝ in nhds t, (s : ℂ) ≠ 0 := by
+      have hU : IsOpen {s : ℝ | (s : ℂ) ≠ 0} := by
+        have hE : {s : ℝ | (s : ℂ) ≠ 0} = Complex.ofReal ⁻¹' ({0}ᶜ : Set ℂ) := by
+          ext s; simp
+        rw [hE]
+        exact isOpen_compl_singleton.preimage Complex.continuous_ofReal
+      exact hU.mem_nhds ht0c
+    have heq : (fun s : ℝ => -1 / ((s : ℂ)) ^ 2) =ᶠ[nhds t]
+        deriv (fun s : ℝ => ((s : ℂ))⁻¹) := by
+      filter_upwards [hev] with s hs
+      exact (((Complex.ofRealCLM.hasDerivAt (x := s)).inv hs).deriv).symm
+    have hcont : ContinuousAt (fun s : ℝ => -1 / ((s : ℂ)) ^ 2) t := by
+      refine ContinuousAt.div continuousAt_const ?_ (pow_ne_zero 2 ht0c)
+      fun_prop
+    exact (hcont.congr heq).continuousWithinAt
+  have habel := sum_mul_eq_sub_sub_integral_mul (c := cc) (f := f) (a := 2) (b := x)
+    (by norm_num) (by linarith) hdiff hIntF
+  rw [Nat.floor_ofNat] at habel
+  -- the small initial terms vanish
+  -- the small initial terms vanish
+  have hsmall : ∑ n ∈ (Finset.Icc 1 2 : Finset ℕ), f n * cc n = 0 := by
+    have hI : (Finset.Icc 1 2 : Finset ℕ) = {1, 2} := by decide
+    rw [hI, Finset.sum_pair (by norm_num)]
+    have h2 : χ ((2 : ℕ) : ZMod 4) = 0 := MulChar.map_nonunit χ h2nu
+    simp only [hf, hcdef]
+    rw [ArithmeticFunction.vonMangoldt_apply_one, h2]
+    norm_num
+  have hfloor : 2 ≤ ⌊x⌋₊ := Nat.le_floor hx
+  have hunion : Icc 1 ⌊x⌋₊ = Icc 1 2 ∪ Ioc 2 ⌊x⌋₊ := by
+    ext n
+    simp only [Finset.mem_Icc, Finset.mem_Ioc, Finset.mem_union]
+    omega
+  have hdisj : Disjoint (Icc 1 2 : Finset ℕ) (Ioc 2 ⌊x⌋₊) := by
+    rw [Finset.disjoint_left]
+    intro a ha ha'
+    simp only [Finset.mem_Icc] at ha
+    simp only [Finset.mem_Ioc] at ha'
+    omega
+  have hgoal : ∑ n ∈ Icc 1 ⌊x⌋₊, (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n =
+      ∑ k ∈ Ioc 2 ⌊x⌋₊, f k * cc k := by
+    have h1 : ∀ n : ℕ, (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n =
+        f n * cc n := by
+      intro n
+      simp only [hf, hcdef, div_eq_inv_mul, Complex.ofReal_natCast]
+    simp only [h1]
+    rw [hunion, Finset.sum_union hdisj, hsmall, zero_add]
+  -- bound the first Abel term
+  have hterm1 : ‖f x * (∑ k ∈ Icc 0 ⌊x⌋₊, cc k)‖ ≤ K' := by
+    rw [hA x, norm_mul]
+    have hxinv : ‖f x‖ = 1 / x := by
+      simp only [hf]
+      rw [norm_inv, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hx0, one_div]
+    rw [hxinv]
+    have hb := hK'b x hx
+    have hexp1 : Real.exp (-c₀ * Real.sqrt (Real.log x)) ≤ 1 := by
+      rw [← Real.exp_zero]
+      apply Real.exp_le_exp.mpr
+      have hl : 0 ≤ Real.log x := Real.log_nonneg (by linarith)
+      nlinarith [Real.sqrt_nonneg (Real.log x), hc]
+    calc (1 / x) * ‖LeanLab.PNTPort.BV.psiChi x χ‖ ≤
+          (1 / x) * (K' * x * Real.exp (-c₀ * Real.sqrt (Real.log x))) :=
+          mul_le_mul_of_nonneg_left hb (by positivity)
+      _ = K' * Real.exp (-c₀ * Real.sqrt (Real.log x)) := by field_simp
+      _ ≤ K' * 1 := mul_le_mul_of_nonneg_left hexp1 (le_of_lt hK'0)
+      _ = K' := by ring
+  -- the second Abel term
+  have hterm2 : ‖f 2 * (∑ k ∈ (Finset.Icc 0 2 : Finset ℕ), cc k)‖ ≤ K' := by
+    have hA2 : ∑ k ∈ (Finset.Icc 0 2 : Finset ℕ), cc k = LeanLab.PNTPort.BV.psiChi 2 χ := by
+      rw [← hA 2, Nat.floor_ofNat]
+    rw [hA2, norm_mul]
+    have hf2 : ‖f 2‖ = 1 / 2 := by
+      simp only [hf]
+      rw [norm_inv, Complex.norm_real, Real.norm_eq_abs]
+      norm_num
+    rw [hf2]
+    have hb := hK'b 2 (by norm_num)
+    have hexp2 : Real.exp (-c₀ * Real.sqrt (Real.log 2)) ≤ 1 := by
+      rw [← Real.exp_zero]
+      apply Real.exp_le_exp.mpr
+      have hl : 0 ≤ Real.log 2 := Real.log_nonneg (by norm_num)
+      nlinarith [Real.sqrt_nonneg (Real.log 2), hc]
+    calc (1 / 2) * ‖LeanLab.PNTPort.BV.psiChi 2 χ‖ ≤
+          (1 / 2) * (K' * 2 * Real.exp (-c₀ * Real.sqrt (Real.log 2))) := by
+          apply mul_le_mul_of_nonneg_left hb (by norm_num)
+      _ = K' * Real.exp (-c₀ * Real.sqrt (Real.log 2)) := by field_simp
+      _ ≤ K' * 1 := mul_le_mul_of_nonneg_left hexp2 (le_of_lt hK'0)
+      _ = K' := by ring
+  -- the integral term
+  have hmaj : ∀ t ∈ Set.Ioc (2 : ℝ) x, ‖deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, cc k)‖ ≤
+      K' * (Real.exp (-c₀ * Real.sqrt (Real.log t)) / t) := by
+    intro t ht
+    obtain ⟨ht1, ht2⟩ := ht
+    have ht2' : 2 ≤ t := le_of_lt ht1
+    have ht0 : (0 : ℝ) < t := by linarith
+    rw [hA t, hderivval t (Set.mem_Icc.mpr ⟨ht2', ht2⟩), norm_mul]
+    have hnorm : ‖(-1 / ((t : ℂ) ^ 2))‖ = 1 / (t * t) := by
+      have htC : ‖((t : ℂ))‖ = t := by
+        rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht0]
+      rw [norm_div, norm_neg, norm_one, norm_pow, htC, pow_two]
+    rw [hnorm]
+    have hb := hK'b t ht2'
+    calc (1 / (t * t)) * ‖LeanLab.PNTPort.BV.psiChi t χ‖ ≤
+          (1 / (t * t)) * (K' * t * Real.exp (-c₀ * Real.sqrt (Real.log t))) :=
+          mul_le_mul_of_nonneg_left hb (by positivity)
+      _ = K' * (Real.exp (-c₀ * Real.sqrt (Real.log t)) / t) := by
+          field_simp
+  have hmajC : IntervalIntegrable (fun t : ℝ => K' *
+      (Real.exp (-c₀ * Real.sqrt (Real.log t)) / t)) MeasureTheory.volume 2 x := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le (by linarith)]
+    intro t ht
+    have ht1 : 1 < t := by linarith [ht.1]
+    apply ContinuousAt.continuousWithinAt
+    fun_prop (disch := first | positivity | linarith)
+  have hmajint : IntervalIntegrable (fun t : ℝ => K' *
+      (Real.exp (-c₀ * Real.sqrt (Real.log t)) / t)) MeasureTheory.volume (min 2 x) (max 2 x) := by
+    rw [min_eq_left (by linarith : (2:ℝ) ≤ x), max_eq_right (by linarith : (2:ℝ) ≤ x)]
+    exact hmajC
+  have hbound := intervalIntegral.norm_integral_le_of_norm_le
+    (μ := MeasureTheory.volume)
+    (f := fun t : ℝ => deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, cc k))
+    (g := fun t : ℝ => K' * (Real.exp (-c₀ * Real.sqrt (Real.log t)) / t))
+    (by linarith : (2 : ℝ) ≤ x) (Filter.Eventually.of_forall hmaj) hmajC
+  rw [intervalIntegral.integral_const_mul] at hbound
+  have hint := integral_exp_sqrtlog_div hc (a := 2) (b := x) (by norm_num) (by linarith)
+  have hint3 : K' * (∫ t in (2 : ℝ)..x, Real.exp (-c₀ * Real.sqrt (Real.log t)) / t) ≤ K' * B := by
+    rw [hBdef]
+    exact mul_le_mul_of_nonneg_left hint (le_of_lt hK'0)
+  have hsetint : (∫ t in Set.Ioc (2 : ℝ) x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, cc k)) =
+      ∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, cc k) :=
+    (intervalIntegral.integral_of_le (by linarith)).symm
+  have hmain : ‖f x * (∑ k ∈ Icc 0 ⌊x⌋₊, cc k) - f 2 * (∑ k ∈ (Finset.Icc 0 2 : Finset ℕ), cc k) -
+      ∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, cc k)‖ ≤ 2 * K' + K' * B := by
+    have h1 : ‖f x * (∑ k ∈ Icc 0 ⌊x⌋₊, cc k) - f 2 * (∑ k ∈ (Finset.Icc 0 2 : Finset ℕ), cc k) -
+        ∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, cc k)‖ ≤ (K' + K') + K' * B := by
+      refine le_trans (norm_sub_le _ _) ?_
+      refine le_trans (add_le_add (norm_sub_le _ _) le_rfl) ?_
+      exact add_le_add (add_le_add hterm1 hterm2) (le_trans hbound hint3)
+    have h2 : (K' + K') + K' * B = 2 * K' + K' * B := by ring
+    rw [← h2]
+    exact h1
+  calc ‖∑ n ∈ Icc 1 ⌊x⌋₊, (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n‖
+      = ‖∑ k ∈ Ioc 2 ⌊x⌋₊, f k * cc k‖ := by rw [hgoal]
+    _ = ‖f x * (∑ k ∈ Icc 0 ⌊x⌋₊, cc k) - f 2 * (∑ k ∈ (Finset.Icc 0 2 : Finset ℕ), cc k) -
+        ∫ t in Set.Ioc (2 : ℝ) x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, cc k)‖ := congrArg norm habel
+    _ = ‖f x * (∑ k ∈ Icc 0 ⌊x⌋₊, cc k) - f 2 * (∑ k ∈ (Finset.Icc 0 2 : Finset ℕ), cc k) -
+        ∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, cc k)‖ := by rw [hsetint]
+    _ ≤ 2 * K' + K' * B := hmain
+
+
+/-- `∫_a^b t^(-5/4) ≤ 4 a^(-1/4)` for `0 < a ≤ b`, from the antiderivative `-4 t^(-1/4)`. -/
+private theorem integral_rpow_neg_five_quarters {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
+    ∫ t in a..b, t ^ (-(5 : ℝ) / 4) ≤ 4 * a ^ (-(1 : ℝ) / 4) := by
+  set G : ℝ → ℝ := fun t => -4 * t ^ (-(1 : ℝ) / 4) with hG
+  have hmem : ∀ t ∈ Set.uIcc a b, (0 : ℝ) < t := by
+    intro t ht
+    rcases Set.mem_uIcc.mp ht with h | h <;> linarith [h.1, h.2, ha, le_of_lt ha]
+  have hderiv : ∀ t ∈ Set.uIcc a b, HasDerivAt G (t ^ (-(5 : ℝ) / 4)) t := by
+    intro t ht
+    have ht0 := hmem t ht
+    have h := (@Real.hasDerivAt_rpow_const t (-(1 : ℝ) / 4) (Or.inl ht0.ne')).const_mul (-4)
+    have hval : -4 * (-(1 : ℝ) / 4 * t ^ (-(1 : ℝ) / 4 - 1)) = t ^ (-(5 : ℝ) / 4) := by
+      rw [show -(1 : ℝ) / 4 - 1 = -(5 : ℝ) / 4 by norm_num]
+      ring
+    rw [hval] at h
+    exact h
+  have hcont : ContinuousOn (fun t : ℝ => t ^ (-(5 : ℝ) / 4)) (Set.uIcc a b) := by
+    intro t ht
+    have ht0 := hmem t ht
+    exact (Real.continuousAt_rpow_const t (-(5 : ℝ) / 4) (Or.inl ht0.ne')).continuousWithinAt
+  have hInt : IntervalIntegrable (fun t : ℝ => t ^ (-(5 : ℝ) / 4)) MeasureTheory.volume a b :=
+    hcont.intervalIntegrable
+  have hfun := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hInt
+  have hb : 0 < b := lt_of_lt_of_le ha hab
+  have h1 : 0 ≤ b ^ (-(1 : ℝ) / 4) := Real.rpow_nonneg hb.le _
+  have h2 : 0 < a ^ (-(1 : ℝ) / 4) := Real.rpow_pos_of_pos ha _
+  have hGa : G a = -4 * a ^ (-(1 : ℝ) / 4) := by simp only [hG]
+  have hGb : G b ≤ 0 := by
+    simp only [hG]
+    nlinarith
+  rw [hfun, hGa]
+  linarith
+
+/-- `∫_a^b 2 log t /(t √t) ≤ 32` for `1 < a ≤ b`. -/
+private theorem integral_log_div_three_halves {a b : ℝ} (ha : 1 < a) (hab : a ≤ b) :
+    ∫ t in a..b, 2 * Real.log t / (t * Real.sqrt t) ≤ 32 := by
+  have ha0 : (0 : ℝ) < a := by linarith
+  have hmaj : ∀ t ∈ Set.Icc a b, 2 * Real.log t / (t * Real.sqrt t) ≤ 8 * t ^ (-(5 : ℝ) / 4) := by
+    intro t ht
+    have ht0 : (0 : ℝ) < t := by linarith [ht.1]
+    have hlog : Real.log t ≤ 4 * t ^ ((1 : ℝ) / 4) := by
+      have h := Real.log_le_rpow_div ht0.le (by norm_num : (0 : ℝ) < 1 / 4)
+      calc Real.log t ≤ t ^ ((1 : ℝ) / 4) / (1 / 4) := h
+        _ = 4 * t ^ ((1 : ℝ) / 4) := by ring
+    have hpos : 0 < t * Real.sqrt t := by positivity
+    have heq : t ^ ((1 : ℝ) / 4) / (t * Real.sqrt t) = t ^ (-(5 : ℝ) / 4) := by
+      have hsq : (t : ℝ) * Real.sqrt t = t ^ ((3 : ℝ) / 2) := by
+        rw [Real.sqrt_eq_rpow]
+        nth_rewrite 1 [show t = t ^ (1 : ℝ) from (Real.rpow_one t).symm]
+        rw [← Real.rpow_add ht0]
+        norm_num
+      rw [hsq, ← Real.rpow_sub ht0]
+      norm_num
+    calc 2 * Real.log t / (t * Real.sqrt t)
+        ≤ 8 * t ^ ((1 : ℝ) / 4) / (t * Real.sqrt t) := by
+          rw [div_le_div_iff_of_pos_right hpos]
+          linarith
+      _ = 8 * (t ^ ((1 : ℝ) / 4) / (t * Real.sqrt t)) := by ring
+      _ = 8 * t ^ (-(5 : ℝ) / 4) := by rw [heq]
+  have hleft : IntervalIntegrable (fun t : ℝ => 2 * Real.log t / (t * Real.sqrt t))
+      MeasureTheory.volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    intro t ht
+    rcases Set.mem_uIcc.mp ht with h | h <;> (have ht0 : (0:ℝ) < t := by linarith [h.1, h.2, ha])
+    · apply ContinuousAt.continuousWithinAt
+      fun_prop (disch := first | positivity | linarith)
+    · apply ContinuousAt.continuousWithinAt
+      fun_prop (disch := first | positivity | linarith)
+  have hright : IntervalIntegrable (fun t : ℝ => 8 * t ^ (-(5 : ℝ) / 4))
+      MeasureTheory.volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    intro t ht
+    rcases Set.mem_uIcc.mp ht with h | h <;> (have ht0 : (0:ℝ) < t := by linarith [h.1, h.2, ha])
+    · exact (Real.continuousAt_rpow_const t (-(5 : ℝ) / 4) (Or.inl ht0.ne')).continuousWithinAt.const_mul 8
+    · exact (Real.continuousAt_rpow_const t (-(5 : ℝ) / 4) (Or.inl ht0.ne')).continuousWithinAt.const_mul 8
+  have hint : ∫ t in a..b, 2 * Real.log t / (t * Real.sqrt t) ≤
+      ∫ t in a..b, 8 * t ^ (-(5 : ℝ) / 4) := by
+    apply intervalIntegral.integral_mono_on hab hleft hright
+    intro t ht
+    exact hmaj t ht
+  have h8 : ∫ t in a..b, 8 * t ^ (-(5 : ℝ) / 4) = 8 * ∫ t in a..b, t ^ (-(5 : ℝ) / 4) :=
+    intervalIntegral.integral_const_mul 8 _
+  rw [h8] at hint
+  have hb := integral_rpow_neg_five_quarters ha0 hab
+  have hle1 : a ^ (-(1 : ℝ) / 4) ≤ 1 :=
+    Real.rpow_le_one_of_one_le_of_nonpos (le_of_lt ha) (by norm_num)
+  have hnn : 0 ≤ a ^ (-(1 : ℝ) / 4) := Real.rpow_nonneg ha0.le _
+  nlinarith [hint, hb, hle1, hnn]
+
+
+/-- `ψ - θ` is the sum of `Λ` over the non-primes. -/
+private theorem psi_sub_theta_eq_sum_nonprime (m : ℕ) :
+    Chebyshev.psi m - Chebyshev.theta m =
+      ∑ n ∈ (Finset.Icc 1 m).filter (fun n => ¬ n.Prime), ArithmeticFunction.vonMangoldt n := by
+  have h0 : ArithmeticFunction.vonMangoldt 0 = 0 := by
+    rw [ArithmeticFunction.vonMangoldt_eq_zero_iff, isPrimePow_nat_iff]
+    rintro ⟨p, k, hp, hk, hpk⟩
+    have hpos : 0 < p ^ k := pow_pos (by have := hp.two_le; omega) k
+    omega
+  have hpsi : Chebyshev.psi m = ∑ n ∈ Finset.Icc 1 m, ArithmeticFunction.vonMangoldt n := by
+    rw [Chebyshev.psi_eq_sum_Icc, Nat.floor_natCast,
+      Finset.Icc_eq_cons_Ioc (Nat.zero_le m), Finset.sum_cons, h0, zero_add]
+    have hset : (Finset.Ioc 0 m : Finset ℕ) = Finset.Icc 1 m := by
+      ext n; simp only [Finset.mem_Ioc, Finset.mem_Icc]; omega
+    rw [hset]
+  have htheta : Chebyshev.theta m =
+      ∑ n ∈ (Finset.Icc 1 m).filter (fun n => n.Prime), ArithmeticFunction.vonMangoldt n := by
+    rw [Chebyshev.theta_eq_sum_Icc, Nat.floor_natCast]
+    have hset : (Finset.Icc 0 m).filter (fun n => n.Prime)
+        = (Finset.Icc 1 m).filter (fun n => n.Prime) := by
+      ext n
+      constructor
+      · intro h
+        simp only [Finset.mem_filter, Finset.mem_Icc] at h ⊢
+        exact ⟨⟨by have := h.2.two_le; omega, h.1.2⟩, h.2⟩
+      · intro h
+        simp only [Finset.mem_filter, Finset.mem_Icc] at h ⊢
+        exact ⟨⟨Nat.zero_le _, h.1.2⟩, h.2⟩
+    rw [hset]
+    exact Finset.sum_congr rfl (fun p hp =>
+      (ArithmeticFunction.vonMangoldt_apply_prime (Finset.mem_filter.mp hp).2).symm)
+  rw [hpsi, htheta,
+    ← Finset.sum_filter_add_sum_filter_not (Finset.Icc 1 m) (fun n => n.Prime)
+      (fun n => ArithmeticFunction.vonMangoldt n)]
+  ring
+
+/-- The non-prime part of the von Mangoldt sum with weight `1/n` is bounded uniformly. -/
+private theorem sum_nonprime_mangoldt_div_le {x : ℝ} (hx : 2 ≤ x) :
+    ∑ n ∈ (Finset.Icc 1 ⌊x⌋₊).filter (fun n => ¬ n.Prime),
+      ArithmeticFunction.vonMangoldt n / n ≤ 40 := by
+  have hx0 : (0 : ℝ) < x := by linarith
+  set c : ℕ → ℝ := fun n => if n.Prime then 0 else ArithmeticFunction.vonMangoldt n with hc
+  have h0c : c 0 = 0 := by
+    have hΛ : ArithmeticFunction.vonMangoldt 0 = 0 := by
+      rw [ArithmeticFunction.vonMangoldt_eq_zero_iff, isPrimePow_nat_iff]
+      rintro ⟨p, k, hp, hk, hpk⟩
+      have hpos : 0 < p ^ k := pow_pos (by have := hp.two_le; omega) k
+      omega
+    simp only [hc, hΛ]
+    rw [if_neg (by decide : ¬ (0 : ℕ).Prime)]
+  have hcfilt : ∀ m : ℕ, ∑ k ∈ Icc 0 m, c k =
+      ∑ k ∈ (Finset.Icc 1 m).filter (fun n => ¬ n.Prime), ArithmeticFunction.vonMangoldt k := by
+    intro m
+    rw [Finset.Icc_eq_cons_Ioc (Nat.zero_le m), Finset.sum_cons, h0c, zero_add]
+    have hset : (Finset.Ioc 0 m : Finset ℕ) = Finset.Icc 1 m := by
+      ext n; simp only [Finset.mem_Ioc, Finset.mem_Icc]; omega
+    rw [hset, Finset.sum_filter]
+    exact Finset.sum_congr rfl (fun n _ => by
+      simp only [hc]
+      by_cases h : n.Prime <;> simp [h])
+  have hA : ∀ t : ℝ, ∑ k ∈ Icc 0 ⌊t⌋₊, c k = Chebyshev.psi t - Chebyshev.theta t := by
+    intro t
+    rw [hcfilt ⌊t⌋₊, ← psi_sub_theta_eq_sum_nonprime ⌊t⌋₊]
+    rw [show Chebyshev.psi ⌊t⌋₊ = Chebyshev.psi t from by
+      rw [Chebyshev.psi_eq_sum_Icc, Chebyshev.psi_eq_sum_Icc, Nat.floor_natCast],
+      show Chebyshev.theta ⌊t⌋₊ = Chebyshev.theta t from by
+      rw [Chebyshev.theta_eq_sum_Icc, Chebyshev.theta_eq_sum_Icc, Nat.floor_natCast]]
+  have hAnonneg : ∀ t : ℝ, 0 ≤ Chebyshev.psi t - Chebyshev.theta t := by
+    intro t
+    have hpsi : Chebyshev.psi t = Chebyshev.psi ⌊t⌋₊ := by
+      rw [Chebyshev.psi_eq_sum_Icc, Chebyshev.psi_eq_sum_Icc, Nat.floor_natCast]
+    have htheta : Chebyshev.theta t = Chebyshev.theta ⌊t⌋₊ := by
+      rw [Chebyshev.theta_eq_sum_Icc, Chebyshev.theta_eq_sum_Icc, Nat.floor_natCast]
+    rw [hpsi, htheta, psi_sub_theta_eq_sum_nonprime ⌊t⌋₊]
+    exact Finset.sum_nonneg (fun n _ => ArithmeticFunction.vonMangoldt_nonneg)
+  have hA2 : ∑ k ∈ Icc 0 ⌊(2 : ℝ)⌋₊, c k = 0 := by
+    have hfl : ⌊(2 : ℝ)⌋₊ = 2 := Nat.floor_ofNat 2
+    rw [hfl]
+    have hI : (Finset.Icc 0 2 : Finset ℕ) = {0, 1, 2} := by decide
+    rw [hI]
+    have hΛ0 : ArithmeticFunction.vonMangoldt 0 = 0 := by
+      rw [ArithmeticFunction.vonMangoldt_eq_zero_iff, isPrimePow_nat_iff]
+      rintro ⟨p, k, hp, hk, hpk⟩
+      have hpos : 0 < p ^ k := pow_pos (by have := hp.two_le; omega) k
+      omega
+    have hΛ1 : ArithmeticFunction.vonMangoldt 1 = 0 := ArithmeticFunction.vonMangoldt_apply_one
+    have hc0 : c 0 = 0 := by simp only [hc, hΛ0]; rw [if_neg (by decide : ¬ (0:ℕ).Prime)]
+    have hc1 : c 1 = 0 := by simp only [hc, hΛ1]; rw [if_neg (by decide : ¬ (1:ℕ).Prime)]
+    have hc2 : c 2 = 0 := by simp only [hc]; rw [if_pos Nat.prime_two]
+    rw [show ({0, 1, 2} : Finset ℕ) = insert 0 (insert 1 {2}) from rfl,
+      Finset.sum_insert (by decide), Finset.sum_insert (by decide), Finset.sum_singleton,
+      hc0, hc1, hc2]
+    ring
+  set f : ℝ → ℝ := fun t => t⁻¹ with hf
+  have hdiff : ∀ t ∈ Set.Icc (2 : ℝ) x, DifferentiableAt ℝ f t := by
+    intro t ht
+    simp only [hf]
+    exact differentiableAt_inv (by linarith [ht.1] : (t : ℝ) ≠ 0)
+  have hderivval : ∀ t ∈ Set.Icc (2 : ℝ) x, deriv f t = -(1 / t ^ 2) := by
+    intro t ht
+    have ht0 : (t : ℝ) ≠ 0 := by linarith [ht.1]
+    simp only [hf]
+    simpa using (hasDerivAt_inv ht0).deriv
+  have hIntF : MeasureTheory.IntegrableOn (deriv f) (Set.Icc (2 : ℝ) x) := by
+    simp only [hf]
+    apply ContinuousOn.integrableOn_Icc
+    intro t ht
+    have ht0 : (t : ℝ) ≠ 0 := by linarith [ht.1]
+    have heq : (fun s : ℝ => -(1 / s ^ 2)) =ᶠ[nhds t] deriv (fun s : ℝ => s⁻¹) := by
+      filter_upwards [IsOpen.mem_nhds isOpen_ne ht0] with s hs
+      simpa using ((hasDerivAt_inv hs).deriv).symm
+    have hcont : ContinuousAt (fun s : ℝ => -(1 / s ^ 2)) t := by
+      refine ContinuousAt.neg (ContinuousAt.div continuousAt_const ?_ (pow_ne_zero 2 ht0))
+      fun_prop
+    exact (hcont.congr heq).continuousWithinAt
+  have habel := sum_mul_eq_sub_sub_integral_mul (c := c) (f := f) (a := 2) (b := x)
+    (by norm_num) (by linarith) hdiff hIntF
+  rw [Nat.floor_ofNat] at habel
+  -- bound the boundary term
+  have hterm1 : f x * (∑ k ∈ Icc 0 ⌊x⌋₊, c k) ≤ 4 := by
+    rw [hA x]
+    have hAx : Chebyshev.psi x - Chebyshev.theta x ≤ 2 * Real.sqrt x * Real.log x :=
+      Chebyshev.psi_sub_theta_le (by linarith)
+    have hfx : f x = 1 / x := by simp only [hf, one_div]
+    rw [hfx]
+    have hlog : Real.log x ≤ 2 * Real.sqrt x := by
+      have h := Real.log_le_rpow_div (le_of_lt hx0) (by norm_num : (0 : ℝ) < 1 / 2)
+      calc Real.log x ≤ x ^ ((1 : ℝ) / 2) / (1 / 2) := h
+        _ = 2 * Real.sqrt x := by rw [Real.sqrt_eq_rpow]; ring
+    have hsx : 0 < Real.sqrt x := Real.sqrt_pos.mpr hx0
+    have h1 : (1 / x) * (Chebyshev.psi x - Chebyshev.theta x) ≤
+        (1 / x) * (2 * Real.sqrt x * Real.log x) :=
+      mul_le_mul_of_nonneg_left hAx (by positivity)
+    have h2 : (1 / x) * (2 * Real.sqrt x * Real.log x) ≤
+        (1 / x) * (2 * Real.sqrt x * (2 * Real.sqrt x)) := by
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      nlinarith [Real.sqrt_nonneg x]
+    have h3 : (1 / x) * (2 * Real.sqrt x * (2 * Real.sqrt x)) = 4 := by
+      have hsq : Real.sqrt x * Real.sqrt x = x := by
+        rw [← pow_two, Real.sq_sqrt hx0.le]
+      rw [show (2:ℝ) * Real.sqrt x * (2 * Real.sqrt x) = 4 * (Real.sqrt x * Real.sqrt x) by ring,
+        hsq]
+      field_simp
+    exact h1.trans (h2.trans h3.le)
+  -- bound the integral term in norm
+  have hmaj : ∀ t ∈ Set.Ioc (2 : ℝ) x, ‖deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k)‖ ≤
+      2 * Real.log t / (t * Real.sqrt t) := by
+    intro t ht
+    obtain ⟨ht1, ht2⟩ := ht
+    have ht2' : 2 ≤ t := le_of_lt ht1
+    have ht0 : (0 : ℝ) < t := by linarith
+    rw [hA t, hderivval t (Set.mem_Icc.mpr ⟨ht2', ht2⟩), norm_mul]
+    have hnn2 : (0:ℝ) ≤ 1 / t ^ 2 := by positivity
+    have hnorm : ‖-(1 / t ^ 2)‖ = 1 / (t * t) := by
+      rw [norm_neg, Real.norm_eq_abs, abs_of_nonneg hnn2, pow_two]
+    rw [hnorm]
+    have hnorm2 : ‖Chebyshev.psi t - Chebyshev.theta t‖ =
+        Chebyshev.psi t - Chebyshev.theta t := by
+      rw [Real.norm_eq_abs, abs_of_nonneg (hAnonneg t)]
+    rw [hnorm2]
+    have hb : Chebyshev.psi t - Chebyshev.theta t ≤ 2 * Real.sqrt t * Real.log t :=
+      Chebyshev.psi_sub_theta_le (by linarith)
+    have hnn : 0 ≤ Chebyshev.psi t - Chebyshev.theta t := hAnonneg t
+    have h1 : (1 / (t * t)) * (Chebyshev.psi t - Chebyshev.theta t) ≤
+        (1 / (t * t)) * (2 * Real.sqrt t * Real.log t) :=
+      mul_le_mul_of_nonneg_left hb (by positivity)
+    have heq : (1 / (t * t)) * (2 * Real.sqrt t * Real.log t) =
+        2 * Real.log t / (t * Real.sqrt t) := by
+      have hsq : Real.sqrt t * Real.sqrt t = t := by
+        rw [← pow_two, Real.sq_sqrt ht0.le]
+      have h1 : (0:ℝ) < t * t := by positivity
+      have h2 : (0:ℝ) < t * Real.sqrt t := by positivity
+      rw [show (1 / (t * t)) * (2 * Real.sqrt t * Real.log t) =
+        (2 * Real.sqrt t * Real.log t) / (t * t) by ring]
+      rw [div_eq_div_iff h1.ne' h2.ne']
+      rw [show (2 * Real.sqrt t * Real.log t) * (t * Real.sqrt t)
+        = 2 * Real.log t * t * (Real.sqrt t * Real.sqrt t) by ring, hsq]
+      ring
+    rw [heq] at h1
+    exact h1
+  have hmajint : IntervalIntegrable (fun t : ℝ => 2 * Real.log t / (t * Real.sqrt t))
+      MeasureTheory.volume 2 x := by
+    apply ContinuousOn.intervalIntegrable
+    intro t ht
+    rcases Set.mem_uIcc.mp ht with h | h <;>
+      (have ht0 : (0 : ℝ) < t := by linarith [h.1, h.2])
+    · apply ContinuousAt.continuousWithinAt
+      fun_prop (disch := first | positivity | linarith)
+    · apply ContinuousAt.continuousWithinAt
+      fun_prop (disch := first | positivity | linarith)
+  have hbound := intervalIntegral.norm_integral_le_of_norm_le
+    (μ := MeasureTheory.volume)
+    (f := fun t : ℝ => deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k))
+    (g := fun t : ℝ => 2 * Real.log t / (t * Real.sqrt t))
+    (by linarith : (2 : ℝ) ≤ x) (Filter.Eventually.of_forall hmaj) hmajint
+  have hint2 : ∫ t in (2 : ℝ)..x, 2 * Real.log t / (t * Real.sqrt t) ≤ 32 :=
+    integral_log_div_three_halves (by norm_num) (by linarith)
+  have hint3 : ‖∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k)‖ ≤ 32 :=
+    le_trans hbound hint2
+  have hsetint : (∫ t in Set.Ioc (2 : ℝ) x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k)) =
+      ∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k) :=
+    (intervalIntegral.integral_of_le (by linarith)).symm
+  -- rewrite the target sum as the Abel left-hand side
+  have hfloor : 2 ≤ ⌊x⌋₊ := Nat.le_floor hx
+  have hunion : (Finset.Icc 1 ⌊x⌋₊ : Finset ℕ) = Finset.Icc 1 2 ∪ Ioc 2 ⌊x⌋₊ := by
+    ext n; simp only [Finset.mem_Icc, Finset.mem_Ioc, Finset.mem_union]; omega
+  have hdisj : Disjoint (Finset.Icc 1 2 : Finset ℕ) (Ioc 2 ⌊x⌋₊) := by
+    rw [Finset.disjoint_left]
+    intro a ha ha'
+    simp only [Finset.mem_Icc] at ha
+    simp only [Finset.mem_Ioc] at ha'
+    omega
+  have hsmall2 : ∑ n ∈ (Finset.Icc 1 2 : Finset ℕ),
+      (if ¬ n.Prime then ArithmeticFunction.vonMangoldt n / n else 0) = 0 := by
+    have hI : (Finset.Icc 1 2 : Finset ℕ) = {1, 2} := by decide
+    rw [hI, Finset.sum_pair (by norm_num)]
+    have h1 : ¬ (1:ℕ).Prime := by decide
+    simp [h1, Nat.prime_two, ArithmeticFunction.vonMangoldt_apply_one]
+  have hgoal : ∑ n ∈ (Finset.Icc 1 ⌊x⌋₊).filter (fun n => ¬ n.Prime),
+        ArithmeticFunction.vonMangoldt n / n = ∑ k ∈ Ioc 2 ⌊x⌋₊, c k / k := by
+    rw [hunion, Finset.sum_filter, Finset.sum_union hdisj, hsmall2, zero_add]
+    apply Finset.sum_congr rfl
+    intro n _
+    simp only [hc]
+    by_cases h : n.Prime <;> simp [h]
+  have hbridge : ∀ k : ℕ, c k / k = f k * c k := by
+    intro k
+    simp only [hf, div_eq_inv_mul]
+  rw [hgoal]
+  simp only [hbridge]
+  rw [habel, hsetint]
+  -- assemble
+  have hmain : f x * (∑ k ∈ Icc 0 ⌊x⌋₊, c k) - f 2 * (∑ k ∈ Icc 0 2, c k) -
+      ∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k) ≤ 4 + 0 + 32 := by
+    have h2 : f 2 * (∑ k ∈ Icc 0 2, c k) = 0 := by
+      have : (∑ k ∈ Icc 0 2, c k) = 0 := by
+        rw [← Nat.floor_ofNat (R := ℝ) 2]
+        exact hA2
+      rw [this, mul_zero]
+    have h3 : -(∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k)) ≤ 32 := by
+      have hnv : ‖∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k)‖ =
+          |∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k)| :=
+        Real.norm_eq_abs _
+      have hna := neg_le_abs (∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k))
+      linarith [hint3, hnv, hna]
+    have hA1 := hterm1
+    have hI1 := h3
+    calc f x * (∑ k ∈ Icc 0 ⌊x⌋₊, c k) - f 2 * (∑ k ∈ Icc 0 2, c k) -
+          ∫ t in (2 : ℝ)..x, deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k)
+        = f x * (∑ k ∈ Icc 0 ⌊x⌋₊, c k) + (-(∫ t in (2 : ℝ)..x,
+            deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k))) := by
+          rw [h2]; ring
+      _ ≤ 4 + 32 := by linarith
+      _ = 4 + 0 + 32 := by ring
+  have hnum : (4 : ℝ) + 0 + 32 ≤ 40 := by norm_num
+  exact le_trans hmain hnum
+
 /-- LEAF: page 15, first inequality of the display after display 4.3,
 G_1 of z is at least 10^-10 times the product over w < p < z of the inverse of 1 - omega p / p.
 Class HARD. It is the Selberg sieve lower bound for the truncated sum G_1 of the
@@ -532,6 +1305,394 @@ theorem leaf_G1_ge_euler_product :
   have h2 : 1 / (2 * C) * (C * Ey) = (1 / 2) * Ey := by field_simp
   linarith
 
+/-- The log-weighted prime sum twisted by a nonprincipal character mod 4 is bounded: this is
+`leaf_mertens_chi4` of MertensMod4Bias.lean, from Siegel-Walfisz and the non-prime part of the
+von Mangoldt sum. -/
+private theorem sum_chi_log_div_prime_bound {χ : DirichletCharacter ℂ 4} (hχ : χ ≠ 1) :
+    ∃ B : ℝ, 0 ≤ B ∧ ∀ x : ℝ, 2 ≤ x →
+      ‖∑ p ∈ Nat.primesLE ⌊x⌋₊, χ (p : ZMod 4) * (Real.log p : ℂ) / p‖ ≤ B := by
+  haveI : Fact (1 < 4) := ⟨by norm_num⟩
+  haveI : NeZero (4 : ℕ) := ⟨by norm_num⟩
+  obtain ⟨C, hC0, hC⟩ := sum_chi_mangoldt_div_bound hχ
+  refine ⟨C + 40, by positivity, ?_⟩
+  intro x hx
+  have hsetP : (Nat.primesLE ⌊x⌋₊ : Finset ℕ) =
+      (Finset.Icc 1 ⌊x⌋₊).filter (fun n => n.Prime) := by
+    ext n
+    simp only [Nat.mem_primesLE, Finset.mem_filter, Finset.mem_Icc]
+    constructor
+    · rintro ⟨hn, hp⟩; exact ⟨⟨by have := hp.two_le; omega, hn⟩, hp⟩
+    · rintro ⟨⟨h1, h2⟩, hp⟩; exact ⟨h2, hp⟩
+  have hP : ∑ n ∈ (Finset.Icc 1 ⌊x⌋₊).filter (fun n => n.Prime),
+        (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n =
+      ∑ p ∈ Nat.primesLE ⌊x⌋₊, χ (p : ZMod 4) * (Real.log p : ℂ) / p := by
+    rw [hsetP]
+    apply Finset.sum_congr rfl
+    intro p hp
+    rw [ArithmeticFunction.vonMangoldt_apply_prime (Finset.mem_filter.mp hp).2]
+    push_cast
+    ring
+  have hN : ‖∑ n ∈ (Finset.Icc 1 ⌊x⌋₊).filter (fun n => ¬ n.Prime),
+      (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n‖ ≤ 40 := by
+    refine (norm_sum_le _ _).trans ?_
+    have hreal := sum_nonprime_mangoldt_div_le hx
+    refine le_trans (Finset.sum_le_sum ?_) hreal
+    intro n hn
+    have hn1 : 1 ≤ n := (Finset.mem_Icc.mp (Finset.mem_filter.mp hn).1).1
+    have hnr : (0 : ℝ) < n := by exact_mod_cast hn1
+    have hΛ := ArithmeticFunction.vonMangoldt_nonneg (n := n)
+    have hχ1 := DirichletCharacter.norm_le_one χ (n : ZMod 4)
+    rw [norm_div, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hΛ]
+    have hnormn : ‖((n : ℂ))‖ = (n : ℝ) := by
+      rw [← Complex.ofReal_natCast, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hnr]
+    rw [hnormn]
+    apply div_le_div_of_nonneg_right _ (le_of_lt hnr)
+    calc ArithmeticFunction.vonMangoldt n * ‖χ (n : ZMod 4)‖
+        ≤ ArithmeticFunction.vonMangoldt n * 1 := mul_le_mul_of_nonneg_left hχ1 hΛ
+      _ = ArithmeticFunction.vonMangoldt n := by ring
+  have htot := hC x hx
+  have hsplit : ∑ n ∈ Finset.Icc 1 ⌊x⌋₊,
+        (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n =
+      (∑ n ∈ (Finset.Icc 1 ⌊x⌋₊).filter (fun n => n.Prime),
+          (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n) +
+        ∑ n ∈ (Finset.Icc 1 ⌊x⌋₊).filter (fun n => ¬ n.Prime),
+          (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n :=
+    (Finset.sum_filter_add_sum_filter_not (Finset.Icc 1 ⌊x⌋₊) (fun n => n.Prime) _).symm
+  have hPbound : ‖∑ n ∈ (Finset.Icc 1 ⌊x⌋₊).filter (fun n => n.Prime),
+      (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n‖ ≤ C + 40 := by
+    have h1 : ∑ n ∈ (Finset.Icc 1 ⌊x⌋₊).filter (fun n => n.Prime),
+          (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n =
+        (∑ n ∈ Finset.Icc 1 ⌊x⌋₊, (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n) -
+          ∑ n ∈ (Finset.Icc 1 ⌊x⌋₊).filter (fun n => ¬ n.Prime),
+            (ArithmeticFunction.vonMangoldt n : ℂ) * χ (n : ZMod 4) / n := by
+      rw [hsplit]; ring
+    rw [h1]
+    exact le_trans (norm_sub_le _ _) (by linarith)
+  rw [← hP]
+  exact hPbound
+
+
+/-- `leaf_mertens_chi4` of MertensMod4Bias.lean: the log-weighted prime sum with the real
+character mod 4 is bounded. -/
+private theorem chi4_real_log_prime_bound {χ : DirichletCharacter ℂ 4} (hχ : χ ≠ 1)
+    (hval : ∀ n : ℕ, χ (n : ZMod 4) =
+      if n % 4 = 1 then 1 else if n % 4 = 3 then -1 else 0) :
+    ∃ B₀ : ℝ, 0 ≤ B₀ ∧ ∀ x : ℝ, 2 ≤ x →
+      |∑ p ∈ Nat.primesLE ⌊x⌋₊,
+        (if p % 4 = 1 then (1 : ℝ) else if p % 4 = 3 then -1 else 0) * Real.log p / p| ≤ B₀ := by
+  obtain ⟨B, hB0, hB⟩ := sum_chi_log_div_prime_bound hχ
+  refine ⟨B, hB0, fun x hx => ?_⟩
+  have hcast : ((∑ p ∈ Nat.primesLE ⌊x⌋₊,
+      (if p % 4 = 1 then (1 : ℝ) else if p % 4 = 3 then -1 else 0) * Real.log p / p : ℝ) : ℂ) =
+      ∑ p ∈ Nat.primesLE ⌊x⌋₊, χ (p : ZMod 4) * (Real.log p : ℂ) / p := by
+    rw [Complex.ofReal_sum]
+    apply Finset.sum_congr rfl
+    intro p _
+    rw [hval p]
+    by_cases hp1 : p % 4 = 1
+    · rw [if_pos hp1, if_pos hp1]
+      push_cast
+      ring
+    · by_cases hp3 : p % 4 = 3
+      · rw [if_neg hp1, if_pos hp3, if_neg hp1, if_pos hp3]
+        push_cast
+        ring
+      · rw [if_neg hp1, if_neg hp3, if_neg hp1, if_neg hp3]
+        push_cast
+        ring
+  have hre : ∑ p ∈ Nat.primesLE ⌊x⌋₊,
+      (if p % 4 = 1 then (1 : ℝ) else if p % 4 = 3 then -1 else 0) * Real.log p / p =
+      (∑ p ∈ Nat.primesLE ⌊x⌋₊, χ (p : ZMod 4) * (Real.log p : ℂ) / p).re := by
+    have := congrArg Complex.re hcast
+    rw [Complex.ofReal_re] at this
+    exact this
+  rw [hre]
+  exact le_trans (Complex.abs_re_le_norm _) (hB x hx)
+
+
+/-- Abel summation for the sum of chi p / p over a block of primes, for any weight chi; the weighted
+form of abel_recip in AlmostPrimes/Decomp1528b. Inlined from MertensMod4Bias.lean. -/
+private theorem abel_weighted (χ : ℕ → ℝ) {x y : ℝ} (hy : 2 ≤ y) (hyx : y ≤ x) :
+    ∑ p ∈ (Ioc ⌊y⌋₊ ⌊x⌋₊).filter Nat.Prime,
+        χ p / p =
+      (∑ p ∈ Nat.primesLE ⌊x⌋₊,
+          χ p * log p / p) / log x -
+        (∑ p ∈ Nat.primesLE ⌊y⌋₊,
+          χ p * log p / p) / log y +
+        ∫ t in y..x, (∑ p ∈ Nat.primesLE ⌊t⌋₊,
+          χ p * log p / p) /
+            (t * log t ^ 2) := by
+  let c : ℕ → ℝ := fun n => if n.Prime then χ n * log n / n else 0
+  let f : ℝ → ℝ := fun t => (log t)⁻¹
+  have hs (t : ℝ) : (∑ k ∈ Icc 0 ⌊t⌋₊, c k) =
+      ∑ p ∈ Nat.primesLE ⌊t⌋₊, χ p * log p / p := by
+    simp only [c, ← sum_filter]
+    congr 1
+    ext k
+    simp [Nat.mem_primesLE]
+  have hd (t : ℝ) (ht : 1 < t) : HasDerivAt f (-(1 / (t * log t ^ 2))) t := by
+    have ht0 : t ≠ 0 := by linarith
+    have hl : log t ≠ 0 := (Real.log_pos ht).ne'
+    convert (Real.hasDerivAt_log ht0).inv hl using 1
+    field_simp
+  have hc : ContinuousOn (fun t : ℝ => -(1 / (t * log t ^ 2))) (Set.Icc y x) := by
+    intro t ht
+    have ht0 : t ≠ 0 := by linarith [ht.1]
+    have hl : log t ≠ 0 := (Real.log_pos (by linarith [ht.1])).ne'
+    have hden : t * log t ^ 2 ≠ 0 := mul_ne_zero ht0 (pow_ne_zero 2 hl)
+    apply ContinuousAt.continuousWithinAt
+    fun_prop (disch := assumption)
+  have hi : MeasureTheory.IntegrableOn (deriv f) (Set.Icc y x) := by
+    exact hc.integrableOn_Icc.congr_fun
+      (fun t ht => (hd t (by linarith [ht.1])).deriv.symm) measurableSet_Icc
+  have h := sum_mul_eq_sub_sub_integral_mul c (by linarith : 0 ≤ y) hyx
+    (fun t ht => (hd t (by linarith [ht.1])).differentiableAt) hi
+  have hleft : (∑ k ∈ Ioc ⌊y⌋₊ ⌊x⌋₊, f k * c k) =
+      ∑ p ∈ (Ioc ⌊y⌋₊ ⌊x⌋₊).filter Nat.Prime, χ p / p := by
+    rw [sum_filter]
+    apply sum_congr rfl
+    intro p _
+    dsimp [f, c]
+    split_ifs with hp
+    · have hl : log (p : ℝ) ≠ 0 := (Real.log_pos (by exact_mod_cast hp.one_lt)).ne'
+      field_simp
+    · simp
+  have hI : (∫ t in Set.Ioc y x, deriv f t * ∑ k ∈ Icc 0 ⌊t⌋₊, c k) =
+      -(∫ t in y..x, (∑ p ∈ Nat.primesLE ⌊t⌋₊, χ p * log p / p) / (t * log t ^ 2)) := by
+    rw [← intervalIntegral.integral_of_le hyx, ← intervalIntegral.integral_neg]
+    apply intervalIntegral.integral_congr
+    intro t ht
+    rw [Set.uIcc_of_le hyx] at ht
+    change deriv f t * (∑ k ∈ Icc 0 ⌊t⌋₊, c k) =
+      -((∑ p ∈ Nat.primesLE ⌊t⌋₊, χ p * log p / p) / (t * log t ^ 2))
+    rw [(hd t (by linarith [ht.1])).deriv, hs]
+    ring
+  rw [hleft, hs, hs, hI] at h
+  simpa [f, div_eq_mul_inv, mul_comm, sub_neg_eq_add] using h
+
+
+/-- The bias of the sums of 1/p between the classes 1 and 3 mod 4 is bounded, by Abel summation
+from chi4_real_log_prime_bound. Inlined from MertensMod4Bias.lean. -/
+private theorem chi4_bias_bound {χ : DirichletCharacter ℂ 4} (hχ : χ ≠ 1)
+    (hval : ∀ n : ℕ, χ (n : ZMod 4) =
+      if n % 4 = 1 then 1 else if n % 4 = 3 then -1 else 0) :
+    ∃ B : ℝ, 0 ≤ B ∧ ∀ y x : ℝ, 2 ≤ y → y ≤ x →
+      ∑ p ∈ ((Ioc ⌊y⌋₊ ⌊x⌋₊).filter Nat.Prime).filter (fun p => p % 4 = 1), (1 : ℝ) / p -
+        ∑ p ∈ ((Ioc ⌊y⌋₊ ⌊x⌋₊).filter Nat.Prime).filter (fun p => p % 4 = 3), (1 : ℝ) / p ≤ B := by
+  obtain ⟨B₀, hB₀, H⟩ := chi4_real_log_prime_bound (χ := χ) hχ hval
+  refine ⟨4 * B₀, by positivity, ?_⟩
+  intro y x hy hyx
+  set ψ4 : ℕ → ℝ := fun p => if p % 4 = 1 then (1 : ℝ) else if p % 4 = 3 then -1 else 0 with hψ4
+  set F := (Ioc ⌊y⌋₊ ⌊x⌋₊).filter Nat.Prime
+  have heq : ∑ p ∈ F.filter (fun p => p % 4 = 1), (1 : ℝ) / p -
+      ∑ p ∈ F.filter (fun p => p % 4 = 3), (1 : ℝ) / p = ∑ p ∈ F, ψ4 p / p := by
+    rw [Finset.sum_filter (s := F), Finset.sum_filter (s := F), ← sum_sub_distrib]
+    apply sum_congr rfl
+    intro p _
+    simp only [hψ4]
+    split_ifs with h1 h3 <;> first | omega | ring
+  rw [heq, abel_weighted ψ4 hy hyx]
+  have hx2 : 2 ≤ x := hy.trans hyx
+  have hl2 : (1 / 2 : ℝ) < log 2 := by
+    have := Real.log_two_gt_d9; linarith
+  have hly : 1 / 2 < log y := lt_of_lt_of_le hl2 (Real.log_le_log (by norm_num) hy)
+  have hlx : 1 / 2 < log x := lt_of_lt_of_le hl2 (Real.log_le_log (by norm_num) hx2)
+  have hlyp : 0 < log y := by linarith
+  have hlxp : 0 < log x := by linarith
+  set Bf : ℝ → ℝ := fun t => ∑ p ∈ Nat.primesLE ⌊t⌋₊, ψ4 p * log p / p with hBf
+  let w : ℝ → ℝ := fun t => 1 / (t * log t ^ 2)
+  have hwi : IntervalIntegrable w MeasureTheory.volume y x := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hyx]
+    intro t ht
+    have ht0 : t ≠ 0 := by linarith [ht.1]
+    have hl : log t ≠ 0 := (Real.log_pos (by linarith [ht.1])).ne'
+    have hden : t * log t ^ 2 ≠ 0 := mul_ne_zero ht0 (pow_ne_zero 2 hl)
+    apply ContinuousAt.continuousWithinAt
+    dsimp [w]
+    fun_prop (disch := assumption)
+  have hint : (∫ t in y..x, w t) = 1 / log y - 1 / log x := by
+    have hd : ∀ t ∈ Set.uIcc y x,
+        HasDerivAt (fun t : ℝ => -(log t)⁻¹) (w t) t := by
+      intro t ht
+      rw [Set.uIcc_of_le hyx] at ht
+      have ht0 : t ≠ 0 := by linarith [ht.1]
+      have hl : log t ≠ 0 := (Real.log_pos (by linarith [ht.1])).ne'
+      convert ((Real.hasDerivAt_log ht0).inv hl).neg using 1
+      dsimp [w]
+      field_simp
+    have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt hd hwi
+    simpa only [one_div, neg_sub_neg] using hi
+  have hbound : |∫ t in y..x, Bf t / (t * log t ^ 2)| ≤ ∫ t in y..x, B₀ * w t := by
+    have hb := intervalIntegral.norm_integral_le_of_norm_le (μ := MeasureTheory.volume)
+      (f := fun t => Bf t / (t * log t ^ 2)) hyx
+      (g := fun t => B₀ * w t) (Filter.Eventually.of_forall (fun t ht => by
+        have ht2 : 2 ≤ t := le_trans hy ht.1.le
+        have hden : 0 < t * log t ^ 2 := by
+          have hlog := Real.log_pos (by linarith : 1 < t)
+          positivity
+        rw [Real.norm_eq_abs, abs_div, abs_of_pos hden]
+        have h := H t ht2
+        exact (div_le_div_of_nonneg_right h hden.le).trans_eq (by dsimp [w]; ring)))
+      (hwi.const_mul B₀)
+    exact hb
+  rw [intervalIntegral.integral_const_mul, hint] at hbound
+  have hBx := H x hx2
+  have hBy := H y hy
+  have h1 : Bf x / log x ≤ B₀ / log x := by
+    rw [div_le_div_iff_of_pos_right hlxp]; exact (le_abs_self _).trans hBx
+  have h2 : -(Bf y / log y) ≤ B₀ / log y := by
+    rw [← neg_div, div_le_div_iff_of_pos_right hlyp]; exact (neg_le_abs _).trans hBy
+  have h3 : (∫ t in y..x, Bf t / (t * log t ^ 2)) ≤ B₀ * (1 / log y - 1 / log x) :=
+    (le_abs_self _).trans hbound
+  have hiy : 1 / log y ≤ 2 := by rw [div_le_iff₀ hlyp]; linarith
+  have hmain : Bf x / log x - Bf y / log y + ∫ t in y..x, Bf t / (t * log t ^ 2) ≤
+      2 * B₀ * (1 / log y) := by
+    have : B₀ / log x + B₀ / log y + B₀ * (1 / log y - 1 / log x) = 2 * B₀ * (1 / log y) := by
+      ring
+    linarith
+  calc _ ≤ 2 * B₀ * (1 / log y) := hmain
+    _ ≤ 2 * B₀ * 2 := mul_le_mul_of_nonneg_left hiy (by positivity)
+    _ = 4 * B₀ := by ring
+
+
+/-- Each local factor of the Euler product is at least the exponential of omega p / p, since
+1 - x is at most exp of -x. Inlined from MertensMod4Split.lean. -/
+private theorem exp_le_inv_one_sub {x : ℝ} (hx : x < 1) : Real.exp x ≤ (1 - x)⁻¹ := by
+  have h1 : 0 < 1 - x := by linarith
+  have h2 : 1 - x ≤ Real.exp (-x) := by linarith [Real.add_one_le_exp (-x)]
+  rw [le_inv_comm₀ (Real.exp_pos x) h1, ← Real.exp_neg]
+  exact h2
+
+/-- Page 15: the product is at least exp of the sum of omega p / p, which is the sum of 1/p plus
+the sum over p = 3 mod 4 of 1/p, then mertens2_block and the bias bound. Inlined from
+MertensMod4Split.lean. -/
+private theorem product_ge_log_ratio_aux {χ : DirichletCharacter ℂ 4} (hχ : χ ≠ 1)
+    (hval : ∀ n : ℕ, χ (n : ZMod 4) =
+      if n % 4 = 1 then 1 else if n % 4 = 3 then -1 else 0) :
+    ∃ C : ℝ, 0 < C ∧ ∀ w : ℕ, wBig ≤ w → ∀ z : ℝ, 1 ≤ z →
+      (Real.log z / Real.log w) ^ ((3 : ℝ) / 2) ≤
+        C * ∏ p ∈ (range (⌊z⌋₊ + 1)).filter (fun p => p.Prime ∧ w < p ∧ (p : ℝ) ≤ z),
+          (1 - (envelopingOmega w p : ℝ) / p)⁻¹ := by
+  obtain ⟨B, hB0, HB⟩ := chi4_bias_bound (χ := χ) hχ hval
+  refine ⟨Real.exp (6 + B / 2), Real.exp_pos _, ?_⟩
+  intro w hw z hz1
+  have hwBig1 : (10 : ℝ) ≤ wBig := by
+    calc (10 : ℝ) = (10 : ℝ) ^ (1 : ℝ) := (Real.rpow_one _).symm
+      _ ≤ wBig := Real.rpow_le_rpow_of_exponent_le (by norm_num)
+          (Real.one_le_rpow (by norm_num) (by positivity))
+  have hw10 : (10 : ℝ) ≤ w := hwBig1.trans hw
+  have hlogw : 0 < Real.log w := Real.log_pos (by linarith)
+  have hlogw1 : 1 ≤ Real.log w := by
+    rw [← Real.log_exp 1]
+    exact Real.log_le_log (Real.exp_pos 1) (by linarith [Real.exp_one_lt_d9])
+  set F := (range (⌊z⌋₊ + 1)).filter (fun p => p.Prime ∧ w < p ∧ (p : ℝ) ≤ z) with hF
+  -- facts about primes in F
+  have hFp : ∀ p ∈ F, p.Prime ∧ w < p ∧ (10 : ℝ) < p := by
+    intro p hp
+    have h := (mem_filter.mp hp).2
+    exact ⟨h.1, h.2.1, lt_of_le_of_lt hw10 (by exact_mod_cast h.2.1)⟩
+  have hx : ∀ p ∈ F, (envelopingOmega w p : ℝ) / p < 1 := by
+    intro p hp
+    obtain ⟨-, -, h10⟩ := hFp p hp
+    have hω : (envelopingOmega w p : ℝ) ≤ 2 := by
+      unfold envelopingOmega; split_ifs <;> norm_num
+    rw [div_lt_one (by linarith)]; linarith
+  have hfac1 : ∀ p ∈ F, 1 ≤ (1 - (envelopingOmega w p : ℝ) / p)⁻¹ := by
+    intro p hp
+    have h0 : 0 ≤ (envelopingOmega w p : ℝ) / p := by positivity
+    calc (1 : ℝ) = Real.exp 0 := Real.exp_zero.symm
+      _ ≤ Real.exp ((envelopingOmega w p : ℝ) / p) := Real.exp_le_exp.mpr h0
+      _ ≤ _ := exp_le_inv_one_sub (hx p hp)
+  have hP1 : 1 ≤ ∏ p ∈ F, (1 - (envelopingOmega w p : ℝ) / p)⁻¹ := one_le_prod₀ hfac1
+  have hexpP : Real.exp (∑ p ∈ F, (envelopingOmega w p : ℝ) / p) ≤
+      ∏ p ∈ F, (1 - (envelopingOmega w p : ℝ) / p)⁻¹ := by
+    rw [Real.exp_sum]
+    exact prod_le_prod₀ (fun p _ => (Real.exp_pos _).le) (fun p hp => exp_le_inv_one_sub (hx p hp))
+  by_cases hzw : z < w
+  · -- below w the ratio is below one and the product is at least one
+    have hlz : 0 ≤ Real.log z := Real.log_nonneg hz1
+    have hratio : Real.log z / Real.log w ≤ 1 := by
+      rw [div_le_one hlogw]
+      exact Real.log_le_log (by linarith) hzw.le
+    have hr : (Real.log z / Real.log w) ^ ((3 : ℝ) / 2) ≤ 1 :=
+      Real.rpow_le_one (div_nonneg hlz hlogw.le) hratio (by norm_num)
+    have hC1 : 1 ≤ Real.exp (6 + B / 2) := Real.one_le_exp (by positivity)
+    calc _ ≤ 1 := hr
+      _ ≤ Real.exp (6 + B / 2) * 1 := by linarith
+      _ ≤ _ := mul_le_mul_of_nonneg_left hP1 (Real.exp_pos _).le
+  · push_neg at hzw
+    have hz10 : (10 : ℝ) ≤ z := hw10.trans hzw
+    have hlogz : 0 < Real.log z := Real.log_pos (by linarith)
+    -- F is the block of primes in mertens2_block
+    have hFeq : F = (Ioc ⌊(w : ℝ)⌋₊ ⌊z⌋₊).filter Nat.Prime := by
+      rw [Nat.floor_natCast]
+      ext p
+      simp only [hF, mem_filter, mem_range, mem_Ioc]
+      constructor
+      · rintro ⟨-, hp, hwp, hpz⟩
+        exact ⟨⟨hwp, Nat.le_floor hpz⟩, hp⟩
+      · rintro ⟨⟨hwp, hpz⟩, hp⟩
+        refine ⟨by omega, hp, hwp, ?_⟩
+        exact (Nat.le_floor_iff (by linarith)).mp hpz
+    have hM := LeanLab.AlmostPrimes.Decomp1528b.mertens2_block (y := (w : ℝ)) (x := z) (le_trans (by norm_num) hw10) hzw
+    rw [← hFeq] at hM
+    have hS1 : Real.log (Real.log z) - Real.log (Real.log w) - 4 / Real.log w ≤
+        ∑ p ∈ F, (1 : ℝ) / p := by
+      have := (abs_le.mp hM).1; linarith
+    have hbias := HB w z (le_trans (by norm_num) hw10) hzw
+    rw [← hFeq] at hbias
+    -- split the sum of 1/p by residue mod 4
+    have hodd : ∀ p ∈ F, p % 4 = 1 ∨ p % 4 = 3 := by
+      intro p hp
+      obtain ⟨hpp, -, h10⟩ := hFp p hp
+      have hne : p ≠ 2 := by
+        intro h; rw [h] at h10; norm_num at h10
+      have := hpp.eq_one_or_self_of_dvd 2
+      rcases Nat.even_or_odd p with he | ho
+      · exact absurd (this (even_iff_two_dvd.mp he)) (by omega)
+      · have := Nat.odd_iff.mp ho; omega
+    have hsplit : ∑ p ∈ F, (1 : ℝ) / p =
+        ∑ p ∈ F.filter (fun p => p % 4 = 1), (1 : ℝ) / p +
+          ∑ p ∈ F.filter (fun p => p % 4 = 3), (1 : ℝ) / p := by
+      rw [← sum_filter_add_sum_filter_not F (fun p => p % 4 = 1)]
+      congr 1
+      apply sum_congr _ (fun _ _ => rfl)
+      ext p
+      simp only [mem_filter]
+      constructor
+      · rintro ⟨hp, h⟩; exact ⟨hp, by rcases hodd p hp with h' | h' <;> omega⟩
+      · rintro ⟨hp, h⟩; exact ⟨hp, by omega⟩
+    have hω : ∑ p ∈ F, (envelopingOmega w p : ℝ) / p =
+        ∑ p ∈ F, (1 : ℝ) / p + ∑ p ∈ F.filter (fun p => p % 4 = 3), (1 : ℝ) / p := by
+      rw [Finset.sum_filter (s := F) (fun p => p % 4 = 3), ← sum_add_distrib]
+      apply sum_congr rfl
+      intro p hp
+      obtain ⟨-, hwp, -⟩ := hFp p hp
+      unfold envelopingOmega
+      rw [if_neg (by omega)]
+      rcases hodd p hp with h | h
+      · rw [if_pos h, if_neg (by omega)]; push_cast; ring
+      · rw [if_neg (by omega), if_pos h]; push_cast; ring
+    have hsum : (3 / 2 : ℝ) * (Real.log (Real.log z) - Real.log (Real.log w)) - (6 + B / 2) ≤
+        ∑ p ∈ F, (envelopingOmega w p : ℝ) / p := by
+      have h4 : 4 / Real.log w ≤ 4 := by
+        rw [div_le_iff₀ hlogw]; linarith
+      rw [hω]; linarith
+    have hratio : (Real.log z / Real.log w) ^ ((3 : ℝ) / 2) =
+        Real.exp ((3 / 2 : ℝ) * (Real.log (Real.log z) - Real.log (Real.log w))) := by
+      rw [Real.rpow_def_of_pos (div_pos hlogz hlogw), Real.log_div hlogz.ne' hlogw.ne']
+      ring_nf
+    rw [hratio]
+    calc Real.exp ((3 / 2 : ℝ) * (Real.log (Real.log z) - Real.log (Real.log w)))
+        = Real.exp (6 + B / 2) *
+            Real.exp ((3 / 2 : ℝ) * (Real.log (Real.log z) - Real.log (Real.log w)) - (6 + B / 2)) := by
+          rw [← Real.exp_add]; ring_nf
+      _ ≤ Real.exp (6 + B / 2) * Real.exp (∑ p ∈ F, (envelopingOmega w p : ℝ) / p) :=
+          mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr hsum) (Real.exp_pos _).le
+      _ ≤ _ := mul_le_mul_of_nonneg_left hexpP (Real.exp_pos _).le
+
+
 /-- LEAF: page 15, second inequality of the display after display 4.3,
 the product over w < p < z of the inverse of 1 - omega p / p is at least a constant times
 log z to the 3/2 times log w to the -3/2, with log N equal to 10 log z.
@@ -544,7 +1705,8 @@ theorem leaf_euler_product_ge_log_ratio :
       (Real.log z / Real.log w) ^ ((3 : ℝ) / 2) ≤
         C * ∏ p ∈ (range (⌊z⌋₊ + 1)).filter (fun p => p.Prime ∧ w < p ∧ (p : ℝ) ≤ z),
           (1 - (envelopingOmega w p : ℝ) / p)⁻¹ := by
-  sorry
+  obtain ⟨χ, hχ, -, -, hval⟩ := chi4_exists
+  exact product_ge_log_ratio_aux (χ := χ) hχ hval
 
 /-- Display 3.3 and display 3.4, the normalization phi W / W of the weight f
 compared with log w, as used on page 15 to match the lower bound of G_1.
@@ -679,5 +1841,6 @@ theorem paper_enveloping_normalization_input_of_leaves :
         field_simp
     _ ≤ (10 : ℝ) ^ ((3 : ℝ) / 2) * CB / c₀ * envelopingG w 1 z :=
         mul_le_mul_of_nonneg_left hA (by positivity)
+
 
 end LeanLab.Teravainen2016
