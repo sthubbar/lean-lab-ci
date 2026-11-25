@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_principal_log_weight_sq_long
+import LeanLab.HelfgottMajor.SPLIT_principal_log_weight_tail_neg_main_term_pos
 
 /-!
 Splitting the digamma input `Decomp457b.principal_log_weight_tail_neg_digamma_envelope` of
@@ -49,7 +50,7 @@ theorem tail_neg_digamma_main_term_envelope (t : ℝ) (ht : 2 ≤ |t|) :
           1 / (12 * ((5 / 2 : ℂ) + t * I) ^ 2) -
         (((-1 / 2 : ℂ) + t * I)⁻¹ + ((1 / 2 : ℂ) + t * I)⁻¹ + ((3 / 2 : ℂ) + t * I)⁻¹)‖ +
       2 / 9375 ≤ Real.log |t| + 3 / 2 := by
-  sorry
+  exact TailNegMainTerm.main_term_envelope_of_leaves t ht
 
 /-- The recurrence step, proved: `ψ(-1/2 + it + 3) = ψ(-1/2 + it) + Σ_{k<3} 1/(-1/2 + it + k)`. -/
 theorem tail_neg_digamma_recurrence (t : ℝ) :
@@ -92,3 +93,7 @@ theorem principal_log_weight_tail_neg_digamma_envelope_of_leaves (t : ℝ) (ht :
     _ ≤ Real.log |t| + 3 / 2 := by linarith
 
 end LeanLab.HelfgottMajor.Decomp457b
+
+#print axioms LeanLab.HelfgottMajor.Decomp457b.tail_neg_digamma_main_term_envelope
+#print axioms LeanLab.HelfgottMajor.Decomp457b.TailNegMainTerm.main_term_norm_neg
+#print axioms LeanLab.HelfgottMajor.Decomp457b.principal_log_weight_tail_neg_digamma_envelope_of_leaves
