@@ -169,7 +169,63 @@ theorem leaf_window_basic (A ε c x0 : ℝ) (hA : 0 ≤ A) (hε : 0 < ε) (hε6 
       x0 ≤ windowY X ε / c ∧ 0 < Real.log (windowY X ε / c) ∧
       Real.log (windowY X ε / c) ≤ Real.log X ∧ Real.sqrt (windowY X ε / c) ≤ H ∧
       Real.log X ^ A ≤ (2 : ℝ) ^ A * Real.log (windowY X ε / c) ^ A := by
-  sorry
+  have he2 : (2 : ℝ) ≤ Real.exp 24 := by
+    have := Real.add_one_le_exp (24 : ℝ); linarith
+  refine ⟨max (Real.exp 24) (16 * x0 ^ 2 + 1), he2.trans (le_max_left _ _),
+    fun X H hX hH => ?_⟩
+  have hXe : Real.exp 24 ≤ X := (le_max_left _ _).trans hX
+  have hXx : 16 * x0 ^ 2 + 1 ≤ X := (le_max_right _ _).trans hX
+  have hX0 : 0 < X := lt_of_lt_of_le (by norm_num) (he2.trans hXe)
+  have hX1 : 1 ≤ X := by linarith
+  have hL24 : 24 ≤ Real.log X := by
+    rw [← Real.log_exp 24]; exact Real.log_le_log (Real.exp_pos 24) hXe
+  set L := Real.log X with hLdef
+  set a : ℝ := 7 / 12 + ε / 2 with ha
+  have hY : windowY X ε = X ^ a := rfl
+  have hYpos : 0 < windowY X ε := by rw [hY]; exact Real.rpow_pos_of_pos hX0 a
+  have hc0 : 0 < c := by linarith
+  have hlogY : Real.log (windowY X ε) = a * L := by rw [hY, Real.log_rpow hX0]
+  have hlogc : Real.log c < 2 := by
+    have h4 : Real.log c ≤ Real.log 4 := Real.log_le_log hc0 hc4
+    have : Real.log 4 < 2 := by
+      rw [Real.log_lt_iff_lt_exp (by norm_num)]
+      have h2 : Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+      have h1 := Real.exp_one_gt_d9
+      nlinarith
+    linarith
+  have hlogc0 : 0 ≤ Real.log c := Real.log_nonneg (by linarith)
+  set l := Real.log (windowY X ε / c) with hldef
+  have hl : l = a * L - Real.log c := by
+    rw [hldef, Real.log_div hYpos.ne' hc0.ne', hlogY]
+  have hlpos : 0 < l := by rw [hl]; nlinarith
+  have hlL : l ≤ L := by rw [hl]; nlinarith
+  have hl2 : L ≤ 2 * l := by rw [hl]; nlinarith
+  -- Y is at least sqrt X
+  have hYsq : Real.sqrt X ≤ windowY X ε := by
+    rw [Real.sqrt_eq_rpow, hY]
+    exact Real.rpow_le_rpow_of_exponent_le hX1 (by rw [ha]; linarith)
+  have hx0 : x0 ≤ windowY X ε / c := by
+    have h1 : 4 * |x0| ≤ Real.sqrt X := by
+      rw [show 4 * |x0| = Real.sqrt ((4 * |x0|) ^ 2) by
+        rw [Real.sqrt_sq (by positivity)]]
+      apply Real.sqrt_le_sqrt
+      have : (4 * |x0|) ^ 2 = 16 * x0 ^ 2 := by rw [mul_pow, sq_abs]; norm_num
+      linarith
+    rw [le_div_iff₀ hc0]
+    have : x0 * c ≤ |x0| * 4 := by
+      calc x0 * c ≤ |x0| * c := mul_le_mul_of_nonneg_right (le_abs_self x0) hc0.le
+        _ ≤ |x0| * 4 := mul_le_mul_of_nonneg_left hc4 (abs_nonneg x0)
+    linarith
+  have hsqH : Real.sqrt (windowY X ε / c) ≤ H := by
+    refine le_trans ?_ hH
+    have h1 : Real.sqrt (windowY X ε / c) ≤ Real.sqrt (windowY X ε) :=
+      Real.sqrt_le_sqrt (div_le_self hYpos.le (by linarith))
+    refine h1.trans ?_
+    rw [Real.sqrt_eq_rpow, hY, ← Real.rpow_mul hX0.le]
+    exact Real.rpow_le_rpow_of_exponent_le hX1 (by rw [ha]; linarith)
+  refine ⟨hx0, hlpos, hlL, hsqH, ?_⟩
+  rw [← Real.mul_rpow (by norm_num) hlpos.le]
+  exact Real.rpow_le_rpow (by linarith) hl2 hA
 
 /-- LEAF: P0088 page 15, the remark after display 52 that the choice of z0 in
 display 34 is set by the hypothesis on M in Lemma 3.4: for B at least one and
@@ -181,7 +237,66 @@ theorem leaf_window_cutoff (B ε c : ℝ) (hB : 1 ≤ B) (hε : 0 < ε) (hε6 : 
     ∃ X0 : ℝ, 2 ≤ X0 ∧ ∀ X : ℝ, X0 ≤ X →
       windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ) ≤
         (windowY X ε / c) ^ (1 / 4 : ℝ) * (Real.log (windowY X ε / c) ^ B) ^ (-2 : ℤ) := by
-  sorry
+  have he2 : (2 : ℝ) ≤ Real.exp 4 := by
+    have := Real.add_one_le_exp (4 : ℝ); linarith
+  refine ⟨Real.exp 4, he2, fun X hX => ?_⟩
+  have hX0 : 0 < X := lt_of_lt_of_le (by norm_num) (he2.trans hX)
+  have hL4 : 4 ≤ Real.log X := by
+    rw [← Real.log_exp 4]; exact Real.log_le_log (Real.exp_pos 4) hX
+  set L := Real.log X with hLdef
+  set a : ℝ := 7 / 12 + ε / 2 with ha
+  have hY : windowY X ε = X ^ a := rfl
+  have hYpos : 0 < windowY X ε := by rw [hY]; exact Real.rpow_pos_of_pos hX0 a
+  have hc0 : 0 < c := by linarith
+  have hlogY : Real.log (windowY X ε) = a * L := by rw [hY, Real.log_rpow hX0]
+  have hlogc : Real.log c < 2 := by
+    have h4 : Real.log c ≤ Real.log 4 := Real.log_le_log hc0 hc4
+    have : Real.log 4 < 2 := by
+      rw [Real.log_lt_iff_lt_exp (by norm_num)]
+      have := Real.add_one_le_exp (2 : ℝ)
+      have h2 : Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+      have h1 := Real.exp_one_gt_d9
+      nlinarith
+    linarith
+  have hlogc0 : 0 ≤ Real.log c := Real.log_nonneg (by linarith)
+  set l := Real.log (windowY X ε / c) with hldef
+  have hl : l = a * L - Real.log c := by
+    rw [hldef, Real.log_div hYpos.ne' hc0.ne', hlogY]
+  have hlpos : 0 < l := by rw [hl]; nlinarith
+  have hlL : l ≤ (2 / 3) * L := by rw [hl]; nlinarith
+  have hB0 : 0 ≤ B := by linarith
+  have hLpos : 0 < L := by linarith
+  have hlB : l ^ B ≤ (2 / 3) * L ^ B := by
+    have h1 : l ^ B ≤ ((2 / 3) * L) ^ B := Real.rpow_le_rpow hlpos.le hlL hB0
+    rw [Real.mul_rpow (by norm_num) hLpos.le] at h1
+    have h2 : ((2 : ℝ) / 3) ^ B ≤ ((2 : ℝ) / 3) ^ (1 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_ge (by norm_num) (by norm_num) hB
+    rw [Real.rpow_one] at h2
+    exact h1.trans (mul_le_mul_of_nonneg_right h2 (Real.rpow_nonneg hLpos.le B))
+  have hlBpos : 0 < l ^ B := Real.rpow_pos_of_pos hlpos B
+  have hLBpos : 0 < L ^ B := Real.rpow_pos_of_pos hLpos B
+  have hc4' : c ^ (1 / 4 : ℝ) ≤ 2 := by
+    have h := Real.rpow_le_rpow hc0.le (show c ≤ 16 by linarith) (by norm_num : (0 : ℝ) ≤ 1 / 4)
+    have h16 : (16 : ℝ) ^ (1 / 4 : ℝ) = 2 := by
+      rw [show (16 : ℝ) = 2 ^ (4 : ℝ) by norm_num, ← Real.rpow_mul (by norm_num)]
+      norm_num
+    linarith
+  have hcpos : 0 < c ^ (1 / 4 : ℝ) := Real.rpow_pos_of_pos hc0 _
+  have hYq : 0 < windowY X ε ^ (1 / 4 : ℝ) := Real.rpow_pos_of_pos hYpos _
+  rw [Real.div_rpow hYpos.le hc0.le, zpow_neg, zpow_neg, zpow_two, zpow_two]
+  rw [div_mul_eq_mul_div, le_div_iff₀ hcpos]
+  have hsq : l ^ B * l ^ B ≤ (4 / 9) * (L ^ B * L ^ B) := by nlinarith
+  have hinv : (4 / 9 : ℝ)⁻¹ * (L ^ B * L ^ B)⁻¹ ≤ (l ^ B * l ^ B)⁻¹ := by
+    rw [← mul_inv]
+    exact inv_anti₀ (by positivity) hsq
+  calc windowY X ε ^ (1 / 4 : ℝ) * (L ^ B * L ^ B)⁻¹ * c ^ (1 / 4 : ℝ)
+      ≤ windowY X ε ^ (1 / 4 : ℝ) * (L ^ B * L ^ B)⁻¹ * 2 :=
+        mul_le_mul_of_nonneg_left hc4' (by positivity)
+    _ ≤ windowY X ε ^ (1 / 4 : ℝ) * ((4 / 9 : ℝ)⁻¹ * (L ^ B * L ^ B)⁻¹) := by
+        have : (0 : ℝ) ≤ windowY X ε ^ (1 / 4 : ℝ) * (L ^ B * L ^ B)⁻¹ := by positivity
+        nlinarith
+    _ ≤ windowY X ε ^ (1 / 4 : ℝ) * (l ^ B * l ^ B)⁻¹ :=
+        mul_le_mul_of_nonneg_left hinv hYq.le
 
 /-- LEAF: P0088 page 15, the note after display 52 that the condition on
 theta2 ensures z1 at most H Y^(-1/2) L^(-2B): for eps below 1/6, large X and
@@ -194,7 +309,78 @@ theorem leaf_window_rough (B ε c : ℝ) (hB : 0 ≤ B) (hε : 0 < ε) (hε6 : �
       2 ≤ windowY X ε ^ (1 / 6 + ε / 2) ∧
       windowY X ε ^ (1 / 6 + ε / 2) ≤
         H / Real.sqrt (windowY X ε / c) * (Real.log (windowY X ε / c) ^ B) ^ (-2 : ℤ) := by
-  sorry
+  have hev1 : ∀ᶠ X : ℝ in Filter.atTop, ‖Real.log X ^ (2 * B)‖ ≤ 1 * ‖X ^ (ε / 3)‖ :=
+    (isLittleO_log_rpow_rpow_atTop (2 * B) (by linarith : 0 < ε / 3)).bound one_pos
+  have hev2 : ∀ᶠ X : ℝ in Filter.atTop, 2 ≤ X ^ (7 / 72 : ℝ) :=
+    (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 7 / 72)).eventually_ge_atTop 2
+  obtain ⟨X1, hX1⟩ := Filter.eventually_atTop.1
+    (hev1.and (hev2.and (Filter.eventually_ge_atTop (Real.exp 4))))
+  have he2 : (2 : ℝ) ≤ Real.exp 4 := by
+    have := Real.add_one_le_exp (4 : ℝ); linarith
+  refine ⟨max X1 (Real.exp 4), he2.trans (le_max_right _ _), fun X H hX hH => ?_⟩
+  obtain ⟨k1, k2, hXe⟩ := hX1 X ((le_max_left _ _).trans hX)
+  have hX0 : 0 < X := lt_of_lt_of_le (by norm_num) (he2.trans hXe)
+  have hX1' : 1 ≤ X := by linarith
+  have hL4 : 4 ≤ Real.log X := by
+    rw [← Real.log_exp 4]; exact Real.log_le_log (Real.exp_pos 4) hXe
+  set L := Real.log X with hLdef
+  set a : ℝ := 7 / 12 + ε / 2 with ha
+  have hY : windowY X ε = X ^ a := rfl
+  have hYpos : 0 < windowY X ε := by rw [hY]; exact Real.rpow_pos_of_pos hX0 a
+  have hc0 : 0 < c := by linarith
+  have hlogY : Real.log (windowY X ε) = a * L := by rw [hY, Real.log_rpow hX0]
+  have hlogc : Real.log c < 2 := by
+    have h4 : Real.log c ≤ Real.log 4 := Real.log_le_log hc0 hc4
+    have : Real.log 4 < 2 := by
+      rw [Real.log_lt_iff_lt_exp (by norm_num)]
+      have h2 : Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+      have h1 := Real.exp_one_gt_d9
+      nlinarith
+    linarith
+  have hlogc0 : 0 ≤ Real.log c := Real.log_nonneg (by linarith)
+  set l := Real.log (windowY X ε / c) with hldef
+  have hl : l = a * L - Real.log c := by
+    rw [hldef, Real.log_div hYpos.ne' hc0.ne', hlogY]
+  have hlpos : 0 < l := by rw [hl]; nlinarith
+  have hlL : l ≤ L := by rw [hl]; nlinarith
+  have hLpos : 0 < L := by linarith
+  set b : ℝ := 1 / 6 + ε / 2 with hb
+  have hYb : windowY X ε ^ b = X ^ (a * b) := by rw [hY, ← Real.rpow_mul hX0.le]
+  constructor
+  · rw [hYb]
+    refine k2.trans (Real.rpow_le_rpow_of_exponent_le hX1' ?_)
+    rw [ha, hb]; nlinarith
+  · -- the log factor
+    have hlog2 : (l ^ B) ^ 2 ≤ X ^ (ε / 3) := by
+      have e1 : (l ^ B) ^ 2 = l ^ (2 * B) := by
+        rw [mul_comm, Real.rpow_mul hlpos.le, Real.rpow_two]
+      have e2 : l ^ (2 * B) ≤ L ^ (2 * B) := Real.rpow_le_rpow hlpos.le hlL (by linarith)
+      have e3 : L ^ (2 * B) ≤ X ^ (ε / 3) := by
+        have h := k1
+        rw [one_mul, Real.norm_of_nonneg (Real.rpow_nonneg hLpos.le _),
+          Real.norm_of_nonneg (Real.rpow_nonneg hX0.le _)] at h
+        exact h
+      rw [e1]; exact e2.trans e3
+    have hsq : Real.sqrt (windowY X ε / c) ≤ X ^ (a / 2) := by
+      have h1 : Real.sqrt (windowY X ε / c) ≤ Real.sqrt (windowY X ε) :=
+        Real.sqrt_le_sqrt (div_le_self hYpos.le (by linarith))
+      refine h1.trans (le_of_eq ?_)
+      rw [Real.sqrt_eq_rpow, hY, ← Real.rpow_mul hX0.le]; ring_nf
+    have hsqpos : 0 < Real.sqrt (windowY X ε / c) := Real.sqrt_pos.2 (div_pos hYpos hc0)
+    have hlBpos : 0 < (l ^ B) ^ 2 := by positivity
+    have hexp : X ^ (a * b) * X ^ (a / 2) * X ^ (ε / 3) ≤ H := by
+      rw [← Real.rpow_add hX0, ← Real.rpow_add hX0]
+      refine le_trans (Real.rpow_le_rpow_of_exponent_le hX1' ?_) hH
+      rw [ha, hb]; nlinarith
+    have hprod : windowY X ε ^ b * Real.sqrt (windowY X ε / c) * (l ^ B) ^ 2 ≤ H := by
+      rw [hYb]
+      refine le_trans ?_ hexp
+      have p1 : 0 ≤ X ^ (a * b) := Real.rpow_nonneg hX0.le _
+      have p2 : 0 ≤ X ^ (a / 2) := Real.rpow_nonneg hX0.le _
+      exact mul_le_mul (mul_le_mul_of_nonneg_left hsq p1) hlog2 hlBpos.le (by positivity)
+    rw [zpow_neg, zpow_two, ← pow_two, div_mul_eq_mul_div, le_div_iff₀ hsqpos,
+      ← div_eq_mul_inv, le_div_iff₀ hlBpos]
+    exact hprod
 
 /-- P0088 page 10 display 41 from the hypothesis on alpha of the parent, with
 L = log X replaced by any smaller positive l: l^B at most q at most H l^(-B)
