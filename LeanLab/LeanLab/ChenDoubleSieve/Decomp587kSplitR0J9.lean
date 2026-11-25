@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp587k
+import LeanLab.ChenDoubleSieve.Task587CapChain1122
 
 /-!
 Split of `r0j9_short` from `LeanLab.ChenDoubleSieve.Decomp587k`.
@@ -16,13 +17,13 @@ open Real Set Finset MeasureTheory
 namespace LeanLab.ChenDoubleSieve.Task587.SplitR0J9
 open Wu04Functional
 
-/-- LEAF: Buchstab function cap, Wu 2004 Lemma 2.10 page 9 with the numerical values of
+/-- Buchstab function cap, Wu 2004 Lemma 2.10 page 9 with the numerical values of
 omega used for Lemma 5.2 page 26, D2,9, Table 1 row 1 page 30. For u at least 31 / 10 one has omega u at most
 563 / 1000; numerically the last crossing of this level is below 31 / 10 and omega tends to
-exp of minus gamma, about 0.5615. Class MEDIUM. -/
+exp of minus gamma, about 0.5615. PROVED in Task587CapChain1122. -/
 theorem omega_cap {ω : ℝ → ℝ} (hω : IsBuchstab ω) {u : ℝ} (hu : (31 / 10 : ℝ) ≤ u) :
-    ω u ≤ (563 / 1000 : ℝ) := by
-  sorry
+    ω u ≤ (563 / 1000 : ℝ) :=
+  CapChain.cap_563 hω hu
 
 /-- LEAF: Wu 2004 Lemma 5.2 page 26, D2,9, Table 1 row 1 page 30, numerical maximisation of the Buchstab
 integral, low window phi between 2 and 9 / 4. Class HARD. -/
