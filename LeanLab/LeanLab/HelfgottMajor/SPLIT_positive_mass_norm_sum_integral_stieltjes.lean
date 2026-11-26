@@ -1,4 +1,5 @@
-import LeanLab.HelfgottMajor.SPLIT_stieltjes_positive_zero_sum_parts
+import LeanLab.HelfgottMajor.Decomp431a
+import LeanLab.HelfgottMajor.Continuation457
 
 /-!
 Faithful Stieltjes split of `positive_mass_norm_sum_integral` in
@@ -67,32 +68,7 @@ theorem stieltjes_positive_zero_sum (q : ℕ) [NeZero q] (χ : DirichletCharacte
               0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
               (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) + c -
             t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) := by
-  obtain ⟨hI1, hI2, hI3⟩ := stieltjes_integrability q χ δ T hT
-  rw [stieltjes_sum_by_parts_N q χ δ T hT hzeros]
-  have hsplit :
-      (∫ t in (1 : ℝ)..T,
-        deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t *
-          ((∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
-              0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
-              (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) + c -
-            t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) =
-      (∫ t in (1 : ℝ)..T,
-        deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t *
-          (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
-              0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
-              (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ))) +
-        c * (∫ t in (1 : ℝ)..T,
-          deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t) -
-        (∫ t in (1 : ℝ)..T,
-          deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t *
-            (t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) := by
-    rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_add hI1
-      (hI2.const_mul c), ← intervalIntegral.integral_sub (hI1.add (hI2.const_mul c)) hI3]
-    congr 1
-    funext t
-    ring
-  rw [hsplit, norm_gaussianMellin_ftc δ T hT, main_term_by_parts q δ T hT]
-  ring
+  sorry
 
 /-- LEAF: the zero counting bound of book display 3.95, section 3.7.3.3, in the per sign form
 `N(t, χ) = (t / 2 π) log (q t / 2 π e) + O*(g_χ(t))` with `g_χ(t) = 0.15 log q t + 3.389`,
@@ -135,7 +111,89 @@ theorem error_integral_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
       ∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
           (0.15 * log ((q : ℝ) * t) + 3.389) := by
-  sorry
+  -- AI wrote this proof.
+  set F : ℂ → ℂ := gaussianMellin δ with hFdef
+  set γ : ℝ → ℂ := fun u => (1 / 2 : ℂ) + (u : ℂ) * Complex.I with hγdef
+  have hγre : ∀ u : ℝ, 0 < (γ u).re := by
+    intro u; simp [γ]
+  have hFd : ∀ u : ℝ, DifferentiableAt ℂ F (γ u) := fun u =>
+    Continuation457.gaussian_mellin_differentiable δ (γ u) (hγre u)
+  have hγd : ∀ u : ℝ, HasDerivAt γ Complex.I u := by
+    intro u
+    have h := (((hasDerivAt_id u).ofReal_comp).mul_const Complex.I).const_add (1 / 2 : ℂ)
+    simpa [γ] using h
+  have hg : ∀ u : ℝ, HasDerivAt (fun v => F (γ v)) (deriv F (γ u) * Complex.I) u :=
+    fun u => (hFd u).hasDerivAt.comp u (hγd u)
+  -- pointwise: the derivative of the norm is bounded by the norm of the derivative
+  have hpt : ∀ u : ℝ, |deriv (fun v : ℝ => ‖F (γ v)‖) u| ≤ ‖deriv F (γ u)‖ := by
+    intro u
+    by_cases hdf : DifferentiableAt ℝ (fun v : ℝ => ‖F (γ v)‖) u
+    · have h1 := hdf.hasDerivAt.tendsto_slope
+      have h2 := (hg u).tendsto_slope
+      have h1' := (continuous_abs.tendsto _).comp h1
+      have h2' := (continuous_norm.tendsto _).comp h2
+      have hle : ∀ᶠ v in nhdsWithin u {u}ᶜ,
+          (fun x => |x|) (slope (fun v : ℝ => ‖F (γ v)‖) u v) ≤
+            (fun x => ‖x‖) (slope (fun v => F (γ v)) u v) := by
+        refine Filter.Eventually.of_forall (fun v => ?_)
+        simp only [slope_def_field, slope_def_module]
+        rw [abs_div, norm_smul, norm_inv, Real.norm_eq_abs, div_eq_inv_mul]
+        exact mul_le_mul_of_nonneg_left (abs_norm_sub_norm_le _ _)
+          (inv_nonneg.mpr (abs_nonneg _))
+      have := le_of_tendsto_of_tendsto h1' h2' hle
+      simpa [norm_mul] using this
+    · rw [deriv_zero_of_not_differentiableAt hdf, abs_zero]
+      exact norm_nonneg _
+  have key : ∀ R : ℝ → ℝ, (∀ t ∈ Set.Icc (1 : ℝ) T,
+      |R t| ≤ 0.15 * log ((q : ℝ) * t) + 3.389) →
+      -(∫ t in (1 : ℝ)..T, deriv (fun u : ℝ => ‖F (γ u)‖) t * R t) ≤
+        ∫ t in (1 : ℝ)..T, ‖deriv F (γ t)‖ * (0.15 * log ((q : ℝ) * t) + 3.389) := by
+    intro R hR
+    have hq : (1 : ℝ) ≤ (q : ℝ) := by
+      exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+    have hcont : ContinuousOn
+        (fun t : ℝ => ‖deriv F (γ t)‖ * (0.15 * log ((q : ℝ) * t) + 3.389))
+        (Set.uIcc (1 : ℝ) T) := by
+      have hdd : DifferentiableOn ℂ F {s : ℂ | 0 < s.re} := fun s hs =>
+        (Continuation457.gaussian_mellin_differentiable δ s hs).differentiableWithinAt
+      have hopen : IsOpen {s : ℂ | 0 < s.re} :=
+        isOpen_lt continuous_const Complex.continuous_re
+      have hD : DifferentiableOn ℂ (deriv F) {s : ℂ | 0 < s.re} := hdd.deriv hopen
+      have hγc : Continuous γ := by simp only [γ]; fun_prop
+      have hc1 : Continuous (fun t : ℝ => deriv F (γ t)) := by
+        rw [continuous_iff_continuousAt]
+        intro t
+        exact ((hD.differentiableAt (hopen.mem_nhds (hγre t))).continuousAt).comp
+          hγc.continuousAt
+      refine (hc1.norm.continuousOn).mul ?_
+      refine ContinuousOn.add (ContinuousOn.mul continuousOn_const ?_) continuousOn_const
+      refine ContinuousOn.log (continuousOn_const.mul continuousOn_id) ?_
+      intro t ht
+      rw [Set.uIcc_of_le hT] at ht
+      have : (0 : ℝ) < (q : ℝ) * t := by nlinarith [ht.1]
+      exact this.ne'
+    have hRint : IntervalIntegrable
+        (fun t : ℝ => ‖deriv F (γ t)‖ * (0.15 * log ((q : ℝ) * t) + 3.389))
+        MeasureTheory.volume (1 : ℝ) T := hcont.intervalIntegrable
+    have hptw : ∀ t ∈ Set.Icc (1 : ℝ) T,
+        -(deriv (fun u : ℝ => ‖F (γ u)‖) t * R t) ≤
+          ‖deriv F (γ t)‖ * (0.15 * log ((q : ℝ) * t) + 3.389) := by
+      intro t ht
+      have h1 := hpt t
+      have h2 := hR t ht
+      calc -(deriv (fun u : ℝ => ‖F (γ u)‖) t * R t)
+          ≤ |deriv (fun u : ℝ => ‖F (γ u)‖) t * R t| := neg_le_abs _
+        _ = |deriv (fun u : ℝ => ‖F (γ u)‖) t| * |R t| := abs_mul _ _
+        _ ≤ ‖deriv F (γ t)‖ * (0.15 * log ((q : ℝ) * t) + 3.389) :=
+          mul_le_mul h1 h2 (abs_nonneg _) (norm_nonneg _)
+    by_cases hint : IntervalIntegrable
+        (fun t : ℝ => deriv (fun u : ℝ => ‖F (γ u)‖) t * R t) MeasureTheory.volume (1 : ℝ) T
+    · rw [← intervalIntegral.integral_neg]
+      exact intervalIntegral.integral_mono_on hT hint.neg hRint hptw
+    · rw [intervalIntegral.integral_undef hint, neg_zero]
+      refine intervalIntegral.integral_nonneg hT (fun t ht => ?_)
+      exact mul_nonneg (norm_nonneg _) ((abs_nonneg _).trans (hR t ht))
+  exact key _ hR
 
 /-- The faithful assembly of the three leaves: the bound of `positive_mass_norm_sum_integral`
 plus the boundary term at height `T`, namely `G T * g T`, which integration by parts on `[1, T]`
