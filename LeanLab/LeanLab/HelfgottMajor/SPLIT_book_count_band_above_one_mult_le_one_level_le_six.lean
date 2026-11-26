@@ -45,7 +45,98 @@ character modulo `6` factors through `ZMod 3`, since `(ZMod 6)ˣ → (ZMod 3)ˣ`
 its conductor divides `3` and no character modulo `6` is primitive. Class MEDIUM: finite
 group facts about `(ZMod 6)ˣ` and `DirichletCharacter.FactorsThrough`. -/
 theorem one6_no_primitive_six (χ : DirichletCharacter ℂ q) (hq : q = 6) : ¬ χ.IsPrimitive := by
-  sorry
+  subst hq
+  intro hp
+  have h₃_dvd_6 : 3 ∣ 6 := by norm_num
+  -- First, prove that every character modulo 6 factors through modulo 3
+  have hfac : χ.FactorsThrough 3 := by
+    rw [DirichletCharacter.factorsThrough_iff_ker_unitsMap (by norm_num : 3 ∣ 6)]
+    intro u hu
+    -- The kernel of (ZMod 6)ˣ → (ZMod 3)ˣ is trivial (only 1)
+    -- hu : ZMod.unitsMap (by norm_num : 3 ∣ 6) u = 1
+    -- This means u = 1 in (ZMod 6)ˣ
+    have h : u = 1 := by
+      -- The units of (ZMod 6)ˣ are 1 and 5
+      -- If u is in the kernel, its image in (ZMod 3)ˣ is 1
+      -- The image of 5 is 2 ≠ 1, so u must be 1
+      have h₁ : (u : ZMod 6) = 1 ∨ (u : ZMod 6) = 5 := by
+        -- The units of ZMod 6 are exactly 1 and 5
+        have h₂ : (u : ZMod 6) = 1 ∨ (u : ZMod 6) = 5 := by
+          -- The units of ZMod 6 are 1 and 5
+          classical
+          by_cases h : (u : ZMod 6) = 1
+          · exact Or.inl h
+          · -- If u ≠ 1, then u = 5
+            have h₂ : (u : ZMod 6) = 5 := by
+              -- The only units in ZMod 6 are 1 and 5
+              have h₃ : (u : ZMod 6) = 1 ∨ (u : ZMod 6) = 5 := by
+                -- The units of ZMod 6 are 1 and 5
+                have h₄ : (u : ZMod 6) = 1 ∨ (u : ZMod 6) = 5 := by
+                  -- Use the fact that the units of ZMod 6 are 1 and 5
+                  have h₅ : u = 1 ∨ u = ⟨5, 5, by decide, by decide⟩ := by
+                    classical
+                    by_cases h₆ : u = 1
+                    · exact Or.inl h₆
+                    · -- If u ≠ 1, then u = 5
+                      have h₇ : u = ⟨5, 5, by decide, by decide⟩ := by
+                        classical
+                        revert u
+                        decide
+                      exact Or.inr h₇
+                  cases h₅ with
+                  | inl h₅ =>
+                    simp_all [Units.ext_iff]
+                    <;> contradiction
+                  | inr h₅ =>
+                    simp_all [Units.ext_iff]
+                    <;> aesop
+                cases h₄ with
+                | inl h₄ => simp_all [Units.ext_iff]
+                | inr h₄ => simp_all [Units.ext_iff]
+              exact h₃
+            exact Or.inr h₂
+        exact h₂
+      cases h₁ with
+      | inl h₁ =>
+        -- If u = 1, we're done
+        apply Units.ext
+        simp [h₁]
+      | inr h₁ =>
+        -- If u = 5, check that it doesn't map to 1 in ZMod 3
+        have h₂ : ZMod.unitsMap (by norm_num : 3 ∣ 6) u = 1 := hu
+        have h₃ : (ZMod.unitsMap (by norm_num : 3 ∣ 6) u : ZMod 3) = 1 := by simpa using h₂
+        -- The map sends 5 to 2 in ZMod 3, which is not 1
+        have h₄ : (u : ZMod 6) = 5 := h₁
+        -- The image of 5 is 2, which is not 1
+        have h₅ : (ZMod.unitsMap (by norm_num : 3 ∣ 6) u : ZMod 3) = 2 := by
+          -- Use the fact that u = 5 as a unit
+          have h₅ : u = ⟨5, 5, by decide, by decide⟩ := by
+            apply Units.ext
+            simp [h₁]
+            <;> norm_num
+          rw [h₅]
+          <;> norm_num [ZMod.unitsMap, ZMod.castHom_apply, Units.ext_iff]
+          <;> rfl
+        rw [h₅] at h₃
+        norm_num at h₃ ⊢
+        <;> contradiction
+      <;> simp_all
+    rw [h]
+    simp
+  -- Since χ factors through 3, its conductor divides 3
+  have hconductor_dvd_3 : χ.conductor ∣ 3 := by
+    have h₁ : χ.conductor ∣ 3 := DirichletCharacter.conductor_dvd_of_mem_conductorSet χ hfac
+    exact h₁
+  -- But if χ is primitive, its conductor equals 6
+  have hconductor_eq_6 : χ.conductor = 6 := by
+    rw [DirichletCharacter.isPrimitive_def] at hp
+    exact hp
+  -- Contradiction: 6 does not divide 3
+  have h₆_dvd_3 : (6 : ℕ) ∣ 3 := by
+    rw [hconductor_eq_6] at hconductor_dvd_3
+    exact hconductor_dvd_3
+  norm_num at h₆_dvd_3
+  <;> omega
 
 /-- LEAF: zero free rectangle for the primitive character modulo `3`, the window
 `(1, 2πe / 3]` of the band at conductor `3` holds no strip zero of `L(·, χ)`. Numerically the
