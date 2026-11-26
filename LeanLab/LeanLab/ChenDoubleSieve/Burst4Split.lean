@@ -3,6 +3,7 @@ import LeanLab.ChenDoubleSieve.KernelIntegrability
 import LeanLab.ChenDoubleSieve.Decomp275b
 import LeanLab.ChenDoubleSieve.Discretization
 import LeanLab.ChenDoubleSieve.TableInputsBridge
+import LeanLab.ChenDoubleSieve.Burst9Matrix
 
 /-!
 # Burst 4 split of Wu 2004 Theorem 1, `D(N) ≤ 7.8209 Θ(N)`
@@ -98,8 +99,8 @@ theorem table_kernel_integrable :
 Maple: the rational candidate entries of `Wu04Table.candidateMatrixQ` are lower bounds for the
 actual integrals `a_{i,j}`. With these bounds the folder's exact dual certificate replaces Wu's
 statement that `(I − A)⁻¹` has positive entries. -/
-theorem integral_matrix_bound : Wu04Table.IntegralMatrixBound := by
-  sorry
+theorem integral_matrix_bound : Wu04Table.IntegralMatrixBound :=
+  LeanLab.ChenDoubleSieve.Burst9Matrix.integral_matrix_bound_p3
 
 /-- LEAF. Wu 2004 page 31, the last display of Section 7: taking `σ = {1}` and `s = 2.2` in
 display 3.3 of Lemma 3.2,
