@@ -44,8 +44,34 @@ theorem card6_no_primitive_two (χ : DirichletCharacter ℂ q) (hq : q = 2) : ¬
 character modulo `6` factors through `ZMod 3`, since `(ZMod 6)ˣ → (ZMod 3)ˣ` is a bijection, so
 its conductor divides `3` and no character modulo `6` is primitive. Class MEDIUM: finite
 group facts about `(ZMod 6)ˣ` and `DirichletCharacter.FactorsThrough`. -/
+/-- The units of `ZMod 6` are exactly `1` and `5`. Finite `decide`. -/
+lemma units_mod_six_eq_one_or_five : ∀ a : (ZMod 6)ˣ, (a : ZMod 6) = 1 ∨ (a : ZMod 6) = 5 := by
+  decide
+
+/-- Every Dirichlet character modulo `6` factors through level `3`: the reduction
+`(ZMod 6)ˣ → (ZMod 3)ˣ` is injective, its kernel is trivial, so the kernel inclusion of
+`DirichletCharacter.factorsThrough_iff_ker_unitsMap` holds trivially. -/
+lemma factors_through_three_of_level_six (χ : DirichletCharacter ℂ 6) : χ.FactorsThrough 3 := by
+  have hd : (3 : ℕ) ∣ 6 := by norm_num
+  rw [DirichletCharacter.factorsThrough_iff_ker_unitsMap hd]
+  intro a ha
+  rw [MonoidHom.mem_ker] at ha
+  rcases units_mod_six_eq_one_or_five a with h | h
+  · have ha1 : a = 1 := Units.val_inj.mp h
+    subst ha1
+    simp
+  · exfalso
+    have hv := ZMod.unitsMap_val hd a
+    rw [ha, Units.val_one, h] at hv
+    norm_num at hv
+
 theorem card6_no_primitive_six (χ : DirichletCharacter ℂ q) (hq : q = 6) : ¬ χ.IsPrimitive := by
-  sorry
+  subst hq
+  intro hp
+  have hft := factors_through_three_of_level_six χ
+  have hc : χ.conductor ≤ 3 := Nat.sInf_le (DirichletCharacter.mem_conductorSet_iff.mpr hft)
+  rw [DirichletCharacter.isPrimitive_def] at hp
+  omega
 
 /-- LEAF: zero free rectangle for the primitive character modulo `3`, the window
 `(1, 2πe / 3]` of the band at conductor `3` holds no strip zero of `L(·, χ)`. Numerically the
