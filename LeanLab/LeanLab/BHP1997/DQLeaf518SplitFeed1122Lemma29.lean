@@ -80,10 +80,85 @@ theorem leaf_harman_mean (b : ℝ → ℕ → ℝ) {ε B : ℝ} (hε : 0 < ε)
                   ((x ^ (11 / 20 + ε) / (q * sieveQ ε x)) ^ 2 + t ^ 2)) := by
   sorry
 
+/-- S129: the truncated Perron integral is continuous in `y` on `[a, ∞)` for `a > 0`, `z ≥ 0`. PROVED. -/
+theorem perron_contOn (S : Finset ℕ) (hS : ∀ m ∈ S, 1 ≤ m) (c : ℕ → ℂ) (T z a : ℝ)
+    (hz : 0 ≤ z) (ha : 0 < a) :
+    ContinuousOn (fun y : ℝ => (((2 * Real.pi : ℝ) : ℂ)⁻¹ * ∫ t in (-T)..T,
+      (∑ m ∈ S, c m / (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) *
+        ((((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
+          (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I))) (Set.Ici a) := by
+  have hs : Continuous fun t : ℝ => (1 / 2 : ℂ) + (t : ℂ) * I := by fun_prop
+  have hs0 : ∀ t : ℝ, (1 / 2 : ℂ) + (t : ℂ) * I ≠ 0 := by
+    intro t h
+    have := congrArg Complex.re h
+    simp at this
+  have hG : Continuous fun t : ℝ => ∑ m ∈ S, c m / (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) := by
+    refine continuous_finsetSum _ (fun m hm => ?_)
+    have hm0 : (m : ℂ) ≠ 0 := by
+      have := hS m hm
+      exact_mod_cast (by omega : m ≠ 0)
+    refine continuous_const.div (hs.const_cpow (Or.inl hm0)) ?_
+    intro t
+    exact Complex.cpow_ne_zero_iff.2 (Or.inl hm0)
+  have hslit : ∀ u : ℝ, 0 < u → ((u : ℂ)) ∈ Complex.slitPlane := by
+    intro u hu; exact Complex.ofReal_mem_slitPlane.2 hu
+  have hF : Continuous (Function.uncurry fun (y : ℝ) (t : ℝ) =>
+      (∑ m ∈ S, c m / (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) *
+        ((((max y a + max y a * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
+          ((max y a : ℝ) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I)) := by
+    show Continuous fun p : ℝ × ℝ =>
+      (∑ m ∈ S, c m / (m : ℂ) ^ ((1 / 2 : ℂ) + (p.2 : ℂ) * I)) *
+        ((((max p.1 a + max p.1 a * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (p.2 : ℂ) * I) -
+          ((max p.1 a : ℝ) : ℂ) ^ ((1 / 2 : ℂ) + (p.2 : ℂ) * I)) / ((1 / 2 : ℂ) + (p.2 : ℂ) * I)
+    have hmax : Continuous fun p : ℝ × ℝ => max p.1 a := by fun_prop
+    have hpos : ∀ p : ℝ × ℝ, 0 < max p.1 a := fun p => lt_of_lt_of_le ha (le_max_right _ _)
+    refine Continuous.div ((hG.comp continuous_snd).mul (Continuous.sub ?_ ?_))
+      (hs.comp continuous_snd) (fun p => hs0 _)
+    · refine Continuous.cpow (by fun_prop) (hs.comp continuous_snd) (fun p => hslit _ ?_)
+      have := hpos p; positivity
+    · exact Continuous.cpow (by fun_prop) (hs.comp continuous_snd) (fun p => hslit _ (hpos p))
+  have hcont := (intervalIntegral.continuous_parametric_intervalIntegral_of_continuous
+      (a₀ := -T) (μ := volume) hF (continuous_const (y := T))).const_smul (((2 * Real.pi : ℝ) : ℂ)⁻¹)
+  refine hcont.continuousOn.congr (fun y hy => ?_)
+  have : max y a = y := max_eq_left hy
+  simp only [Pi.smul_apply, smul_eq_mul, this]
+
+/-- S129: the window sum is measurable in `y`, a finite sum of indicators of closed sets. PROVED. -/
+theorem window_measurable (S : Finset ℕ) (d : ℕ → ℂ) (z : ℝ) :
+    Measurable (fun y : ℝ => ∑ m ∈ S.filter (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z), d m) := by
+  have : (fun y : ℝ => ∑ m ∈ S.filter (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z), d m) =
+      fun y => ∑ m ∈ S, if y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z then d m else 0 := by
+    funext y; rw [Finset.sum_filter]
+  rw [this]
+  refine Finset.measurable_sum _ (fun m _ => Measurable.ite ?_ measurable_const measurable_const)
+  exact (measurableSet_le measurable_id measurable_const).inter
+    (measurableSet_le measurable_const (measurable_id.add (measurable_id.mul_const z)))
+
+/-- S129: the window sum is bounded by the full sum of norms. PROVED. -/
+theorem window_bound (S : Finset ℕ) (d : ℕ → ℂ) (z y : ℝ) :
+    ‖∑ m ∈ S.filter (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z), d m‖ ≤ ∑ m ∈ S, ‖d m‖ :=
+  (norm_sum_le _ _).trans (Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+    (fun _ _ _ => norm_nonneg _))
+
+/-- S129: `‖W - g‖^2` is interval integrable for `W` measurable bounded, `g` continuous. PROVED. -/
+theorem sq_norm_intInt {W g : ℝ → ℂ} {a b M : ℝ} (hab : a ≤ b) (hW : Measurable W)
+    (hWb : ∀ y, ‖W y‖ ≤ M) (hg : ContinuousOn g (Set.Icc a b)) :
+    IntervalIntegrable (fun y => ‖W y - g y‖ ^ 2) volume a b := by
+  rw [intervalIntegrable_iff_integrableOn_Icc_of_le hab]
+  obtain ⟨Mg, hMg⟩ := isCompact_Icc.exists_bound_of_continuousOn hg
+  have hm : AEStronglyMeasurable (fun y => W y - g y) (volume.restrict (Set.Icc a b)) :=
+    hW.aestronglyMeasurable.sub (hg.aestronglyMeasurable measurableSet_Icc)
+  refine Integrable.of_bound ?_ ((M + Mg) ^ 2) ?_
+  · exact (continuous_pow 2).comp_aestronglyMeasurable hm.norm
+  · refine ae_restrict_of_forall_mem measurableSet_Icc (fun y hy => ?_)
+    have h1 : ‖W y - g y‖ ≤ M + Mg := (norm_sub_le _ _).trans (add_le_add (hWb y) (hMg y hy))
+    have h0 : 0 ≤ ‖W y - g y‖ := norm_nonneg _
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    nlinarith
 /-- LEAF: page 43 to 44, tacit in the paper, class MEDIUM. P0069 Baker Harman Pintz 1997:
 the squared Perron error and the squared Perron integral are interval integrable in `y` on
 `[Y/2, 3Y]`; the window sum is piecewise constant in `y` and the Perron integral is continuous
-in `y > 0`. -/
+in `y > 0`. PROVED in burst S129 wave 13 from the helper lemmas above. -/
 theorem leaf_window_integrable (b : ℝ → ℕ → ℝ) {ε B : ℝ} (hε : 0 < ε)
     (hb : ∃ C : ℝ, ∀ x k, |b x k| ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B) :
     ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ q : ℕ, 1 ≤ q → q ≤ sieveQ ε x →
@@ -113,7 +188,26 @@ theorem leaf_window_integrable (b : ℝ → ℕ → ℝ) {ε B : ℝ} (hε : 0 <
                     ((((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
                       (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I))‖ ^ 2)
             MeasureTheory.volume (x ^ (11 / 20 + ε) / 2) (3 * x ^ (11 / 20 + ε)) := by
-  sorry
+  refine ⟨1, fun x hx q hq1 hqQ z hz1 hz2 χ hχ => ?_⟩
+  have hY : 0 < x ^ (11 / 20 + ε) := Real.rpow_pos_of_pos (by linarith) _
+  have hz : 0 ≤ z := le_trans (by positivity) hz1
+  have ha : 0 < x ^ (11 / 20 + ε) / 2 := by positivity
+  have hab : x ^ (11 / 20 + ε) / 2 ≤ 3 * x ^ (11 / 20 + ε) := by linarith
+  have hd : Thm2.delta χ = 0 := by simp [Thm2.delta, hχ]
+  have hS : ∀ m ∈ rightInterval ε x, 1 ≤ m := by
+    intro m hm
+    simp only [rightInterval, Finset.mem_Ioc] at hm
+    omega
+  have hg := (perron_contOn (rightInterval ε x) hS (fun m => (b x m : ℂ) * χ (m : ZMod q))
+    (x ^ (11 / 20 + ε)) z (x ^ (11 / 20 + ε) / 2) hz ha).mono
+    (show Set.Icc (x ^ (11 / 20 + ε) / 2) (3 * x ^ (11 / 20 + ε)) ⊆ Set.Ici (x ^ (11 / 20 + ε) / 2)
+      from fun y hy => hy.1)
+  have hW := window_measurable (rightInterval ε x) (fun m => (b x m : ℂ) * χ (m : ZMod q)) z
+  have hWb := window_bound (rightInterval ε x) (fun m => (b x m : ℂ) * χ (m : ZMod q)) z
+  simp only [hd, zero_mul, sub_zero]
+  refine ⟨sq_norm_intInt hab hW hWb hg, ?_⟩
+  simpa using sq_norm_intInt (W := fun _ => (0 : ℂ)) (M := 0) hab measurable_const
+    (fun _ => by simp) hg
 
 /-- `∫ ‖f‖^2 ≤ 2 ∫ ‖f - g‖^2 + 2 ∫ ‖g‖^2` on an interval. PROVED. -/
 theorem sq_norm_integral_le {f g : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
