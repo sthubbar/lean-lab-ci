@@ -65,6 +65,146 @@ theorem leaf_bad_character_removal (F : ℤ[X]) (hF : Admissible F)
           N * Real.log N ^ (-B)) := by
   sorry
 
+/-- Elementary reduction: the good-character energy is bounded by the full
+character energy, since the good characters are a subset and every integrand
+‖twistedRemainder‖² is nonnegative. The integrals over `a..b` and
+`Set.Icc a b` agree (a ≤ b here). This is the only unconditional step; bounding
+`characterEnergy` itself for `q ≤ fareyOrder ...` requires the missing explicit
+formula (Perelli–Pintz §5, eqs. 21–26). -/
+lemma goodEnergy_le_characterEnergy (B ε N : ℝ) (M q : ℕ) [NeZero q] (Q : ℝ)
+    (hQ : 0 < Q) :
+    goodEnergy B ε N M q Q ≤ characterEnergy M q Q := by
+  have hφ : 0 < q.totient := Nat.totient_pos.mpr (Nat.pos_of_ne_zero (NeZero.ne q))
+  have hφpos : 0 < (q.totient : ℝ) := by positivity
+  have hqpos : 0 < (q : ℝ) := by exact_mod_cast (Nat.pos_of_ne_zero (NeZero.ne q))
+  have hpref : 0 < (q : ℝ) / q.totient := by positivity
+  have hleab : (-(1 / ((q : ℝ) * Q)) : ℝ) ≤ (1 / ((q : ℝ) * Q) : ℝ) := by
+    have h₁ : 0 < (q : ℝ) * Q := by positivity
+    have h₂ : 0 < 1 / ((q : ℝ) * Q) := by positivity
+    linarith
+  -- The `if`-sum over good characters is bounded by the sum over all characters.
+  have hsum :
+      (∑ χ : DirichletCharacter ℂ q,
+        if goodCharacter B ε N χ then
+          (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+            ‖twistedRemainder M χ η‖ ^ 2) else 0) ≤
+      (∑ χ : DirichletCharacter ℂ q,
+        (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+          ‖twistedRemainder M χ η‖ ^ 2)) := by
+    apply Finset.sum_le_sum
+    intro χ _
+    have hI : 0 ≤ (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+        ‖twistedRemainder M χ η‖ ^ 2) := by
+      -- The integrand is continuous and nonnegative, so the integral is nonnegative.
+      have hc : Continuous (fun η : ℝ => ‖twistedRemainder M χ η‖ ^ 2) := by
+        exact (continuous_twistedRemainder M χ).norm.pow 2
+      have h₁ : IntervalIntegrable (fun η : ℝ => ‖twistedRemainder M χ η‖ ^ 2) MeasureTheory.volume
+          (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q)) := by
+        apply ContinuousOn.intervalIntegrable
+        exact hc.continuousOn
+      have h₂ : (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+          ‖twistedRemainder M χ η‖ ^ 2) =
+          ∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+            ‖twistedRemainder M χ η‖ ^ 2 := rfl
+      -- intervalIntegral.integral of a nonnegative function over [a,b] with a ≤ b is ≥ 0.
+      have h₃ : 0 ≤ ∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+          ‖twistedRemainder M χ η‖ ^ 2 := by
+        apply intervalIntegral.nonneg_of_forall_nonneg
+        intro η _
+        positivity
+      exact h₃
+    split_ifs <;>
+    (try simp_all [hI]) <;>
+    (try linarith) <;>
+    (try
+      {
+        cases' le_total 0 (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+          ‖twistedRemainder M χ η‖ ^ 2) with h h <;>
+        simp_all [hI, h] <;>
+        linarith
+      })
+  -- The integrals over `a..b` and `Set.Icc a b` agree (a ≤ b).
+  have hinteq : ∀ (χ : DirichletCharacter ℂ q),
+      (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+        ‖twistedRemainder M χ η‖ ^ 2) =
+      (∫ η in Set.Icc (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q)),
+        ‖twistedRemainder M χ η‖ ^ 2) := by
+    intro χ
+    have h₁ : (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+        ‖twistedRemainder M χ η‖ ^ 2) =
+        (∫ η in Set.Icc (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q)),
+          ‖twistedRemainder M χ η‖ ^ 2) := by
+      -- intervalIntegral.integral a b f = ∫ x in Set.Icc a b f for a ≤ b.
+      have h₂ : Continuous (fun η : ℝ => ‖twistedRemainder M χ η‖ ^ 2) := by
+        exact (continuous_twistedRemainder M χ).norm.pow 2
+      -- Use the fact that integrating over `a..b` equals integrating over `Set.Icc a b`.
+      have h₃ : (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+          ‖twistedRemainder M χ η‖ ^ 2) =
+          intervalIntegral.integral (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q))
+            (fun η => ‖twistedRemainder M χ η‖ ^ 2) := rfl
+      rw [h₃]
+      have h₄ : intervalIntegral.integral (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q))
+          (fun η => ‖twistedRemainder M χ η‖ ^ 2) =
+          ∫ η in Set.Icc (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q)),
+            ‖twistedRemainder M χ η‖ ^ 2 := by
+        -- `intervalIntegral.integral a b f = ∫ x in Set.Icc a b f` when a ≤ b.
+        have h₅ : (-(1 / ((q : ℝ) * Q)) : ℝ) ≤ (1 / ((q : ℝ) * Q) : ℝ) := hleab
+        have h₆ : intervalIntegral.integral (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q))
+            (fun η => ‖twistedRemainder M χ η‖ ^ 2) =
+            ∫ η in Set.Icc (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q)),
+              ‖twistedRemainder M χ η‖ ^ 2 := by
+          -- Use the lemma relating interval integral to integral over Icc.
+          have h₇ : intervalIntegral.integral (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q))
+              (fun η => ‖twistedRemainder M χ η‖ ^ 2) =
+              ∫ η in Set.Icc (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q)),
+                ‖twistedRemainder M χ η‖ ^ 2 := by
+            -- The integrand is continuous on [a,b], so the interval integral equals the
+            -- integral over Set.Icc.
+            have h₈ : Continuous (fun η : ℝ => ‖twistedRemainder M χ η‖ ^ 2) := h₂
+            -- Use the fact that intervalIntegral.integral a b f = ∫ x in Set.Icc a b f.
+            simp [intervalIntegral.integral_eq_integral_Icc]
+            <;>
+            (try
+              {
+                apply (congr_arg (fun s => ∫ η in s, ‖twistedRemainder M χ η‖ ^ 2 ∂MeasureTheory.volume))
+              }) <;>
+            (try
+              {
+                simp_all [Set.Icc_subset_Ioi]
+              })
+            <;>
+            (try
+              {
+                aesop
+              })
+          exact h₇
+        exact h₆
+      rw [h₄]
+    exact h₁
+  calc
+    goodEnergy B ε N M q Q =
+      (q : ℝ) / q.totient *
+        (∑ χ : DirichletCharacter ℂ q,
+          if goodCharacter B ε N χ then
+            (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+              ‖twistedRemainder M χ η‖ ^ 2) else 0) := by
+      rfl
+    _ ≤ (q : ℝ) / q.totient *
+      (∑ χ : DirichletCharacter ℂ q,
+        (∫ η in (-(1 / ((q : ℝ) * Q)))..(1 / ((q : ℝ) * Q)),
+          ‖twistedRemainder M χ η‖ ^ 2)) := by
+      gcongr
+    _ = (q : ℝ) / q.totient *
+      (∑ χ : DirichletCharacter ℂ q,
+        (∫ η in Set.Icc (-(1 / ((q : ℝ) * Q))) (1 / ((q : ℝ) * Q)),
+          ‖twistedRemainder M χ η‖ ^ 2)) := by
+      apply (mul_congr (by positivity) _)
+      apply Finset.sum_congr rfl
+      intro χ _
+      rw [hinteq χ]
+    _ = characterEnergy M q Q := by
+      rfl
+
 /-- LEAF: Page 485 display 25, arguing as in Perelli and Pintz 1993 Section 5
 equations 21 through 26: the truncated explicit formula and the short interval
 smoothing for the good characters, with the density estimate 21, give
@@ -78,6 +218,12 @@ theorem leaf_good_character_mean (F : ℤ[X]) (hF : Admissible F)
       H ≤ N ^ (1 / (F.natDegree : ℝ)) →
       ∀ (q : ℕ) [NeZero q], (q : ℝ) ≤ fareyOrder F N H B →
         goodEnergy B ε N ⌊c * N⌋₊ q (fareyOrder F N H B) ≤ C' * N * Real.log N ^ (-B) := by
+  -- The elementary reduction `goodEnergy ≤ characterEnergy` is available as
+  -- `goodEnergy_le_characterEnergy`, but bounding `characterEnergy ⌊c * N⌋₊ q
+  -- (fareyOrder F N H B)` by `C' * N * Real.log N ^ (-B)` for `q ≤ fareyOrder ...`
+  -- is the missing analytic core (an explicit formula / pointwise bound for
+  -- `twistedRemainder` on good characters, Perelli–Pintz §5 eqs. 21–26). It is not
+  -- formalized in the current library; see PROGRESS.md.
   sorry
 
 /-- Pages 484 and 485 displays 16 through 25. The exact statement of
