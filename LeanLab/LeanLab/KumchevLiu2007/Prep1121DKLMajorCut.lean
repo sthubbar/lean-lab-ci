@@ -1303,8 +1303,6 @@ theorem S1_mean_square {X Y : ℝ} (hXY : 0 ≤ X - Y) (hY : 1 ≤ Y) :
   rw [← intervalIntegral.integral_of_le zero_le_one]
   exact primeSum_parseval_le hXY hY
 
-/-! ## The mean square of S2* over m0, display 24 (ported from S2starMinorSplit1122) -/
-
 private lemma gauss_mean_square_sq_le (j : ℕ) : (j + 2) ^ 2 ≤ 5 * 2 ^ j := by
   induction j with
   | zero => norm_num
@@ -1316,7 +1314,6 @@ private lemma gauss_mean_square_sq_le (j : ℕ) : (j + 2) ^ 2 ≤ 5 * 2 ^ j := b
         _ ≤ 2 * (j + 2) ^ 2 := this
         _ ≤ 2 * (5 * 2 ^ j) := by omega
         _ = 5 * 2 ^ (j + 1) := by ring
-
 
 private lemma gauss_mean_square_prime_pow (p k : ℕ) (hp : p.Prime) (hk : 1 ≤ k) :
     (k + 1) ^ 2 * p ^ k ≤ (if p = 2 then 10 else if p = 3 then 4 else if p = 5 then 2 else 1) * (p ^ (k - 1) * (p - 1)) ^ 2 := by
@@ -1360,7 +1357,7 @@ private lemma gauss_mean_square_c_prod (s : Finset ℕ) : ∏ p ∈ s, (if p = 2
   have h2 : ∏ p ∈ s ∩ {2, 3, 5}, (if p = 2 then 10 else if p = 3 then 4 else if p = 5 then 2 else 1) ∣ ∏ p ∈ ({2, 3, 5} : Finset ℕ), (if p = 2 then 10 else if p = 3 then 4 else if p = 5 then 2 else 1) :=
     Finset.prod_dvd_prod_of_subset _ _ _ Finset.inter_subset_right
   have h3 : ∏ p ∈ ({2, 3, 5} : Finset ℕ), (if p = 2 then 10 else if p = 3 then 4 else if p = 5 then 2 else 1) = 80 := by
-    simp
+    norm_num [Finset.prod_insert]
   rw [h1]; rw [h3] at h2; exact Nat.le_of_dvd (by norm_num) h2
 
 private lemma gauss_mean_square_tau_phi (n : ℕ) (hn : n ≠ 0) :
@@ -1531,7 +1528,7 @@ Gauss sums S(q, a) of page 3 display 8: the sum over 1 <= a <= q, (a, q) = 1, of
 |S(q, a)|^2 / phi(q)^2 is << q^eta; here eta = 1/2. Split class HARD: needs
 multiplicativity of S(q, a) in q and the prime power evaluation, or the
 Parseval identity over a mod q with a count of square roots of unity. -/
-theorem gauss_mean_square : ∃ C : ℝ, 0 < C ∧ ∀ q : ℕ, 1 ≤ q →
+private theorem gauss_mean_square : ∃ C : ℝ, 0 < C ∧ ∀ q : ℕ, 1 ≤ q →
     ∑ a ∈ (Finset.Icc 1 q).filter (fun a => Nat.Coprime a q),
       ‖U1534.gaussS q a‖ ^ 2 / (Nat.totient q : ℝ) ^ 2 ≤ C * (q : ℝ) ^ (1 / 2 : ℝ) := by
   refine ⟨18, by norm_num, ?_⟩
@@ -1592,7 +1589,7 @@ theorem gauss_mean_square : ∃ C : ℝ, 0 < C ∧ ∀ q : ℕ, 1 ≤ q →
 /-- PROVED. P0088 page 4 display 15, the arcs M(q, a) with q <= P are pairwise
 disjoint when the width parameter R = Q = H/P exceeds 2P, used in the first sum
 of page 6 display 24. Split class EASY: |a q' - a' q| <= (q + q')/R < 1 and coprimality. -/
-theorem arcs_disjoint {P R : ℝ} (hR : 2 * P < R) {v w : ℕ × ℕ}
+private theorem arcs_disjoint {P R : ℝ} (hR : 2 * P < R) {v w : ℕ × ℕ}
     (hv : v ∈ arcPairs P) (hw : w ∈ arcPairs P) {α : ℝ}
     (h1 : α ∈ arc R v) (h2 : α ∈ arc R w) : v = w := by
   obtain ⟨q, a⟩ := v
@@ -1647,7 +1644,7 @@ theorem arcs_disjoint {P R : ℝ} (hR : 2 * P < R) {v w : ℕ × ℕ}
 /-- PROVED. P0088 page 6 display 23: a point of M(q, a) with q <= P outside M0 has
 |q alpha - a| > 1/Q0 = P^3/Y, Q0 = Y P^(-3) of display 14. M0 is written as
 majorArcs (Y P^(-2)) P. Split class EASY. -/
-theorem off_M0 {Y P : ℝ} (hY : 0 < Y) (hP : 0 < P) {v : ℕ × ℕ} (hv : v ∈ arcPairs P)
+private theorem off_M0 {Y P : ℝ} (hY : 0 < Y) (hP : 0 < P) {v : ℕ × ℕ} (hv : v ∈ arcPairs P)
     {α : ℝ} (hα : α ∉ majorArcs (Y * P ^ (-2 : ℤ)) P) :
     P ^ 3 / Y < |(v.1 : ℝ) * α - v.2| := by
   by_contra h
@@ -1668,7 +1665,7 @@ theorem off_M0 {Y P : ℝ} (hY : 0 < Y) (hP : 0 < P) {v : ℕ × ℕ} (hv : v �
 P = (log X)^B and Y = X^(7/12 + eps/2), one has 8 P^6 Y^(1/2) <= X^(7/18 + eps),
 so H/P > 2P and P/H <= Y^(-1/2)/4 for H >= X^(7/18 + eps) P^(-4). Split class MEDIUM:
 a power of log X against a power of X. -/
-theorem eventually_large {B ε : ℝ} (hB : 0 < B) (hε : 0 < ε) :
+private theorem eventually_large {B ε : ℝ} (hB : 0 < B) (hε : 0 < ε) :
     ∃ X0 : ℝ, ∀ X : ℝ, X0 ≤ X → 3 ≤ X ∧
       8 * (Real.log X ^ B) ^ 6 * Real.sqrt (windowY X ε) ≤ X ^ (7 / 18 + ε) := by
   have hlo := isLittleO_log_rpow_rpow_atTop (6 * B) (show (0:ℝ) < 7 / 72 by norm_num)
@@ -1711,7 +1708,7 @@ private theorem pointwise_bound_T2sq {Y C β : ℝ} {T : ℂ} (hY : 0 < Y) (hC :
 disjoint and display 22 for T2 on every arc, |S2*(alpha)|^2 is at most the sum over
 q, a of |S(q, a)|^2/phi(q)^2 C^2/(Y beta^2) on |beta| > P^3/(q Y), beta = alpha - a/q.
 Class MEDIUM. -/
-theorem pointwise_bound {Y H P C : ℝ} (hY : 0 < Y) (hP : 0 < P) (hC : 0 < C)
+private theorem pointwise_bound {Y H P C : ℝ} (hY : 0 < Y) (hP : 0 < P) (hC : 0 < C)
     (hRP : 2 * P < H / P)
     (hT2 : ∀ β : ℝ, |β| ≤ P / H → ‖T2 Y P β‖ ≤ C * Real.sqrt Y / (1 + Y * |β|))
     (α : ℝ) (hα : α ∉ majorArcs (Y * P ^ (-2 : ℤ)) P) :
@@ -1801,7 +1798,7 @@ private lemma tail_integral_G {r K : ℝ} (hr : 0 < r) :
 
 /-- PROVED. P0088 page 6 display 24, the last integral: for r > 0 the function
 K/(x - c)^2 on |x - c| > r is integrable with integral 2K/r. Split class MEDIUM. -/
-theorem tail_integral {r K : ℝ} (hr : 0 < r) (c : ℝ) :
+private theorem tail_integral {r K : ℝ} (hr : 0 < r) (c : ℝ) :
     Integrable (Set.indicator {x : ℝ | r < |x - c|} fun x => K / (x - c) ^ 2) ∧
       ∫ x, Set.indicator {x : ℝ | r < |x - c|} (fun x => K / (x - c) ^ 2) x = 2 * K / r := by
   obtain ⟨hGi, hGv⟩ := tail_integral_G (K := K) hr
@@ -1881,7 +1878,7 @@ private lemma arc_sum_bound_inner {P Cg : ℝ} (q : ℕ) (hq : 1 ≤ q) (hqN : q
 over 1 <= a <= q, the sum over the arc pairs q <= P, 0 <= a <= q, of
 q |S(q, a)|^2/phi(q)^2 is at most (Cg + 1) P^(5/2); the pair q = 1, a = 0 adds
 at most 1. Split class EASY. -/
-theorem arc_sum_bound {P Cg : ℝ} (hP : 1 ≤ P) (hCg : 0 ≤ Cg)
+private theorem arc_sum_bound {P Cg : ℝ} (hP : 1 ≤ P) (hCg : 0 ≤ Cg)
     (hG : ∀ q : ℕ, 1 ≤ q →
       ∑ a ∈ (Finset.Icc 1 q).filter (fun a => Nat.Coprime a q),
         ‖U1534.gaussS q a‖ ^ 2 / (Nat.totient q : ℝ) ^ 2 ≤ Cg * (q : ℝ) ^ (1 / 2 : ℝ)) :
@@ -1936,15 +1933,15 @@ theorem arc_sum_bound {P Cg : ℝ} (hP : 1 ≤ P) (hCg : 0 ≤ Cg)
   nlinarith
 
 /-- The first coordinate of an arc pair is at least one. -/
-theorem one_le_of_mem_arcPairs {P : ℝ} {v : ℕ × ℕ} (hv : v ∈ arcPairs P) : 1 ≤ v.1 := by
+private theorem one_le_of_mem_arcPairs {P : ℝ} {v : ℕ × ℕ} (hv : v ∈ arcPairs P) : 1 ≤ v.1 := by
   simp only [arcPairs, Finset.mem_filter, Finset.mem_product, Finset.mem_Icc] at hv
   exact hv.1.1.1
 
-/-- The exact statement of S2star_minor_mean_square, P0088 page 6
+/-- The exact statement of Prep1121DKLMajorCut.S2star_minor_mean_square, P0088 page 6
 display 24, from gauss_mean_square, eventually_large, pointwise_bound, tail_integral
 and arc_sum_bound, with display 22 for T2 as the hypothesis T2BoundProp, as in the
 parent. No sorry of its own. -/
-theorem S2star_minor_mean_square_of_pieces (h2 : T2BoundProp) :
+private theorem S2star_minor_mean_square_of_pieces (h2 : T2BoundProp) :
     ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 →
       ∃ C X0 : ℝ, 0 < C ∧ ∀ X H : ℝ, X0 ≤ X →
         X ^ (7 / 18 + ε) * (Real.log X ^ B) ^ (-4 : ℤ) ≤ H →
@@ -1970,7 +1967,7 @@ theorem S2star_minor_mean_square_of_pieces (h2 : T2BoundProp) :
   set Y := windowY X ε with hYdef
   have hP1 : 1 ≤ P := Real.one_le_rpow hlog1 hB.le
   have hP : 0 < P := by linarith
-  have hY1 : 1 ≤ Y := windowY_ge_one (by linarith) hε
+  have hY1 : 1 ≤ Y := Prep1121DKLMajorCut.windowY_ge_one (by linarith) hε
   have hY : 0 < Y := by linarith
   have hsY1 : 1 ≤ Real.sqrt Y := by
     rw [show (1 : ℝ) = Real.sqrt 1 from Real.sqrt_one.symm]
@@ -2013,7 +2010,7 @@ theorem S2star_minor_mean_square_of_pieces (h2 : T2BoundProp) :
   have hSI : S ⊆ Set.Ioc (0 : ℝ) 1 := Set.inter_subset_left
   have : IsFiniteMeasure (volume.restrict S) :=
     isFiniteMeasure_restrict.mpr ((measure_mono hSI).trans_lt measure_Ioc_lt_top).ne
-  obtain ⟨m2, c2, b2⟩ := S2star_props Y H P
+  obtain ⟨m2, c2, b2⟩ := Prep1121DKLMajorCut.S2star_props Y H P
   have hfi : IntegrableOn (fun α => ‖S2star Y H P α‖ ^ 2) S := by
     refine (MemLp.of_bound (m2.norm.pow_const 2).aestronglyMeasurable (c2 ^ 2)
       (Filter.Eventually.of_forall fun α => ?_)).integrable le_rfl
@@ -2262,9 +2259,14 @@ example : type_of% @bound20 := bound20_of_pieces
 
 /-! ## bound26 -/
 
-/-! ## S1 - S1* on M0, display 25 (ported from Prep1122S1StarM0Cut) -/
-
-lemma pair_eq_of_cross (q q' a' : ℕ) (a : ℤ) (hq : 1 ≤ q)
+/-- LEAF: P0088 page 6 display 25, the pointwise form. For alpha in M0 near a/q,
+beta = alpha - a/q has |beta| at most P^3/(qY). The character expansion of
+S1(a/q + beta), the bound |tau(chi)| at most q^(1/2), and partial summation
+against e(m beta) with hypothesis (A1.2), here A12Corr, give
+|S1 - S1*| at most C Y P^(-5) q^(1/2) (1 + Y |beta|), at most C Y P^(-2). No prime
+of the window divides q, since q is at most P. The arcs of M are disjoint for
+large X, so S1* at alpha is the single term of that arc. -/
+private lemma pair_eq_of_cross (q q' a' : ℕ) (a : ℤ) (hq : 1 ≤ q)
     (hcop : IsCoprime a (q : ℤ)) (hcop' : Nat.Coprime a' q')
     (h : (q' : ℤ) * a = q * a') : q' = q ∧ a = a' := by
   have h1 : (q : ℤ) ∣ q' := by
@@ -2286,7 +2288,7 @@ lemma pair_eq_of_cross (q q' a' : ℕ) (a : ℤ) (hq : 1 ≤ q)
 this defines S_j* on M". MEDIUM. For alpha in the period interval with |q alpha - a|
 at most (H/P)^(-1), q at most P and a coprime to q, no other arc of M contains alpha
 once H exceeds 2 P^2, so S1*(alpha) is the single term mu(q)/phi(q) T1(alpha - a/q). -/
-theorem S1star_on_arc (X Y H P α : ℝ) (q : ℕ) (a : ℤ) (hP : 1 ≤ P) (hH : 2 * P ^ 2 < H)
+private theorem S1star_on_arc (X Y H P α : ℝ) (q : ℕ) (a : ℤ) (hP : 1 ≤ P) (hH : 2 * P ^ 2 < H)
     (hα : α ∈ Set.Ioc (0 : ℝ) 1) (hq1 : 1 ≤ q) (hqP : (q : ℝ) ≤ P) (hcop : IsCoprime a (q : ℤ))
     (hqa : |(q : ℝ) * α - a| ≤ (H / P)⁻¹) :
     S1star X Y H P α = ((ArithmeticFunction.moebius q : ℤ) : ℂ) / (Nat.totient q : ℂ) *
@@ -2370,7 +2372,7 @@ theorem S1star_on_arc (X Y H P α : ℝ) (q : ℕ) (a : ℤ) (hP : 1 ≤ P) (hH 
 
 /-- Orthogonality: for `c` a unit mod `q`, the sum over characters of
 `χ⁻¹ b * χ c` is `φ(q)` when `b = c` and `0` otherwise. -/
-lemma sum_inv_mul_char (q : ℕ) [NeZero q] {c : ZMod q} (hc : IsUnit c) (b : ZMod q) :
+private lemma sum_inv_mul_char (q : ℕ) [NeZero q] {c : ZMod q} (hc : IsUnit c) (b : ZMod q) :
     ∑ χ : DirichletCharacter ℂ q, χ⁻¹ b * χ c = if b = c then (Nat.totient q : ℂ) else 0 := by
   by_cases hb : IsUnit b
   · have : ∀ χ : DirichletCharacter ℂ q, χ⁻¹ b * χ c = χ (Ring.inverse b * c) := by
@@ -2388,7 +2390,7 @@ lemma sum_inv_mul_char (q : ℕ) [NeZero q] {c : ZMod q} (hc : IsUnit c) (b : ZM
 of the characters modulo q. MEDIUM. For a and m coprime to q,
 e(am/q) = sum over chi mod q of tau(chi^(-1)) chi(a) chi(m) / phi(q), where tau is the
 Gauss sum with the additive character e(x/q). -/
-theorem char_expansion (q : ℕ) [NeZero q] (a : ℤ) (m : ℕ) (ha : IsCoprime a (q : ℤ))
+private theorem char_expansion (q : ℕ) [NeZero q] (a : ℤ) (m : ℕ) (ha : IsCoprime a (q : ℤ))
     (hm : Nat.Coprime m q) :
     ∑ χ : DirichletCharacter ℂ q, gaussSum χ⁻¹ (ZMod.stdAddChar (N := q)) * χ (a : ZMod q) /
         (Nat.totient q : ℂ) * χ (m : ZMod q) =
@@ -2421,7 +2423,7 @@ theorem char_expansion (q : ℕ) [NeZero q] (a : ℤ) (m : ℕ) (ha : IsCoprime 
 
 
 /-- The sum of all complex `n`-th roots of unity is `1` for `n = 1` and `0` for `n > 1`. -/
-lemma sum_nthRootsFinset_one (n : ℕ) (hn : 0 < n) :
+private lemma sum_nthRootsFinset_one (n : ℕ) (hn : 0 < n) :
     ∑ x ∈ Polynomial.nthRootsFinset n (1 : ℂ), x = if n = 1 then 1 else 0 := by
   have hn0 : n ≠ 0 := hn.ne'
   have : NeZero n := ⟨hn0⟩
@@ -2447,7 +2449,7 @@ lemma sum_nthRootsFinset_one (n : ℕ) (hn : 0 < n) :
     exact hζ.geom_sum_eq_zero (by omega)
 
 /-- The sum of the primitive complex `n`-th roots of unity is `μ(n)`. -/
-lemma sum_primitiveRoots_eq_moebius (n : ℕ) (hn : 0 < n) :
+private lemma sum_primitiveRoots_eq_moebius (n : ℕ) (hn : 0 < n) :
     ∑ x ∈ primitiveRoots n ℂ, x = ((ArithmeticFunction.moebius n : ℤ) : ℂ) := by
   have key := (ArithmeticFunction.sum_eq_iff_sum_mul_moebius_eq
     (f := fun n => ∑ x ∈ primitiveRoots n ℂ, x) (g := fun n => if n = 1 then (1 : ℂ) else 0)).mp
@@ -2472,7 +2474,7 @@ lemma sum_primitiveRoots_eq_moebius (n : ℕ) (hn : 0 < n) :
 mu(q)/phi(q) T1 as in the definition of S1* on page 5. MEDIUM. The Gauss sum of the
 principal character mod q is the Ramanujan sum c_q(1), the sum of the primitive q-th
 roots of unity, which is mu(q). -/
-theorem gaussSum_one_eq_moebius (q : ℕ) [NeZero q] :
+private theorem gaussSum_one_eq_moebius (q : ℕ) [NeZero q] :
     gaussSum (1 : DirichletCharacter ℂ q) (ZMod.stdAddChar (N := q)) =
       ((ArithmeticFunction.moebius q : ℤ) : ℂ) := by
   have hq : 0 < q := Nat.pos_of_ne_zero (NeZero.ne q)
@@ -2506,30 +2508,69 @@ theorem gaussSum_one_eq_moebius (q : ℕ) [NeZero q] :
       rw [ZMod.stdAddChar_apply, ZMod.toCircle_natCast]; congr 1; ring
 
 
-/-- PROVED. The bound for the Gauss sum of page 3 display 8 that display 25 needs: for
-every character chi modulo q, primitive or not, |tau(chi)| is at most q, q terms each of
-modulus at most one. P0088 page 6 display 25 uses q^(1/2); the factor q^(1/2) is not
-needed, since the defect bound C Y P^(-5) of (A1.2) leaves the room of P^(3/2). -/
-theorem gaussSum_norm_le_card (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) :
-    ‖gaussSum χ (ZMod.stdAddChar (N := q))‖ ≤ (q : ℝ) := by
-  have hψ : ∀ a : ZMod q, ‖ZMod.stdAddChar a‖ = 1 := by
-    intro a
-    rw [ZMod.stdAddChar_apply]
-    exact Circle.norm_coe _
-  change ‖∑ a : ZMod q, χ a * ZMod.stdAddChar a‖ ≤ (q : ℝ)
-  calc ‖∑ a : ZMod q, χ a * ZMod.stdAddChar a‖
-      ≤ ∑ a : ZMod q, ‖χ a * ZMod.stdAddChar a‖ := norm_sum_le _ _
-    _ ≤ ∑ _a : ZMod q, (1 : ℝ) := by
-        refine Finset.sum_le_sum fun a _ => ?_
-        rw [norm_mul, hψ a, mul_one]
-        exact DirichletCharacter.norm_le_one χ a
-    _ = (q : ℝ) := by simp
+/-- PROVED. Finite additive Parseval for all shifts of a Gauss sum: the energy of the
+family `a |-> gaussSum chi (stdAddChar.mulShift a)` is `q * phi(q)`. -/
+private theorem s1m0_gauss_energy {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) :
+    ∑ a : ZMod q, ‖gaussSum χ (ZMod.stdAddChar.mulShift a)‖ ^ 2 =
+      (q : ℝ) * (q.totient : ℝ) := by
+  set ψ : AddChar (ZMod q) ℂ := ZMod.stdAddChar with hψ
+  change ∑ a : ZMod q, ‖gaussSum χ (ψ.mulShift a)‖ ^ 2 = _
+  apply Complex.ofReal_injective
+  push_cast
+  simp_rw [← Complex.ofReal_pow]
+  unfold gaussSum
+  simp_rw [LeanLab.PNTPort.LargeSieve.ofReal_normSq_sum, AddChar.mulShift_apply]
+  have hc : ∀ z, (starRingEnd ℂ) (ψ z) = ψ (-z) :=
+    fun z => LeanLab.PNTPort.LargeSieve.conj_stdAddChar z
+  have hexp : ∀ a x y : ZMod q,
+      χ x * ψ (a * x) * (starRingEnd ℂ) (χ y * ψ (a * y)) =
+      χ x * (starRingEnd ℂ) (χ y) * ψ (a * (x - y)) := by
+    intro a x y
+    rw [(starRingEnd ℂ).map_mul, hc, mul_sub, sub_eq_add_neg, AddChar.map_add_eq_mul]
+    ring
+  simp_rw [hexp]
+  rw [Finset.sum_comm]
+  refine (Finset.sum_congr rfl (fun x _ => Finset.sum_comm)).trans ?_
+  have hsum : ∀ x y : ZMod q, ∑ a : ZMod q, χ x * (starRingEnd ℂ) (χ y) * ψ (a * (x - y)) =
+      if x = y then (q : ℂ) * (χ x * (starRingEnd ℂ) (χ x)) else 0 := by
+    intro x y
+    rw [← Finset.mul_sum, AddChar.sum_mulShift _ (ZMod.isPrimitive_stdAddChar q), ZMod.card]
+    by_cases hxy : x = y
+    · rw [ite_eq_left (sub_eq_zero.mpr hxy), ite_eq_left hxy, hxy]
+      ring
+    · rw [ite_eq_right (fun h => hxy (sub_eq_zero.mp h)), ite_eq_right hxy, Nat.cast_zero, mul_zero]
+  simp_rw [hsum, Finset.sum_ite_eq, Finset.mem_univ, ite_true]
+  rw [← Finset.mul_sum]
+  simp_rw [Complex.mul_conj', ← Complex.ofReal_pow]
+  rw [← Complex.ofReal_sum, LeanLab.PNTPort.LargeSieve.sum_normSq_char]
+  norm_cast
 
-lemma psum_norm_fourier (n : ℤ) (x : AddCircle (1 : ℝ)) : ‖fourier n x‖ = 1 := by
+/-- LEAF: P0088 page 6 display 25, the bound |tau(chi)| at most q^(1/2) that turns
+1/phi(q) times the Gauss sum into the factor q^(-1/2 + eta). HARD. It holds for every
+character chi mod q, primitive or not: for chi induced by a primitive chi* mod q*,
+tau(chi) = mu(q/q*) chi*(q/q*) tau(chi*) and |tau(chi*)| = q*^(1/2). -/
+private theorem norm_gaussSum_le_sqrt (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) :
+    ‖gaussSum χ (ZMod.stdAddChar (N := q))‖ ≤ Real.sqrt q := by
+  have hpoint : ∀ a : ZMod q, ‖χ⁻¹ a‖ ^ 2 * ‖gaussSum χ (ZMod.stdAddChar (N := q))‖ ^ 2 ≤
+      ‖gaussSum χ (ZMod.stdAddChar.mulShift a)‖ ^ 2 := by
+    intro a
+    by_cases ha : IsUnit a
+    · rw [← ha.unit_spec, gaussSum_mulShift_eq, norm_mul, mul_pow]
+    · rw [MulChar.map_nonunit _ ha, norm_zero, zero_pow (by omega), zero_mul]
+      positivity
+  have hs := Finset.sum_le_sum (fun a (_ : a ∈ (Finset.univ : Finset (ZMod q))) => hpoint a)
+  rw [← Finset.sum_mul, LeanLab.PNTPort.LargeSieve.sum_normSq_char, s1m0_gauss_energy] at hs
+  have hφ : (0 : ℝ) < (q.totient : ℝ) := by
+    exact_mod_cast Nat.totient_pos.2 (Nat.pos_of_ne_zero (NeZero.ne q))
+  have hs2 : ‖gaussSum χ (ZMod.stdAddChar (N := q))‖ ^ 2 ≤ (q : ℝ) := by nlinarith
+  exact (Real.le_sqrt (norm_nonneg _) (by positivity)).mpr hs2
+
+/-- The unimodularity of the Fourier character. -/
+private lemma psum_norm_fourier (n : ℤ) (x : AddCircle (1 : ℝ)) : ‖fourier n x‖ = 1 := by
   simp [fourier_apply]
 
 /-- The step bound |e(beta) - 1| at most 2 pi |beta|. -/
-lemma psum_step (β : ℝ) :
+private lemma psum_step (β : ℝ) :
     ‖fourier (1 : ℤ) (β : AddCircle (1 : ℝ)) - 1‖ ≤ 2 * π * |β| := by
   rw [fourier_coe_apply]
   have h : (2 * (π : ℂ) * Complex.I * ((1 : ℤ) : ℂ) * (β : ℂ) / ((1 : ℝ) : ℂ))
@@ -2542,7 +2583,7 @@ lemma psum_step (β : ℝ) :
 deduce from (25) and (A1.2)". MEDIUM. If every sum of the coefficients c over the
 window primes' interval I1 cut to u at most m below v is at most K, then the sum of
 c(m) e(m beta) over I1 is at most K (1 + 2 pi |beta| (Y + 1)). -/
-theorem partial_summation_window (X Y K β : ℝ) (hY : 0 ≤ Y) (c : ℕ → ℂ)
+private theorem partial_summation_window (X Y K β : ℝ) (hY : 0 ≤ Y) (c : ℕ → ℂ)
     (hK : ∀ u v : ℝ, X - Y ≤ u → u ≤ v → v ≤ X →
       ‖∑ m ∈ (primeWindow X Y).filter (fun m : ℕ => u ≤ (m : ℝ) ∧ (m : ℝ) < v), c m‖ ≤ K) :
     ‖∑ m ∈ primeWindow X Y, c m * fourier (m : ℤ) (β : AddCircle (1 : ℝ))‖ ≤
@@ -2660,7 +2701,7 @@ theorem partial_summation_window (X Y K β : ℝ) (hY : 0 ≤ Y) (c : ℕ → �
 
 /-- PROVED. The size facts of the block range: for large X, with P = (log X)^B,
 2 P^6 is below X^(7/18), 4 P is at most X, and 2 X^(7/9) is at most X. -/
-theorem block_large (B : ℝ) (_hB : 0 < B) : ∃ X1 : ℝ, ∀ X : ℝ, X1 ≤ X →
+private theorem block_large (B : ℝ) (_hB : 0 < B) : ∃ X1 : ℝ, ∀ X : ℝ, X1 ≤ X →
     2 * (Real.log X ^ B) ^ 6 < X ^ (7 / 18 : ℝ) ∧ 4 * Real.log X ^ B ≤ X ∧
       2 * X ^ (7 / 9 : ℝ) ≤ X ∧ 1 ≤ X := by
   have h1 := (isLittleO_log_rpow_rpow_atTop (6 * B) (by norm_num : (0 : ℝ) < 7 / 18)).bound
@@ -2692,9 +2733,9 @@ theorem block_large (B : ℝ) (_hB : 0 < B) : ∃ X1 : ℝ, ∀ X : ℝ, X1 ≤ 
           mul_le_mul_of_nonneg_right (by linarith) h79
       _ = X := hsplit.symm
 
-/-- The exact statement of S1_sub_S1star_on_M0, from the five
+/-- The exact statement of Prep1121DKLMajorCut.S1_sub_S1star_on_M0, from the five
 pieces above and block_large, CONDITIONAL ON A12Corr. No sorry of its own. -/
-theorem S1_sub_S1star_on_M0_of_leaves (hA : A12Corr) :
+private theorem S1_sub_S1star_on_M0_of_leaves (hA : A12Corr) :
     ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 →
       ∃ C X0 : ℝ, 0 < C ∧ ∀ X H : ℝ, X0 ≤ X →
         X ^ (7 / 18 + ε) * (Real.log X ^ B) ^ (-4 : ℤ) ≤ H →
@@ -2717,7 +2758,7 @@ theorem S1_sub_S1star_on_M0_of_leaves (hA : A12Corr) :
     rw [Real.le_log_iff_exp_le hXpos]
     exact Real.exp_one_lt_three.le.trans hX3
   have hP1 : 1 ≤ Real.log X ^ B := Real.one_le_rpow hL1 hB.le
-  have hY1 := windowY_ge_one (by linarith : (1 : ℝ) ≤ X) hε
+  have hY1 := Prep1121DKLMajorCut.windowY_ge_one (by linarith : (1 : ℝ) ≤ X) hε
   have hYX : windowY X ε ≤ X ^ (7 / 9 : ℝ) :=
     Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
   have hX718 : X ^ (7 / 18 : ℝ) ≤ X ^ (7 / 18 + ε) :=
@@ -2820,15 +2861,15 @@ theorem S1_sub_S1star_on_M0_of_leaves (hA : A12Corr) :
     intro u v hu huv hv
     exact hA' X hXA q hq1 hqP χ u v hu huv hv
   have hφ : (0 : ℝ) < Nat.totient q := by exact_mod_cast Nat.totient_pos.2 (by omega)
-  have hcn : ∀ χ : DirichletCharacter ℂ q, ‖c χ‖ ≤ (q : ℝ) / (Nat.totient q : ℝ) := by
+  have hcn : ∀ χ : DirichletCharacter ℂ q, ‖c χ‖ ≤ Real.sqrt q / (Nat.totient q : ℝ) := by
     intro χ
     simp only [c, norm_div, norm_mul, Complex.norm_natCast]
-    have h1 := gaussSum_norm_le_card q χ⁻¹
+    have h1 := norm_gaussSum_le_sqrt q χ⁻¹
     have h2 := DirichletCharacter.norm_le_one χ (a : ZMod q)
     refine div_le_div_of_nonneg_right ?_ hφ.le
-    calc ‖gaussSum χ⁻¹ ψ‖ * ‖χ (a : ZMod q)‖ ≤ (q : ℝ) * 1 :=
-          mul_le_mul h1 h2 (norm_nonneg _) (by positivity)
-      _ = (q : ℝ) := mul_one _
+    calc ‖gaussSum χ⁻¹ ψ‖ * ‖χ (a : ZMod q)‖ ≤ Real.sqrt q * 1 :=
+          mul_le_mul h1 h2 (norm_nonneg _) (Real.sqrt_nonneg _)
+      _ = Real.sqrt q := mul_one _
   have hcard : (Finset.univ : Finset (DirichletCharacter ℂ q)).card = Nat.totient q := by
     rw [Finset.card_univ, ← Nat.card_eq_fintype_card]
     exact DirichletCharacter.card_eq_totient_of_hasEnoughRootsOfUnity ℂ q
@@ -2838,18 +2879,27 @@ theorem S1_sub_S1star_on_M0_of_leaves (hA : A12Corr) :
       have := abs_nonneg β; have := Real.pi_pos; positivity
     exact mul_nonneg (mul_nonneg (mul_nonneg hCA.le hY.le) hP5.le) this
   -- the final arithmetic of display 25 with |beta| at most P^3/(qY)
+  have hs1 : 1 ≤ Real.sqrt q := Real.one_le_sqrt.2 (by exact_mod_cast hq1)
+  have hss : Real.sqrt q * Real.sqrt q = q := Real.mul_self_sqrt hq0.le
+  have hsP : Real.sqrt q ≤ P := by
+    have h := le_mul_of_one_le_right (Real.sqrt_nonneg (q : ℝ)) hs1
+    rw [hss] at h
+    linarith
   have hP3 : P ≤ P ^ 3 := le_self_pow₀ hP1 (by norm_num)
-  have hsP : (q : ℝ) ≤ P ^ 3 := hqP.trans hP3
-  have hsβ : (q : ℝ) * |β| ≤ P ^ 3 / Y := hqβ
-  have hinner : (q : ℝ) * (1 + 2 * π * |β| * (Y + 1)) ≤ (1 + 4 * π) * P ^ 3 := by
-    have h1 : (q : ℝ) * |β| * (Y + 1) ≤ 2 * P ^ 3 := by
-      calc (q : ℝ) * |β| * (Y + 1) ≤ P ^ 3 / Y * (2 * Y) :=
+  have hsβ : Real.sqrt q * |β| ≤ P ^ 3 / Y := by
+    calc Real.sqrt q * |β| ≤ Real.sqrt q * (Real.sqrt q * |β|) :=
+          le_mul_of_one_le_left (mul_nonneg (Real.sqrt_nonneg _) (abs_nonneg _)) hs1
+      _ = q * |β| := by rw [← mul_assoc, hss]
+      _ ≤ P ^ 3 / Y := hqβ
+  have hinner : Real.sqrt q * (1 + 2 * π * |β| * (Y + 1)) ≤ (1 + 4 * π) * P ^ 3 := by
+    have h1 : Real.sqrt q * |β| * (Y + 1) ≤ 2 * P ^ 3 := by
+      calc Real.sqrt q * |β| * (Y + 1) ≤ P ^ 3 / Y * (2 * Y) :=
             mul_le_mul hsβ (by linarith) (by positivity) (by positivity)
         _ = 2 * P ^ 3 := by field_simp
-    have h2 : 2 * π * ((q : ℝ) * |β| * (Y + 1)) ≤ 2 * π * (2 * P ^ 3) :=
+    have h2 : 2 * π * (Real.sqrt q * |β| * (Y + 1)) ≤ 2 * π * (2 * P ^ 3) :=
       mul_le_mul_of_nonneg_left h1 (by have := Real.pi_pos; positivity)
-    have h3 : (q : ℝ) * (1 + 2 * π * |β| * (Y + 1)) =
-        (q : ℝ) + 2 * π * ((q : ℝ) * |β| * (Y + 1)) := by ring
+    have h3 : Real.sqrt q * (1 + 2 * π * |β| * (Y + 1)) =
+        Real.sqrt q + 2 * π * (Real.sqrt q * |β| * (Y + 1)) := by ring
     rw [h3]
     nlinarith [h2, hsP, hP3]
   have hpow : P ^ (-5 : ℤ) * P ^ 3 = P ^ (-2 : ℝ) := by
@@ -2862,27 +2912,20 @@ theorem S1_sub_S1star_on_M0_of_leaves (hA : A12Corr) :
       ≤ ∑ χ : DirichletCharacter ℂ q, ‖c χ *
           ∑ m ∈ primeWindow X Y, d χ m * fourier (m : ℤ) (β : AddCircle (1 : ℝ))‖ :=
         norm_sum_le _ _
-    _ ≤ ∑ _χ : DirichletCharacter ℂ q, (q : ℝ) / (Nat.totient q : ℝ) *
+    _ ≤ ∑ _χ : DirichletCharacter ℂ q, Real.sqrt q / (Nat.totient q : ℝ) *
           (CA * Y * P ^ (-5 : ℤ) * (1 + 2 * π * |β| * (Y + 1))) := by
         refine Finset.sum_le_sum fun χ _ => ?_
         rw [norm_mul]
-        exact mul_le_mul (hcn χ) (hW χ) (norm_nonneg _) (div_nonneg (by positivity) hφ.le)
-    _ = (q : ℝ) * (CA * Y * P ^ (-5 : ℤ) * (1 + 2 * π * |β| * (Y + 1))) := by
+        exact mul_le_mul (hcn χ) (hW χ) (norm_nonneg _) (div_nonneg (Real.sqrt_nonneg _) hφ.le)
+    _ = Real.sqrt q * (CA * Y * P ^ (-5 : ℤ) * (1 + 2 * π * |β| * (Y + 1))) := by
         rw [Finset.sum_const, hcard, nsmul_eq_mul]
         field_simp
-    _ = CA * Y * P ^ (-5 : ℤ) * ((q : ℝ) * (1 + 2 * π * |β| * (Y + 1))) := by ring
+    _ = CA * Y * P ^ (-5 : ℤ) * (Real.sqrt q * (1 + 2 * π * |β| * (Y + 1))) := by ring
     _ ≤ CA * Y * P ^ (-5 : ℤ) * ((1 + 4 * π) * P ^ 3) :=
         mul_le_mul_of_nonneg_left hinner (mul_nonneg (mul_nonneg hCA.le hY.le) hP5.le)
     _ = CA * (1 + 4 * π) * Y * (P ^ (-5 : ℤ) * P ^ 3) := by ring
     _ = CA * (1 + 4 * π) * Y * P ^ (-2 : ℝ) := by rw [hpow]
 
-/-- LEAF: P0088 page 6 display 25, the pointwise form. For alpha in M0 near a/q,
-beta = alpha - a/q has |beta| at most P^3/(qY). The character expansion of
-S1(a/q + beta), the bound |tau(chi)| at most q^(1/2), and partial summation
-against e(m beta) with hypothesis (A1.2), here A12Corr, give
-|S1 - S1*| at most C Y P^(-5) q^(1/2) (1 + Y |beta|), at most C Y P^(-2). No prime
-of the window divides q, since q is at most P. The arcs of M are disjoint for
-large X, so S1* at alpha is the single term of that arc. -/
 theorem S1_sub_S1star_on_M0 (hA : A12Corr) :
     ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 →
       ∃ C X0 : ℝ, 0 < C ∧ ∀ X H : ℝ, X0 ≤ X →
@@ -2894,9 +2937,9 @@ theorem S1_sub_S1star_on_M0 (hA : A12Corr) :
             C * windowY X ε * (Real.log X ^ B) ^ (-2 : ℝ) :=
   S1_sub_S1star_on_M0_of_leaves hA
 
-/-! ## The L1 norm of S2* over M0, display 26 second factor (ported from Prep1122S2starL1) -/
+/-! Helpers for complete_gauss_coprime, proved by a workflow prover of session S37. -/
 
-theorem sum_range_zmod_gc (m : ℕ) [NeZero m] (f : ZMod m → ℂ) :
+private theorem sum_range_zmod_gc (m : ℕ) [NeZero m] (f : ZMod m → ℂ) :
     ∑ a ∈ Finset.range m, f (a : ZMod m) = ∑ a : ZMod m, f a := by
   apply Finset.sum_bij (s := Finset.range m) (t := (Finset.univ : Finset (ZMod m))) (fun a _ => (a : ZMod m))
   · intro a ha; exact Finset.mem_univ _
@@ -2908,7 +2951,7 @@ theorem sum_range_zmod_gc (m : ℕ) [NeZero m] (f : ZMod m → ℂ) :
     exact ⟨a.val, Finset.mem_range.mpr (ZMod.val_lt a), ZMod.natCast_zmod_val a⟩
   · intro a ha; rfl
 
-theorem card_two_kernel_gc (m : ℕ) [NeZero m] :
+private theorem card_two_kernel_gc (m : ℕ) [NeZero m] :
     (Finset.univ.filter (fun h : ZMod m => 2 * h = 0)).card ≤ 2 := by
   have hsub : Finset.univ.filter (fun h : ZMod m => 2 * h = 0) ⊆ {0, ((m/2 : ℕ) : ZMod m)} := by
     intro h hh
@@ -2937,7 +2980,7 @@ quadratic Gauss sum. For m at least one and c coprime to m the sum over y modulo
 of e(c y^2 / m) has modulus at most (2m)^(1/2), by Weyl differencing: the square
 modulus is a sum over h of e(c h^2/m) times a complete linear sum that vanishes
 unless m divides 2h. -/
-theorem complete_gauss_coprime (m c : ℕ) (hm : 1 ≤ m) (hc : Nat.Coprime c m) :
+private theorem complete_gauss_coprime (m c : ℕ) (hm : 1 ≤ m) (hc : Nat.Coprime c m) :
     ‖∑ y ∈ Finset.range m, U1534.ee (((c * y ^ 2 : ℕ) : ℝ) / (m : ℝ))‖ ≤
       Real.sqrt (2 * m) := by
   have : NeZero m := ⟨by omega⟩
@@ -3008,14 +3051,14 @@ theorem complete_gauss_coprime (m c : ℕ) (hm : 1 ≤ m) (hc : Nat.Coprime c m)
 
 /-! Helpers for complete_gauss_gcd, proved by a workflow prover of session S37. -/
 
-lemma ee_add_nat_gcd (x : ℝ) (N : ℕ) : U1534.ee (x + N) = U1534.ee x := by
+private lemma ee_add_nat_gcd (x : ℝ) (N : ℕ) : U1534.ee (x + N) = U1534.ee x := by
   unfold U1534.ee
   have : (2 * (Real.pi : ℂ) * Complex.I * ((x + N : ℝ) : ℂ)) =
       2 * Real.pi * Complex.I * (x : ℂ) + (N : ℤ) * (2 * Real.pi * Complex.I) := by
     push_cast; ring
   rw [this, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
 
-lemma ee_period_gcd (c' n k y : ℕ) (hn : 0 < n) :
+private lemma ee_period_gcd (c' n k y : ℕ) (hn : 0 < n) :
     U1534.ee (((c' * (n * k + y) ^ 2 : ℕ) : ℝ) / (n : ℝ)) =
       U1534.ee (((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ)) := by
   have hn' : (n : ℝ) ≠ 0 := by exact_mod_cast hn.ne'
@@ -3024,7 +3067,7 @@ lemma ee_period_gcd (c' n k y : ℕ) (hn : 0 < n) :
     push_cast; field_simp; ring
   rw [this, ee_add_nat_gcd]
 
-lemma sum_blocks_gcd (c' n : ℕ) (hn : 0 < n) (g : ℕ) :
+private lemma sum_blocks_gcd (c' n : ℕ) (hn : 0 < n) (g : ℕ) :
     (∑ y ∈ Finset.range (n * g), U1534.ee (((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ))) =
       (g : ℂ) * ∑ y ∈ Finset.range n, U1534.ee (((c' * y ^ 2 : ℕ) : ℝ) / (n : ℝ)) := by
   induction g with
@@ -3038,7 +3081,7 @@ lemma sum_blocks_gcd (c' n : ℕ) (hn : 0 < n) (g : ℕ) :
 complete quadratic sum. With g = (c, m), each term e(c y^2 / m) equals
 e((c/g) y^2 / (m/g)), which has period m/g in y, so the sum over y modulo m is g
 times the sum over y modulo m/g. -/
-theorem complete_gauss_gcd (m c : ℕ) (hm : 1 ≤ m) :
+private theorem complete_gauss_gcd (m c : ℕ) (hm : 1 ≤ m) :
     (∑ y ∈ Finset.range m, U1534.ee (((c * y ^ 2 : ℕ) : ℝ) / (m : ℝ))) =
       (Nat.gcd c m : ℂ) * ∑ y ∈ Finset.range (m / Nat.gcd c m),
         U1534.ee ((((c / Nat.gcd c m) * y ^ 2 : ℕ) : ℝ) / ((m / Nat.gcd c m : ℕ) : ℝ)) := by
@@ -3058,14 +3101,14 @@ theorem complete_gauss_gcd (m c : ℕ) (hm : 1 ≤ m) :
 
 /-! Helpers for gaussS_moebius, proved by a workflow prover of session S37. -/
 
-theorem moebius_sum_divisors_complex (n : ℕ) (_hn : 1 ≤ n) :
+private theorem moebius_sum_divisors_complex (n : ℕ) (_hn : 1 ≤ n) :
     ∑ d ∈ n.divisors, ((ArithmeticFunction.moebius d : ℤ) : ℂ) = if n = 1 then 1 else 0 := by
   have h := congrArg (fun f : ArithmeticFunction ℤ => f n) ArithmeticFunction.moebius_mul_coe_zeta
   simp only [ArithmeticFunction.coe_mul_zeta_apply, ArithmeticFunction.one_apply] at h
   rw [← Int.cast_sum, h]
   split_ifs <;> simp
 
-theorem filter_dvd_range_eq (a q d : ℕ) (hd : d ∣ q) (hd0 : 0 < d) :
+private theorem filter_dvd_range_eq (a q d : ℕ) (hd : d ∣ q) (hd0 : 0 < d) :
     ∑ x ∈ (Finset.range q).filter (fun x => d ∣ x), (fun x => U1534.ee (((a * x ^ 2 : ℕ) : ℝ) / (q : ℝ))) x
       = ∑ y ∈ Finset.range (q / d), U1534.ee ((((a * d) * y ^ 2 : ℕ) : ℝ) / ((q / d : ℕ) : ℝ)) := by
   obtain ⟨k, rfl⟩ := hd
@@ -3094,7 +3137,7 @@ theorem filter_dvd_range_eq (a q d : ℕ) (hd : d ∣ q) (hd0 : 0 < d) :
 the condition (x, q) = 1: the residues x = d y with d dividing q give
 S(q, a) = sum over d dividing q of mu(d) times the complete sum over y modulo q/d
 of e(a d y^2 / (q/d)). -/
-theorem gaussS_moebius (q a : ℕ) (hq : 1 ≤ q) :
+private theorem gaussS_moebius (q a : ℕ) (hq : 1 ≤ q) :
     U1534.gaussS q a = ∑ d ∈ q.divisors, ((ArithmeticFunction.moebius d : ℤ) : ℂ) *
       ∑ y ∈ Finset.range (q / d), U1534.ee ((((a * d) * y ^ 2 : ℕ) : ℝ) / ((q / d : ℕ) : ℝ)) := by
   unfold U1534.gaussS
@@ -3123,7 +3166,7 @@ theorem gaussS_moebius (q a : ℕ) (hq : 1 ≤ q) :
 
 /-- PROVED. P0088 page 3 display 8, the complete quadratic sum with any coefficient:
 modulus at most (2 m (c, m))^(1/2), from complete_gauss_gcd and complete_gauss_coprime. -/
-theorem complete_gauss_le (m c : ℕ) (hm : 1 ≤ m) :
+private theorem complete_gauss_le (m c : ℕ) (hm : 1 ≤ m) :
     ‖∑ y ∈ Finset.range m, U1534.ee (((c * y ^ 2 : ℕ) : ℝ) / (m : ℝ))‖ ≤
       Real.sqrt (2 * m * Nat.gcd c m) := by
   set g := Nat.gcd c m with hg
@@ -3145,7 +3188,7 @@ theorem complete_gauss_le (m c : ℕ) (hm : 1 ≤ m) :
 
 /-- PROVED. The divisor bound with exponent 1/8. Copy of the proved
 BHP1997.Decomp312c.card_divisors_le_rpow, which is private there. -/
-theorem card_divisors_le_rpow {ε : ℝ} (hε : 0 < ε) :
+private theorem card_divisors_le_rpow {ε : ℝ} (hε : 0 < ε) :
     ∃ C : ℝ, 0 < C ∧ ∀ n : ℕ, (n.divisors.card : ℝ) ≤ C * (n : ℝ) ^ ε := by
   let r : ℝ := (2 : ℝ) ^ ε
   have hr : 1 < r := Real.one_lt_rpow (by norm_num) hε
@@ -3213,7 +3256,7 @@ theorem card_divisors_le_rpow {ε : ℝ} (hε : 0 < ε) :
 /-- PROVED. P0088 page 3 display 8, the bound used on page 6: for a coprime to q,
 |S(q, a)| is at most C q^(1/2 + eta) with eta = 1/8. From gaussS_moebius,
 complete_gauss_le, (a d, q/d) = (d, q/d) at most d, and the divisor bound. -/
-theorem gaussS_norm_le : ∃ C : ℝ, 0 < C ∧ ∀ q a : ℕ, 1 ≤ q → Nat.Coprime a q →
+private theorem gaussS_norm_le : ∃ C : ℝ, 0 < C ∧ ∀ q a : ℕ, 1 ≤ q → Nat.Coprime a q →
     ‖U1534.gaussS q a‖ ≤ C * (q : ℝ) ^ (5 / 8 : ℝ) := by
   obtain ⟨Cd, hCd, hd⟩ := card_divisors_le_rpow (ε := 1 / 8) (by norm_num)
   refine ⟨Cd * Real.sqrt 2, by positivity, fun q a hq ha => ?_⟩
@@ -3259,7 +3302,7 @@ theorem gaussS_norm_le : ∃ C : ℝ, 0 < C ∧ ∀ q a : ℕ, 1 ≤ q → Nat.C
 
 /-- PROVED. P0088 page 4 display 15: the closed arc of width R^(-1) in q alpha is the
 interval of half length R^(-1)/q about a/q. -/
-theorem arc_eq_Icc (R : ℝ) (v : ℕ × ℕ) (hq : 1 ≤ v.1) :
+private theorem arc_eq_Icc (R : ℝ) (v : ℕ × ℕ) (hq : 1 ≤ v.1) :
     arc R v = Set.Icc ((v.2 : ℝ) / v.1 - R⁻¹ / v.1) ((v.2 : ℝ) / v.1 + R⁻¹ / v.1) := by
   have hq0 : (0 : ℝ) < v.1 := by exact_mod_cast hq
   ext α
@@ -3273,7 +3316,7 @@ theorem arc_eq_Icc (R : ℝ) (v : ℕ × ℕ) (hq : 1 ≤ v.1) :
 /-- PROVED. P0088 page 4 display 15 and page 6 display 23: an arc about a/q and an arc
 about a'/q', both fractions reduced, meet only when q = q' and a = a', once
 q' r1 + q r2 < 1, since otherwise |a q' - a' q| is at least one. -/
-theorem arc_localize {q q' a : ℕ} {a' : ℤ} {α r1 r2 : ℝ} (hq : 1 ≤ q) (hq' : 1 ≤ q')
+private theorem arc_localize {q q' a : ℕ} {a' : ℤ} {α r1 r2 : ℝ} (hq : 1 ≤ q) (hq' : 1 ≤ q')
     (ha : Nat.Coprime a q) (ha' : IsCoprime a' (q' : ℤ))
     (h1 : |(q : ℝ) * α - a| ≤ r1) (h2 : |(q' : ℝ) * α - a'| ≤ r2)
     (hsmall : (q' : ℝ) * r1 + q * r2 < 1) : q = q' ∧ (a : ℤ) = a' := by
@@ -3314,7 +3357,7 @@ theorem arc_localize {q q' a : ℕ} {a' : ℤ} {α r1 r2 : ℝ} (hq : 1 ≤ q) (
 arc M(q, a) of display 15 through alpha is the narrow arc of display 23 with the same
 q and a, so |S2*(alpha)| is at most the sum over the narrow arcs through alpha of
 |S(q, a)|/phi(q) |T2(alpha - a/q)|. -/
-theorem S2star_norm_le_on_M0 {Y H P α : ℝ} (hP : 1 ≤ P)
+private theorem S2star_norm_le_on_M0 {Y H P α : ℝ} (hP : 1 ≤ P)
     (hsmall : P * (H / P)⁻¹ + P * (Y * P ^ (-2 : ℤ) / P)⁻¹ < 1)
     (hα : α ∈ majorArcs (Y * P ^ (-2 : ℤ)) P) :
     ‖S2star Y H P α‖ ≤ ∑ v ∈ arcPairs P, (arc (Y * P ^ (-2 : ℤ) / P) v).indicator
@@ -3352,7 +3395,7 @@ theorem S2star_norm_le_on_M0 {Y H P α : ℝ} (hP : 1 ≤ P)
 /-- PROVED. P0088 page 6 display 26: on an arc of width R^(-1) in q alpha, display 22
 for T2, |T2(beta)| at most C Y^(1/2)/(1 + Y |beta|), integrates to at most
 2 C Y^(-1/2) log(1 + Y R^(-1)). -/
-theorem T2_arc_integral {Y P C R : ℝ} (v : ℕ × ℕ) (hq : 1 ≤ v.1) (hY : 0 < Y) (hR : 0 < R)
+private theorem T2_arc_integral {Y P C R : ℝ} (v : ℕ × ℕ) (hq : 1 ≤ v.1) (hY : 0 < Y) (hR : 0 < R)
     (hC : 0 ≤ C)
     (hT : ∀ β : ℝ, |β| ≤ R⁻¹ → ‖T2 Y P β‖ ≤ C * Real.sqrt Y / (1 + Y * |β|)) :
     ∫ α in arc R v, ‖T2 Y P (α - v.2 / v.1)‖ ≤
@@ -3417,7 +3460,7 @@ theorem T2_arc_integral {Y P C R : ℝ} (v : ℕ × ℕ) (hq : 1 ≤ v.1) (hY : 
 /-- PROVED. P0088 page 6 display 26, the sum over q at most P and a of |S(q, a)|/phi(q):
 with |S(q, a)| at most C q^(5/8), at most phi(q) + 1 values of a for each q, and
 q at most P, the sum is at most 2 C P^(13/8). -/
-theorem arcPairs_sum_le {C P : ℝ} (hC : 0 < C) (hP : 1 ≤ P)
+private theorem arcPairs_sum_le {C P : ℝ} (hC : 0 < C) (hP : 1 ≤ P)
     (hS : ∀ q a : ℕ, 1 ≤ q → Nat.Coprime a q →
       ‖U1534.gaussS q a‖ ≤ C * (q : ℝ) ^ (5 / 8 : ℝ)) :
     ∑ v ∈ arcPairs P, ‖U1534.gaussS v.1 v.2‖ / (Nat.totient v.1 : ℝ) ≤
@@ -3481,7 +3524,7 @@ theorem arcPairs_sum_le {C P : ℝ} (hC : 0 < C) (hP : 1 ≤ P)
 
 /-- PROVED. log(1 + P^3) is at most 25 P^(1/8) for P at least one; the log factor of
 display 26 is absorbed by eta = 1/8. -/
-theorem log_one_add_cube_le {P : ℝ} (hP : 1 ≤ P) :
+private theorem log_one_add_cube_le {P : ℝ} (hP : 1 ≤ P) :
     Real.log (1 + P ^ 3) ≤ 25 * P ^ (1 / 8 : ℝ) := by
   have hP0 : 0 < P := by linarith
   have hP3 : 1 ≤ P ^ 3 := one_le_pow₀ hP
@@ -3499,7 +3542,7 @@ theorem log_one_add_cube_le {P : ℝ} (hP : 1 ≤ P) :
 
 /-- PROVED. For large X, 4 (log X)^(6B) is at most X^(1/4), since every power of
 log X is o(X^(1/4)). -/
-theorem eventually_small (B : ℝ) :
+private theorem eventually_small (B : ℝ) :
     ∃ X0 : ℝ, ∀ X, X0 ≤ X → 3 ≤ X ∧ 4 * (Real.log X ^ B) ^ 6 ≤ X ^ (1 / 4 : ℝ) := by
   have h := (isLittleO_log_rpow_rpow_atTop (6 * B) (by norm_num : (0 : ℝ) < 1 / 4)).bound
     (by norm_num : (0 : ℝ) < 1 / 4)
@@ -3516,11 +3559,11 @@ theorem eventually_small (B : ℝ) :
 
 /-! ## Assembly -/
 
-/-- The exact statement of S2star_M0_L1, P0088 page 6 display 26
+/-- The exact statement of Prep1121DKLMajorCut.S2star_M0_L1, P0088 page 6 display 26
 second factor, from S2star_norm_le_on_M0, T2_arc_integral, arcPairs_sum_le,
 gaussS_norm_le and log_one_add_cube_le. No sorry anywhere: PROVED,
 CONDITIONAL ON T2BoundProp, display 22 for T2. -/
-theorem S2star_M0_L1_of_pieces (h2 : T2BoundProp) :
+private theorem S2star_M0_L1_of_pieces (h2 : T2BoundProp) :
     ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 →
       ∃ C X0 : ℝ, 0 < C ∧ ∀ X H : ℝ, X0 ≤ X →
         X ^ (7 / 18 + ε) * (Real.log X ^ B) ^ (-4 : ℤ) ≤ H →
@@ -3542,7 +3585,7 @@ theorem S2star_M0_L1_of_pieces (h2 : T2BoundProp) :
     rw [Real.le_log_iff_exp_le hX0]
     exact Real.exp_one_lt_three.le.trans hX3
   have hP1 : 1 ≤ Real.log X ^ B := Real.one_le_rpow hL1 hB.le
-  have hY1 := windowY_ge_one (by linarith : (1 : ℝ) ≤ X) hε
+  have hY1 := Prep1121DKLMajorCut.windowY_ge_one (by linarith : (1 : ℝ) ≤ X) hε
   have hsY : X ^ (1 / 4 : ℝ) ≤ Real.sqrt (windowY X ε) := by
     rw [windowY, Real.sqrt_eq_rpow, ← Real.rpow_mul hX0.le]
     exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
@@ -3605,7 +3648,7 @@ theorem S2star_M0_L1_of_pieces (h2 : T2BoundProp) :
   have hint : ∀ v ∈ arcPairs P,
       Integrable ((arc R0 v).indicator (fun α => K v * ‖T2 Y P (α - v.2 / v.1)‖)) := by
     intro v hv
-    rw [integrable_indicator_iff (measurableSet_arc R0 v), arc_eq_Icc R0 v (hv1 v hv)]
+    rw [integrable_indicator_iff (Prep1121DKLMajorCut.measurableSet_arc R0 v), arc_eq_Icc R0 v (hv1 v hv)]
     exact (continuous_const.mul
       ((trig_continuous _ _ _).comp (continuous_sub_right _)).norm).integrableOn_Icc
   have hGint : Integrable G := integrable_finsetSum _ hint
@@ -3623,7 +3666,7 @@ theorem S2star_M0_L1_of_pieces (h2 : T2BoundProp) :
       ‖T2 Y P (α - v.2 / v.1)‖ := by
     rw [hGdef, integral_finset_sum _ hint]
     refine Finset.sum_congr rfl fun v _ => ?_
-    rw [integral_indicator (measurableSet_arc R0 v), integral_const_mul]
+    rw [integral_indicator (Prep1121DKLMajorCut.measurableSet_arc R0 v), integral_const_mul]
   have hL0 : 0 ≤ Real.log (1 + Y * R0⁻¹) := Real.log_nonneg (by
     have : 0 ≤ Y * R0⁻¹ := by positivity
     linarith)
