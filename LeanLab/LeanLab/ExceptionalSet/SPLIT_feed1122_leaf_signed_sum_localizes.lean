@@ -52,6 +52,55 @@ theorem leaf_signed_fourier_large_translate (γ δ : ℝ) (hγ₁ : 1 < γ) (hγ
             < ‖∑ n ∈ Finset.Ioc (N / 2) N, eC ((α + h / 2) * F γ n)‖ := by
   sorry
 
+/-- The top of the translate range of Lemma 9, p. 370, lies eventually below a larger power of
+`F(N)`: for `0 < δ < δ''` and `κ ≤ δ`, eventually `F γ N ^ δ + ℰ ≤ F γ N ^ δ''`, because
+`log ℰ = κ (log N) ^ (3 - 2γ) ≤ δ (log N) ^ γ` and `2 F γ N ^ δ ≤ F γ N ^ δ''` once
+`(δ'' - δ) (log N) ^ γ ≥ log 2`.  Proved. -/
+private theorem translate_top_below_power (γ δ δ'' κ : ℝ) (hγ₁ : 1 < γ) (hγ₂ : γ < 3 / 2)
+    (hδδ : δ < δ'') (hκ : 0 ≤ κ) (hκδ : κ ≤ δ) :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → F γ N ^ δ + calE γ κ N ≤ F γ N ^ δ'' := by
+  set T : ℝ := max 1 (Real.log 2 / (δ'' - δ)) with hT
+  refine ⟨⌈Real.exp T⌉₊ + 1, ?_⟩
+  intro N hN
+  have hNpos : (0 : ℝ) < N := by exact_mod_cast (by omega : 0 < N)
+  have hNe : Real.exp T ≤ (N : ℝ) := by
+    have := Nat.le_ceil (Real.exp T)
+    have h' : (⌈Real.exp T⌉₊ : ℝ) ≤ N := by exact_mod_cast (by omega : _ ≤ N)
+    linarith
+  set L : ℝ := Real.log N with hL
+  have hTL : T ≤ L := by
+    rw [hL, ← Real.log_exp T]
+    exact Real.log_le_log (Real.exp_pos _) hNe
+  have hL1 : 1 ≤ L := le_trans (le_max_left _ _) hTL
+  have hL2 : Real.log 2 / (δ'' - δ) ≤ L := le_trans (le_max_right _ _) hTL
+  have hdd : 0 < δ'' - δ := by linarith
+  have hLP : L ≤ L ^ γ := by
+    calc L = L ^ (1 : ℝ) := (Real.rpow_one L).symm
+      _ ≤ L ^ γ := Real.rpow_le_rpow_of_exponent_le hL1 hγ₁.le
+  have hQP : L ^ (3 - 2 * γ) ≤ L ^ γ :=
+    Real.rpow_le_rpow_of_exponent_le hL1 (by linarith)
+  have hP0 : 0 ≤ L ^ γ := le_trans (by linarith) hLP
+  have hF : ∀ t : ℝ, F γ N ^ t = Real.exp (L ^ γ * t) := by
+    intro t
+    unfold LeanLab.ExceptionalSet.BrudernPerelli1998.F
+    rw [← Real.exp_mul]
+  rw [hF δ, hF δ'']
+  have hE : calE γ κ N ≤ Real.exp (L ^ γ * δ) := by
+    unfold calE
+    apply Real.exp_le_exp.mpr
+    rw [← hL]
+    have h1 : κ * L ^ (3 - 2 * γ) ≤ κ * L ^ γ := mul_le_mul_of_nonneg_left hQP hκ
+    have h2 : κ * L ^ γ ≤ δ * L ^ γ := mul_le_mul_of_nonneg_right hκδ hP0
+    linarith
+  have hlog2 : Real.log 2 ≤ (δ'' - δ) * L ^ γ := by
+    rw [div_le_iff₀ hdd] at hL2
+    nlinarith
+  have h2 : 2 * Real.exp (L ^ γ * δ) ≤ Real.exp (L ^ γ * δ'') := by
+    rw [← Real.exp_log (by norm_num : (0 : ℝ) < 2), ← Real.exp_add]
+    apply Real.exp_le_exp.mpr
+    nlinarith
+  linarith
+
 /-- LEAF: the full sum on the translates beyond the range of Theorem 2.  For `1 < γ < 3/2` and
 `0 < δ < 1`, uniformly in every sufficiently small `κ`, eventually: if
 `F γ N ^ ((γ - 1) / 2) < |β| ≤ F γ N ^ δ + ℰ` then `‖Σ_{N/2 < n ≤ N} e(β F(n))‖ ≤ N ℰ^(-1)`.
@@ -65,7 +114,32 @@ theorem leaf_translate_large_beta (γ δ : ℝ) (hγ₁ : 1 < γ) (hγ₂ : γ <
       ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ β : ℝ,
         F γ N ^ ((γ - 1) / 2) < |β| → |β| ≤ F γ N ^ δ + calE γ κ N →
         ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (β * F γ n)‖ ≤ N * calE γ κ N ^ (-1 : ℝ) := by
-  sorry
+  -- reduce to `leaf_fsm_large_alpha` at the larger exponent `(δ + 1) / 2` and at `3κ`
+  set δ'' : ℝ := (δ + 1) / 2 with hδ''
+  obtain ⟨κL, hκL, hL⟩ := leaf_fsm_large_alpha γ δ'' hγ₁ hγ₂ (by linarith) (by linarith)
+  refine ⟨min (κL / 3) δ, lt_min (by linarith) hδ₀, ?_⟩
+  intro κ hκ hκle
+  have hκ1 : 3 * κ ≤ κL := by
+    have := le_trans hκle (min_le_left _ _); linarith
+  have hκ2 : κ ≤ δ := le_trans hκle (min_le_right _ _)
+  obtain ⟨N₁, hN₁⟩ := hL (3 * κ) (by linarith) hκ1
+  obtain ⟨N₂, hN₂⟩ := translate_top_below_power γ δ δ'' κ hγ₁ hγ₂ (by linarith) hκ.le hκ2
+  refine ⟨max N₁ N₂, ?_⟩
+  intro N hN β hlow hhigh
+  have hb := hN₁ N (le_trans (le_max_left _ _) hN) β hlow
+    (le_trans hhigh (hN₂ N (le_trans (le_max_right _ _) hN)))
+  have h3 : calE γ (3 * κ) N ^ (-(1 / 3 : ℝ)) = calE γ κ N ^ (-1 : ℝ) := by
+    unfold calE
+    rw [← Real.exp_mul, ← Real.exp_mul]
+    congr 1
+    ring
+  rw [h3] at hb
+  have hE : 0 ≤ (N : ℝ) * calE γ κ N ^ (-1 : ℝ) := by
+    apply mul_nonneg (Nat.cast_nonneg _)
+    apply Real.rpow_nonneg
+    unfold calE
+    exact (Real.exp_pos _).le
+  linarith
 
 /-- `ℰ` at `3κ` to the power `-1/3` is `ℰ` at `κ` to the power `-1`. -/
 private theorem calE_three_mul (γ κ : ℝ) (N : ℕ) :
