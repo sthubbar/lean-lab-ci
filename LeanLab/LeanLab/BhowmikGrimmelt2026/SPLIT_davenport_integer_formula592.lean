@@ -4,6 +4,7 @@ The sharp integer formula is kept separate from its elementary zero sum estimate
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.RouteCount508
+import LeanLab.BhowmikGrimmelt2026.DavenportLeaves636
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -25,7 +26,7 @@ theorem davenport_integer_half_formula592 :
         ∑ ρ ∈ Z.filter (fun ρ => |ρ.im| < 1), (mult χ ρ : ℂ) / ρ‖ ≤
         D * ((n : ℝ) / T * Real.log ((q : ℝ) * n * T) ^ 2 +
           Real.log q + Real.log n) := by
-  sorry
+  exact Davenport636.formula636
 
 /-- CONDITIONAL on davenport_integer_half_formula592.
 Davenport page 117: the proved half weight endpoint bound converts the cited half

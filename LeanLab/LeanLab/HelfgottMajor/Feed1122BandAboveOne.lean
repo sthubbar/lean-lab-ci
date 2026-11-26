@@ -1,5 +1,7 @@
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le_card
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le_one
+import LeanLab.HelfgottMajor.BookZeroSplit1122
+import LeanLab.HelfgottMajor.SPLIT_book_zero_count_large_height_upper_short_level_one
 
 /-!
 # Feed1122 split of the open conductor block leaves of the band above height one
@@ -66,6 +68,64 @@ private lemma not_primitive_ten (χ : DirichletCharacter ℂ 10) : ¬ χ.IsPrimi
 private lemma not_primitive_fourteen (χ : DirichletCharacter ℂ 14) : ¬ χ.IsPrimitive :=
   not_primitive_of_unitsMap_injective (show 7 ∣ 14 by norm_num) (by norm_num) (by decide) χ
 
+/-- A full multiplicity sum at most one bounds both the number of strip zeros and
+ each individual multiplicity. This reduction has no cited zero count input. -/
+theorem card_and_mult_le_one_of_sum (χ : DirichletCharacter ℂ q) (S : Finset ℂ)
+    (hS : ∀ ρ ∈ S, DirichletCharacter.LFunction χ ρ = 0 ∧ ρ.re < 1)
+    (hsum : (∑ ρ ∈ S, (mult χ ρ : ℝ)) ≤ 1) :
+    S.card ≤ 1 ∧ ∀ ρ ∈ S, (mult χ ρ : ℝ) ≤ 1 := by
+  have hpos (ρ : ℂ) (hρ : ρ ∈ S) : (1 : ℝ) ≤ mult χ ρ := by
+    have hne1 : ρ ≠ 1 := by
+      intro h
+      have := (hS ρ hρ).2
+      simpa [h] using this
+    have han : AnalyticOnNhd ℂ (DirichletCharacter.LFunction χ) ({1}ᶜ : Set ℂ) := by
+      apply DifferentiableOn.analyticOnNhd _ isOpen_compl_singleton
+      intro s hs
+      exact (χ.differentiableAt_LFunction s (Or.inl hs)).differentiableWithinAt
+    have hpc : IsPreconnected ({1}ᶜ : Set ℂ) :=
+      (isConnected_compl_singleton_of_one_lt_rank (by simp) (1 : ℂ)).isPreconnected
+    have hρmem : ρ ∈ ({1}ᶜ : Set ℂ) := by simpa using hne1
+    have htop : analyticOrderAt (DirichletCharacter.LFunction χ) ρ ≠ ⊤ := by
+      intro ht
+      have hz := han.eqOn_zero_of_preconnected_of_eventuallyEq_zero hpc hρmem
+        (analyticOrderAt_eq_top.mp ht) (show (2 : ℂ) ∈ ({1}ᶜ : Set ℂ) by simp)
+      exact (DirichletCharacter.LFunction_ne_zero_of_one_le_re χ
+        (Or.inr (by norm_num)) (by norm_num)) hz
+    have hm : 1 ≤ mult χ ρ := by
+      rw [Nat.one_le_iff_ne_zero]
+      intro hzero
+      apply ((han ρ hρmem).analyticOrderAt_ne_zero.mpr (hS ρ hρ).1)
+      rw [← Nat.cast_analyticOrderNatAt htop, show analyticOrderNatAt
+        (DirichletCharacter.LFunction χ) ρ = 0 from hzero]
+      rfl
+    exact_mod_cast hm
+  have hcard : (S.card : ℝ) ≤ ∑ ρ ∈ S, (mult χ ρ : ℝ) := by
+    simpa using Finset.card_nsmul_le_sum S (fun ρ => (mult χ ρ : ℝ)) (1 : ℝ) hpos
+  constructor
+  · exact_mod_cast hcard.trans hsum
+  · intro ρ hρ
+    exact (Finset.single_le_sum (fun z _ => Nat.cast_nonneg (mult χ z)) hρ).trans hsum
+
+/-- The general book count error at the top of the band permits the value two.
+This proves a limitation of that estimate, not the existence of two zeros. -/
+theorem band_top_error_allows_two :
+    |(2 : ℝ) - bookMain q (2 * Real.pi * Real.exp 1 / (q : ℝ))| ≤
+      bookError q (2 * Real.pi * Real.exp 1 / (q : ℝ)) := by
+  have hq : (q : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne q)
+  have hc : (q : ℝ) * (2 * Real.pi * Real.exp 1 / (q : ℝ)) =
+      2 * Real.pi * Real.exp 1 := mul_div_cancel₀ _ hq
+  have hmain : bookMain q (2 * Real.pi * Real.exp 1 / (q : ℝ)) = 0 := by
+    unfold bookMain
+    rw [hc, div_self (by positivity), Real.log_one, mul_zero]
+  have hp : (1 : ℝ) ≤ 2 * Real.pi := by linarith [Real.pi_gt_three]
+  have he : (1 : ℝ) ≤ Real.exp 1 := Real.one_le_exp_iff.mpr (by norm_num)
+  have hlog : 0 ≤ Real.log (2 * Real.pi * Real.exp 1) := by
+    apply Real.log_nonneg
+    simpa using mul_le_mul hp he (by norm_num : (0 : ℝ) ≤ 1) (by positivity : 0 ≤ 2 * Real.pi)
+  rw [hmain, sub_zero, abs_of_pos (by norm_num : (0 : ℝ) < 2), bookError, hc]
+  linarith
+
 /-! ## Conductor one: the zeta function on `(1, 2πe]` -/
 
 /-- LEAF: conductor one, zeta has no strip zero with imaginary part in `(1, 14)`. HARD.
@@ -76,7 +136,14 @@ above `1` has imaginary part at least `14`. This is the band of P0014 page 38 di
 theorem zeta_band_no_zero_below_fourteen (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
     (hq : q = 1) :
     ∀ ρ ∈ stripZeros χ (2 * Real.pi * Real.exp 1), 1 < ρ.im → 14 ≤ ρ.im := by
-  sorry
+  subst hq
+  intro ρ hρ him
+  have hL : DirichletCharacter.LFunction χ = riemannZeta :=
+    DirichletCharacter.LFunction_modOne_eq
+  have hz : riemannZeta ρ = 0 := by simpa only [hL] using hρ.1
+  have hfirst := BookZeroSplit1122.zeta_first_zero hz hρ.2.1 hρ.2.2.1
+  rw [abs_of_pos (by linarith : 0 < ρ.im)] at hfirst
+  linarith
 
 /-- LEAF: conductor one, at most one zeta zero with imaginary part in `[14, 2πe]`. HARD.
 For the primitive character of modulus `1` the strip zeros with absolute imaginary part at
@@ -87,7 +154,23 @@ theorem zeta_band_card_from_fourteen (χ : DirichletCharacter ℂ q) (hχ : χ.I
     (hq : q = 1) :
     ((stripZeros_finite χ (2 * Real.pi * Real.exp 1)).toFinset.filter
       (fun ρ => 14 ≤ ρ.im)).card ≤ 1 := by
-  sorry
+  subst hq
+  let S := (stripZeros_finite χ (2 * Real.pi * Real.exp 1)).toFinset.filter
+    (fun ρ => 14 ≤ ρ.im)
+  have hL : DirichletCharacter.LFunction χ = riemannZeta :=
+    DirichletCharacter.LFunction_modOne_eq
+  have htop : 2 * Real.pi * Real.exp 1 ≤ 20 := by
+    nlinarith [Real.pi_lt_d4, Real.exp_one_lt_d9, Real.pi_pos, Real.exp_pos 1]
+  have hS (ρ : ℂ) (hρ : ρ ∈ S) :
+      riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ 0 ≤ ρ.im ∧ ρ.im ≤ 20 := by
+    obtain ⟨hz, him⟩ := Finset.mem_filter.mp hρ
+    have hz := (stripZeros_finite χ _).mem_toFinset.mp hz
+    exact ⟨by simpa only [hL] using hz.1, hz.2.1, hz.2.2.1, by linarith,
+      (le_abs_self _).trans (hz.2.2.2.trans htop)⟩
+  have hsum : (∑ ρ ∈ S, (mult χ ρ : ℝ)) ≤ 1 := by
+    simpa only [mult, hL] using zeta_zero_mult_sum_height_twenty_le_one S hS
+  exact (card_and_mult_le_one_of_sum χ S (fun ρ hρ =>
+    ⟨by simpa only [hL] using (hS ρ hρ).1, (hS ρ hρ).2.2.1⟩) hsum).1
 
 /-- LEAF: conductor one, a zeta zero with imaginary part in `[14, 2πe]` is simple. HARD.
 For the primitive character of modulus `1` every strip zero with absolute imaginary part at
@@ -96,7 +179,19 @@ display 4.26 at `q = 1`; this is the simplicity of the first zeta zero `14.1347�
 theorem zeta_band_mult_from_fourteen (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
     (hq : q = 1) :
     ∀ ρ ∈ stripZeros χ (2 * Real.pi * Real.exp 1), 14 ≤ ρ.im → (mult χ ρ : ℝ) ≤ 1 := by
-  sorry
+  subst hq
+  intro ρ hρ him
+  have hL : DirichletCharacter.LFunction χ = riemannZeta :=
+    DirichletCharacter.LFunction_modOne_eq
+  have htop : 2 * Real.pi * Real.exp 1 ≤ 20 := by
+    nlinarith [Real.pi_lt_d4, Real.exp_one_lt_d9, Real.pi_pos, Real.exp_pos 1]
+  have hsum := zeta_zero_mult_sum_height_twenty_le_one {ρ} (by
+    intro z hz
+    have heq : z = ρ := Finset.mem_singleton.mp hz
+    subst z
+    exact ⟨by simpa only [hL] using hρ.1, hρ.2.1, hρ.2.2.1, by linarith,
+      (le_abs_self _).trans (hρ.2.2.2.trans htop)⟩)
+  simpa only [Finset.sum_singleton, mult, hL] using hsum
 
 /-- Twin of `book_count_band_above_one_mult_le_card_level_one`, same statement, assembled from
 the two conductor one leaves: the window above height `1` sits above height `14`. -/
