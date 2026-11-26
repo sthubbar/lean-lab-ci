@@ -17,10 +17,11 @@ namespace LeanLab.Zhan1991
 noncomputable section
 open Filter Topology
 
-/-- Every point z has a punctured neighbourhood free of zeros of L(s, χ): at the pole of the
-principal character by the residue, elsewhere by isolated zeros, since L(s, χ) is analytic on
-the connected set ℂ \ {1} and L(2, χ) ≠ 0. -/
-theorem lfun_isolated_for_zeroWindow (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (z : ℂ) :
+/-- LEAF: Page 262, Lemma 4, the count `N(α, T, H, q)` is a finite count: for `α ≥ 1/2` the zeros
+of `L(s, χ)` with `Re s ≥ α` and `T ≤ Im s ≤ T + H` form a finite set. MEDIUM: `L(s, χ)` is
+analytic off `s = 1` and not identically zero, its zeros are isolated, there is none with
+`Re s ≥ 1` except possibly the junk value at the pole, and none accumulates at the pole. -/
+private theorem lfun_isolated_1122 (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (z : ℂ) :
     ∀ᶠ w in 𝓝 z, w ≠ z → DirichletCharacter.LFunction χ w ≠ 0 := by
   set f := DirichletCharacter.LFunction χ
   refine eventually_nhdsWithin_iff.mp ?_
@@ -51,6 +52,7 @@ theorem lfun_isolated_for_zeroWindow (q : ℕ) [NeZero q] (χ : DirichletCharact
       have hpc : IsPreconnected ({1}ᶜ : Set ℂ) :=
         (isConnected_compl_singleton_of_one_lt_rank
           (by rw [Complex.rank_real_complex]; norm_num) 1).isPreconnected
+      -- pick a point near z different from 1 where f vanishes eventually
       have hz' : ∃ w : ℂ, w ≠ 1 ∧ f =ᶠ[𝓝 w] 0 := by
         by_cases h1 : z = 1
         · have hev : ∀ᶠ w in 𝓝 z, ∀ᶠ y in 𝓝 w, f y = 0 := h.eventually_nhds
@@ -66,10 +68,6 @@ theorem lfun_isolated_for_zeroWindow (q : ℕ) [NeZero q] (χ : DirichletCharact
         (by norm_num) h2
     · exact h
 
-/-- LEAF: Page 262, Lemma 4, the count `N(α, T, H, q)` is a finite count: for `α ≥ 1/2` the zeros
-of `L(s, χ)` with `Re s ≥ α` and `T ≤ Im s ≤ T + H` form a finite set. MEDIUM: `L(s, χ)` is
-analytic off `s = 1` and not identically zero, its zeros are isolated, there is none with
-`Re s ≥ 1` except possibly the junk value at the pole, and none accumulates at the pole. -/
 theorem zeroWindow_finite (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (α T H : ℝ)
     (hα : 1 / 2 ≤ α) :
     {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧
@@ -89,7 +87,7 @@ theorem zeroWindow_finite (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (
       exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inr hne) hlt.le hρ.1
     · rfl
   obtain ⟨t, -, hcover⟩ := hK.elim_nhds_subcover
-    (fun z => {w | w ≠ z → f w ≠ 0}) (fun z _ => lfun_isolated_for_zeroWindow q χ z)
+    (fun z => {w | w ≠ z → f w ≠ 0}) (fun z _ => lfun_isolated_1122 q χ z)
   refine (t.finite_toSet).subset ?_
   intro ρ hρ
   obtain ⟨z, hzt, hz⟩ := Set.mem_iUnion₂.mp (hcover (hSK hρ))
