@@ -1,4 +1,5 @@
 import LeanLab.Halupczok2012.Decomp398a
+import LeanLab.Halupczok2012.Split398aMajorA4
 
 /-!
 Split of the open statement `Decomp398a.major_energy` into faithful leaves.
@@ -712,13 +713,164 @@ theorem a3_T_integral : A3Stmt := by
   apply div_le_div_of_nonneg_left (by positivity) hWpos
   linarith
 
+/-- The trivial bound |c_q(n)| at most phi q for the Ramanujan sum. -/
+theorem ramanujanSum_norm_le (q : ℕ) (n : ℤ) :
+    ‖ramanujanSum q n‖ ≤ (Nat.totient q : ℝ) := by
+  have hcard : (redRes q).card = Nat.totient q := by
+    rw [← Nat.filter_coprime_Ico_eq_totient q 1]
+    unfold redRes
+    congr 1
+    ext a
+    simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_Ico, Nat.coprime_comm]
+    omega
+  unfold ramanujanSum
+  refine (norm_sum_le _ _).trans ?_
+  simp only [phase, LeanLab.PNTPort.LargeSieve.norm_e, sum_const, hcard, nsmul_eq_mul,
+    mul_one, le_refl]
+
+/-- PP1993 p. 45: the sum over reduced a of e of -m a/q in Sigma_1 is the Ramanujan sum. -/
+theorem sigma1_regroup (N Y ε A : ℝ) (m : ℕ) :
+    sigma1 N Y ε A m = ∑ q ∈ majorQ N ε A, ((μ q : ℂ)) ^ 2 / (Nat.totient q : ℂ) ^ 2 *
+      ramanujanSum q (-(m : ℤ)) *
+      ∫ η in xiArc N Y ε A q, firstT N Y η * secondT Y η * phase (-(m : ℝ) * η) := by
+  unfold sigma1 ramanujanSum
+  refine sum_congr rfl fun q _ => ?_
+  rw [show ∀ x y z : ℂ, x * y * z = y * (x * z) from fun x y z => by ring, sum_mul]
+  refine sum_congr rfl fun a _ => ?_
+  congr 2
+  push_cast
+  ring
+
+/-- The weight of q in Sigma_1 has norm at most 1 over phi q. -/
+theorem weight_norm_le {q : ℕ} (hq : 1 ≤ q) (n : ℤ) :
+    ‖((μ q : ℂ)) ^ 2 / (Nat.totient q : ℂ) ^ 2 * ramanujanSum q n‖ ≤
+      1 / (Nat.totient q : ℝ) := by
+  have hφ : (0 : ℝ) < Nat.totient q := by exact_mod_cast Nat.totient_pos.mpr hq
+  have hμ : |(μ q : ℝ)| ≤ 1 := by exact_mod_cast ArithmeticFunction.abs_moebius_le_one
+  rw [norm_mul, norm_div, norm_pow, norm_pow, Complex.norm_intCast, Complex.norm_natCast]
+  have h2 : |(μ q : ℝ)| ^ 2 ≤ 1 := by
+    have := abs_nonneg (μ q : ℝ); nlinarith
+  calc |(μ q : ℝ)| ^ 2 / (Nat.totient q : ℝ) ^ 2 * ‖ramanujanSum q n‖
+      ≤ 1 / (Nat.totient q : ℝ) ^ 2 * (Nat.totient q : ℝ) := by
+        apply mul_le_mul (div_le_div_of_nonneg_right h2 (by positivity))
+          (ramanujanSum_norm_le q n) (norm_nonneg _) (by positivity)
+    _ = 1 / (Nat.totient q : ℝ) := by field_simp
+
 /-- LEAF: PP1993 p. 45, two unnumbered displays, given A3 the piece Sigma_1 equals
 M* at 2k times the singular series plus O of Y times the Ramanujan tail over q above L^B
 plus O of Y L^{-B}; this uses the singular series of p. 41 as the full Ramanujan series of
 mu^2 over phi^2 times c_q of -2k, the Euler product algebra of U1457SingSeries
 local_factor, euler_expand and truncS_expand. Class MEDIUM. -/
 theorem a4_sigma1 (h3 : A3Stmt) : A4Stmt := by
-  sorry
+  intro ε A hε hA
+  obtain ⟨C, N0, hC⟩ := h3 ε A hε hA
+  obtain ⟨c, hc0, hc⟩ := Split398aMajorA4.sum_div_totient_le
+  have hB : 0 < bigB ε A := by unfold bigB; positivity
+  refine ⟨2 + max C 0 * c, max N0 3, ?_⟩
+  intro N Y k hN hlow hYN hk
+  have hN0 : N0 ≤ N := le_trans (le_max_left _ _) hN
+  have hN3 : 3 ≤ N := le_trans (le_max_right _ _) hN
+  have hL1 : 1 ≤ Real.log N := by
+    rw [Real.le_log_iff_exp_le (by linarith)]
+    linarith [Real.exp_one_lt_d9]
+  have hY1 : 1 ≤ Y := (Real.one_le_rpow (by linarith) (by positivity)).trans hlow
+  have hk1 : 1 ≤ k := by
+    unfold kRange at hk
+    rw [Finset.mem_filter] at hk
+    have h1 : (0 : ℝ) < k := by linarith [hk.2.1]
+    exact_mod_cast h1
+  set L := Real.log N with hLdef
+  set X := L ^ bigB ε A with hXdef
+  have hX0 : 0 < X := Real.rpow_pos_of_pos (by linarith) _
+  set f : ℕ → ℂ := fun q => ((μ q : ℂ)) ^ 2 / (Nat.totient q : ℂ) ^ 2 *
+      ramanujanSum q (-((2 * k : ℕ) : ℤ)) with hf
+  set I : ℕ → ℂ := fun q => ∫ η in xiArc N Y ε A q,
+      firstT N Y η * secondT Y η * phase (-((2 * k : ℕ) : ℝ) * η) with hI
+  set P : ℂ := ((LeanLab.Halupczok2012.ppM (2 * k) N Y : ℝ) : ℂ) with hP
+  have hS : HasSum f ((S (2 * k) : ℝ) : ℂ) := Split398aMajorA4.singular_ramanujan k hk1
+  have hf0 : f 0 = 0 := by simp [hf]
+  -- the tail
+  have hmem : ∀ q : ℕ, 1 ≤ q → (q ∈ majorQ N ε A ↔ ¬ X < q) := by
+    intro q hq
+    unfold majorQ
+    rw [Finset.mem_Icc, not_lt, ← Nat.le_floor_iff hX0.le]
+    simp only [hq, true_and]
+    rfl
+  have hg : HasSum (fun q => if q ∈ majorQ N ε A then f q else 0)
+      (∑ q ∈ majorQ N ε A, f q) := by
+    have h0 : HasSum (fun q => if q ∈ majorQ N ε A then f q else 0)
+        (∑ q ∈ majorQ N ε A, (if q ∈ majorQ N ε A then f q else 0)) :=
+      hasSum_sum_of_ne_finset_zero (by intro q hq; simp [hq])
+    rwa [Finset.sum_congr rfl (g := f) (fun q hq => by simp [hq])] at h0
+  have htail : ramanujanTail (2 * k) X = (S (2 * k) : ℂ) - ∑ q ∈ majorQ N ε A, f q := by
+    unfold ramanujanTail
+    apply HasSum.tsum_eq
+    convert hS.sub hg using 1
+    funext q
+    rcases Nat.eq_zero_or_pos q with h0 | hq
+    · subst h0; simp [hf0]
+    · by_cases hx : X < (q : ℝ)
+      · have : q ∉ majorQ N ε A := fun h => (hmem q hq).mp h hx
+        simp [hx, this, hf]
+      · have : q ∈ majorQ N ε A := (hmem q hq).mpr hx
+        simp [hx, this, hf]
+  have hreg := sigma1_regroup N Y ε A (2 * k)
+  have hdecomp : sigma1 N Y ε A (2 * k) - ((S (2 * k) * LeanLab.Halupczok2012.ppM (2 * k) N Y : ℝ) : ℂ)
+      = ∑ q ∈ majorQ N ε A, f q * (I q - P) - ramanujanTail (2 * k) X * P := by
+    rw [hreg, htail]
+    simp only [hf, hI, hP, mul_sub, sum_sub_distrib, Complex.ofReal_mul, ← sum_mul]
+    ring
+  -- bounds
+  set C' := max C 0 with hC'
+  have hW : 0 < L ^ (2 * bigB ε A) := Real.rpow_pos_of_pos (by linarith) _
+  have hterm : ∀ q ∈ majorQ N ε A, ‖f q * (I q - P)‖ ≤
+      C' * Y / L ^ (2 * bigB ε A) * ((q : ℝ) / (Nat.totient q : ℝ)) := by
+    intro q hq
+    have hq1 : 1 ≤ q := (Finset.mem_Icc.mp hq).1
+    have hφ : (0 : ℝ) < Nat.totient q := by exact_mod_cast Nat.totient_pos.mpr hq1
+    have h1 := weight_norm_le hq1 (-((2 * k : ℕ) : ℤ))
+    have h2 := hC N Y q (2 * k) hN0 hlow hYN hq
+    have h2' : ‖I q - P‖ ≤ C' * q * Y / L ^ (2 * bigB ε A) := by
+      refine h2.trans ?_
+      apply div_le_div_of_nonneg_right _ hW.le
+      have : (0 : ℝ) ≤ q * Y := by positivity
+      nlinarith [le_max_left C 0]
+    rw [norm_mul]
+    calc ‖f q‖ * ‖I q - P‖ ≤ 1 / (Nat.totient q : ℝ) * (C' * q * Y / L ^ (2 * bigB ε A)) :=
+          mul_le_mul h1 h2' (norm_nonneg _) (by positivity)
+      _ = _ := by field_simp
+  have hsum := hc ⌊X⌋₊
+  have hfl : (⌊X⌋₊ : ℝ) ≤ X := Nat.floor_le hX0.le
+  have hC'0 : 0 ≤ C' := le_max_right _ _
+  have hpow : L ^ (2 * bigB ε A) = X * X := by
+    rw [hXdef, ← Real.rpow_add (by linarith)]; ring_nf
+  have hneg : L ^ (-bigB ε A) = 1 / X := by
+    rw [Real.rpow_neg (by linarith), hXdef, one_div]
+  have hfirst : ‖∑ q ∈ majorQ N ε A, f q * (I q - P)‖ ≤ C' * c * (Y * L ^ (-bigB ε A)) := by
+    refine (norm_sum_le _ _).trans ((sum_le_sum hterm).trans ?_)
+    rw [← mul_sum]
+    calc C' * Y / L ^ (2 * bigB ε A) * ∑ q ∈ majorQ N ε A, (q : ℝ) / (Nat.totient q : ℝ)
+        ≤ C' * Y / L ^ (2 * bigB ε A) * (c * X) := by
+          apply mul_le_mul_of_nonneg_left _ (by positivity)
+          refine (hsum.trans ?_)
+          exact mul_le_mul_of_nonneg_left hfl hc0
+      _ = C' * c * (Y * L ^ (-bigB ε A)) := by
+          rw [hpow, hneg]; field_simp
+  have hPle : ‖P‖ ≤ Y := by
+    rw [hP, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (by unfold LeanLab.Halupczok2012.ppM; positivity)]
+    exact Split398aMajorA4.ppM_le _ _ _ (by linarith)
+  have hsecond : ‖ramanujanTail (2 * k) X * P‖ ≤ Y * ‖ramanujanTail (2 * k) X‖ := by
+    rw [norm_mul, mul_comm]
+    exact mul_le_mul_of_nonneg_right hPle (norm_nonneg _)
+  rw [hdecomp]
+  refine (norm_sub_le _ _).trans ?_
+  have hT : 0 ≤ Y * ‖ramanujanTail (2 * k) X‖ := by positivity
+  have hE : 0 ≤ Y * L ^ (-bigB ε A) := by
+    have : 0 ≤ L ^ (-bigB ε A) := Real.rpow_nonneg (by linarith) _
+    positivity
+  have hCc : 0 ≤ C' * c := mul_nonneg hC'0 hc0
+  nlinarith
 
 /-- LEAF: PP1993 p. 45, last unnumbered display, giving display 8, the mean square over
 N below 2k at most N + H of the Ramanujan tail over q above L^B is at most H L^{-A}.
