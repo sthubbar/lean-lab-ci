@@ -19,6 +19,7 @@ tacit triangle step of page 44.
 AI wrote the Lean code. Binary Goldbach is open; nothing here changes that.
 -/
 import LeanLab.BHP1997.Prep1121LowExcLemma29
+import LeanLab.ExceptionalSet.WindowParseval264
 
 namespace LeanLab.BHP1997.S64LowExcCharNP
 open Classical Complex DecompC165b LowerShortC165
@@ -52,6 +53,235 @@ theorem leaf_perron_window (b : ℝ → ℕ → ℝ) {ε B : ℝ} (hε : 0 < ε)
             K * (x ^ (11 / 20 + ε)) ^ (1 / 100 : ℝ) := by
   sorry
 
+/-- `y^(1/2+it) = √y * exp(i t log y)` for `y > 0`. -/
+private lemma cpow_half_add_it {y : ℝ} (hy : 0 < y) (t : ℝ) :
+    (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)
+      = (Real.sqrt y : ℂ) * Complex.exp (((t : ℂ) * (Real.log y : ℂ)) * I) := by
+  have hyc : (y : ℂ) ≠ 0 := by exact_mod_cast hy.ne'
+  rw [Complex.cpow_add (1 / 2 : ℂ) ((t : ℂ) * I) hyc]
+  have h1 : (y : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt y : ℂ) := by
+    have h := (Complex.ofReal_cpow (x := y) hy.le (1 / 2 : ℝ)).symm
+    rw [show ((1 / 2 : ℝ) : ℂ) = (1 / 2 : ℂ) by norm_num] at h
+    rw [Real.sqrt_eq_rpow]
+    exact h
+  have h2 : (y : ℂ) ^ ((t : ℂ) * I)
+      = Complex.exp (((t : ℂ) * (Real.log y : ℂ)) * I) := by
+    rw [Complex.cpow_def_of_ne_zero hyc, ← Complex.ofReal_log hy.le]
+    congr 1
+    ring
+  rw [h1, h2]
+
+/-- The Fourier character at `t a / 2π` is `exp (i t a)`. -/
+private lemma fourierChar_eq_exp (t a : ℝ) :
+    (Real.fourierChar (t * a / (2 * Real.pi)) : ℂ)
+      = Complex.exp (((t : ℂ) * (a : ℂ)) * I) := by
+  have hq : 2 * Real.pi * (t * a / (2 * Real.pi)) = t * a := by
+    field_simp
+  rw [Real.fourierChar_apply, hq, Complex.ofReal_mul]
+
+/-- The indicator of an interval times a continuous function is `L¹` and `L²`. -/
+private lemma indicator_memLp (g : ℝ → ℂ) (hg : Continuous g) (T : ℝ) :
+    Integrable (Set.indicator (Set.Ioc (-T) T) g) ∧
+      MemLp (Set.indicator (Set.Ioc (-T) T) g) 2 := by
+  have hms : MeasurableSet (Set.Ioc (-T) T) := measurableSet_Ioc
+  have hIO : IntegrableOn g (Set.Ioc (-T) T) :=
+    (ContinuousOn.integrableOn_compact isCompact_Icc hg.continuousOn).mono_set
+      Set.Ioc_subset_Icc_self
+  refine ⟨hIO.integrable_indicator hms, ?_⟩
+  have haesm : AEStronglyMeasurable (Set.indicator (Set.Ioc (-T) T) g) :=
+    hg.aestronglyMeasurable.indicator hms
+  refine (memLp_two_iff_integrable_sq_norm haesm).2 ?_
+  have hEq : (fun t => ‖Set.indicator (Set.Ioc (-T) T) g t‖ ^ 2)
+      = Set.indicator (Set.Ioc (-T) T) (fun t => ‖g t‖ ^ 2) := by
+    funext t
+    by_cases ht : t ∈ Set.Ioc (-T) T <;> simp [ht]
+  rw [hEq]
+  exact ((ContinuousOn.integrableOn_compact isCompact_Icc (hg.norm.pow 2).continuousOn).mono_set
+    Set.Ioc_subset_Icc_self).integrable_indicator hms
+
+/-- Plancherel for the interval-restricted function. -/
+private lemma window_plancherel (g : ℝ → ℂ) (hg : Continuous g) {T : ℝ} (hT : 0 ≤ T) :
+    ∫ u : ℝ, ‖(FourierTransform.fourier (Set.indicator (Set.Ioc (-T) T) g) : ℝ → ℂ) u‖ ^ 2
+      = ∫ t in (-T)..T, ‖g t‖ ^ 2 := by
+  obtain ⟨hInt, hmem⟩ := indicator_memLp g hg T
+  rw [LeanLab.ExceptionalSet.WindowParseval264.integral_norm_sq_fourier
+    (Set.indicator (Set.Ioc (-T) T) g) hInt hmem]
+  have hms : MeasurableSet (Set.Ioc (-T) T) := measurableSet_Ioc
+  have hEq : (fun x => ‖Set.indicator (Set.Ioc (-T) T) g x‖ ^ 2)
+      = Set.indicator (Set.Ioc (-T) T) (fun t => ‖g t‖ ^ 2) := by
+    funext t
+    by_cases ht : t ∈ Set.Ioc (-T) T <;> simp [ht]
+  rw [hEq, MeasureTheory.integral_indicator hms,
+    ← intervalIntegral.integral_of_le (a := -T) (b := T) (by linarith)]
+
+/-- The main mean-square bound, with the `y`-variable as in the leaf. -/
+private lemma plancherel_window_y (g : ℝ → ℂ) (hg : Continuous g) {T Y : ℝ} (hT : 0 ≤ T)
+    (hY : 0 < Y) :
+    ∫ y in (Y / 2)..(3 * Y),
+        ‖∫ t in (-T)..T, g t * (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2
+      ≤ 18 * Real.pi * Y ^ 2 * ∫ t in (-T)..T, ‖g t‖ ^ 2 := by
+  obtain ⟨hInt, hmem⟩ := indicator_memLp g hg T
+  set f : ℝ → ℂ := Set.indicator (Set.Ioc (-T) T) g with hf
+  set Ψ : ℝ → ℝ := fun u => ‖(FourierTransform.fourier f : ℝ → ℂ) u‖ ^ 2 with hΨ
+  have hFcont : Continuous (FourierTransform.fourier f : ℝ → ℂ) :=
+    VectorFourier.fourierIntegral_continuous Real.continuous_fourierChar (innerSL ℝ).continuous₂ hInt
+  have hΨcont : Continuous Ψ := by
+    rw [hΨ]
+    exact (hFcont.norm).pow 2
+  have hΨnn : ∀ u : ℝ, 0 ≤ Ψ u := by intro u; rw [hΨ]; positivity
+  -- the pointwise identity
+  have hpt : ∀ y : ℝ, 0 < y →
+      ‖∫ t in (-T)..T, g t * (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2
+        = y * Ψ (-(Real.log y) / (2 * Real.pi)) := by
+    intro y hy
+    have harg : ∀ t : ℝ, -(inner ℝ t (-(Real.log y) / (2 * Real.pi)))
+        = t * Real.log y / (2 * Real.pi) := by
+      intro t; rw [Real.inner_apply]; ring
+    have hG : (FourierTransform.fourier f : ℝ → ℂ) (-(Real.log y) / (2 * Real.pi))
+        = ∫ t in (-T)..T, g t * Complex.exp (((t : ℂ) * (Real.log y : ℂ)) * I) := by
+      rw [Real.fourier_eq]
+      simp only [Circle.smul_def, smul_eq_mul]
+      have hfun : (fun t : ℝ => (Real.fourierChar (-inner ℝ t (-(Real.log y) / (2 * Real.pi)))
+            : ℂ) * Set.indicator (Set.Ioc (-T) T) g t)
+          = (fun t : ℝ => Set.indicator (Set.Ioc (-T) T)
+              (fun t => g t * Complex.exp (((t : ℂ) * (Real.log y : ℂ)) * I)) t) := by
+        funext t
+        rw [harg t, fourierChar_eq_exp]
+        by_cases ht : t ∈ Set.Ioc (-T) T
+        · simp only [Set.indicator_of_mem ht]
+          ring
+        · simp only [Set.indicator_of_notMem ht, mul_zero]
+      rw [hfun, MeasureTheory.integral_indicator measurableSet_Ioc,
+        intervalIntegral.integral_of_le (a := -T) (b := T) (by linarith)]
+    have hFy : (∫ t in (-T)..T, g t * (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I))
+        = (Real.sqrt y : ℂ) *
+            (FourierTransform.fourier f : ℝ → ℂ) (-(Real.log y) / (2 * Real.pi)) := by
+      rw [hG, ← intervalIntegral.integral_const_mul]
+      apply intervalIntegral.integral_congr
+      intro t _
+      dsimp only
+      rw [cpow_half_add_it hy t]
+      ring
+    rw [hFy, norm_mul, mul_pow]
+    have hsq : ‖(Real.sqrt y : ℂ)‖ ^ 2 = y := by
+      rw [Complex.sq_norm, Complex.normSq_ofReal, Real.mul_self_sqrt hy.le]
+    rw [hsq, hΨ]
+  -- substitution `y = exp u`
+  set a : ℝ := Real.log (Y / 2) with ha
+  set b : ℝ := Real.log (3 * Y) with hb
+  have hab : a ≤ b := by
+    rw [ha, hb]; exact Real.log_le_log (by linarith) (by linarith)
+  have hY2 : (0 : ℝ) < Y / 2 := by linarith
+  have hY3 : (0 : ℝ) < 3 * Y := by linarith
+  have hexpa : Real.exp a = Y / 2 := Real.exp_log hY2
+  have hexpb : Real.exp b = 3 * Y := Real.exp_log hY3
+  have hlogcont : ContinuousOn (fun y : ℝ => Real.log y) (Real.exp '' Set.uIcc a b) :=
+    Real.continuousOn_log.mono (by
+      rintro _ ⟨x, -, rfl⟩
+      simp)
+  have hsub_cont : ContinuousOn (fun y : ℝ => y * Ψ (-(Real.log y) / (2 * Real.pi)))
+      (Real.exp '' Set.uIcc a b) :=
+    continuous_id.continuousOn.mul
+      (hΨcont.comp_continuousOn (hlogcont.neg.div_const _))
+  have hsubst : ∫ y in (Y / 2)..(3 * Y),
+        ‖∫ t in (-T)..T, g t * (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2
+      = ∫ u in a..b, Real.exp (2 * u) * Ψ (-(u) / (2 * Real.pi)) := by
+    have h1 : ∫ y in (Y / 2)..(3 * Y),
+        ‖∫ t in (-T)..T, g t * (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2
+        = ∫ y in (Y / 2)..(3 * Y), y * Ψ (-(Real.log y) / (2 * Real.pi)) := by
+      apply intervalIntegral.integral_congr
+      intro y hy
+      simp only [Set.uIcc_of_le (by linarith : Y / 2 ≤ 3 * Y), Set.mem_Icc] at hy
+      exact hpt y (by linarith [hy.1])
+    rw [h1]
+    have key := intervalIntegral.integral_comp_mul_deriv'
+      (a := a) (b := b) (f := Real.exp) (f' := Real.exp)
+      (g := fun y : ℝ => y * Ψ (-(Real.log y) / (2 * Real.pi)))
+      (fun x _ => Real.hasDerivAt_exp x) Real.continuous_exp.continuousOn hsub_cont
+    simp only [Function.comp] at key
+    rw [hexpa, hexpb] at key
+    rw [← key]
+    apply intervalIntegral.integral_congr
+    intro u _
+    dsimp only
+    rw [Real.log_exp]
+    have e2 : Real.exp (2 * u) = Real.exp u * Real.exp u := by
+      rw [show (2 : ℝ) * u = u + u by ring, Real.exp_add]
+    rw [e2]
+    ring
+  -- bound the exponential weight
+  have hstep1 : ∫ u in a..b, Real.exp (2 * u) * Ψ (-(u) / (2 * Real.pi))
+      ≤ ∫ u in a..b, (9 * Y ^ 2) * Ψ (-(u) / (2 * Real.pi)) := by
+    have hc1 : Continuous fun u : ℝ => Real.exp (2 * u) * Ψ (-(u) / (2 * Real.pi)) :=
+      (Real.continuous_exp.comp (by fun_prop)).mul (hΨcont.comp (by fun_prop))
+    have hc2 : Continuous fun u : ℝ => (9 * Y ^ 2) * Ψ (-(u) / (2 * Real.pi)) :=
+      continuous_const.mul (hΨcont.comp (by fun_prop))
+    apply intervalIntegral.integral_mono_on hab (hc1.intervalIntegrable _ _)
+      (hc2.intervalIntegrable _ _)
+    intro u hu
+    have h1 : Real.exp u ≤ 3 * Y := by
+      calc Real.exp u ≤ Real.exp b := Real.exp_le_exp.mpr hu.2
+        _ = 3 * Y := hexpb
+    have h2 : Real.exp (2 * u) = (Real.exp u) ^ 2 := by
+      rw [show (2 : ℝ) * u = u + u by ring, Real.exp_add]
+      ring
+    rw [h2]
+    have h3 : Real.exp u * Real.exp u ≤ (3 * Y) * (3 * Y) :=
+      mul_self_le_mul_self (by positivity) h1
+    have h9 : (3 * Y) * (3 * Y) = 9 * Y ^ 2 := by ring
+    rw [h9] at h3
+    nlinarith [h3, hΨnn (-(u) / (2 * Real.pi))]
+  -- integrability of the rescaled Ψ
+  have hΨint : Integrable fun u : ℝ => Ψ (-(u) / (2 * Real.pi)) := by
+    have hFmem : MemLp (FourierTransform.fourier f : ℝ → ℂ) 2 :=
+      MemLp.ae_eq (LeanLab.ExceptionalSet.WindowParseval264.fourierIntegral_ae_eq
+        f hInt hmem).symm (Lp.memLp _)
+    have h0 : Integrable Ψ :=
+      (memLp_two_iff_integrable_sq_norm hFmem.aestronglyMeasurable).1 hFmem
+    have hpi : (2 * Real.pi : ℝ) ≠ 0 := by positivity
+    have hR : (-(2 * Real.pi)⁻¹) ≠ 0 := by simp
+    have hcomp : Integrable fun u : ℝ => Ψ (-(2 * Real.pi)⁻¹ * u) :=
+      h0.comp_mul_left' (R := -(2 * Real.pi)⁻¹) hR
+    have heq : (fun u : ℝ => Ψ (-(u) / (2 * Real.pi)))
+        = (fun u : ℝ => Ψ (-(2 * Real.pi)⁻¹ * u)) := by
+      funext u
+      congr 1
+      field_simp
+    rw [heq]
+    exact hcomp
+  -- monotonicity: the interval is below the line
+  have hmono : ∫ u in a..b, Ψ (-(u) / (2 * Real.pi))
+      ≤ ∫ u : ℝ, Ψ (-(u) / (2 * Real.pi)) := by
+    rw [intervalIntegral.integral_of_le hab]
+    exact MeasureTheory.setIntegral_le_integral hΨint
+      (Filter.Eventually.of_forall fun u => hΨnn (-(u) / (2 * Real.pi)))
+  have hrescale : ∫ u : ℝ, Ψ (-(u) / (2 * Real.pi))
+      = 2 * Real.pi * ∫ u : ℝ, Ψ u := by
+    have h := MeasureTheory.Measure.integral_comp_mul_left (g := Ψ) (-(2 * Real.pi)⁻¹)
+    have hpi : (0 : ℝ) < 2 * Real.pi := by positivity
+    have ha : |(-(2 * Real.pi)⁻¹)⁻¹| = 2 * Real.pi := by
+      rw [inv_neg, inv_inv, abs_neg, abs_of_pos hpi]
+    rw [ha, smul_eq_mul] at h
+    rw [← h]
+    apply integral_congr_ae
+    filter_upwards with u
+    congr 1
+    field_simp
+  have hplan : ∫ u : ℝ, Ψ u = ∫ t in (-T)..T, ‖g t‖ ^ 2 := by
+    rw [hΨ]
+    exact window_plancherel g hg hT
+  calc ∫ y in (Y / 2)..(3 * Y),
+        ‖∫ t in (-T)..T, g t * (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2
+      = ∫ u in a..b, Real.exp (2 * u) * Ψ (-(u) / (2 * Real.pi)) := hsubst
+    _ ≤ ∫ u in a..b, (9 * Y ^ 2) * Ψ (-(u) / (2 * Real.pi)) := hstep1
+    _ = (9 * Y ^ 2) * ∫ u in a..b, Ψ (-(u) / (2 * Real.pi)) := by
+        rw [intervalIntegral.integral_const_mul]
+    _ ≤ (9 * Y ^ 2) * ∫ u : ℝ, Ψ (-(u) / (2 * Real.pi)) := by
+        exact mul_le_mul_of_nonneg_left hmono (by positivity)
+    _ = (9 * Y ^ 2) * (2 * Real.pi * ∫ u : ℝ, Ψ u) := by rw [hrescale]
+    _ = (9 * Y ^ 2) * (2 * Real.pi * ∫ t in (-T)..T, ‖g t‖ ^ 2) := by rw [hplan]
+    _ = 18 * Real.pi * Y ^ 2 * ∫ t in (-T)..T, ‖g t‖ ^ 2 := by ring
+
 /-- LEAF: page 44, proof of Lemma 29, the variant of [8] Lemma 2, class HARD. P0069 Baker
 Harman Pintz 1997, "By a variant of [8], Lemma 2,
 `∫_{Y/2}^{3Y} |∫_T^{T'} g(t) y^(it) dt|^2 dy ≪ Y L ∫_T^{T'} |g(t)|^2 dt` whenever `g` is
@@ -66,7 +296,9 @@ theorem leaf_mellin_mean_value :
       ∫ y in (Y / 2)..(3 * Y),
           ‖∫ t in (-T)..T, g t * (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2 ≤
         K * Y ^ 2 * ∫ t in (-T)..T, ‖g t‖ ^ 2 := by
-  sorry
+  refine ⟨18 * Real.pi, by positivity, ?_⟩
+  intro Y hY T hT g hg
+  exact plancherel_window_y g hg hT hY
 
 /-- Page 3, the definition of Q: `Q ≤ Y^(1/16)` when `Y ≥ 1`. -/
 theorem sieveQ_le_sixteenth {ε x : ℝ} (hY : 1 ≤ x ^ (11 / 20 + ε)) :
