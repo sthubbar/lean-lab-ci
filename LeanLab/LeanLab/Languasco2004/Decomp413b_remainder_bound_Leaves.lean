@@ -15,7 +15,7 @@ attribute [local instance] Classical.propDecidable
 
 /-- LEAF: page 45 display 7, linearity of the rational arc integral over the
 three product terms that make up the remainder coefficient.
-Class MEDIUM. Each integrand is a finite sum of continuous phases, so it is
+Class MEDIUM. PROVED S154. Each integrand is a finite sum of continuous phases, so it is
 integrable on the bounded arc set and the integral splits. -/
 theorem remainder_linear (N Y H B : ℝ) (m : ℕ) :
     remainderCoefficient N Y H B m =
@@ -24,7 +24,59 @@ theorem remainder_linear (N Y H B : ℝ) (m : ℕ) :
       rationalIntegral N Y H B m (fun q a t =>
         rationalWeight q * secondModel Y t * firstRemainder N Y q a t) +
       rationalIntegral N Y H B m (fun q a t =>
-        firstRemainder N Y q a t * secondRemainder Y q a t) := by sorry
+        firstRemainder N Y q a t * secondRemainder Y q a t) := by
+  have hphase : Continuous phase := by unfold phase; fun_prop
+  have hfS : ∀ (q a : ℕ), Continuous (fun t : ℝ => firstSum N Y ((a : ℝ) / q + t)) := by
+    intro q a; unfold firstSum
+    exact continuous_finsetSum _ (fun h _ => continuous_const.mul
+      (hphase.comp (continuous_const.mul (continuous_const.add continuous_id))))
+  have hsS : ∀ (q a : ℕ), Continuous (fun t : ℝ => secondSum Y ((a : ℝ) / q + t)) := by
+    intro q a; unfold secondSum
+    exact continuous_finsetSum _ (fun h _ => continuous_const.mul
+      (hphase.comp (continuous_const.mul (continuous_const.add continuous_id))))
+  have hfM : Continuous (fun t : ℝ => firstModel N Y t) := by
+    unfold firstModel
+    exact continuous_finsetSum _ (fun h _ => hphase.comp (continuous_const.mul continuous_id))
+  have hsM : Continuous (fun t : ℝ => secondModel Y t) := by
+    unfold secondModel
+    exact continuous_finsetSum _ (fun h _ => hphase.comp (continuous_const.mul continuous_id))
+  have hfR : ∀ q a : ℕ, Continuous (fun t => firstRemainder N Y q a t) := by
+    intro q a; unfold firstRemainder; exact (hfS q a).sub (continuous_const.mul hfM)
+  have hsR : ∀ q a : ℕ, Continuous (fun t => secondRemainder Y q a t) := by
+    intro q a; unfold secondRemainder; exact (hsS q a).sub (continuous_const.mul hsM)
+  have hph : ∀ (q a : ℕ), Continuous (fun t : ℝ => phase (-(m : ℝ) * ((a : ℝ) / q + t))) :=
+    fun q a => hphase.comp (continuous_const.mul (continuous_const.add continuous_id))
+  -- integrability on the bounded arc set
+  have hint : ∀ (q a : ℕ) (c : ℝ) (f : ℝ → ℂ), Continuous f →
+      IntegrableOn f {t : ℝ | |t| < c ∧ (a : ℝ) / q + t ∈ period H} := by
+    intro q a c f hf
+    refine (hf.integrableOn_Icc (a := -c) (b := c)).mono_set ?_
+    intro t ht
+    have := abs_lt.mp ht.1
+    exact ⟨this.1.le, this.2.le⟩
+  unfold remainderCoefficient rationalIntegral
+  rw [← sum_add_distrib, ← sum_add_distrib]
+  refine sum_congr rfl (fun q _ => ?_)
+  rw [← sum_add_distrib, ← sum_add_distrib]
+  refine sum_congr rfl (fun a _ => ?_)
+  have h1 := hint q a (Real.log N ^ (2 * B) / ((q : ℝ) * Y))
+    (fun t => rationalWeight q * firstModel N Y t * secondRemainder Y q a t *
+      phase (-(m : ℝ) * ((a : ℝ) / q + t)))
+    (((continuous_const.mul hfM).mul (hsR q a)).mul (hph q a))
+  have h2 := hint q a (Real.log N ^ (2 * B) / ((q : ℝ) * Y))
+    (fun t => rationalWeight q * secondModel Y t * firstRemainder N Y q a t *
+      phase (-(m : ℝ) * ((a : ℝ) / q + t)))
+    (((continuous_const.mul hsM).mul (hfR q a)).mul (hph q a))
+  have h3 := hint q a (Real.log N ^ (2 * B) / ((q : ℝ) * Y))
+    (fun t => firstRemainder N Y q a t * secondRemainder Y q a t *
+      phase (-(m : ℝ) * ((a : ℝ) / q + t)))
+    (((hfR q a).mul (hsR q a)).mul (hph q a))
+  beta_reduce
+  rw [← integral_add h1 h2, ← integral_add ?_ h3]
+  · congr 1
+    funext t
+    ring
+  · exact h1.add h2
 
 /-- LEAF: page 46 displays 9 to 13, the mean square of the term with the
 principal model T1 and the S2 remainder, controlled by the ordinary
