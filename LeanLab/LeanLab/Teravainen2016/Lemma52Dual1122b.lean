@@ -20,7 +20,57 @@ theorem leaf_geometric_interval : ∀ S : Finset ℕ,
     (∀ x ∈ S, ∀ z ∈ S, ∀ y, x ≤ y → y ≤ z → y ∈ S) →
     ∀ γ : ℝ, ∀ m : ℤ, |γ - m| ≤ 1 / 2 →
       ‖∑ n ∈ S, eC (γ * n)‖ * (2 * |γ - m|) ≤ 1 := by
-  sorry
+  intro S hS γ m hγ
+  set δ := γ - m with hδ
+  rcases S.eq_empty_or_nonempty with rfl | hne
+  · simp
+  rcases eq_or_ne δ 0 with h0 | h0
+  · rw [h0]; simp
+  set z : ℂ := Complex.exp (Complex.I * ((2 * Real.pi * γ : ℝ) : ℂ)) with hz
+  have hpow : ∀ n : ℕ, eC (γ * n) = z ^ n := by
+    intro n; unfold eC; rw [hz, ← Complex.exp_nat_mul]; congr 1; push_cast; ring
+  have hsin : ‖z - 1‖ = 2 * |Real.sin (Real.pi * δ)| := by
+    rw [hz, Complex.norm_exp_I_mul_ofReal_sub_one]
+    have : 2 * Real.pi * γ / 2 = Real.pi * δ + m * Real.pi := by rw [hδ]; ring
+    rw [this, Real.sin_add_int_mul_pi, norm_mul, norm_mul, Real.norm_eq_abs, Real.norm_eq_abs,
+      Real.norm_eq_abs, abs_neg_one_zpow, one_mul]
+    norm_num
+  have hjordan : 2 * |δ| ≤ |Real.sin (Real.pi * δ)| := by
+    have hpi := Real.pi_pos
+    have h1 : 0 ≤ Real.pi * |δ| := by positivity
+    have h2 : Real.pi * |δ| ≤ Real.pi / 2 := by nlinarith
+    have hj := Real.mul_le_sin h1 h2
+    have e : 2 / Real.pi * (Real.pi * |δ|) = 2 * |δ| := by field_simp
+    rw [e] at hj
+    rcases le_total 0 δ with hd | hd
+    · rw [abs_of_nonneg hd] at hj ⊢
+      exact hj.trans (le_abs_self _)
+    · rw [abs_of_nonpos hd] at hj ⊢
+      rw [show Real.pi * -δ = -(Real.pi * δ) by ring, Real.sin_neg] at hj
+      exact hj.trans (neg_le_abs _)
+  have hδpos : 0 < |δ| := abs_pos.mpr h0
+  have hz1 : z ≠ 1 := by
+    intro h; rw [h, sub_self, norm_zero] at hsin; linarith
+  have hznorm : ‖z‖ = 1 := by rw [hz]; exact Complex.norm_exp_I_mul_ofReal _
+  set a := S.min' hne
+  set b := S.max' hne
+  have hSI : S = Ico a (b + 1) := by
+    ext x; rw [mem_Ico]; constructor
+    · intro hx; exact ⟨S.min'_le x hx, Nat.lt_succ_of_le (S.le_max' x hx)⟩
+    · intro hx; exact hS a (S.min'_mem hne) b (S.max'_mem hne) x hx.1 (Nat.le_of_lt_succ hx.2)
+  have hab : a ≤ b + 1 := by
+    have := S.min'_le_max' hne; omega
+  have hsum : ∑ n ∈ S, eC (γ * n) = (z ^ (b + 1) - z ^ a) / (z - 1) := by
+    rw [sum_congr rfl fun n _ => hpow n, hSI, geom_sum_Ico hz1 hab]
+  have hpos : 0 < ‖z - 1‖ := norm_pos_iff.mpr (sub_ne_zero.mpr hz1)
+  have hnum : ‖z ^ (b + 1) - z ^ a‖ ≤ 2 := by
+    calc _ ≤ ‖z ^ (b + 1)‖ + ‖z ^ a‖ := norm_sub_le _ _
+      _ = 2 := by rw [norm_pow, norm_pow, hznorm]; norm_num
+  rw [hsum, norm_div]
+  calc ‖z ^ (b + 1) - z ^ a‖ / ‖z - 1‖ * (2 * |δ|) ≤ 2 / ‖z - 1‖ * (2 * |δ|) := by
+        gcongr
+    _ ≤ 1 := by
+        rw [div_mul_eq_mul_div, div_le_one hpos, hsin]; linarith
 
 /-- LEAF: the count of the `Q` frequencies `a/Q - β`, spaced `1/Q` apart modulo one, the second
 step of the dual count in Matomäki and Shao Lemma 7.4 behind Lemma 5.2, page 18. Class MEDIUM.
