@@ -59,6 +59,10 @@ theorem negative_bottom_gaussian_lower_window_mid_center_lipschitz (δ : ℝ) {t
     |‖gaussianMellin δ ((1 / 2 : ℂ) + (t₁ : ℝ) * Complex.I)‖ -
         ‖gaussianMellin δ ((1 / 2 : ℂ) + (t₂ : ℝ) * Complex.I)‖| ≤
       24 * |t₁ - t₂| * ‖gaussianMellin δ ((1 / 2 : ℂ) - Complex.I)‖ := by
+  have h₁_ne : gaussianMellin δ ((1 / 2 : ℂ) + (t₁ : ℝ) * Complex.I) ≠ 0 := by
+    sorry
+  have h₂_ne : gaussianMellin δ ((1 / 2 : ℂ) + (t₂ : ℝ) * Complex.I) ≠ 0 := by
+    sorry
   sorry
 
 /-- The statement of `negative_bottom_gaussian_lower_window_mid_center`, assembled from the midpoint
