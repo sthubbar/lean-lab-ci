@@ -244,6 +244,29 @@ theorem remainder_ge_one {q : ℕ} (hq7 : 7 ≤ q) (hq : q ≤ 1000) :
   · exact remainder_dyadic hq7 9 (by norm_num) (by norm_num; omega) (by norm_num; omega) 22.6 (by norm_num)
       (by norm_num) (by norm_num; linarith) (by norm_num; linarith)
 
+/-- The full length remainder is at least one through the last range where it is at least one.
+This extends `remainder_ge_one` from 1000 through 14762 by the same dyadic arithmetic. -/
+theorem remainder_ge_one_14762 {q : ℕ} (hq7 : 7 ≤ q) (hq : q ≤ 14762) :
+    1 ≤ 1 / (2 * π) * sqrt q * log q + 1 / π * sqrt q * log (log q) + sqrt q -
+      sqrt q / π * (log (((q - 1) / 2 : ℕ) : ℝ) + eulerMascheroniConstant + log 2 +
+        3 / (((q - 1) / 2 : ℕ) : ℝ)) := by
+  rcases Nat.lt_or_ge q 1025 with h1025 | h1025
+  · by_cases h1000 : q ≤ 1000
+    · exact remainder_ge_one hq7 h1000
+    · exact remainder_dyadic hq7 9 (by norm_num) (by norm_num; omega) (by norm_num; omega)
+        22.6 (by norm_num) (by norm_num) (by norm_num; linarith) (by norm_num; linarith)
+  rcases Nat.lt_or_ge q 2049 with h2049 | h2049
+  · exact remainder_dyadic hq7 10 (by norm_num) (by norm_num; omega) (by norm_num; omega)
+      32 (by norm_num) (by norm_num) (by norm_num; linarith) (by norm_num; linarith)
+  rcases Nat.lt_or_ge q 4097 with h4097 | h4097
+  · exact remainder_dyadic hq7 11 (by norm_num) (by norm_num; omega) (by norm_num; omega)
+      45 (by norm_num) (by norm_num) (by norm_num; linarith) (by norm_num; linarith)
+  rcases Nat.lt_or_ge q 8193 with h8193 | h8193
+  · exact remainder_dyadic hq7 12 (by norm_num) (by norm_num; omega) (by norm_num; omega)
+      64 (by norm_num) (by norm_num) (by norm_num; linarith) (by norm_num; linarith)
+  · exact remainder_dyadic hq7 13 (by norm_num) (by norm_num; omega) (by norm_num; omega)
+      90 (by norm_num) (by norm_num) (by norm_num; linarith) (by norm_num; linarith)
+
 /-- LEAF: Pomerance 2011 proof of Theorem 1 for odd χ, large moduli q > 1000: the Polya Fourier
 expansion of the interval indicator, Frolenkov display 12, truncated at Pomerance's parameter H
 with his explicit truncation error, Frolenkov displays 15 and 21, reduced through display 10 and
@@ -258,7 +281,12 @@ theorem odd_truncated_large {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
           |cos (m * (2 * π * M / q)) - cos (m * (2 * π * (N + 1) / q))| / m +
         (1 / (2 * π) * sqrt q * log q + 1 / π * sqrt q * log (log q) + sqrt q -
           sqrt q / π * (log H + eulerMascheroniConstant + log 2 + 3 / H)) := by
-  sorry
+  by_cases hq14762 : q ≤ 14762
+  · refine ⟨(q - 1) / 2, by omega, fun M N => ?_⟩
+    have a := odd_full_bound χ hχ (by omega) hodd M N
+    have b := remainder_ge_one_14762 (by omega) hq14762
+    linarith
+  · sorry
 
 /-- Assembly: exactly `PVCases1122.odd_truncated`. For q ≤ 1000, H = (q-1)/2 with
 `odd_full_bound` and `remainder_ge_one`; for q > 1000, the LEAF `odd_truncated_large`. -/
