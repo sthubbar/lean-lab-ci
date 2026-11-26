@@ -46,7 +46,30 @@ theorem leaf_high_j1_large_phase_localizes (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3
               (N : ℝ) * calE γ κ N ^ (-(5 / 6 : ℝ)) <
                   ‖blockPhase (indices_high_j1 γ N) (fun n => F γ n - (1 : ℤ)) (b - a)‖ →
                 ∃ h : ℤ, |(b - a) - (h : ℝ) / 2| ≤ F γ N ^ (δ - 1) := by
-  sorry
+  classical
+  obtain ⟨δp, hδp, hp⟩ := leaf_parity_gap γ h1 h2
+  refine ⟨min δp 1, lt_min hδp one_pos, fun δ hδ hδs => ?_⟩
+  have hδp' : δ < δp := hδs.trans_le (min_le_left _ _)
+  obtain ⟨κp, hκp, hp⟩ := hp δ hδ hδp'
+  refine ⟨κp, hκp, fun κ hκ hκs => ?_⟩
+  obtain ⟨Np, hp⟩ := hp κ hκ hκs
+  obtain ⟨Nw, hw⟩ := phase_window_parameters γ δ κ h1 h2 hδ hδs.le hκ
+  refine ⟨max Np Nw, fun N hN => ?_⟩
+  have hNp : Np ≤ N := (le_max_left _ _).trans hN
+  have hNw : Nw ≤ N := (le_max_right _ _).trans hN
+  intro a ha b hb hlarge
+  obtain ⟨-, hE1, -, hlog, hscale, hTX, -, hr, hXr⟩ := hw N hNw
+  have hba : |b - a| ≤ F γ N ^ δ := by
+    have hb1 : b ≤ calE γ κ N ^ (2 / 3 : ℝ) := hb.2.2
+    have hb2 : -(calE γ κ N ^ (2 / 3 : ℝ)) ≤ b := hb.2.1
+    have ha1 : a ≤ calE γ κ N ^ (2 / 3 : ℝ) := ha.2.2
+    have ha2 : -(calE γ κ N ^ (2 / 3 : ℝ)) ≤ a := ha.2.1
+    have hE0 : 0 < calE γ κ N := Real.exp_pos _
+    have hEp : (0 : ℝ) ≤ calE γ κ N ^ (2 / 3 : ℝ) := Real.rpow_nonneg hE0.le _
+    rw [abs_le]
+    constructor <;> linarith
+  obtain ⟨h, hh⟩ := hp N hNp (b - a) hba hlarge
+  exact ⟨h, hh⟩
 
 /-- LEAF. Step 2, the prime square supremum on the truncated minor arc. There is
 an admissible width `δ` and a constant such that, eventually, every point of the
