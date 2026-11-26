@@ -7,6 +7,7 @@ CONDITIONAL on every unproved leaf. Goldbach is open.
 AI wrote the Lean code. CODEX task132, 2026-10-26.
 -/
 import LeanLab.BHP1997.Cover132
+import LeanLab.BHP1997.DecompC165b
 
 namespace LeanLab.BHP1997.Decomp132
 open Classical Real Filter
@@ -112,7 +113,7 @@ theorem sieve_data :
                 (u0 * v1 + u1 * v0 - u1 * v1) * r / 6 ∧
               |convolution I J a1 b1 N - u1 * v1 * r| ≤
                 (u0 * v1 + u1 * v0 - u1 * v1) * r / 6 := by
-  sorry
+  exact LeanLab.BHP1997.DecompC165b.sieve_data
 
 /-- LEAF. Page 2, the deduction of Theorem 1 from 1.2: estimates on
 intervals of exponent delta imply the claimed estimates at every strictly
