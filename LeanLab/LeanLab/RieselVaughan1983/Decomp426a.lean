@@ -22,6 +22,10 @@ theorem schoenfeld_relative_rows (b u ε t : ℝ)
         List (ℝ × ℝ × ℝ)))
     (ht : 0 < t) (hb : b ≤ log t) (hu : log t ≤ u) :
     |psi t - t| < ε * t := by
+  -- Attempt 2026-11-23. The membership split reduces to four cited Schoenfeld rows.
+  -- The Lean check reported error: unknown identifier Task246.schoenfeld_psi_error_large_leaf.
+  -- It also reported unsolved goals for the second through fourth rows.
+  -- The needed source is the page 358 epsilon column. Mathlib does not supply it.
   sorry
 
 /-- The logarithmic threshold for the first selected page 358 row. -/
