@@ -22,6 +22,36 @@ namespace LeanLab.BS2022GRH.Decomp327c
 open Real Finset Classical ChenThresholdGRH Decomp148f DecompC169d Decomp327a
 noncomputable section
 
+lemma hS_pos_ge_one {s : ℝ} (hs : 1 ≤ s) : 0 < hS s := by
+  have h₁ : 0 < s := by linarith
+  unfold hS
+  split_ifs <;>
+    (try positivity) <;>
+    (try {
+      constructor <;> positivity
+    })
+
+lemma V_pos (P : Set ℕ) (Q : Finset ℕ) (g : ℕ → ℝ) (z : ℝ)
+    (hP : ∀ p ∈ P, p.Prime) (hg : ∀ p ∈ P, 0 ≤ g p ∧ g p < 1)
+    (hz : 2 ≤ z) :
+    0 < ∏ p ∈ (siftingPrimes P z \ Q), (1 - g p) := by
+  have h₁ : ∀ p ∈ siftingPrimes P z, p ∈ P := by
+    intro p hp
+    have h₂ : p ∈ (range ⌈z⌉₊).filter (fun p => p ∈ P ∧ (p : ℝ) < z) := hp
+    exact h₂.2.1
+  have h₂ : ∀ p ∈ siftingPrimes P z \ Q, 0 < 1 - g p := by
+    intro p hp
+    have h₃ : p ∈ siftingPrimes P z := hp.1
+    have h₄ : p ∉ Q := hp.2
+    have h₅ : p ∈ P := h₁ p h₃
+    have h₆ : 0 ≤ g p ∧ g p < 1 := hg p h₅
+    linarith
+  have h₃ : 0 < ∏ p ∈ (siftingPrimes P z \ Q), (1 - g p) := by
+    apply Finset.prod_pos
+    intro p hp
+    exact h₂ p hp
+  exact h₃
+
 /-- LEAF: BJS Lemma 11, the case n even and 2 at most s at most 3, p. 12: for s0 in 2, 2.2,
 2.4, 2.6, 2.8 and s0 at most s at most s0 plus 0.2, the argument of displays 34 to 38 with
 gamma_{s0} of Lemma 9 and kappa_{s0} of Lemma 10 gives the factor xi_{s0}, then summed over
@@ -46,6 +76,30 @@ theorem lower_stopping_even_band (P : Set ℕ) (Q : Finset ℕ) (g : ℕ → ℝ
       else 0) ≤
       (∏ p ∈ siftingPrimes P z \ Q, (1 - g p)) *
         ((1 / 8349 : ℝ) * 114 * exp 2 * hS (log D / log z)) := by
+  have hs_ge_two : (2 : ℝ) ≤ log D / log z := by
+    have h₁ : 0 < z := by linarith
+    have h₂ : 0 < log z := log_pos (by linarith)
+    have h₃ : log (z ^ 2) ≤ log D := log_le_log (pow_pos h₁ 2) hzD
+    have h₄ : log (z ^ 2) = 2 * log z := by rw [log_pow] <;> norm_num
+    have h₅ : 2 * log z ≤ log D := by linarith
+    have h₆ : 2 ≤ log D / log z := by
+      rw [div_le_iff₀ (by linarith)]
+      nlinarith
+    linarith
+  have hs_le_four : log D / log z ≤ 4 := by
+    have h₁ : s0 ≤ 14 / 5 := by
+      rcases hs0 with (rfl | rfl | rfl | rfl | rfl) <;> norm_num
+    have h₂ : log D / log z ≤ s0 + 1 / 5 := hhi
+    have h₃ : s0 + 1 / 5 ≤ (4 : ℝ) := by linarith
+    linarith
+  have hS_pos' : 0 < hS (log D / log z) := by
+    have h₁ : 1 ≤ log D / log z := by linarith
+    exact hS_pos_ge_one h₁
+  have hlogz : 0 < log z := by
+    have h₁ : 0 < z := by linarith
+    exact log_pos h₁
+  have hV_pos : 0 < ∏ p ∈ (siftingPrimes P z \ Q), (1 - g p) := by
+    exact V_pos P Q g z hP hg hz
   sorry
 
 /-- LEAF: BJS Lemma 11, the case n at least 2 and s at least 3, p. 11 displays 34 to 38 with
@@ -70,6 +124,16 @@ theorem lower_stopping_even_high (P : Set ℕ) (Q : Finset ℕ) (g : ℕ → ℝ
       else 0) ≤
       (∏ p ∈ siftingPrimes P z \ Q, (1 - g p)) *
         ((1 / 8349 : ℝ) * 114 * exp 2 * hS (log D / log z)) := by
+  have hs_ge_two : (2 : ℝ) ≤ log D / log z := by linarith
+  have hs_le_four : log D / log z ≤ 4 := hs
+  have hS_pos' : 0 < hS (log D / log z) := by
+    have h₁ : 1 ≤ log D / log z := by linarith
+    exact hS_pos_ge_one h₁
+  have hlogz : 0 < log z := by
+    have h₁ : 0 < z := by linarith
+    exact log_pos h₁
+  have hV_pos : 0 < ∏ p ∈ (siftingPrimes P z \ Q), (1 - g p) := by
+    exact V_pos P Q g z hP hg hz
   sorry
 
 /-- The target statement verbatim, from the band LEAF on each of the five bands of width 0.2
