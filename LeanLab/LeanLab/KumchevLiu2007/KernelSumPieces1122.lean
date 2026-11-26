@@ -11,7 +11,7 @@ of KernelSumSplit1122, P0088 Kumchev and Liu 2007, page 7, the display before 27
 * abs_sum_sin_le: partial sums of sin 2 pi k b are at most 1/(2b) for 0 < b at most 1/2.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.KumchevLiu2007.KernelSumSplit1122
+import LeanLab.KumchevLiu2007.KernelBase687
 
 namespace LeanLab.KumchevLiu2007.KernelSumPieces1122
 

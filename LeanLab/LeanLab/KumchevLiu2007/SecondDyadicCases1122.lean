@@ -34,6 +34,7 @@ This file therefore proves each case statement exactly from two LEAFs:
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Split1122SecondDyadicBlock
+import LeanLab.KumchevLiu2007.BlockEdge687
 
 namespace LeanLab.KumchevLiu2007.SecondDyadicCases1122
 
@@ -108,7 +109,48 @@ theorem case1_edge (A : ℝ) (hA : 0 < A) :
                 ((ArithmeticFunction.moebius d : ℤ) : ℂ)) *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  refine ⟨A + 2, by linarith, ?_⟩
+  intro B hB ε hε hε'
+  have hBpos : 0 < B := by linarith
+  have hεmax : ε ≤ 7 / 18 := by linarith
+  obtain ⟨X1, hX1, hbig⟩ := Split1122KLLemma34M1.block_large_X B ε 0 hBpos hε hεmax
+  refine ⟨288, X1, by norm_num, hX1, ?_⟩
+  intro X H hX hlo hhi α q a hcop hqP hqQ hclose M hM hMz hzM D hD hDP
+  obtain ⟨hL1, hP2, hgap, hhalf, -⟩ := hbig X hX
+  have hX2 : 2 ≤ X := hX1.trans hX
+  have hX0 : 0 < X := by linarith
+  have hY0 : 0 < windowY X ε := Real.rpow_pos_of_pos hX0 _
+  have hY1 : 1 ≤ windowY X ε := Real.one_le_rpow (by linarith) (by linarith)
+  obtain ⟨-, -, -, -, -, -, hsY, hH4, hHP, -, -⟩ :=
+    Split1122KLLemma34M1.block_hyps B ε X H (windowY X ε / 2)
+      (windowY X ε ^ (1 / 6 + ε / 2)) α q a hBpos hε hεmax hX2 hL1 hP2 hgap hhalf
+      hlo hhi hqP hqQ hclose le_rfl (by linarith) (by linarith)
+  refine Task687.small_block_edge_integral_le _ _ _ _ _ A B hY0 hsY hH4 hHP hL1
+    (by linarith) ?_
+  intro m hm
+  rw [norm_mul, show ‖fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ = 1 from
+    Circle.norm_coe _, mul_one]
+  have hmwin := (Finset.mem_filter.mp hm).2
+  have hmpos : 0 < m := by
+    have hs := Real.sqrt_pos.mpr hY0
+    have : (0 : ℝ) < m := by linarith [hmwin.1]
+    exact_mod_cast this
+  have hmz : (m : ℝ) < (windowY X ε ^ (1 / 6 + ε / 2)) ^ 3 := by
+    refine hmwin.2.trans_le ?_
+    rw [Real.sqrt_eq_rpow, ← Real.rpow_natCast, ← Real.rpow_mul hY0.le]
+    exact Real.rpow_le_rpow_of_exponent_le hY1 (by norm_num; linarith)
+  refine le_trans (Task687.small_divisor_block_norm_le _ _ _ m
+    (windowY X ε ^ (1 / 6 + ε / 2)) D hmpos (by positivity) hmz hD ?_ ?_ ?_) ?_
+  · intro p hp
+    obtain ⟨hp, -, -⟩ := Finset.mem_filter.mp hp
+    obtain ⟨-, hpp, hpz, -, hpm⟩ := Finset.mem_filter.mp hp
+    exact ⟨hpp, hpm, hpz⟩
+  · intro p hp d hd
+    exact (Finset.mem_filter.mp hd).2.2
+  · intro p hp d hd
+    rw [Complex.norm_intCast]
+    exact_mod_cast ArithmeticFunction.abs_moebius_le_one (n := d)
+  · linarith
 
 /-- LEAF: P0088 page 11, Case 2 of the proof of Lemma 3.4 on the interior stretch
 t in [Y/4, Y - 2H]. Class MEDIUM. Follows from Lemma 3.2,

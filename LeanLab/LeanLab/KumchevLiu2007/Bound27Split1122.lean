@@ -26,6 +26,7 @@ bound27_of_leaves proves the exact type of bound27 with no sorry of its own;
 its only open input is the LEAF kernel_sum_bound. AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Prep1121KLMajorArc
+import LeanLab.KumchevLiu2007.KernelBound687
 
 namespace LeanLab.KumchevLiu2007.Burst1122B27
 
@@ -712,27 +713,6 @@ theorem tail_kernel_identity (X Y P b : ℝ) (n : ℕ) :
   refine Finset.sum_congr rfl (fun m2 _ => ?_)
   rw [fourier_interval_integral, fourier_symm_integral]
   split_ifs <;> push_cast <;> ring
-
-/-- LEAF: P0088 page 7, the display before 27, kernel form of the tail. HARD.
-With b = 1/(q Q0) = P^3/(q Y), q at most P, the sum over m1 in the prime window and m2 in the
-square window of f1(m1) f2(m2) K(m1 + m2^2 - n), K(k) = 1 - 2b at k = 0 and
--sin(2 pi k b)/(pi k) otherwise, is O(Y^(1/2) P^(-2)) uniformly in q and n. The paper
-cites display 22, which fails for T2 at beta of order one, QUESTION Q2; the notes sketch a
-proof from the vanishing total mass of K, the spacing of squares and the smoothness of f1. -/
-theorem kernel_sum_bound :
-    ∀ B : ℝ, 0 < B → ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 → ∃ C X0 : ℝ, 0 < C ∧
-      ∀ X : ℝ, X0 ≤ X → ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ Real.log X ^ B → ∀ n : ℕ,
-        |∑ m1 ∈ primeWindow X (windowY X ε), ∑ m2 ∈ squareWindow (windowY X ε),
-          1 / Real.log (m1 : ℝ) *
-            f2Weight (windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ)) (m2 : ℝ) *
-          ((if -(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ) = 0 then 1 else 0) -
-            (if -(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ) = 0 then
-              2 * ((windowY X ε * (Real.log X ^ B) ^ (-2 : ℤ) / Real.log X ^ B)⁻¹ / q) else
-              Real.sin (2 * π * ((-(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ) : ℤ) : ℝ) *
-                  ((windowY X ε * (Real.log X ^ B) ^ (-2 : ℤ) / Real.log X ^ B)⁻¹ / q)) /
-                (π * ((-(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ) : ℤ) : ℝ))))| ≤
-          C * Real.sqrt (windowY X ε) * (Real.log X ^ B) ^ (-2 : ℤ) := by
-  sorry
 
 /-- PROVED from kernel_sum_bound and tail_kernel_identity. P0088 page 7, the display before 27:
 the integral of T1 T2 e(-beta n) over 1/(q Q0) at most |beta| at most 1/2 is O(Y^(1/2) P^(-2)),
