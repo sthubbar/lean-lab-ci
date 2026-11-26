@@ -30,13 +30,77 @@ open Finset Real
 
 noncomputable section
 
-/-- LEAF: page 262 last display, the fresh rational approximation behind the block cut; it is
+section DirichletD
+open Filter Asymptotics
+
+/-- Page 262, Dirichlet's approximation theorem in the form of condition (1.2): for `Q ≥ 1`
+every real `α` has a reduced `a/q` with `1 ≤ q ≤ Q` and `|α - a/q| ≤ 1/(qQ)`. PROVED, burst-20261124
+D-extra-1. -/
+theorem dirichlet_cond12_aux (α Q : ℝ) (hQ : 1 ≤ Q) :
+    ∃ (a : ℤ) (q : ℕ), Cond12 α Q a q (α - a / q) := by
+  have hn : 0 < ⌊Q⌋₊ := Nat.floor_pos.mpr hQ
+  obtain ⟨j, k, hk0, hkn, hjk⟩ := Real.exists_int_int_abs_mul_sub_le α hn
+  set r : ℚ := (j : ℚ) / k with hr
+  have hk0' : (0 : ℚ) < k := by exact_mod_cast hk0
+  have hden : (r.den : ℤ) ≤ k := by
+    have := Rat.den_dvd j k
+    rw [Rat.divInt_eq_div] at this
+    exact Int.le_of_dvd hk0 this
+  refine ⟨r.num, r.den, ?_, ?_, ?_, ?_, ?_⟩
+  · ring
+  · exact r.reduced
+  · have hrr : ((r.num : ℝ) / (r.den : ℝ)) = (j : ℝ) / k := by
+      have : ((r.num : ℚ) / (r.den : ℚ)) = (j : ℚ) / k := Rat.num_div_den r
+      exact_mod_cast this
+    rw [hrr]
+    have hkR : (0 : ℝ) < k := by exact_mod_cast hk0
+    have hdR : (0 : ℝ) < r.den := by exact_mod_cast r.den_pos
+    have hdk : (r.den : ℝ) ≤ k := by exact_mod_cast hden
+    have hnQ : (⌊Q⌋₊ : ℝ) + 1 ≥ Q := (Nat.lt_floor_add_one Q).le
+    have h1 : |α - j / k| = |k * α - j| / k := by
+      rw [show α - j / k = (k * α - j) / k by field_simp]
+      rw [abs_div, abs_of_pos hkR]
+    rw [h1, div_le_div_iff₀ hkR (by positivity)]
+    have hQ0 : 0 < Q := by linarith
+    calc |k * α - j| * (r.den * Q) ≤ 1 / (⌊Q⌋₊ + 1) * (k * Q) := by
+          apply mul_le_mul hjk (by gcongr) (by positivity) (by positivity)
+      _ ≤ 1 / Q * (k * Q) := by gcongr
+      _ = 1 * k := by field_simp
+  · exact_mod_cast r.den_pos
+  · have hdk : (r.den : ℝ) ≤ k := by exact_mod_cast hden
+    have hkn' : (k : ℝ) ≤ ⌊Q⌋₊ := by exact_mod_cast hkn
+    linarith [Nat.floor_le (by linarith : (0:ℝ) ≤ Q)]
+
+/-- Page 262, the block parameter `τ₁ = x^{1/3} L^{-c₁} / 4` is at least `1` for large `x`.
+PROVED, burst-20261124 D-extra-1. -/
+theorem tau1_ge_one (c1 : ℝ) : ∃ N₁ : ℝ, ∀ x : ℝ, N₁ ≤ x →
+    1 ≤ x ^ (1 / 3 : ℝ) / 4 * Real.log x ^ (-c1) := by
+  have h := (isLittleO_log_rpow_rpow_atTop c1 (by norm_num : (0:ℝ) < 1 / 3)).bound
+    (by norm_num : (0 : ℝ) < 1 / 4)
+  obtain ⟨X, hX⟩ := eventually_atTop.mp (h.and (eventually_ge_atTop (Real.exp 1)))
+  refine ⟨X, fun x hx => ?_⟩
+  obtain ⟨h1, h2⟩ := hX x hx
+  have hx0 : 0 < x := lt_of_lt_of_le (Real.exp_pos 1) h2
+  have hL1 : 1 ≤ Real.log x := by simpa using Real.log_le_log (Real.exp_pos 1) h2
+  have hLp : 0 < Real.log x := by linarith
+  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg hLp.le _),
+    abs_of_nonneg (Real.rpow_nonneg hx0.le _)] at h1
+  have hc : 0 < Real.log x ^ c1 := Real.rpow_pos_of_pos hLp _
+  rw [Real.rpow_neg hLp.le]
+  rw [show x ^ (1 / 3 : ℝ) / 4 * (Real.log x ^ c1)⁻¹ = (1 / 4 * x ^ (1 / 3 : ℝ)) / Real.log x ^ c1 by
+    field_simp]
+  rw [le_div_iff₀ hc]; linarith
+
+end DirichletD
+
+/-- Page 262 last display, the fresh rational approximation behind the block cut; it is
 Dirichlet's approximation theorem with parameter `τ₁ = N^{1/3} L^{-c₁} / 4`, which is `≥ 1`
-for large `N`. Class EASY. -/
+for large `N`. Formerly a LEAF, class EASY; PROVED, burst-20261124 D-extra-1. -/
 theorem middle_dirichlet_leaf (c1 : ℝ) :
     ∃ N₁ : ℝ, ∀ N : ℕ, N₁ ≤ N → ∀ α : ℝ, ∃ (a1 : ℤ) (q1 : ℕ),
       Cond12 α ((N : ℝ) ^ (1 / 3 : ℝ) / 4 * Real.log N ^ (-c1)) a1 q1 (α - a1 / q1) := by
-  sorry
+  obtain ⟨N₁, h⟩ := tau1_ge_one c1
+  exact ⟨N₁, fun N hN α => dirichlet_cond12_aux α _ (h N hN)⟩
 
 /-- LEAF: page 262 last display and page 263 first line, the blockwise step of the paper when
 the fresh approximation `a₁/q₁` with parameter `τ₁ = N^{1/3} L^{-c₁} / 4` has `q₁ ≥ L^{c₂}`:

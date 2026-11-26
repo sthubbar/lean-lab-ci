@@ -14,6 +14,7 @@ nine expression into the printed power part.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp328b
+import LeanLab.BhowmikGrimmelt2026.LEAF_burst1124_ssum_minor_log2
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -22,13 +23,15 @@ open MeasureTheory
 /-- LEAF. The minor arc bound for the unsmoothed prime sum at logarithm power two:
 on a minor arc at length `X` nothing above the rational scale `√R` survives, so every partial
 sum up to `X` is bounded by `(X/√R + X^(4/5))` times the square of the logarithm of `X`.
-This is the pointwise sharpening that the available power four bound does not give. -/
+This is the pointwise sharpening that the available power four bound does not give.
+Proved burst-20261124 from the HARD leaf `leaf_vaughan_log2_feed1124` in
+LEAF_burst1124_ssum_minor_log2.lean, display 4.8 at logarithm power two. -/
 theorem split_leaf_ssum_minor_log2 :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (X : ℕ), 2 ≤ X → ∀ R : ℝ, 1 ≤ R → R ≤ X →
       ∀ (m : ℕ), m ≤ X → ∀ α : ℝ, ¬ MajorArc X R α →
         ‖Ssum m α‖ ≤ C * ((X : ℝ) / Real.sqrt R + (X : ℝ) ^ (4 / 5 : ℝ)) *
           Real.log X ^ 2 := by
-  sorry
+  exact ssum_minor_log2_from_leaves
 
 /-- LEAF. The same minor arc bound after the smoothing by parts, for the smoothed prime sum:
 summation by parts against the Lipschitz smoothing transfers the power two bound for the
