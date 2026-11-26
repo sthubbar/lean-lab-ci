@@ -34,6 +34,37 @@ open LeanLab.ExceptionalSet.Lu2010Main63
 
 attribute [local instance] Classical.propDecidable
 
+/-- The expression 63 over the empty family vanishes identically, since `pairs N ∅ M` is empty. -/
+theorem printed63_empty (N : ℕ) (M : ℝ) (k : ℕ) :
+    Lu2010Eq63.printed63 N (∅ : Finset Exponent) M k = 0 := by
+  unfold Lu2010Eq63.printed63 Lu2010Formula63.pairs
+  simp
+
+/-- Reduction helper, proved.  Display (84) of Lu 2010, p. 2391, for the concrete major arc
+integral `Lu2010Arcs.D1c` and the concrete singular product `BG2026.Sing`, on Lemma 1's window,
+implies the leaf's existence statement.  The zero mass display (39) is trivial for the empty
+family, because its weight sum over an empty set is zero, and `printed63` over the empty family
+vanishes by `printed63_empty`.  This isolates the exact missing analytic input of the leaf: the
+major arc lower bound (84) for the printed expression 63.  The empty family is the strongest
+choice for (63), since it makes the error term `‖printed63‖` zero; any nonempty family makes
+both (39) and (84) harder. -/
+theorem leaf_of_major84
+    (h84 : ∃ Cerr : ℝ, ∃ N0 : ℕ, ∀ N : ℕ, N0 ≤ N → ∀ k ∈ Win N, Even k →
+      LeanLab.ExceptionalSet.BG2026.Sing k * (bb N - aa N) * dd N *
+        ((Real.log (Real.log (Real.log N)))⁻¹ - Cerr * (Real.log (Real.log N)) ^ (-2⁻¹ : ℝ))
+        < (Lu2010Arcs.D1c N k).re) :
+    ∃ (family : ℕ → Finset Exponent) (M : ℕ → ℝ),
+      Mass39 family ∧ Nonempty (MajorInputs63 family M) := by
+  refine ⟨fun _ => ∅, fun _ => 0, ⟨0, by norm_num, 0, fun N _ _ => by simp⟩, ?_⟩
+  obtain ⟨Cerr, N0, h⟩ := h84
+  refine ⟨⟨N0, Cerr, 1, one_pos, ?_⟩⟩
+  intro N hN
+  refine Or.inl (fun k hk hke => ?_)
+  have h63 : Lu2010Eq63.printed63 N (∅ : Finset Exponent) 0 k = 0 := printed63_empty N 0 k
+  rw [h63]
+  simp
+  exact h N hN k hk hke
+
 /-- LEAF: Lu 2010, p. 2391 displays (84) or (85) together with display (39). HARD.
 There are a family of exponents and a cutoff `M` for which the zero mass display (39) holds and
 the major arc lower bound (84), in the case without an exceptional zero, or (85), in the case
@@ -41,6 +72,7 @@ with one, holds on Lemma 1's window for the concrete expression (63) and the sin
 This is the analytic heart of Lu's Sections 4 to 8: zero density estimates, the exceptional zero
 repulsion and the singular series lower bound.  It says nothing about Goldbach numbers by itself;
 the lab proves everything from it to the window count. -/
+
 theorem leaf_lu_major_and_mass39 :
     ∃ (family : ℕ → Finset Exponent) (M : ℕ → ℝ),
       Mass39 family ∧ Nonempty (MajorInputs63 family M) := by
