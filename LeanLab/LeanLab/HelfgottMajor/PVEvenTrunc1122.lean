@@ -57,95 +57,62 @@ theorem cos_sum_cot (φ : ℝ) (hφ : sin φ ≠ 0) (K : ℕ) :
     rw [e1, cos_add, sin_add, cos_two_mul, sin_two_mul, cot_eq_cos_div_sin]
     field_simp
     linear_combination (-2 * sin (K * 2 * φ) * cos φ) * sin_sq_add_cos_sq φ
-/-- The additive character in cosines, used in `cot_identity`: e(j/q) = cos(2πj/q) + i sin(2πj/q).
-PROVED. -/
-theorem e_int {q : ℕ} [NeZero q] (j : ℤ) :
-    ZMod.stdAddChar (j : ZMod q) =
-      ((cos (2 * π * j / q) : ℝ) : ℂ) + ((sin (2 * π * j / q) : ℝ) : ℂ) * Complex.I := by
-  rw [ZMod.stdAddChar_apply, ZMod.toCircle_intCast]
-  have : 2 * (π : ℂ) * Complex.I * (j : ℂ) / (q : ℂ) = ((2 * π * j / q : ℝ) : ℂ) * Complex.I := by
-    push_cast; ring
-  rw [this, Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
 
-/-- Pairing h with -h in `cot_identity`: e(nh/q) + e(-nh/q) = 2 cos(2π n h/q). PROVED. -/
-theorem e_pair {q : ℕ} [NeZero q] (h : ZMod q) (n : ℕ) :
-    ZMod.stdAddChar ((n : ZMod q) * h) + ZMod.stdAddChar (-((n : ZMod q) * h)) =
-      2 * ((cos ((n : ℝ) * (2 * (π * (h.val : ℝ) / q))) : ℝ) : ℂ) := by
-  have h1 : (n : ZMod q) * h = (((n * h.val : ℕ) : ℤ) : ZMod q) := by
-    push_cast; try rw [ZMod.natCast_zmod_val]
-  have h2 : -((n : ZMod q) * h) = (Int.cast (-((n * h.val : ℕ) : ℤ)) : ZMod q) := by
-    rw [h1, Int.cast_neg]
-  rw [h2, h1, e_int, e_int]
-  have c1 : (((-((n * h.val : ℕ) : ℤ)) : ℤ) : ℝ) = -(((n * h.val : ℕ) : ℤ) : ℝ) := by
-    rw [Int.cast_neg]
-  have c2 : ((((n * h.val : ℕ) : ℤ)) : ℝ) = (n : ℝ) * (h.val : ℝ) := by push_cast; ring
-  rw [c1, mul_neg, neg_div, Real.cos_neg, Real.sin_neg, c2]
-  have e2 : (n : ℝ) * (2 * (π * (h.val : ℝ) / q)) = 2 * π * ((n : ℝ) * (h.val : ℝ)) / q := by ring
-  rw [e2]
-  push_cast; ring
+/-- The cosine as an average of `stdAddChar` values. PROVED. -/
+private theorem cos_eq_stdAddChar {q : ℕ} [NeZero q] (n : ℕ) (h : ZMod q) :
+    ((cos (2 * π * n * (h.val : ℝ) / q) : ℝ) : ℂ) =
+      (ZMod.stdAddChar ((n : ZMod q) * h) + ZMod.stdAddChar (-((n : ZMod q) * h))) / 2 := by
+  have e1 : (n : ZMod q) * h = (((n * h.val : ℕ) : ℤ) : ZMod q) := by
+    push_cast; rw [ZMod.natCast_zmod_val]
+  have e2 : -((n : ZMod q) * h) = ((-((n * h.val : ℕ) : ℤ) : ℤ) : ZMod q) := by
+    rw [e1]; push_cast; ring
+  rw [e2, e1, ZMod.stdAddChar_coe, ZMod.stdAddChar_coe, Complex.ofReal_cos, Complex.cos]
+  push_cast
+  congr 3 <;> ring_nf
 
-/-- LEAF: Pomerance 2011 proof of Theorem 1, even case, the exact finite Fourier expansion,
-Frolenkov display 12 with M = 0 and display 17 before truncation: from
-`PVEvenPolya1122.polya_initial_segment`, the geometric inner sum is
-`(e(Kh/q) - 1)/(e(h/q) - 1)`, whose real part is `1/2 + sin(2πKh/q) cot(πh/q)/2 - cos(2πKh/q)/2`;
-pairing h with -h for even χ keeps the real part, the constant sums to 0 over h, and the cosine
-part gives `χ(K) τ(χ⁻¹)` by `PV420Split1122.gauss_twist`. Was LEAF class MEDIUM; PROVED by S124. -/
-theorem cot_identity {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
-    (hχ : χ.IsPrimitive) (hq : q ≠ 1) (heven : χ (-1) = 1) (K : ℕ) :
-    gaussSum χ⁻¹ ZMod.stdAddChar * (2 * ∑ m ∈ range K, χ (m : ZMod q) + χ (K : ZMod q)) =
-      ∑ h : ZMod q, χ⁻¹ h *
-        ((cot (π * (h.val : ℝ) / q) * sin (2 * π * K * (h.val : ℝ) / q) : ℝ) : ℂ) := by
-  have hP := LeanLab.HelfgottMajor.PVEvenPolya1122.polya_initial_segment hχ K
-  have hG := LeanLab.HelfgottMajor.PV420Split1122.gauss_twist
-    (LeanLab.HelfgottMajor.PVEvenPolya1122.isPrimitive_inv hχ) (K : ZMod q)
-  rw [inv_inv] at hG
-  have hev : χ⁻¹ (-1) = 1 := by
+/-- The cosine twisted Gauss sum: `∑_h χ⁻¹(h) cos(2π n h/q) = χ(n) τ(χ⁻¹)`. PROVED. -/
+private theorem cos_twist {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q} (hχ : χ.IsPrimitive)
+    (heven : χ (-1) = 1) (n : ℕ) :
+    ∑ h : ZMod q, χ⁻¹ h * ((cos (2 * π * n * (h.val : ℝ) / q) : ℝ) : ℂ) =
+      χ (n : ZMod q) * gaussSum χ⁻¹ ZMod.stdAddChar := by
+  have hχ' := LeanLab.HelfgottMajor.PVEvenPolya1122.isPrimitive_inv hχ
+  have heven' : χ⁻¹ (-1) = 1 := by
     rw [MulChar.inv_apply_eq_inv', heven, inv_one]
-  have refl : ∀ A : ZMod q → ℂ, ∑ h, χ⁻¹ h * A h = ∑ h, χ⁻¹ h * A (-h) := by
-    intro A
-    refine Fintype.sum_equiv (Equiv.neg (ZMod q)) _ _ fun x => ?_
-    simp only [Equiv.neg_apply, neg_neg]
-    have : χ⁻¹ (-x) = χ⁻¹ (-1) * χ⁻¹ x := by rw [← map_mul, neg_one_mul]
-    rw [this, hev, one_mul]
-  set B : ZMod q → ℂ := fun h =>
-    2 * ∑ m ∈ range K, ZMod.stdAddChar ((m : ZMod q) * h) + ZMod.stdAddChar ((K : ZMod q) * h)
-    with hB
-  have hL : gaussSum χ⁻¹ ZMod.stdAddChar * (2 * ∑ m ∈ range K, χ (m : ZMod q) + χ (K : ZMod q))
-      = ∑ h, χ⁻¹ h * B h := by
-    rw [mul_add, mul_comm (gaussSum _ _) (χ _), hG, ← mul_assoc, mul_comm _ (2 : ℂ), mul_assoc, hP,
-      mul_sum, ← sum_add_distrib]
-    refine sum_congr rfl fun h _ => ?_
-    simp only [hB]; ring
-  have hsym : ∑ h, χ⁻¹ h * B h = ∑ h, χ⁻¹ h * ((B h + B (-h)) / 2) := by
-    have := refl B
-    have e : ∑ h, χ⁻¹ h * ((B h + B (-h)) / 2) =
-        ((∑ h, χ⁻¹ h * B h) + ∑ h, χ⁻¹ h * B (-h)) / 2 := by
-      rw [← sum_add_distrib, sum_div]; refine sum_congr rfl fun h _ => ?_; ring
-    rw [e, ← this]; ring
-  have hzero : ∑ h : ZMod q, χ⁻¹ h = 0 := by
-    apply MulChar.sum_eq_zero_of_ne_one
-    intro h1
-    have h1' : χ = 1 := inv_eq_one.mp h1
-    have hc := (DirichletCharacter.eq_one_iff_conductor_eq_one).mp h1'
-    rw [(DirichletCharacter.isPrimitive_def _).mp hχ] at hc
-    exact hq hc
-  have hterm : ∀ h : ZMod q, χ⁻¹ h * ((B h + B (-h)) / 2) =
-      χ⁻¹ h * (1 + ((cot (π * (h.val : ℝ) / q) * sin (2 * π * K * (h.val : ℝ) / q) : ℝ) : ℂ)) := by
-    intro h
-    by_cases h0 : h = 0
-    · subst h0
-      have : χ⁻¹ (0 : ZMod q) = 0 := by
-        have : Fact (1 < q) := ⟨by have := NeZero.ne q; omega⟩
-        exact MulChar.map_nonunit _ not_isUnit_zero
-      rw [this, zero_mul, zero_mul]
-    congr 1
-    have hv0 : 0 < h.val := by
-      rcases Nat.eq_zero_or_pos h.val with hz | hz
-      · exact absurd ((ZMod.val_eq_zero h).mp hz) h0
-      · exact hz
-    have hvq : h.val < q := ZMod.val_lt h
+  have := LeanLab.HelfgottMajor.PV420Split1122.gauss_twist_even hχ' heven' (n : ZMod q)
+  rw [inv_inv] at this
+  rw [this]
+  exact sum_congr rfl fun h _ => by rw [cos_eq_stdAddChar]
+
+/-- The sum of `χ⁻¹` vanishes for `χ` primitive and `q ≠ 1`. PROVED. -/
+private theorem sum_inv_eq_zero {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q}
+    (hχ : χ.IsPrimitive) (hq : q ≠ 1) : ∑ h : ZMod q, χ⁻¹ h = 0 := by
+  have hχ' := LeanLab.HelfgottMajor.PVEvenPolya1122.isPrimitive_inv hχ
+  refine MulChar.sum_eq_zero_of_ne_one fun h1 => hq ?_
+  rw [DirichletCharacter.IsPrimitive, h1, DirichletCharacter.conductor_one] at hχ'
+  exact hχ'.symm
+
+/-- The termwise expansion: for every `h`, `χ⁻¹(h) cot(πh/q) sin(2πKh/q)` equals
+`χ⁻¹(h) (2 ∑_{m<K} cos(2πmh/q) - 1 + cos(2πKh/q))`. PROVED. -/
+private theorem term_expand {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) (hq : q ≠ 1) (K : ℕ)
+    (h : ZMod q) :
+    χ⁻¹ h * ((cot (π * (h.val : ℝ) / q) * sin (2 * π * K * (h.val : ℝ) / q) : ℝ) : ℂ) =
+      χ⁻¹ h * (2 * ∑ m ∈ range K, ((cos (2 * π * m * (h.val : ℝ) / q) : ℝ) : ℂ) - 1 +
+        ((cos (2 * π * K * (h.val : ℝ) / q) : ℝ) : ℂ)) := by
+  by_cases h0 : h = 0
+  · subst h0
+    have : χ⁻¹ (0 : ZMod q) = 0 := by
+      have : Nontrivial (ZMod q) := by
+        rw [ZMod.nontrivial_iff]; exact hq
+      exact MulChar.map_zero _
+    rw [this, zero_mul, zero_mul]
+  · congr 1
     have hq0 : (0 : ℝ) < q := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne q)
-    have hs : sin (π * (h.val : ℝ) / q) ≠ 0 := by
+    have hv0 : 0 < h.val := by
+      rcases Nat.eq_zero_or_pos h.val with hv | hv
+      · exact absurd ((ZMod.val_eq_zero h).1 hv) h0
+      · exact hv
+    have hvq : h.val < q := ZMod.val_lt h
+    have hsin : sin (π * (h.val : ℝ) / q) ≠ 0 := by
       apply ne_of_gt
       apply sin_pos_of_pos_of_lt_pi
       · have : (0 : ℝ) < h.val := by exact_mod_cast hv0
@@ -153,26 +120,41 @@ theorem cot_identity {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
       · rw [div_lt_iff₀ hq0]
         have : (h.val : ℝ) < q := by exact_mod_cast hvq
         nlinarith [pi_pos]
-    have hc := LeanLab.HelfgottMajor.PVEvenTrunc1122.cos_sum_cot (π * (h.val : ℝ) / q) hs K
-    have hBB : B h + B (-h) = 2 * ∑ m ∈ range K,
-        (ZMod.stdAddChar ((m : ZMod q) * h) + ZMod.stdAddChar (-((m : ZMod q) * h))) +
-        (ZMod.stdAddChar ((K : ZMod q) * h) + ZMod.stdAddChar (-((K : ZMod q) * h))) := by
-      simp only [hB, mul_neg, sum_add_distrib]; ring
-    rw [hBB]
-    simp only [e_pair]
-    rw [← mul_sum]
-    have hc' : (2 : ℂ) * ∑ m ∈ range K, ((cos ((m : ℝ) * (2 * (π * (h.val : ℝ) / q))) : ℝ) : ℂ) =
-        (((1 - cos ((K : ℝ) * (2 * (π * (h.val : ℝ) / q))) +
-          sin ((K : ℝ) * (2 * (π * (h.val : ℝ) / q))) * cot (π * (h.val : ℝ) / q)) : ℝ) : ℂ) := by
-      rw [← hc]; push_cast; ring
-    have e3 : (K : ℝ) * (2 * (π * (h.val : ℝ) / q)) = 2 * π * K * (h.val : ℝ) / q := by ring
-    rw [show (2 : ℂ) * (2 * ∑ m ∈ range K, ((cos ((m : ℝ) * (2 * (π * (h.val : ℝ) / q))) : ℝ) : ℂ))
-      = 2 * (2 * ∑ m ∈ range K, ((cos ((m : ℝ) * (2 * (π * (h.val : ℝ) / q))) : ℝ) : ℂ)) from rfl,
-      hc']
-    rw [e3]
-    push_cast; ring
-  rw [hL, hsym]
-  simp only [hterm, mul_add, mul_one, sum_add_distrib, hzero, zero_add]
+    have key := cos_sum_cot _ hsin K
+    have e : ∀ n : ℕ, (n : ℝ) * (2 * (π * (h.val : ℝ) / q)) = 2 * π * n * (h.val : ℝ) / q := by
+      intro n; ring
+    simp only [e] at key
+    have key' : cot (π * (h.val : ℝ) / q) * sin (2 * π * K * (h.val : ℝ) / q) =
+        2 * ∑ m ∈ range K, cos (2 * π * m * (h.val : ℝ) / q) - 1 +
+          cos (2 * π * K * (h.val : ℝ) / q) := by linarith
+    rw [key']
+    push_cast
+    ring
+
+/-- LEAF: Pomerance 2011 proof of Theorem 1, even case, the exact finite Fourier expansion,
+Frolenkov display 12 with M = 0 and display 17 before truncation: from
+`PVEvenPolya1122.polya_initial_segment`, the geometric inner sum is
+`(e(Kh/q) - 1)/(e(h/q) - 1)`, whose real part is `1/2 + sin(2πKh/q) cot(πh/q)/2 - cos(2πKh/q)/2`;
+pairing h with -h for even χ keeps the real part, the constant sums to 0 over h, and the cosine
+part gives `χ(K) τ(χ⁻¹)` by `PV420Split1122.gauss_twist`. Class MEDIUM. -/
+theorem cot_identity {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (hχ : χ.IsPrimitive) (hq : q ≠ 1) (heven : χ (-1) = 1) (K : ℕ) :
+    gaussSum χ⁻¹ ZMod.stdAddChar * (2 * ∑ m ∈ range K, χ (m : ZMod q) + χ (K : ZMod q)) =
+      ∑ h : ZMod q, χ⁻¹ h *
+        ((cot (π * (h.val : ℝ) / q) * sin (2 * π * K * (h.val : ℝ) / q) : ℝ) : ℂ) := by
+
+  simp_rw [term_expand χ hq K]
+  simp only [mul_add, mul_sub, mul_one, sum_add_distrib, sum_sub_distrib, mul_sum]
+  rw [sum_inv_eq_zero hχ hq, cos_twist hχ heven K, sum_comm]
+  have : ∀ m ∈ range K, ∑ h : ZMod q, χ⁻¹ h * (2 * ((cos (2 * π * m * (h.val : ℝ) / q) : ℝ) : ℂ))
+      = 2 * (χ (m : ZMod q) * gaussSum χ⁻¹ ZMod.stdAddChar) := by
+    intro m _
+    rw [← cos_twist hχ heven m, mul_sum]
+    exact sum_congr rfl fun h _ => by ring
+  rw [sum_congr rfl this, sub_zero]
+  congr 1
+  · exact sum_congr rfl fun i _ => by ring
+  · ring
 
 /-- Reflection used in the head step, Frolenkov display 17: the weight |cot(π v/q)| |sin(2π K v/q)|
 is unchanged under v ↦ q - v. PROVED. -/
@@ -372,8 +354,6 @@ end LeanLab.HelfgottMajor.PVEvenTrunc1122
 #print axioms LeanLab.HelfgottMajor.PVEvenTrunc1122.norm_gauss_inv
 #print axioms LeanLab.HelfgottMajor.PVEvenTrunc1122.cot_pos_le_inv
 #print axioms LeanLab.HelfgottMajor.PVEvenTrunc1122.cos_sum_cot
-#print axioms LeanLab.HelfgottMajor.PVEvenTrunc1122.e_int
-#print axioms LeanLab.HelfgottMajor.PVEvenTrunc1122.e_pair
 #print axioms LeanLab.HelfgottMajor.PVEvenTrunc1122.cot_identity
 #print axioms LeanLab.HelfgottMajor.PVEvenTrunc1122.F_reflect
 #print axioms LeanLab.HelfgottMajor.PVEvenTrunc1122.F_le
