@@ -14,14 +14,16 @@ open Finset Real Decomp279a Decomp316c Model564 Feed564bPrime
 noncomputable section
 attribute [local instance] Classical.propDecidable
 
-/-- LEAF: Jia page 282 clipping, for n in the basic interval every prime pair of regions 53
+/-- PROVED, formerly LEAF: Jia page 282 clipping, for n in the basic interval every prime pair of regions 53
 and 66 satisfies Y^(16/135) < q < min p (sqrt (2Y/p)) and p ≤ sqrt (2Y), so the unclipped
 prime sum is a subsum of the clipped prime model. MEDIUM -/
 theorem pairModel12_le_primeModel :
     ∃ ε₁ : ℝ, 0 < ε₁ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₁ → ∃ N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       ∀ n ∈ window N ε,
-        pairModel labels12 N (localization N ε) n ≤ primeModel labels12 N (localization N ε) n := by
-  sorry
+        pairModel labels12 N (localization N ε) n ≤ primeModel labels12 N (localization N ε) n :=
+  ⟨1, one_pos, fun ε hε _ => ⟨2, fun N hN n _ =>
+    pairModel_le_primeModel_of_clip labels12 N _ n
+      (clip12 _ (one_lt_localization N ε hN hε))⟩⟩
 
 /-- LEAF: Jia Lemma 12 pages 233 to 235 with Lemma 18 display 32 on page 253 and the page 260
 exceptional set argument, applied to one source region D_i, i in 53, 66: outside an

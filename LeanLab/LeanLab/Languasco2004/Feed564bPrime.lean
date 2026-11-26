@@ -169,14 +169,210 @@ theorem prime_transfer_of_pair (labels : Finset ℕ)
     exact_mod_cast card_le_card hsub
   exact hc.trans (hC N ((le_max_right _ _).trans hN))
 
-/-- LEAF: Jia page 280 clipping, for n in the basic interval every prime pair of regions 33,
+/-- Pages 267 to 269 display 52: the least matching region satisfies its own six defining inequalities. -/
+theorem regionIndex_spec (Y : ℝ) (p q : ℕ) (h : regionIndex Y p q ≠ 0) :
+    Y ^ (regionData (regionIndex Y p q) 0 : ℝ) < (p : ℝ) ∧
+      (p : ℝ) ≤ Y ^ (regionData (regionIndex Y p q) 1 : ℝ) ∧
+      (p : ℝ) ^ (regionData (regionIndex Y p q) 2 : ℝ) *
+        Y ^ (regionData (regionIndex Y p q) 3 : ℝ) < (q : ℝ) ∧
+      (q : ℝ) < (p : ℝ) ^ (regionData (regionIndex Y p q) 4 : ℝ) *
+        Y ^ (regionData (regionIndex Y p q) 5 : ℝ) := by
+  unfold regionIndex at h ⊢
+  split_ifs at h ⊢ with hex
+  · exact (Nat.find_spec hex).2
+  · exact absurd rfl h
+
+/-- Pages 267 to 269: the region inequalities in logarithmic form. -/
+theorem region_logs (Y : ℝ) (hY : 1 < Y) (p q : ℕ) (hp : p.Prime) (hq : q.Prime)
+    (h : regionIndex Y p q ≠ 0) :
+    (regionData (regionIndex Y p q) 0 : ℝ) * Real.log Y < Real.log p ∧
+      Real.log p ≤ (regionData (regionIndex Y p q) 1 : ℝ) * Real.log Y ∧
+      (regionData (regionIndex Y p q) 2 : ℝ) * Real.log p +
+        (regionData (regionIndex Y p q) 3 : ℝ) * Real.log Y < Real.log q ∧
+      Real.log q < (regionData (regionIndex Y p q) 4 : ℝ) * Real.log p +
+        (regionData (regionIndex Y p q) 5 : ℝ) * Real.log Y := by
+  obtain ⟨h1, h2, h3, h4⟩ := regionIndex_spec Y p q h
+  have hY0 : 0 < Y := by linarith
+  have hp0 : (0 : ℝ) < p := by exact_mod_cast hp.pos
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast hq.pos
+  set i := regionIndex Y p q
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · have := Real.log_lt_log (rpow_pos_of_pos hY0 _) h1
+    rwa [Real.log_rpow hY0] at this
+  · have := Real.log_le_log hp0 h2
+    rwa [Real.log_rpow hY0] at this
+  · have := Real.log_lt_log (by positivity) h3
+    rwa [Real.log_mul (by positivity) (by positivity), Real.log_rpow hp0,
+      Real.log_rpow hY0] at this
+  · have := Real.log_lt_log hq0 h4
+    rwa [Real.log_mul (by positivity) (by positivity), Real.log_rpow hp0,
+      Real.log_rpow hY0] at this
+
+/-- Page 280: the clipping inequalities follow from their logarithmic forms. -/
+theorem clip_of_logs (Y : ℝ) (hY : 1 < Y) (p q : ℕ) (hp : p.Prime) (hq : q.Prime)
+    (g1 : (16 / 135 : ℝ) * Real.log Y < Real.log p)
+    (g2 : 2 * Real.log p ≤ Real.log 2 + Real.log Y)
+    (g3 : (16 / 135 : ℝ) * Real.log Y < Real.log q)
+    (g4 : Real.log q < Real.log p)
+    (g5 : 2 * Real.log q + Real.log p < Real.log 2 + Real.log Y) :
+    Y ^ (16 / 135 : ℝ) < (p : ℝ) ∧ (p : ℝ) ≤ Real.sqrt (2 * Y) ∧
+      Y ^ (16 / 135 : ℝ) < (q : ℝ) ∧
+      (q : ℝ) < min (p : ℝ) (Real.sqrt (2 * Y / (p : ℝ))) := by
+  have hY0 : 0 < Y := by linarith
+  have hp0 : (0 : ℝ) < p := by exact_mod_cast hp.pos
+  have hq0 : (0 : ℝ) < q := by exact_mod_cast hq.pos
+  refine ⟨?_, ?_, ?_, lt_min ?_ ?_⟩
+  · rw [← Real.log_lt_log_iff (rpow_pos_of_pos hY0 _) hp0, Real.log_rpow hY0]; exact g1
+  · rw [Real.le_sqrt hp0.le (by positivity)]
+    rw [← Real.log_le_log_iff (by positivity) (by positivity), Real.log_pow,
+      Real.log_mul (by norm_num) hY0.ne']
+    push_cast; linarith
+  · rw [← Real.log_lt_log_iff (rpow_pos_of_pos hY0 _) hq0, Real.log_rpow hY0]; exact g3
+  · rwa [← Real.log_lt_log_iff hq0 hp0]
+  · rw [Real.lt_sqrt hq0.le]
+    rw [← Real.log_lt_log_iff (by positivity) (by positivity), Real.log_pow,
+      Real.log_div (by positivity) hp0.ne', Real.log_mul (by norm_num) hY0.ne']
+    push_cast; linarith
+
+
+/-- Page 280: every prime pair of regions 33, 36, 38, 40, 42, 46 and 49 lies in the clipped recovery domain. -/
+theorem clip11 (Y : ℝ) (hY : 1 < Y) (p q : ℕ) (hp : p.Prime) (hq : q.Prime)
+    (h : regionIndex Y p q ∈ labels11) :
+    Y ^ (16 / 135 : ℝ) < (p : ℝ) ∧ (p : ℝ) ≤ Real.sqrt (2 * Y) ∧
+      Y ^ (16 / 135 : ℝ) < (q : ℝ) ∧
+      (q : ℝ) < min (p : ℝ) (Real.sqrt (2 * Y / (p : ℝ))) := by
+  have h0 : regionIndex Y p q ≠ 0 := by
+    intro h0; rw [h0] at h; simp [labels11] at h
+  obtain ⟨l1, l2, l3, l4⟩ := region_logs Y hY p q hp hq h0
+  have hL : 0 < Real.log Y := Real.log_pos hY
+  have h2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  generalize regionIndex Y p q = i at h l1 l2 l3 l4
+  simp only [labels11, mem_insert, mem_singleton] at h
+  rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · simp only [show regionData 33 0 = (1649/4752 : ℚ) from rfl, show regionData 33 1 = (25/72 : ℚ) from rfl, show regionData 33 2 = (-70/59 : ℚ) from rfl, show regionData 33 3 = (34/59 : ℚ) from rfl, show regionData 33 4 = (-58/49 : ℚ) from rfl, show regionData 33 5 = (85/147 : ℚ) from rfl] at l1 l2 l3 l4
+    push_cast at l1 l2 l3 l4
+    apply clip_of_logs Y hY p q hp hq <;> linarith
+  · simp only [show regionData 36 0 = (25/72 : ℚ) from rfl, show regionData 36 1 = (10/27 : ℚ) from rfl, show regionData 36 2 = (-70/59 : ℚ) from rfl, show regionData 36 3 = (34/59 : ℚ) from rfl, show regionData 36 4 = (-58/49 : ℚ) from rfl, show regionData 36 5 = (85/147 : ℚ) from rfl] at l1 l2 l3 l4
+    push_cast at l1 l2 l3 l4
+    apply clip_of_logs Y hY p q hp hq <;> linarith
+  · simp only [show regionData 38 0 = (10/27 : ℚ) from rfl, show regionData 38 1 = (617/1620 : ℚ) from rfl, show regionData 38 2 = (-70/59 : ℚ) from rfl, show regionData 38 3 = (34/59 : ℚ) from rfl, show regionData 38 4 = (-58/49 : ℚ) from rfl, show regionData 38 5 = (85/147 : ℚ) from rfl] at l1 l2 l3 l4
+    push_cast at l1 l2 l3 l4
+    apply clip_of_logs Y hY p q hp hq <;> linarith
+  · simp only [show regionData 40 0 = (617/1620 : ℚ) from rfl, show regionData 40 1 = (1823/4725 : ℚ) from rfl, show regionData 40 2 = (-70/59 : ℚ) from rfl, show regionData 40 3 = (34/59 : ℚ) from rfl, show regionData 40 4 = (-58/49 : ℚ) from rfl, show regionData 40 5 = (85/147 : ℚ) from rfl] at l1 l2 l3 l4
+    push_cast at l1 l2 l3 l4
+    apply clip_of_logs Y hY p q hp hq <;> linarith
+  · simp only [show regionData 42 0 = (1823/4725 : ℚ) from rfl, show regionData 42 1 = (3041/7830 : ℚ) from rfl, show regionData 42 2 = (0 : ℚ) from rfl, show regionData 42 3 = (16/135 : ℚ) from rfl, show regionData 42 4 = (-58/49 : ℚ) from rfl, show regionData 42 5 = (85/147 : ℚ) from rfl] at l1 l2 l3 l4
+    push_cast at l1 l2 l3 l4
+    apply clip_of_logs Y hY p q hp hq <;> linarith
+  · simp only [show regionData 46 0 = (11/27 : ℚ) from rfl, show regionData 46 1 = (34/81 : ℚ) from rfl, show regionData 46 2 = (-29/19 : ℚ) from rfl, show regionData 46 3 = (89/114 : ℚ) from rfl, show regionData 46 4 = (-35/23 : ℚ) from rfl, show regionData 46 5 = (18/23 : ℚ) from rfl] at l1 l2 l3 l4
+    push_cast at l1 l2 l3 l4
+    apply clip_of_logs Y hY p q hp hq <;> linarith
+  · simp only [show regionData 49 0 = (34/81 : ℚ) from rfl, show regionData 49 1 = (49/114 : ℚ) from rfl, show regionData 49 2 = (-29/19 : ℚ) from rfl, show regionData 49 3 = (89/114 : ℚ) from rfl, show regionData 49 4 = (-35/23 : ℚ) from rfl, show regionData 49 5 = (18/23 : ℚ) from rfl] at l1 l2 l3 l4
+    push_cast at l1 l2 l3 l4
+    apply clip_of_logs Y hY p q hp hq <;> linarith
+
+/-- Page 282: every prime pair of regions 53 and 66 lies in the clipped recovery domain. -/
+theorem clip12 (Y : ℝ) (hY : 1 < Y) (p q : ℕ) (hp : p.Prime) (hq : q.Prime)
+    (h : regionIndex Y p q ∈ labels12) :
+    Y ^ (16 / 135 : ℝ) < (p : ℝ) ∧ (p : ℝ) ≤ Real.sqrt (2 * Y) ∧
+      Y ^ (16 / 135 : ℝ) < (q : ℝ) ∧
+      (q : ℝ) < min (p : ℝ) (Real.sqrt (2 * Y / (p : ℝ))) := by
+  have h0 : regionIndex Y p q ≠ 0 := by
+    intro h0; rw [h0] at h; simp [labels12] at h
+  obtain ⟨l1, l2, l3, l4⟩ := region_logs Y hY p q hp hq h0
+  have hL : 0 < Real.log Y := Real.log_pos hY
+  have h2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  generalize regionIndex Y p q = i at h l1 l2 l3 l4
+  simp only [labels12, mem_insert, mem_singleton] at h
+  rcases h with rfl | rfl
+  · simp only [show regionData 53 0 = (3397/7830 : ℚ) from rfl, show regionData 53 1 = (4/9 : ℚ) from rfl, show regionData 53 2 = (-35/12 : ℚ) from rfl, show regionData 53 3 = (17/12 : ℚ) from rfl, show regionData 53 4 = (-29/10 : ℚ) from rfl, show regionData 53 5 = (17/12 : ℚ) from rfl] at l1 l2 l3 l4
+    push_cast at l1 l2 l3 l4
+    apply clip_of_logs Y hY p q hp hq <;> linarith
+  · simp only [show regionData 66 0 = (211/432 : ℚ) from rfl, show regionData 66 1 = (281/570 : ℚ) from rfl, show regionData 66 2 = (-58/9 : ℚ) from rfl, show regionData 66 3 = (89/27 : ℚ) from rfl, show regionData 66 4 = (-70/11 : ℚ) from rfl, show regionData 66 5 = (36/11 : ℚ) from rfl] at l1 l2 l3 l4
+    push_cast at l1 l2 l3 l4
+    apply clip_of_logs Y hY p q hp hq <;> linarith
+
+/-- Page 263: a nonzero count S of A_d and z forces d at most n. -/
+theorem sifted_ne_zero_le (N Y : ℝ) (n d : ℕ) (z : ℝ) (h : sifted N Y n d z ≠ 0) : d ≤ n := by
+  unfold sifted at h
+  obtain ⟨a, ha⟩ := Finset.card_ne_zero.mp h
+  obtain ⟨ha1, ha2⟩ := mem_filter.mp ha
+  obtain ⟨h1, h2⟩ := mem_Icc.mp ha1
+  exact (Nat.le_of_dvd (by omega) ha2.1).trans h2
+
+/-- Page 280: a family whose prime pairs all lie in the clipped domain has its unclipped prime sum below the clipped prime model. -/
+theorem pairModel_le_primeModel_of_clip (labels : Finset ℕ) (N Y : ℝ) (n : ℕ)
+    (hclip : ∀ p q : ℕ, p.Prime → q.Prime → regionIndex Y p q ∈ labels →
+      Y ^ (16 / 135 : ℝ) < (p : ℝ) ∧ (p : ℝ) ≤ Real.sqrt (2 * Y) ∧
+      Y ^ (16 / 135 : ℝ) < (q : ℝ) ∧
+      (q : ℝ) < min (p : ℝ) (Real.sqrt (2 * Y / (p : ℝ)))) :
+    pairModel labels N Y n ≤ primeModel labels N Y n := by
+  set F : ℕ → ℕ → ℝ := fun p q =>
+    if p.Prime ∧ q.Prime ∧ regionIndex Y p q ∈ labels then (sifted N Y n (p * q) q : ℝ) else 0
+    with hF
+  have hF0 : ∀ p q, 0 ≤ F p q := fun p q => by simp only [hF]; split_ifs <;> positivity
+  have hFne : ∀ p q, F p q ≠ 0 → p.Prime ∧ q.Prime ∧ regionIndex Y p q ∈ labels ∧
+      sifted N Y n (p * q) q ≠ 0 := by
+    intro p q h
+    simp only [hF] at h
+    split_ifs at h with hc
+    · exact ⟨hc.1, hc.2.1, hc.2.2, fun h0 => h (by simp [h0])⟩
+    · exact absurd rfl h
+  have hA : pairModel labels N Y n ≤ ∑ x ∈ range (n + 1) ×ˢ range (n + 1), F x.1 x.2 := by
+    have e : pairModel labels N Y n =
+        ∑ x ∈ range (⌊2 * Y⌋₊ + 1) ×ˢ range (⌊2 * Y⌋₊ + 1), F x.1 x.2 := by
+      rw [sum_product]; rfl
+    rw [e, ← sum_filter_ne_zero]
+    apply sum_le_sum_of_subset_of_nonneg
+    · intro x hx
+      obtain ⟨-, hx⟩ := mem_filter.mp hx
+      obtain ⟨hp, hq, -, hs⟩ := hFne _ _ hx
+      have hle := sifted_ne_zero_le N Y n _ _ hs
+      have hp1 := hp.one_le
+      have hq1 := hq.one_le
+      have : x.1 ≤ n := le_trans (Nat.le_mul_of_pos_right _ (by omega)) hle
+      have : x.2 ≤ n := le_trans (Nat.le_mul_of_pos_left _ (by omega)) hle
+      exact mem_product.mpr ⟨mem_range.mpr (by omega), mem_range.mpr (by omega)⟩
+    · intro x _ _; exact hF0 _ _
+  refine hA.trans ?_
+  rw [sum_product]
+  unfold primeModel
+  rw [← sum_filter_of_ne (p := fun p : ℕ => p.Prime ∧
+    Y ^ (16 / 135 : ℝ) < (p : ℝ) ∧ (p : ℝ) ≤ Real.sqrt (2 * Y))]
+  · apply sum_le_sum
+    intro p _
+    rw [← sum_filter_of_ne (p := fun q : ℕ => q.Prime ∧
+      Y ^ (16 / 135 : ℝ) < (q : ℝ) ∧
+      (q : ℝ) < min (p : ℝ) (Real.sqrt (2 * Y / (p : ℝ))))]
+    · apply sum_le_sum
+      intro q _
+      simp only [hF]
+      split_ifs <;> first | exact le_rfl | positivity | (exfalso; tauto)
+    · intro q _ hq
+      obtain ⟨hp, hq', hl, -⟩ := hFne _ _ hq
+      obtain ⟨-, -, c3, c4⟩ := hclip p q hp hq' hl
+      exact ⟨hq', c3, c4⟩
+  · intro p _ hp
+    obtain ⟨q, _, hq⟩ := exists_ne_zero_of_sum_ne_zero hp
+    obtain ⟨hp', hq', hl, -⟩ := hFne _ _ hq
+    obtain ⟨c1, c2, -, -⟩ := hclip p q hp' hq' hl
+    exact ⟨hp', c1, c2⟩
+
+/-- Page 208: Y exceeds 1 once N is at least 2. -/
+theorem one_lt_localization (N ε : ℝ) (hN : 2 ≤ N) (hε : 0 < ε) : 1 < localization N ε := by
+  unfold localization
+  exact Real.one_lt_rpow (by linarith) (by linarith)
+
+/-- PROVED, formerly LEAF: Jia page 280 clipping, for n in the basic interval every prime pair of regions 33,
 36, 38, 40, 42, 46 and 49 satisfies Y^(16/135) < q < min p (sqrt (2Y/p)) and p ≤ sqrt (2Y),
 so the unclipped prime sum is a subsum of the clipped prime model. MEDIUM -/
 theorem pairModel11_le_primeModel :
     ∃ ε₁ : ℝ, 0 < ε₁ ∧ ∀ ε : ℝ, 0 < ε → ε < ε₁ → ∃ N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       ∀ n ∈ window N ε,
-        pairModel labels11 N (localization N ε) n ≤ primeModel labels11 N (localization N ε) n := by
-  sorry
+        pairModel labels11 N (localization N ε) n ≤ primeModel labels11 N (localization N ε) n :=
+  ⟨1, one_pos, fun ε hε _ => ⟨2, fun N hN n _ =>
+    pairModel_le_primeModel_of_clip labels11 N _ n
+      (clip11 _ (one_lt_localization N ε hN hε))⟩⟩
 
 /-- LEAF: Jia Lemma 11 pages 231 to 233 with Lemma 18 display 32 on page 253 and the page 260
 exceptional set argument, applied to one source region D_i, i in 33, 36, 38, 40, 42, 46, 49:
@@ -206,6 +402,9 @@ theorem prime_to_rough11_from_leaves (δ : ℝ) (hδ : 0 < δ) :
 #print axioms transfer_union
 #print axioms transfer_of_regions
 #print axioms prime_transfer_of_pair
+#print axioms clip11
+#print axioms clip12
+#print axioms pairModel_le_primeModel_of_clip
 #print axioms pairModel11_le_primeModel
 #print axioms region_transfer11
 #print axioms prime_to_rough11_from_leaves

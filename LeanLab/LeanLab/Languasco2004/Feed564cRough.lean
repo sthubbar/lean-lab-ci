@@ -14,12 +14,15 @@ open Finset Real Decomp279a Decomp316c Model564 RemainderData564 Feed564bRough
 noncomputable section
 attribute [local instance] Classical.propDecidable
 
-/-- LEAF: Jia pages 281 and 282 with Lemma 21 on page 262, applied to each cofactor count
+/-- REDUCED, formerly LEAF: Jia pages 281 and 282 with Lemma 21 on page 262, applied to each cofactor count
 S of B_pq and q over regions 53 and 66, then summed; the Lemma 21 error is absorbed by the
-Mertens bound for the sum of t over log q over these two regions. HARD -/
+Mertens bound for the sum of t over log q over these two regions. HARD
+CONDITIONAL ON Decomp578c.lemma21_rough_asymptotic, the Lemma 21 LEAF already on main;
+no new sorry, S140. -/
 theorem rough12_lemma21_sum (w : ℝ → ℝ) (hw : IsBuchstab w) (η : ℝ) (hη : 0 < η) :
     ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y →
-      buchstabMain labels12 w Y - η * (Y / Real.log Y) ≤ roughModel labels12 Y := by sorry
+      buchstabMain labels12 w Y - η * (Y / Real.log Y) ≤ roughModel labels12 Y :=
+  rough_lemma21_sum_of_logs labels12 labels12_logs w hw η hη
 
 /-- LEAF: Jia pages 281 and 282, the prime number theorem Riemann sum step: the double prime
 sum of the Lemma 21 main term over regions 53 and 66 is at least the Buchstab integral over
