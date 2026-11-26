@@ -8,6 +8,7 @@ The assembly is a case split on the window holding k; it adds no input.
 -/
 
 import LeanLab.DtRS1998.SPLIT_cray_high_blocks
+import LeanLab.DtRS1998.Task303HighBlock
 
 namespace LeanLab.DtRS1998.Decomp270e
 
@@ -25,7 +26,7 @@ theorem cray_high_blocks_k_2500_3000 :
         qs.any (fun q => decide
           (q ≤ 9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime))) = true := by
-  sorry
+  exact Task303.High.certificate
 
 /-- LEAF. Second sub-window: every block with 3000 ≤ k < 3500 carries a finite
 prime list qs and a successful Boolean offset check on every j < (10 ^ 9) / 2 + 1.
