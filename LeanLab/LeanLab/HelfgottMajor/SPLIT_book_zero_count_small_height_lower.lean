@@ -78,7 +78,16 @@ theorem book_zero_count_small_height_lower_large_conductor (χ : DirichletCharac
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T)
     (hlog : 21 < Real.log ((q : ℝ) * T)) :
     bookMain q T - bookCount χ T ≤ bookError q T := by
-  sorry
+  have h : |bookCount χ T - bookMain q T| ≤ bookError q T := by
+    have h₁ : |bookCount χ T - bookMain q T| ≤ bookError q T := book_zero_count χ hχ hT
+    exact h₁
+  have h₂ : bookMain q T - bookCount χ T ≤ bookError q T := by
+    have h₃ : bookMain q T - bookCount χ T ≤ |(bookMain q T - bookCount χ T : ℝ)| := by
+      apply le_abs_self
+    have h₄ : |(bookMain q T - bookCount χ T : ℝ)| = |bookCount χ T - bookMain q T| := by rw [abs_sub_comm]
+    have h₅ : |bookCount χ T - bookMain q T| ≤ bookError q T := h
+    linarith
+  exact h₂
 
 /-- Assembly, with the same statement as `book_zero_count_small_height_lower`: below
 `log (q T) = 21` the arithmetic part and the nonnegativity of the count, above it the leaf. -/
