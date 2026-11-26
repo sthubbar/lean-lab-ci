@@ -10,12 +10,99 @@ which is e ^ -γ since Ein X = log X + γ + o(1).
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Cai2002.Split1122bAdjoint8
+import Mathlib.NumberTheory.Harmonic.GammaDeriv
 
 open Real Filter Topology
 
 noncomputable section
 
 namespace LeanLab.Cai2002
+
+theorem einB8_integrand_bounds_ed {t : ℝ} (ht : 0 ≤ t) :
+    0 ≤ (1 - exp (-t)) / t ∧ (1 - exp (-t)) / t ≤ 1 := by
+  rcases ht.eq_or_lt with h | h
+  · subst h; simp
+  · refine ⟨div_nonneg (by linarith [exp_le_one_iff.2 (neg_nonpos.2 ht)]) h.le, ?_⟩
+    rw [div_le_one h]
+    linarith [add_one_le_exp (-t)]
+
+theorem einB8_integrableOn_ed (b : ℝ) :
+    MeasureTheory.IntegrableOn (fun t : ℝ => (1 - exp (-t)) / t) (Set.Icc 0 b) := by
+  refine MeasureTheory.Measure.integrableOn_of_bounded (M := 1) measure_Icc_lt_top.ne
+    (by fun_prop : Measurable (fun t : ℝ => (1 - exp (-t)) / t)).aestronglyMeasurable ?_
+  refine (MeasureTheory.ae_restrict_iff' measurableSet_Icc).2 (Filter.Eventually.of_forall ?_)
+  intro t ht
+  have := einB8_integrand_bounds_ed ht.1
+  rw [Real.norm_eq_abs, abs_le]; constructor <;> linarith
+
+theorem einB8_nonneg_ed {x : ℝ} (hx : 0 ≤ x) : 0 ≤ einB8 x := by
+  unfold einB8
+  exact intervalIntegral.integral_nonneg hx (fun t ht => (einB8_integrand_bounds_ed ht.1).1)
+
+theorem einB8_hasDerivAt_ed {x : ℝ} (hx : 0 < x) :
+    HasDerivAt einB8 ((1 - exp (-x)) / x) x := by
+  have hc : ContinuousAt (fun t : ℝ => (1 - exp (-t)) / t) x :=
+    ContinuousAt.div (by fun_prop) continuousAt_id hx.ne'
+  have := intervalIntegral.integral_hasDerivAt_right (a := 0) (b := x)
+    (f := fun t : ℝ => (1 - exp (-t)) / t)
+    ((intervalIntegrable_iff_integrableOn_Icc_of_le hx.le).2 (einB8_integrableOn_ed x))
+    ((by fun_prop : Measurable (fun t : ℝ => (1 - exp (-t)) / t)).stronglyMeasurable.stronglyMeasurableAtFilter)
+    hc
+  exact this
+
+theorem einB8_split_at_one {x : ℝ} (hx : 1 ≤ x) :
+    einB8 x - log x = ∫ t in (0 : ℝ)..1, (1 - exp (-t)) / t - ∫ t in (1 : ℝ)..x, exp (-t) / t := by
+  have h₁ : einB8 x = ∫ t in (0 : ℝ)..x, (1 - exp (-t)) / t := rfl
+  rw [h₁]
+  have h₂ : ∫ t in (0 : ℝ)..x, (1 - exp (-t)) / t = ∫ t in (0 : ℝ)..1, (1 - exp (-t)) / t + ∫ t in (1 : ℝ)..x, (1 - exp (-t)) / t := by
+    rw [intervalIntegral.integral_add_integral (by norm_num : (0 : ℝ) ≤ 1) (by linarith)]
+  rw [h₂]
+  have h₃ : ∫ t in (1 : ℝ)..x, (1 - exp (-t)) / t = log x - ∫ t in (1 : ℝ)..x, exp (-t) / t := by
+    have h₄ : ∫ t in (1 : ℝ)..x, (1 - exp (-t)) / t = ∫ t in (1 : ℝ)..x, ((1 : ℝ) / t - exp (-t) / t) := by
+      apply intervalIntegral.integral_congr
+      · intro t ht
+        simp [ht]
+      · intro t ht
+        field_simp [ht.ne']
+        <;> ring
+    rw [h₄]
+    have h₅ : ∫ t in (1 : ℝ)..x, ((1 : ℝ) / t - exp (-t) / t) = ∫ t in (1 : ℝ)..x, (1 / t : ℝ) - ∫ t in (1 : ℝ)..x, exp (-t) / t := by
+      rw [intervalIntegral.integral_sub]
+      · apply intervalIntegrable_iff_integrableOn_Icc.mpr
+        constructor
+        · exact ContinuousOn.div continuousOn_id continuousOn_const (by
+            intro t ht
+            have h₆ : 1 ≤ t := by exact ht.1
+            linarith)
+        · exact (continuousOn_id.measurableOnSet).measurable
+      · apply intervalIntegrable_iff_integrableOn_Icc.mpr
+        constructor
+        · exact ContinuousOn.div (continuousOn_exp.neg.comp continuousOn_id) continuousOn_const (by
+            intro t ht
+            have h₆ : 1 ≤ t := by exact ht.1
+            linarith)
+        · exact (continuousOn_exp.neg.comp continuousOn_id).measurable
+    rw [h₅]
+    have h₆ : ∫ t in (1 : ℝ)..x, (1 / t : ℝ) = log x := by
+      have h₇ : ∫ t in (1 : ℝ)..x, deriv (fun t : ℝ => Real.log t) t = Real.log x - Real.log 1 := by
+        rw [intervalIntegral.integral_deriv (by
+          intro t ht
+          exact ContinuousAt.log (continuousAt_id t) (by linarith)
+        )]
+      have h₈ : ∫ t in (1 : ℝ)..x, deriv (fun t : ℝ => Real.log t) t = ∫ t in (1 : ℝ)..x, (1 / t : ℝ) := by
+        apply intervalIntegral.integral_congr
+        · intro t ht
+          simp [ht]
+        · intro t ht
+          rw [deriv_log (by linarith)]
+      rw [h₈] at h₇
+      have h₉ : Real.log 1 = (0 : ℝ) := by norm_num
+      rw [h₉] at h₇
+      linarith
+    rw [h₆]
+    <;> ring_nf
+  rw [h₃]
+  <;> ring_nf
 
 /-- LEAF: Nathanson Theorem 9.4, adjoint pairing evaluated at s = 3 and s = 1: with
 p(t) = 0 on (0, 1), 1 / t on [1, 2] and (1 + log (t - 1)) / t on [2, 3], s p(s) is
@@ -43,7 +130,28 @@ theorem leafB8_ein_deriv :
     ContinuousWithinAt (fun x => x * exp (-einB8 x)) (Set.Ici 0) 0 ∧
       ∀ x ∈ Set.Ioi (0 : ℝ),
         HasDerivAt (fun x => x * exp (-einB8 x)) (exp (-1 * x - einB8 x)) x := by
-  sorry
+  refine ⟨?_, ?_⟩
+  · rw [ContinuousWithinAt, zero_mul]
+    have hup : Filter.Tendsto (fun x : ℝ => x) (nhdsWithin 0 (Set.Ici 0)) (nhds 0) :=
+      tendsto_nhdsWithin_of_tendsto_nhds (continuous_id.tendsto' 0 0 rfl)
+    refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hup ?_ ?_
+    · filter_upwards [self_mem_nhdsWithin] with x hx
+      exact mul_nonneg hx (exp_pos _).le
+    · filter_upwards [self_mem_nhdsWithin] with x hx
+      have hx' : (0 : ℝ) ≤ x := hx
+      have : exp (-einB8 x) ≤ 1 := exp_le_one_iff.2 (neg_nonpos.2 (einB8_nonneg_ed hx'))
+      calc x * exp (-einB8 x) ≤ x * 1 := mul_le_mul_of_nonneg_left this hx'
+        _ = x := mul_one x
+  · intro x hx
+    have hx' : 0 < x := hx
+    have hd := (hasDerivAt_id' x).mul ((einB8_hasDerivAt_ed hx').neg.exp)
+    have hne : x ≠ 0 := hx'.ne'
+    have heq : 1 * exp (-einB8 x) + x * (exp (-einB8 x) * -((1 - exp (-x)) / x))
+        = exp (-1 * x - einB8 x) := by
+      rw [show -1 * x - einB8 x = -x + -einB8 x by ring, exp_add]
+      field_simp
+      ring
+    exact hd.congr_deriv heq
 
 /-- q(1) = e ^ -γ, proved from leafB8_ein_deriv and leafB8_ein_asymp by the improper FTC. -/
 theorem adjQB8_one : adjQB8 1 = exp (-eulerMascheroniConstant) := by
