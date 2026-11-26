@@ -5,6 +5,7 @@ The dyadic block union of Lemma 19 shared by the two removed layer transfers. It
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Languasco2004.Decomp565d
+import LeanLab.Languasco2004.Feed578bBlocks19
 
 namespace LeanLab.Languasco2004.Feed578bBlocks
 open Finset Real Decomp279a Decomp316a Source565 Decomp565d
@@ -51,7 +52,8 @@ theorem lemma19_blocks_uniform :
             |weightedCofactors false N (localization N ε) (M j N) n (w j N) -
               singular n / log N *
                 weightedCofactors true N (localization N ε) (M j N) n (w j N)|)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B :=
+  Feed578bBlocks19.lemma19_blocks_uniform_from_leaves
 
 #print axioms count_transfer
 #print axioms lemma19_blocks_uniform
