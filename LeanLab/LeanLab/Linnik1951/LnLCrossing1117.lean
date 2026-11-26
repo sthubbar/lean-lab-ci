@@ -10,7 +10,8 @@ It reduces the negation of continuous_lnL_line1622 to one sign pattern of L-valu
 It is CONDITIONAL ON that sign pattern, which is a hypothesis here and is not proved in
 Lean. No statement on main is changed. AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.SPLIT_lineBound_lnL1622
+import LeanLab.Linnik1951.Core519
+import LeanLab.Linnik1951.Repair493MellinData
 
 namespace LeanLab.Linnik1951
 

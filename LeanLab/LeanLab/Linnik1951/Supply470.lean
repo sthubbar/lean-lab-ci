@@ -5,7 +5,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.Grimmelt2019.GaussBounds
 import LeanLab.BhowmikGrimmelt2026.PrimeGauss443
 import LeanLab.Linnik1951.GaussBound376
-import LeanLab.Linnik1951.Decomp280b
+import LeanLab.Linnik1951.Base280b
 
 namespace LeanLab.Linnik1951
 open Finset

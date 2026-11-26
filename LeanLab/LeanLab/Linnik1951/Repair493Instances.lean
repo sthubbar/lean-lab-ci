@@ -3,6 +3,7 @@ P0093 equations 2.1, 2.2, 7.3 and 7.4. Concrete parameter and notation checks.
 These examples do not supply GRH or either open analytic estimate.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
+import LeanLab.Linnik1951.Decomp111
 import LeanLab.Linnik1951.Decomp357f
 
 namespace LeanLab.Linnik1951

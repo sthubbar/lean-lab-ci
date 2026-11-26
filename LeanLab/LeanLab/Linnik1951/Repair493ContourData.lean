@@ -2,9 +2,7 @@
 P0093 route supplies for Assembly376.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp442b
-import LeanLab.Linnik1951.Decomp487a
-import LeanLab.Linnik1951.SPLIT_abstract_outer_kernels442
+import LeanLab.Linnik1951.Gamma442
 
 namespace LeanLab.Linnik1951
 

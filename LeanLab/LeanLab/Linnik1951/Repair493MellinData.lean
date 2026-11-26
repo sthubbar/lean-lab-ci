@@ -2,7 +2,7 @@
 P0093 page 156 equations 4.1 and 4.2. Sealed Mellin data and its zero instance.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp357a
+import Mathlib
 
 namespace LeanLab.Linnik1951
 

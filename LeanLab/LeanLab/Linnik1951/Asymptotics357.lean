@@ -2,7 +2,7 @@
 P0093 page 166. Logarithmic absorption of a power saving.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp280b
+import LeanLab.Linnik1951.Base280b
 
 namespace LeanLab.Linnik1951
 

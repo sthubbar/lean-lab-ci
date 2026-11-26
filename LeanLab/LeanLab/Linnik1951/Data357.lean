@@ -2,7 +2,7 @@
 P0093 pages 165 and 168. Finite singular main term data.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp280b
+import LeanLab.Linnik1951.Base280b
 import LeanLab.Perelli1996.Ramanujan103
 
 namespace LeanLab.Linnik1951

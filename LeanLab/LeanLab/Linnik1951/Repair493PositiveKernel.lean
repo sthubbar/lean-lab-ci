@@ -3,7 +3,7 @@ P0093 page 157 before equation 4.4. Positive parameter kernel regularity.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Repair493ContourData
-import LeanLab.Linnik1951.SPLIT_outer_kernel_integrable442
+import LeanLab.Linnik1951.Gamma442
 
 namespace LeanLab.Linnik1951
 

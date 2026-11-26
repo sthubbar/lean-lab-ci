@@ -2,6 +2,7 @@
 P0093 route supplies for Assembly376. Sealed contour data is imported before its tail proof.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
+import LeanLab.Linnik1951.Decomp487a
 import LeanLab.Linnik1951.Repair493ContourData
 import LeanLab.Linnik1951.SPLIT_outer_tail_pointwise487
 import LeanLab.Linnik1951.Decomp501a

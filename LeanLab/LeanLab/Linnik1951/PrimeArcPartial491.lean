@@ -4,6 +4,7 @@ arc for the prime series against the model series S one, equations 6.1 and 6.3.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.PrimeArcAbel491
+import LeanLab.Linnik1951.Decomp520a
 import LeanLab.Linnik1951.PrimeArcPowers491
 import LeanLab.Linnik1951.Base491b
 import LeanLab.Linnik1951.Decomp552b

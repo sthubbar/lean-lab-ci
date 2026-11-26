@@ -4,6 +4,7 @@ The error only amplitude and the unit modulus approximation cannot both hold.
 This checks the split, not the paper. The original main term is retained.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
+import LeanLab.Linnik1951.Decomp111
 import LeanLab.Linnik1951.Decomp491b
 import LeanLab.Linnik1951.LogConvPort111
 

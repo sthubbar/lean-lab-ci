@@ -7,6 +7,7 @@ and the passage to the limit of the partial sums of the series of equation 6.3.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Base491b
+import LeanLab.Linnik1951.Decomp520a
 
 namespace LeanLab.Linnik1951
 

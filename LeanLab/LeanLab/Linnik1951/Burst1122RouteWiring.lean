@@ -38,6 +38,7 @@ left in the closure.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Prep1121RouteWiring
+import LeanLab.Linnik1951.SquareSupply696
 import LeanLab.Linnik1951.Prep1121ResidueMean
 import LeanLab.Linnik1951.Prep1121MixedRepair520
 import LeanLab.Linnik1951.Prep1121DL51Fourier
@@ -48,78 +49,6 @@ import LeanLab.Linnik1951.Decomp552e
 namespace LeanLab.Linnik1951.Task519
 
 open MeasureTheory Filter Finset
-
-/-- TWIN of nonprincipal_mass519 in Decomp519a, same statement plus hT, proof copied with the twin calls.
-P0093 page 159 equation 5.2. The corrected Mellin transfer and the
-abstract square estimate imply the nonprincipal character square estimate.
-CONDITIONAL ON the transfer hypothesis hT, the statement of grh_mellin_transfer519,
-and on lemma2_square519_w1121. -/
-theorem nonprincipal_mass519_b1122 (hG : LeanLab.DERZ1997.GRH)
-    (hT : ∃ B0 : ℝ, 0 < B0 ∧ ∃ B : ℝ, 0 < B ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
-      ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
-        ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 →
-          ∃ M : ℝ → ℂ, (Continuous M ∧ ∀ t : ℝ,
-            ‖M t‖ ≤ B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3) ∧ ∀ α : ℝ,
-              ‖Task519.characterPrime519 χ N α - Task519.mellinU519 N M α‖ ≤ B * Real.sqrt N) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
-      ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
-        ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 →
-          ∀ R : ℝ, 1 ≤ R → R ≤ (N : ℝ) ^ (2 / 7 : ℝ) →
-            (∫ α in -(1 / R)..(1 / R), ‖characterPrime519 χ N α‖ ^ 2) ≤
-              C * ((N : ℝ) / R * Real.log N ^ 13) := by
-  obtain ⟨B0, hB0, B, hB, Nt, ht⟩ := hT
-  obtain ⟨C, hC, Nm, hm⟩ := lemma2_square519_w1121 B0 hB0
-  obtain ⟨L, hL⟩ := exists_nat_gt (Real.exp 1)
-  refine ⟨2 * C + 4 * B ^ 2, by positivity, max 1 (max L (max Nt Nm)), ?_⟩
-  intro N hN q hq hqN χ hχ R hR hRN
-  have hN1 : 1 ≤ N := by omega
-  have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
-  have hRp : 0 < R := by linarith
-  have hNt : Nt < N := by omega
-  have hNm : Nm < N := by omega
-  have hLN : (L : ℝ) < N := by exact_mod_cast (show L < N by omega)
-  have hlog : 1 ≤ Real.log N := by
-    simpa only [Real.log_exp] using Real.log_le_log (Real.exp_pos 1) (hL.trans hLN).le
-  have hlog13 : 1 ≤ Real.log N ^ 13 := one_le_pow₀ hlog
-  obtain ⟨M, hM, hrem⟩ := ht N hNt q hq hqN χ hχ
-  obtain ⟨hiM, hmass⟩ := hm N hNm R hR hRN M hM
-  have hc := (continuous_character_prime519 χ N hN1).norm.pow 2
-  have hle : ∀ α : ℝ, ‖characterPrime519 χ N α‖ ^ 2 ≤
-      2 * ‖mellinU519 N M α‖ ^ 2 + 2 * B ^ 2 * N := by
-    intro α
-    have htri : ‖characterPrime519 χ N α‖ ≤
-        ‖mellinU519 N M α‖ + B * Real.sqrt N := by
-      have := norm_add_le (mellinU519 N M α)
-        (characterPrime519 χ N α - mellinU519 N M α)
-      have he : mellinU519 N M α +
-          (characterPrime519 χ N α - mellinU519 N M α) = characterPrime519 χ N α := by ring
-      rw [he] at this
-      exact this.trans (add_le_add le_rfl (hrem α))
-    nlinarith [sq_nonneg (‖mellinU519 N M α‖ - B * Real.sqrt N),
-      Real.sq_sqrt hNp.le, norm_nonneg (characterPrime519 χ N α),
-      norm_nonneg (mellinU519 N M α), Real.sqrt_nonneg (N : ℝ)]
-  have hiMi : IntervalIntegrable (fun α : ℝ => ‖mellinU519 N M α‖ ^ 2)
-      volume (-(1 / R)) (1 / R) := by
-    apply (intervalIntegrable_iff_integrableOn_Icc_of_le (by linarith [one_div_nonneg.mpr hRp.le] : -(1 / R) ≤ (1 / R))).mpr
-    exact hiM
-  have hh := intervalIntegral.integral_mono_on (by linarith [one_div_nonneg.mpr hRp.le] : -(1 / R) ≤ (1 / R))
-    (hc.intervalIntegrable _ _)
-    ((hiMi.const_mul 2).add (intervalIntegrable_const (a := -(1 / R)) (b := 1 / R)))
-    (fun α _ => hle α)
-  rw [intervalIntegral.integral_add (hiMi.const_mul 2) intervalIntegrable_const,
-    intervalIntegral.integral_const_mul, intervalIntegral.integral_const, smul_eq_mul] at hh
-  calc
-    _ ≤ 2 * (∫ α in -(1 / R)..(1 / R), ‖mellinU519 N M α‖ ^ 2) +
-        (1 / R - -(1 / R)) * (2 * B ^ 2 * N) := hh
-    _ ≤ 2 * (C * ((N : ℝ) / R * Real.log N ^ 13)) +
-        (1 / R - -(1 / R)) * (2 * B ^ 2 * N) := by gcongr
-    _ ≤ (2 * C + 4 * B ^ 2) * ((N : ℝ) / R * Real.log N ^ 13) := by
-      have he : (1 / R - -(1 / R)) * (2 * B ^ 2 * N) =
-          4 * B ^ 2 * ((N : ℝ) / R) := by ring
-      rw [he]
-      have := mul_le_mul_of_nonneg_left hlog13
-        (show 0 ≤ 4 * B ^ 2 * ((N : ℝ) / R) by positivity)
-      nlinarith
 
 /-- TWIN of system_character_bound519 in Decomp519a, same statement plus hT, proof copied with the twin calls.
 P0093 page 166 equation 9.1. The finite character expansion and the

@@ -7,6 +7,7 @@ AI wrote the Lean code. Binary Goldbach is open.
 import LeanLab.Linnik1951.Repair493ContourData
 import LeanLab.Linnik1951.Repair493PositiveKernel
 import LeanLab.Linnik1951.Decomp452g
+import LeanLab.Linnik1951.KernelElementary695
 
 namespace LeanLab.Linnik1951
 

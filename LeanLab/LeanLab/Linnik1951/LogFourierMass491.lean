@@ -4,6 +4,7 @@ for S one of the trivial estimate of page 159 before equation 5.3.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Base491b
+import LeanLab.Linnik1951.Decomp520a
 
 namespace LeanLab.Linnik1951
 

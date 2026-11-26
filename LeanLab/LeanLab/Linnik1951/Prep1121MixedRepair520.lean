@@ -17,6 +17,8 @@ are not used.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Linnik1951.Decomp520a
+import LeanLab.Linnik1951.Prep1121DL51Fourier
+import LeanLab.Linnik1951.Prep1121DL51Damped
 
 namespace LeanLab.Linnik1951
 open Finset MeasureTheory
@@ -56,19 +58,6 @@ theorem mixed_norm_le_prep1121 (N q : ℕ) (hN : 1 ≤ N) (n : ℤ) :
     rw [h2]
     ring_nf
     exact le_refl _
-
-/-- LEAF: P0093 page 156 display 3.3 with the coefficient of display 3.4. The
-principal coefficient mu of q over phi of q has norm at most one over phi of q. -/
-theorem coefficient_le_inv_totient_prep1121 (q : ℕ) (hq : 1 ≤ q) :
-    ‖principalCoefficient520 q‖ ≤ 1 / (q.totient : ℝ) := by
-  have hφ : (0 : ℝ) < q.totient := by
-    exact_mod_cast Nat.totient_pos.mpr (show 0 < q by omega)
-  have hμ : |(ArithmeticFunction.moebius q : ℝ)| ≤ 1 := by
-    exact_mod_cast (ArithmeticFunction.abs_moebius_le_one (n := q))
-  have hc : principalCoefficient520 q =
-      (((ArithmeticFunction.moebius q : ℝ) / (q.totient : ℝ) : ℝ) : ℂ) := rfl
-  rw [hc, Complex.norm_real, Real.norm_eq_abs, abs_div, abs_of_pos hφ]
-  exact div_le_div_of_nonneg_right hμ hφ.le
 
 /-- LEAF: P0093 page 159 display 5.3, the Cauchy Schwarz step, here over the
 reduced residues and the arc together. For continuous real functions on a
@@ -189,7 +178,7 @@ the damped prime sum with doubled decay. Compare fourier_coefficient_proved357_u
 theorem principal_fourier_coeff_sq_prep1121 (N q : ℕ) (hN : 1 ≤ N) :
     ∑' i : ℤ, ‖fourierCoeffOn (by norm_num : (0 : ℝ) < 1) (principalPrime520 N q) i‖ ^ 2 ≤
       ∑' p : Nat.Primes, Real.exp (-(2 * ((p : ℕ) : ℝ)) / N) := by
-  sorry
+  exact principal_fourier_coeff_sq_prep1121D N q hN
 
 /-- P0093 page 159 before display 5.3, the Parseval step of the trivial
 estimate. Over one full period the squared norm of the principal series
@@ -247,7 +236,7 @@ theorem damped_from_count_prep1121 (C : ℝ) (hC : 0 < C)
     ∃ C' : ℝ, 0 < C' ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
       ∑' p : Nat.Primes, Real.exp (-(2 * ((p : ℕ) : ℝ)) / N) ≤
         C' * (N : ℝ) / Real.log N := by
-  sorry
+  exact damped_from_count_prep1121D C hC hcount
 
 /-- P0093 page 159 before display 5.3, the size N over ln N of the trivial
 estimate: the damped prime sum is at most a constant times N over ln N. -/

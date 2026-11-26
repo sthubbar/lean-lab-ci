@@ -8,7 +8,7 @@ size of the part of the expansion carrying exponents at least two. The assembly
 at the end has no sorry and does not use grh_mellin_transfer519.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp519a
+import LeanLab.Linnik1951.Core519
 
 namespace LeanLab.Linnik1951.Task519
 

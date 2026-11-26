@@ -19,6 +19,8 @@ and it is the reason the mass is finite at all.
 import LeanLab.Linnik1951.Repair493KernelData
 import LeanLab.Linnik1951.Gamma442
 
+import LeanLab.Linnik1951.KernelElementary695
+
 namespace LeanLab.Linnik1951
 
 open MeasureTheory
@@ -166,36 +168,6 @@ theorem mellin_base_bound442 (N : ℕ) (α t : ℝ) (hN : 2 ≤ N)
     rw [← Real.log_sqrt hNr.le, Real.exp_log (Real.sqrt_pos.mpr hNr)]
   rw [Real.exp_add, Real.exp_add, hexp_logN]
   try ring
-
-/-- LEAF. Second step of the parent proof, the split of the logarithm.
-For N at least two the logarithm of N times the sum of absolute t and two
-is the sum of two nonnegative logarithms, so its cube is at most eight
-cubes of log N plus eight cubes of the logarithm of the sum. -/
-theorem log_cube_split442 (N : ℕ) (t : ℝ) (hN : 2 ≤ N) :
-    Real.log ((N : ℝ) * (|t| + 2)) ^ 3 ≤
-      8 * Real.log N ^ 3 + 8 * Real.log (|t| + 2) ^ 3 := by
-  have hNr : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (show 0 < N by omega)
-  have hN1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (show 1 ≤ N by omega)
-  have hu : (0 : ℝ) < |t| + 2 := by positivity
-  have hu1 : (1 : ℝ) ≤ |t| + 2 := by linarith [abs_nonneg t]
-  have hsplit : Real.log ((N : ℝ) * (|t| + 2)) =
-      Real.log N + Real.log (|t| + 2) := Real.log_mul hNr.ne' hu.ne'
-  have hA : (0 : ℝ) ≤ Real.log N := Real.log_nonneg hN1
-  have hB : (0 : ℝ) ≤ Real.log (|t| + 2) := Real.log_nonneg hu1
-  rw [hsplit]
-  set a := Real.log N with ha
-  set b := Real.log (|t| + 2) with hb
-  have hA' : 0 ≤ a := by rw [ha]; exact hA
-  have hB' : 0 ≤ b := by rw [hb]; exact hB
-  have h1 : 0 ≤ 2 * a ^ 3 + b ^ 3 - 3 * a ^ 2 * b := by
-    rw [show 2 * a ^ 3 + b ^ 3 - 3 * a ^ 2 * b = (a - b) ^ 2 * (2 * a + b) by ring]
-    exact mul_nonneg (sq_nonneg _) (by linarith)
-  have h2 : 0 ≤ a ^ 3 + 2 * b ^ 3 - 3 * a * b ^ 2 := by
-    rw [show a ^ 3 + 2 * b ^ 3 - 3 * a * b ^ 2 = (a - b) ^ 2 * (a + 2 * b) by ring]
-    exact mul_nonneg (sq_nonneg _) (by linarith)
-  have h3 : 0 ≤ a ^ 3 := pow_nonneg hA' 3
-  have h4 : 0 ≤ b ^ 3 := pow_nonneg hB' 3
-  nlinarith [h1, h2, h3, h4]
 
 /-- `exp (-b * |t|)` is integrable on the line for `b > 0`. -/
 private lemma integrable_exp_neg_abs442 (b : ℝ) (hb : 0 < b) :

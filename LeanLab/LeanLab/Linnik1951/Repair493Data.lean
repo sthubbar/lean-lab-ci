@@ -74,4 +74,11 @@ noncomputable def arcContributionSplit111 (k N : ℕ) (s : Set ℝ) : ℝ :=
   Real.exp 1 * (∫ α in s, primeSeriesSplit111 N α ^ 2 * powerSeriesSplit111 N α ^ k *
     Complex.exp (((2 * Real.pi * α * N) : ℝ) * Complex.I)).re
 
+/-- P0093 page 168 following equation 10.6. The singular series is at least one
+at every positive even residual, by the existing lab Euler product proof. -/
+theorem one_le_singularSeries111 {n : ℕ} (hn : Even n) (hn2 : 2 ≤ n) :
+    1 ≤ singularSeries111 n := by
+  change 1 ≤ LeanLab.Perelli1996.Sing n
+  exact LeanLab.Perelli1996.one_le_sing hn (by omega)
+
 end LeanLab.Linnik1951

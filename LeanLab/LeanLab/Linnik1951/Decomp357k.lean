@@ -2,7 +2,7 @@
 P0093 page 158 final sentence. Reflection of character prime sums.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp280b
+import LeanLab.Linnik1951.Base280b
 import Mathlib.NumberTheory.MulChar.Lemmas
 
 namespace LeanLab.Linnik1951

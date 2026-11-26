@@ -1179,13 +1179,6 @@ theorem error_bound111 (hG : GRH) :
   rw [heq]
   nlinarith [mul_nonneg (mul_nonneg hC.le hs) hr.le]
 
-/-- P0093 page 168 following equation 10.6. The singular series is at least one
-at every positive even residual, by the existing lab Euler product proof. -/
-theorem one_le_singularSeries111 {n : ℕ} (hn : Even n) (hn2 : 2 ≤ n) :
-    1 ≤ singularSeries111 n := by
-  change 1 ≤ LeanLab.Perelli1996.Sing n
-  exact LeanLab.Perelli1996.one_le_sing hn (by omega)
-
 /-- P0093 Section 11, page 168. Every tuple in a small exponent box has a positive even residual. -/
 theorem cutoff_residual111 {N k L : ℕ} (ν : Fin k → ℕ) (hcut : k * 2 ^ L + 2 ≤ N)
     (hν : ∀ i, 1 ≤ ν i) (hL : ∀ i, ν i ≤ L) (hN : Even N) :

@@ -2,7 +2,7 @@
 P0093 page 161 equation 7.1. Elementary dyadic damping bound.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp280b
+import LeanLab.Linnik1951.Base280b
 
 namespace LeanLab.Linnik1951
 

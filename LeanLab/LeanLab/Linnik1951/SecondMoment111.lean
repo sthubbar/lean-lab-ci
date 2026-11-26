@@ -2,7 +2,8 @@
 P0093 Lemma 3 on page 162. This isolates the outside Romanov input used in Decomp111.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
-import LeanLab.Linnik1951.Decomp111
+import LeanLab.Linnik1951.CircleSplit111
+import LeanLab.Linnik1951.Repair493Data
 import LeanLab.Romanov.Moment
 
 namespace LeanLab.Linnik1951
