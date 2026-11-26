@@ -1,5 +1,5 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_near_zero_even_index
-import LeanLab.ExceptionalSet.Feed1122_exceptional_zero_page_bound_s134
+import LeanLab.PNTPort.DirichletZF.Siegel
 
 /-!
 Feed for `leaf_near_zero_even_large_prime_long` of
@@ -66,8 +66,26 @@ Davenport chapter 14; used in the weaker form `1 - β ≫ r^(-3/5)`. MEDIUM. -/
 theorem leaf_exceptional_zero_page_bound :
     ∃ c₀ : ℝ, 0 < c₀ ∧ ∀ (r : ℕ) (_ : NeZero r) (χ : DirichletCharacter ℂ r) (β : ℝ),
       χ.IsPrimitive → χ ^ 2 = 1 → χ ≠ 1 → 0 < β → β < 1 → χ.LFunction β = 0 →
-        c₀ * (r : ℝ) ^ (-(3 / 5 : ℝ)) ≤ 1 - β :=
-  leaf_exceptional_zero_page_bound_s134
+        c₀ * (r : ℝ) ^ (-(3 / 5 : ℝ)) ≤ 1 - β := by
+  -- Proved 2026-11-24, CLOUD S6 burst-20261124 unit S6-17: lift `χ` to modulus `8 r`, where the
+  -- zero persists by `L_lift`, and apply the lab's Siegel theorem `siegel_zero` with `ε = 3/5`.
+  obtain ⟨c, hc, hs⟩ := LeanLab.PNTPort.DirichletZF.siegel_zero (3 / 5) (by norm_num)
+  refine ⟨c * (8 : ℝ) ^ (-(3 / 5 : ℝ)), by positivity, ?_⟩
+  intro r hr χ β _ hχ2 hχ1 _ hβ1 hz
+  have hr0 : r ≠ 0 := NeZero.ne r
+  haveI : NeZero (8 * r) := ⟨Nat.mul_ne_zero (by norm_num) hr0⟩
+  have hd : r ∣ 8 * r := Dvd.intro_left 8 rfl
+  have hzl : DirichletCharacter.LFunction (DirichletCharacter.changeLevel hd χ) (β : ℂ) = 0 := by
+    rw [LeanLab.PNTPort.DirichletZF.L_lift hd hχ1, hz, zero_mul]
+  have h8 : 8 ≤ 8 * r := by
+    have : 1 ≤ r := Nat.one_le_iff_ne_zero.mpr hr0
+    omega
+  have h := hs (8 * r) h8 (DirichletCharacter.changeLevel hd χ)
+    (LeanLab.PNTPort.DirichletZF.lift_ne_one hd hχ1)
+    (LeanLab.PNTPort.DirichletZF.lift_sq hd hχ2) β hβ1.le hzl
+  have hcast : (((8 * r : ℕ) : ℝ)) = 8 * (r : ℝ) := by push_cast; ring
+  rw [hcast, Real.mul_rpow (by norm_num) (Nat.cast_nonneg r)] at h
+  linarith [h]
 
 /-- Proved helper: `log P = 6 δ (log N)^γ` for `P = F γ N ^ (6 δ)`. -/
 theorem feed1122_log_P (γ δ : ℝ) (N : ℕ) :
