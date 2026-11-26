@@ -113,6 +113,90 @@ theorem zero_count_error_bound (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ
         0.15 * log ((q : ℝ) * t) + 3.389 := by
   sorry
 
+/-- PROVED, a helper for `error_integral_le`: the derivative of `t ↦ ‖G_δ (1/2 + i t)‖` is at most
+`‖G_δ' (1/2 + i t)‖` in absolute value, display 16.26, page 434.  AI wrote this proof. -/
+theorem errint_deriv_norm_le (δ t : ℝ) :
+    |deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t| ≤
+      ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ := by
+  set z : ℂ := (1 / 2 : ℂ) + (t : ℝ) * Complex.I with hz
+  have han : AnalyticAt ℂ (gaussianMellin δ) z :=
+    Decomp389b.gaussian_mellin_analyticAt δ _ (by simp [z]) (by simp [z]; norm_num)
+  have hlin : HasDerivAt (fun w : ℂ => (1 / 2 : ℂ) + w * Complex.I) Complex.I (t : ℂ) := by
+    simpa using ((hasDerivAt_id (t : ℂ)).mul_const Complex.I).const_add (1 / 2 : ℂ)
+  have hc : HasDerivAt (fun w : ℂ => gaussianMellin δ ((1 / 2 : ℂ) + w * Complex.I))
+      (deriv (gaussianMellin δ) z * Complex.I) (t : ℂ) :=
+    han.differentiableAt.hasDerivAt.comp (t : ℂ) hlin
+  have hh : HasDerivAt (fun u : ℝ => gaussianMellin δ ((1 / 2 : ℂ) + (u : ℂ) * Complex.I))
+      (deriv (gaussianMellin δ) z * Complex.I) t := hc.comp_ofReal
+  have hb : ‖deriv (gaussianMellin δ) z * Complex.I‖ = ‖deriv (gaussianMellin δ) z‖ := by
+    simp
+  rw [← Real.norm_eq_abs, ← hb]
+  apply le_of_forall_pos_le_add
+  intro ε hε
+  apply norm_deriv_le_of_lip' (by positivity)
+  have ho := (hasDerivAt_iff_isLittleO.mp hh).def hε
+  filter_upwards [ho] with x hx
+  have h1 : |‖gaussianMellin δ ((1 / 2 : ℂ) + (x : ℂ) * Complex.I)‖ -
+      ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℂ) * Complex.I)‖| ≤
+      ‖gaussianMellin δ ((1 / 2 : ℂ) + (x : ℂ) * Complex.I) -
+        gaussianMellin δ ((1 / 2 : ℂ) + (t : ℂ) * Complex.I)‖ := abs_norm_sub_norm_le _ _
+  have h2 : ‖gaussianMellin δ ((1 / 2 : ℂ) + (x : ℂ) * Complex.I) -
+        gaussianMellin δ ((1 / 2 : ℂ) + (t : ℂ) * Complex.I)‖ ≤
+      ‖(x - t) • (deriv (gaussianMellin δ) z * Complex.I)‖ + ε * ‖x - t‖ := by
+    set A := gaussianMellin δ ((1 / 2 : ℂ) + (x : ℂ) * Complex.I) -
+        gaussianMellin δ ((1 / 2 : ℂ) + (t : ℂ) * Complex.I)
+    set B := (x - t) • (deriv (gaussianMellin δ) z * Complex.I)
+    calc ‖A‖ = ‖(A - B) + B‖ := by rw [sub_add_cancel]
+      _ ≤ ‖A - B‖ + ‖B‖ := norm_add_le _ _
+      _ ≤ ‖B‖ + ε * ‖x - t‖ := by linarith
+  rw [norm_smul] at h2
+  rw [Real.norm_eq_abs]
+  simp only [Real.norm_eq_abs] at h2 ⊢
+  nlinarith [abs_nonneg (x - t)]
+
+/-- PROVED, a helper for `error_integral_le`: the error integral bound of the proof of Lemma 16.9,
+page 431, for any error function `R` bounded by display 16.21 on `[1, T]`.  AI wrote this proof. -/
+theorem errint_general_le (q : ℕ) [NeZero q] (δ T : ℝ) (hT : 1 ≤ T) (R : ℝ → ℝ)
+    (hR : ∀ t ∈ Set.Icc (1 : ℝ) T, |R t| ≤ 0.15 * log ((q : ℝ) * t) + 3.389) :
+    -(∫ t in (1 : ℝ)..T,
+        deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t * R t) ≤
+      ∫ t in (1 : ℝ)..T,
+        ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
+          (0.15 * log ((q : ℝ) * t) + 3.389) := by
+  have hq : (0 : ℝ) < q := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne q)
+  have hcontD : Continuous (fun t : ℝ =>
+      ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖) := by
+    have hpath : Continuous (fun t : ℝ => (1 / 2 : ℂ) + (t : ℝ) * Complex.I) := by fun_prop
+    apply Continuous.norm
+    apply continuous_iff_continuousAt.mpr
+    intro t
+    have han : AnalyticAt ℂ (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I) :=
+      Decomp389b.gaussian_mellin_analyticAt δ _ (by simp) (by simp; norm_num)
+    exact ContinuousAt.comp (f := fun u : ℝ => (1 / 2 : ℂ) + (u : ℝ) * Complex.I)
+      (g := deriv (gaussianMellin δ)) han.deriv.continuousAt hpath.continuousAt
+  have hcontB : ContinuousOn (fun t : ℝ => 0.15 * log ((q : ℝ) * t) + 3.389)
+      (Set.uIcc 1 T) := by
+    rw [Set.uIcc_of_le hT]
+    apply ContinuousOn.add _ continuousOn_const
+    apply ContinuousOn.mul continuousOn_const
+    apply ContinuousOn.log (by fun_prop)
+    intro x hx
+    have : (0 : ℝ) < x := by linarith [hx.1]
+    positivity
+  have hint : IntervalIntegrable (fun t : ℝ =>
+      ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
+        (0.15 * log ((q : ℝ) * t) + 3.389)) MeasureTheory.volume 1 T :=
+    (hcontD.continuousOn.mul hcontB).intervalIntegrable
+  have hbound := intervalIntegral.norm_integral_le_of_norm_le hT
+    (f := fun t => deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t * R t)
+    (Filter.Eventually.of_forall (fun t ht => by
+      have hRt := hR t ⟨ht.1.le, ht.2⟩
+      rw [norm_mul, Real.norm_eq_abs, Real.norm_eq_abs]
+      exact mul_le_mul (errint_deriv_norm_le δ t) hRt (abs_nonneg _) (norm_nonneg _)))
+    hint
+  rw [Real.norm_eq_abs] at hbound
+  exact (neg_le_abs _).trans hbound
+
 /-- LEAF: the error integral step of the proof of Lemma 16.9, page 431, the bound
 `∫ f'(T) (N(T, χ) - main) dT = O*(∫ |f'(T)| g_χ(T) dT)`, together with `|f'| ≤ |G_δ'|` used in
 display 16.26, page 434: for `f t = |G_δ (1/2 + i t)|` one has `|f'(t)| ≤ |G_δ'(1/2 + i t)|`
@@ -134,8 +218,8 @@ theorem error_integral_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
             t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) ≤
       ∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
-          (0.15 * log ((q : ℝ) * t) + 3.389) := by
-  sorry
+          (0.15 * log ((q : ℝ) * t) + 3.389) :=
+  errint_general_le q δ T hT _ hR
 
 /-- The faithful assembly of the three leaves: the bound of `positive_mass_norm_sum_integral`
 plus the boundary term at height `T`, namely `G T * g T`, which integration by parts on `[1, T]`
