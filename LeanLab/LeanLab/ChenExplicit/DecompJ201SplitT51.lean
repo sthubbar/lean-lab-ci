@@ -38,6 +38,8 @@ theorem eq69_lower (N : ℕ) (hEven : Even N) (hN : exp (exp 36) < (N : ℝ)) :
         U N * Acard N * eps0 N * (3465 / 10000 / log (N : ℝ) +
           17906648 / 10000 / (log (N : ℝ) * √(log (N : ℝ)))) -
         U N * Acard N / (10 ^ 6 * (log (N : ℝ) * √(log (N : ℝ)))) < (SA N (zN N) : ℝ) := by
+  have hL : exp 36 < log (N : ℝ) := by sorry
+  have hLpos : 0 < log (N : ℝ) := by sorry
   sorry
 
 /-- LEAF: Yamada 2015, eq 79 on pages 17 and 18, from Lemma 2.2 in the form eq 78 and the ranges
@@ -55,6 +57,9 @@ theorem eq79_bound (N : ℕ) (hEven : Even N) (hN : exp (exp 36) < (N : ℝ)) (D
           (1 - 1 / ((p : ℝ) - 1))) +
         U N * (-(4 * exp eulerMascheroniConstant * log 3 - 1733 / 10000 * eps0 N) /
           log (N : ℝ) + 73633192 / 100000 / (log (N : ℝ) * √(log (N : ℝ)))) := by
+  have hL : exp 36 < log (N : ℝ) := by sorry
+  have hs1 : 1 < s := by sorry
+  have hDpos : 0 < log D := by sorry
   sorry
 
 /-- Exact statement of `Yamada.thm51_leaf1`, Theorem 5.1 eq 56 in the lab's form.
