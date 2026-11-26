@@ -283,6 +283,22 @@ theorem leaf_fsm_saving (γ κ B : ℝ) (hγ₁ : 1 < γ) (hγ₂ : γ < 3 / 2) 
 This is the part of the parent that lies outside the range `C < γ - 1` of Theorem 2,
 p. 354, and of Karacuba's Lemma 10, p. 370; it is empty for `δ ≤ (γ - 1) / 2`, and the
 paper's Lemma 9 never uses it.  HARD: an exponential sum estimate for large `α`. -/
+private theorem leaf_fsm_large_alpha_range_empty (γ δ : ℝ) (hγ₁ : 1 < γ)
+    (hδ : δ ≤ (γ - 1) / 2) {N : ℕ} (hN : 2 ≤ N) {α : ℝ}
+    (hlo : F γ N ^ ((γ - 1) / 2) < |α|) (hhi : |α| ≤ F γ N ^ δ) : False := by
+  have hN1 : (1 : ℝ) ≤ N := by
+    have hN1n : 1 ≤ N := by omega
+    exact_mod_cast hN1n
+  have hlogN0 : 0 ≤ Real.log (N : ℝ) := Real.log_nonneg hN1
+  have hpow0 : 0 ≤ Real.log (N : ℝ) ^ γ := Real.rpow_nonneg hlogN0 γ
+  have hF1 : 1 ≤ F γ N := by
+    unfold LeanLab.ExceptionalSet.BrudernPerelli1998.F
+    exact Real.one_le_exp hpow0
+  have hmono : F γ N ^ δ ≤ F γ N ^ ((γ - 1) / 2) :=
+    Real.rpow_le_rpow_of_exponent_le hF1 hδ
+  have hα : |α| ≤ F γ N ^ ((γ - 1) / 2) := hhi.trans hmono
+  exact (not_lt_of_ge hα) hlo
+
 theorem leaf_fsm_large_alpha (γ δ : ℝ) (hγ₁ : 1 < γ) (hγ₂ : γ < 3 / 2)
     (hδ₀ : 0 < δ) (hδ₁ : δ < 1) :
     ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
@@ -290,7 +306,98 @@ theorem leaf_fsm_large_alpha (γ δ : ℝ) (hγ₁ : 1 < γ) (hγ₂ : γ < 3 / 
         F γ N ^ ((γ - 1) / 2) < |α| → |α| ≤ F γ N ^ δ →
         ‖∑ n ∈ Finset.Ioc (N / 2) N, eC (α * F γ n)‖
           ≤ (N : ℝ) * calE γ κ N ^ (-(1 / 3 : ℝ)) / 8 := by
-  sorry
+  by_cases hδ : δ ≤ (γ - 1) / 2
+  · refine ⟨1, one_pos, ?_⟩
+    intro κ hκ hκle
+    refine ⟨2, ?_⟩
+    intro N hN α hlo hhi
+    exact False.elim (leaf_fsm_large_alpha_range_empty γ δ hγ₁ hδ hN hlo hhi)
+  · by_cases hδC : δ < γ - 1
+    · set C : ℝ := (δ + (γ - 1)) / 2 with hC
+      have hC0 : 0 < C := by
+        unfold C
+        linarith
+      have hCγ : C < γ - 1 := by
+        unfold C
+        linarith
+      have hδC' : δ < C := by
+        unfold C
+        linarith
+      obtain ⟨κT, B, hκT, hT⟩ := theorem2 γ hγ₁ hγ₂ (1 / 2) C
+        (by norm_num) (by norm_num) hC0 hCγ
+      set κ₁ : ℝ := min κT 1 with hκ₁
+      have hκ₁pos : 0 < κ₁ := lt_min hκT one_pos
+      refine ⟨1, one_pos, ?_⟩
+      intro κ hκ hκle
+      obtain ⟨N₁, hN₁⟩ := leaf_fsm_high_end γ δ C hγ₁ hδ₀ hδC'
+      obtain ⟨N₂, hN₂⟩ := leaf_fsm_saving γ κ₁ (max B 0) hγ₁ hγ₂ hκ₁pos
+        (min_le_right _ _)
+      refine ⟨N₁ + N₂ + 2, ?_⟩
+      intro N hN α hlo hhi
+      have hN2 : 2 ≤ N := by omega
+      have hM1 : 1 ≤ N / 2 := by omega
+      have hF2 : 1 ≤ F γ (2 * ((N / 2 : ℕ) : ℝ)) := by
+        unfold LeanLab.ExceptionalSet.BrudernPerelli1998.F
+        apply Real.one_le_exp
+        apply Real.rpow_nonneg
+        apply Real.log_nonneg
+        have hM1r : (1 : ℝ) ≤ ((N / 2 : ℕ) : ℝ) := by exact_mod_cast hM1
+        linarith
+      have hlow1 : 1 ≤ F γ N ^ ((γ - 1) / 2) := by
+        unfold LeanLab.ExceptionalSet.BrudernPerelli1998.F
+        rw [← Real.exp_mul]
+        apply Real.one_le_exp
+        have hpow0 : 0 ≤ Real.log (N : ℝ) ^ γ := by
+          apply Real.rpow_nonneg
+          apply Real.log_nonneg
+          have hN1r : (1 : ℝ) ≤ N := by exact_mod_cast hN2
+          exact hN1r
+        positivity
+      have hαgt1 : 1 < |α| := lt_of_lt_of_le hlo hlow1
+      have hα1 : F γ (2 * ((N / 2 : ℕ) : ℝ)) ^ (-(1 / 2 : ℝ)) ≤ |α| := by
+        have hpow0 : 0 ≤ Real.log (2 * ((N / 2 : ℕ) : ℝ)) ^ γ := by
+          apply Real.rpow_nonneg
+          apply Real.log_nonneg
+          have hM1r : (1 : ℝ) ≤ ((N / 2 : ℕ) : ℝ) := by exact_mod_cast hM1
+          linarith
+        unfold LeanLab.ExceptionalSet.BrudernPerelli1998.F
+        rw [← Real.exp_mul]
+        have he : Real.exp (Real.log (2 * ((N / 2 : ℕ) : ℝ)) ^ γ * (-(1 / 2 : ℝ))) ≤ 1 := by
+          apply Real.exp_le_one.mpr
+          nlinarith
+        simpa only [neg_mul, mul_comm] using he
+      have hα2 : |α| ≤ F γ ((N / 2 : ℕ) : ℝ) ^ C :=
+        hhi.trans (hN₁ N (by omega))
+      have hTb := hT (N / 2) hM1 α hα1 hα2
+      have hL : 0 ≤ Real.log ((N / 2 : ℕ) : ℝ) ^ (3 - 2 * γ) := by
+        apply Real.rpow_nonneg
+        apply Real.log_nonneg
+        exact_mod_cast hM1
+      have hM0 : (0 : ℝ) ≤ ((N / 2 : ℕ) : ℝ) := Nat.cast_nonneg _
+      have hexp : Real.exp (-κT * Real.log ((N / 2 : ℕ) : ℝ) ^ (3 - 2 * γ))
+          ≤ Real.exp (-κ₁ * Real.log ((N / 2 : ℕ) : ℝ) ^ (3 - 2 * γ)) := by
+        apply Real.exp_le_exp.mpr
+        have hκ₁le : κ₁ ≤ κT := min_le_left _ _
+        nlinarith
+      have hB : B * ((N / 2 : ℕ) : ℝ) * Real.exp (-κT * Real.log ((N / 2 : ℕ) : ℝ) ^ (3 - 2 * γ))
+          ≤ max B 0 * ((N / 2 : ℕ) : ℝ) *
+              Real.exp (-κ₁ * Real.log ((N / 2 : ℕ) : ℝ) ^ (3 - 2 * γ)) := by
+        have h1 : B * ((N / 2 : ℕ) : ℝ) ≤ max B 0 * ((N / 2 : ℕ) : ℝ) :=
+          mul_le_mul_of_nonneg_right (le_max_left _ _) hM0
+        have h2 : 0 ≤ max B 0 * ((N / 2 : ℕ) : ℝ) := mul_nonneg (le_max_right _ _) hM0
+        calc B * ((N / 2 : ℕ) : ℝ) * Real.exp (-κT * Real.log ((N / 2 : ℕ) : ℝ) ^ (3 - 2 * γ))
+            ≤ max B 0 * ((N / 2 : ℕ) : ℝ) *
+                Real.exp (-κT * Real.log ((N / 2 : ℕ) : ℝ) ^ (3 - 2 * γ)) :=
+              mul_le_mul_of_nonneg_right h1 (Real.exp_pos _).le
+          _ ≤ _ := mul_le_mul_of_nonneg_left hexp h2
+      have hS := hN₂ N (by omega) κ hκ
+        (le_trans hκle (min_le_right _ _))
+      have hD := leaf_fsm_dyadic_transport γ α N
+      have hTb' : ‖expSumF γ α (N / 2)‖ ≤ B * ((N / 2 : ℕ) : ℝ) *
+          Real.exp (-κT * Real.log ((N / 2 : ℕ) : ℝ) ^ (3 - 2 * γ)) := by
+        simpa using hTb
+      linarith
+    · sorry
 
 /-- `leaf_full_sum_minor_arc` from Theorem 2 of the paper, the proved dyadic transport, range comparisons and saving comparison, and the
 large range leaf. -/
