@@ -140,6 +140,47 @@ noncomputable def upperNormCoeff (ε : ℝ) (lam : ℝ → ℕ → ℝ) (x : ℝ
     lam x m * upperRawWeight ε (x ^ (11 / 20 + ε)) m
   else 0
 
+/-- The trivial character modulo one is one at every residue. -/
+theorem upper_norm_coeff_trivial_char (m : ℕ) :
+    (1 : DirichletCharacter ℂ 1) (m : ZMod 1) = 1 := by
+  rw [Subsingleton.elim (m : ZMod 1) 1, map_one]
+
+/-- The centered short sum for a constant rescaling, read with the trivial character modulo one.
+This records that the short distribution clause is a centered equality of masses, not an upper
+bound that becomes weaker when the density is increased. -/
+theorem upper_norm_coeff_constant_centered_sum {ε x : ℝ}
+    (hY : 2 ≤ x ^ (11 / 20 + ε)) (L v : ℝ) :
+    (∑ m ∈ (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ 2 * x ^ (11 / 20 + ε)),
+        (((upperNormCoeff ε (fun _ _ => L) x m : ℝ) : ℂ) * (1 : DirichletCharacter ℂ 1) (m : ZMod 1) -
+          Thm2.delta (1 : DirichletCharacter ℂ 1) * v / Real.log (x ^ (11 / 20 + ε)))) =
+      (((∑ m ∈ rightInterval ε x, (L * upperRawWeight ε (x ^ (11 / 20 + ε)) m -
+          v / Real.log (x ^ (11 / 20 + ε)))) : ℝ) : ℂ) := by
+  rw [Finset.filter_true_of_mem]
+  · push_cast
+    refine Finset.sum_congr rfl fun m hm => ?_
+    rw [upper_norm_coeff_trivial_char]
+    simp only [Thm2.delta, upperNormCoeff, hY, hm, and_self, ↓reduceIte]
+    push_cast
+    ring
+  · intro m hm
+    have hk := (Finset.mem_Ioc.mp hm).2
+    have h0 : (0 : ℝ) ≤ 2 * x ^ (11 / 20 + ε) := by linarith
+    calc (m : ℝ) ≤ (⌊2 * x ^ (11 / 20 + ε)⌋₊ : ℝ) := by exact_mod_cast hk
+      _ ≤ _ := Nat.floor_le h0
+
+/-- The length of the right interval is at least half of Y once Y is at least two. -/
+theorem upper_norm_coeff_interval_card_ge {ε x : ℝ}
+    (hY : 2 ≤ x ^ (11 / 20 + ε)) :
+    x ^ (11 / 20 + ε) / 2 ≤ ((rightInterval ε x).card : ℝ) := by
+  set Y := x ^ (11 / 20 + ε) with hYdef
+  have hle : ⌊Y⌋₊ ≤ ⌊2 * Y⌋₊ := Nat.floor_le_floor (by linarith)
+  have hc : (rightInterval ε x).card = ⌊2 * Y⌋₊ - ⌊Y⌋₊ := by
+    simp only [rightInterval, Nat.card_Ioc, hYdef]
+  rw [hc, Nat.cast_sub hle]
+  have h1 : (⌊Y⌋₊ : ℝ) ≤ Y := Nat.floor_le (by linarith)
+  have h2 : 2 * Y < (⌊2 * Y⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one _
+  linarith
+
 /-- LEAF: OPEN, CITED-LEFT. P0069 Baker Harman Pintz 1997, Section 5, page 53, with display 5.17
 on page 51 and displays 5.18 to 5.23 on page 52. Analytic input for b1: Lemma 34 gives (5.1) and
 (5.2) for g_m, h_m and j_m, Lemma 33 covers the kept part of k_m, and the constant v1 in (1.8) is
