@@ -1,4 +1,5 @@
 import LeanLab.Halupczok2012.Decomp398a
+import LeanLab.Halupczok2012.B1btChebyshev
 import Mathlib.NumberTheory.LSeries.DirichletContinuation
 import Mathlib.Analysis.Analytic.Order
 
@@ -129,12 +130,13 @@ def badChar (N Y ε A : ℝ) {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q
 
 /-- LEAF: PP1993 p. 44 display 3, Brun Titchmarsh input of the Cauchy Schwarz step.
 Short interval upper bound `∑_{N-Y<h≤N} Λ(h) ≪ Y` for `Y ≥ N^(7/12+ε)`, and Chebyshev for S2.
-Class HARD. Citation wall: Brun Titchmarsh, Montgomery and Vaughan, Mathematika 20, 1973;
-no copy in papers/, INTAKE needed. Not in the note's list; split off from B1, see B1. -/
+Class HARD. PROVED by S135 in `B1btChebyshev`, from Mathlib's Chebyshev bounds and the lab's
+proved Brun Titchmarsh `PNTPort.LargeSieve.brun_titchmarsh_montgomery`; no cited input remains.
+Not in the note's list; split off from B1, see B1. -/
 theorem leaf_B1_bt : ∃ c : ℝ, 0 < c ∧ ∀ ε : ℝ, 0 < ε → ∃ N0 : ℝ, ∀ N Y : ℝ,
     N0 ≤ N → N ^ (7 / 12 + ε) ≤ Y → Y ≤ N →
-    (∑ h ∈ kRange (N - Y) Y, Λ h) ≤ c * Y ∧ (∑ j ∈ kRange 0 Y, Λ j) ≤ c * Y := by
-  sorry
+    (∑ h ∈ kRange (N - Y) Y, Λ h) ≤ c * Y ∧ (∑ j ∈ kRange 0 Y, Λ j) ≤ c * Y :=
+  B1btChebyshev.leaf_B1_bt
 
 /-- LEAF: PP1993 p. 44 display 3, Sigma_m is at most `(YL)^(3/2)` times the root of the
 supremum over ξ of the weighted integral of `|S2|^2`. Class MEDIUM.
