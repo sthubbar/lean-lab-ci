@@ -25,6 +25,78 @@ open Finset Real
 
 noncomputable section
 
+section Helpers341
+open Complex LSeries ArithmeticFunction
+open scoped LSeries.notation
+
+/-- Iwaniec 1974 page 102: `3 + 4 cos θ + cos 2θ ≥ 0`, as `Re (3 + 4u + u²) ≥ 0` for `|u| = 1`. -/
+theorem comb_nonneg1122 (u : ℂ) (hu : ‖u‖ = 1) : 0 ≤ (3 + 4 * u + u ^ 2).re := by
+  have h : u.re * u.re + u.im * u.im = 1 := by
+    rw [← Complex.normSq_apply, Complex.normSq_eq_norm_sq, hu]; norm_num
+  simp [pow_two]
+  nlinarith [sq_nonneg (1 + u.re)]
+
+/-- Iwaniec 1974 page 102, display (14): each Dirichlet series term of the 3-4-1 combination
+has nonnegative real part. -/
+theorem term_nonneg1122 {q : ℕ} (χ : DirichletCharacter ℂ q) (σ γ : ℝ) (_hσ : 1 < σ) (n : ℕ) :
+    0 ≤ 3 * (term (↗(1 : DirichletCharacter ℂ q) * ↗Λ) (σ : ℂ) n).re +
+      4 * (term (↗χ * ↗Λ) ((σ : ℂ) + (γ : ℂ) * I) n).re +
+      (term (↗(χ ^ 2) * ↗Λ) ((σ : ℂ) + ((2 * γ : ℝ) : ℂ) * I) n).re := by
+  rcases eq_or_ne n 0 with rfl | hn
+  · simp
+  simp only [term_of_ne_zero hn, Pi.mul_apply]
+  have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+  set w : ℂ := (n : ℂ) ^ ((γ : ℂ) * I) with hw
+  set p : ℂ := (n : ℂ) ^ (σ : ℂ) with hp
+  have hw1 : ‖w‖ = 1 := by
+    rw [hw, Complex.norm_natCast_cpow_of_pos (Nat.pos_of_ne_zero hn)]; simp
+  have hw0 : w ≠ 0 := by intro h; rw [h] at hw1; simp at hw1
+  have h1 : (n : ℂ) ^ ((σ : ℂ) + (γ : ℂ) * I) = p * w := by
+    rw [Complex.cpow_add _ _ hn0]
+  have h2 : (n : ℂ) ^ ((σ : ℂ) + ((2 * γ : ℝ) : ℂ) * I) = p * w * w := by
+    rw [show (σ : ℂ) + ((2 * γ : ℝ) : ℂ) * I = (σ : ℂ) + (γ : ℂ) * I + (γ : ℂ) * I by
+      push_cast; ring, Complex.cpow_add _ _ hn0, h1]
+  have hpr : p = ((((n : ℝ) ^ σ : ℝ)) : ℂ) := by
+    rw [hp, Complex.ofReal_cpow (Nat.cast_nonneg n)]; simp
+  have hpos : 0 < (n : ℝ) ^ σ := Real.rpow_pos_of_pos (by exact_mod_cast Nat.pos_of_ne_zero hn) σ
+  rw [h1, h2, MulChar.pow_apply' χ (by norm_num)]
+  set r : ℝ := Λ n / (n : ℝ) ^ σ with hr
+  have hr0 : 0 ≤ r := div_nonneg vonMangoldt_nonneg hpos.le
+  by_cases hu : IsUnit (n : ZMod q)
+  · rw [MulChar.one_apply hu]
+    have hc : ‖χ n‖ = 1 := by
+      have := DirichletCharacter.unit_norm_eq_one χ hu.unit
+      simpa using this
+    have hp0 : p ≠ 0 := by rw [hpr]; exact_mod_cast hpos.ne'
+    have key : 3 * ((1 : ℂ) * Λ n / p) + 4 * (χ n * Λ n / (p * w)) + χ n ^ 2 * Λ n / (p * w * w)
+        = ((Λ n : ℂ) / p) * (3 + 4 * (χ n / w) + (χ n / w) ^ 2) := by
+      field_simp
+    have hrc : (Λ n : ℂ) / p = ((r : ℝ) : ℂ) := by rw [hr, hpr]; push_cast; rfl
+    have hcomb := comb_nonneg1122 (χ n / w) (by rw [norm_div, hc, hw1]; norm_num)
+    calc (0 : ℝ) ≤ r * (3 + 4 * (χ n / w) + (χ n / w) ^ 2).re := mul_nonneg hr0 hcomb
+      _ = (((r : ℝ) : ℂ) * (3 + 4 * (χ n / w) + (χ n / w) ^ 2)).re := (Complex.re_ofReal_mul _ _).symm
+      _ = _ := by
+        rw [← hrc, ← key]; simp only [Complex.add_re]
+        simp [Complex.mul_re]
+  · simp [MulChar.map_nonunit _ hu]
+
+/-- For `Re s > 1`, `L'/L (s, χ) = -Σ χ(n) Λ(n) n^(-s)`, Iwaniec 1974 page 102. -/
+theorem logDeriv_Lfun481_eq1122 {q : ℕ} (hq : 1 ≤ q) (χ : DirichletCharacter ℂ q) {s : ℂ}
+    (hs : 1 < s.re) : logDeriv (Lfun481 χ) s = -LSeries (↗χ * ↗Λ) s := by
+  haveI : NeZero q := ⟨by omega⟩
+  have hfun : Lfun481 χ = DirichletCharacter.LFunction χ := by
+    funext z; simp [Lfun481, show q ≠ 0 by omega]
+  have hev : DirichletCharacter.LFunction χ =ᶠ[nhds s] LSeries (fun n => χ n) := by
+    have ho : IsOpen {z : ℂ | 1 < z.re} := isOpen_lt continuous_const Complex.continuous_re
+    filter_upwards [ho.mem_nhds hs] with z hz
+    exact DirichletCharacter.LFunction_eq_LSeries χ hz
+  rw [hfun, logDeriv_apply, hev.deriv_eq, DirichletCharacter.LFunction_eq_LSeries χ hs,
+    DirichletCharacter.LSeries_twist_vonMangoldt_eq χ hs]
+  ring
+
+end Helpers341
+
+open scoped LSeries.notation in
 /-- LEAF: Iwaniec 1974 page 102, display (14), the 3-4-1 inequality for log derivatives.
 Class: MEDIUM.
 H. Iwaniec, On zeros of Dirichlet's L series, Invent. Math. 23, 1974, page 102, display (14):
@@ -35,7 +107,26 @@ theorem iwaniec_341_logDeriv1122 (q : ℕ) (hq : 1 ≤ q) (χ : DirichletCharact
     3 * (logDeriv (Lfun481 (1 : DirichletCharacter ℂ q)) (σ : ℂ)).re +
       4 * (logDeriv (Lfun481 χ) ((σ : ℂ) + (γ : ℂ) * Complex.I)).re +
       (logDeriv (Lfun481 (χ ^ 2)) ((σ : ℂ) + ((2 * γ : ℝ) : ℂ) * Complex.I)).re ≤ 0 := by
-  sorry
+  have h0 : 1 < (σ : ℂ).re := by simpa using hσ
+  have h1 : 1 < ((σ : ℂ) + (γ : ℂ) * Complex.I).re := by simpa using hσ
+  have h2 : 1 < ((σ : ℂ) + ((2 * γ : ℝ) : ℂ) * Complex.I).re := by simpa using hσ
+  have sA := DirichletCharacter.LSeriesSummable_twist_vonMangoldt (1 : DirichletCharacter ℂ q) h0
+  have sB := DirichletCharacter.LSeriesSummable_twist_vonMangoldt χ h1
+  have sC := DirichletCharacter.LSeriesSummable_twist_vonMangoldt (χ ^ 2) h2
+  rw [logDeriv_Lfun481_eq1122 hq _ h0, logDeriv_Lfun481_eq1122 hq _ h1, logDeriv_Lfun481_eq1122 hq _ h2]
+  simp only [Complex.neg_re, LSeries]
+  rw [Complex.re_tsum sA, Complex.re_tsum sB, Complex.re_tsum sC]
+  have rA := Complex.reCLM.summable sA
+  have rB := Complex.reCLM.summable sB
+  have rC := Complex.reCLM.summable sC
+  simp only [Complex.reCLM_apply] at rA rB rC
+  have hnn : 0 ≤ ∑' n : ℕ, (3 * (LSeries.term (↗(1 : DirichletCharacter ℂ q) * ↗ArithmeticFunction.vonMangoldt) (σ : ℂ) n).re +
+      4 * (LSeries.term (↗χ * ↗ArithmeticFunction.vonMangoldt) ((σ : ℂ) + (γ : ℂ) * Complex.I) n).re +
+      (LSeries.term (↗(χ ^ 2) * ↗ArithmeticFunction.vonMangoldt) ((σ : ℂ) + ((2 * γ : ℝ) : ℂ) * Complex.I) n).re) :=
+    tsum_nonneg (term_nonneg1122 χ σ γ hσ)
+  rw [Summable.tsum_add ((rA.mul_left 3).add (rB.mul_left 4)) rC,
+    Summable.tsum_add (rA.mul_left 3) (rB.mul_left 4), tsum_mul_left, tsum_mul_left] at hnn
+  linarith
 
 /-- LEAF: Iwaniec 1974 page 102, the principal character against `ζ`, before display (15).
 Class: MEDIUM.
@@ -73,67 +164,7 @@ display (16): `ζ(σ)/ζ(2σ) ≤ 1/(σ - 1)` near one, stated for `1 < σ ≤ 6
 `(σ - 1) ζ(σ) ≤ σ ≤ 6/5` and `ζ(2σ) ≥ ζ(12/5) > 6/5`. -/
 theorem iwaniec_zeta_ratio1122 (σ : ℝ) (hσ : 1 < σ) (hσ' : σ ≤ 6 / 5) :
     (σ - 1) * ‖riemannZeta (σ : ℂ)‖ ≤ ‖riemannZeta ((2 * σ : ℝ) : ℂ)‖ := by
-  have hZ : ∀ s : ℝ, 1 < s →
-      riemannZeta (s : ℂ) = ((∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s : ℝ) : ℂ) := by
-    intro s hs
-    rw [Complex.ofReal_tsum, zeta_eq_tsum_one_div_nat_add_one_cpow (by simpa using hs)]
-    congr 1 with n
-    rw [Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_cpow (by positivity)]
-    norm_cast
-  have hZnn : ∀ s : ℝ, 0 ≤ ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s :=
-    fun s => tsum_nonneg (fun n => by positivity)
-  -- upper bound at σ
-  have hup : (∑' n : ℕ, 1 / (n + 1 : ℝ) ^ σ) ≤ σ / (σ - 1) := by
-    have h1 := ZetaAsymptotics.termTSum_of_lt hσ
-    have h2 : 0 ≤ ZetaAsymptotics.termTSum σ :=
-      tsum_nonneg (fun n => ZetaAsymptotics.term_nonneg (n + 1) σ)
-    rw [h1] at h2
-    have hs0 : 0 < σ := by linarith
-    have hs1 : 0 < σ - 1 := by linarith
-    rw [le_div_iff₀ hs1]
-    have h3 : 1 / σ * (∑' n : ℕ, 1 / (n + 1 : ℝ) ^ σ) ≤ 1 / (σ - 1) := by linarith
-    rw [div_mul_eq_mul_div, one_mul, div_le_div_iff₀ hs0 hs1, one_mul] at h3
-    linarith
-  -- lower bound at 2σ
-  have h2σ : 1 < 2 * σ := by linarith
-  have hsum : Summable (fun n : ℕ => 1 / (n + 1 : ℝ) ^ (2 * σ)) := by
-    have h := (summable_nat_add_iff 1).mpr (Real.summable_nat_rpow_inv.mpr h2σ)
-    refine h.congr (fun n => ?_)
-    push_cast
-    rw [one_div]
-  have hlow : 1 + 1 / (2 : ℝ) ^ (2 * σ) + 1 / (3 : ℝ) ^ (2 * σ) ≤
-      ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ (2 * σ) := by
-    have h := hsum.sum_le_tsum (Finset.range 3) (fun n _ => by positivity)
-    simp [Finset.sum_range_succ] at h
-    norm_num at h ⊢
-    linarith
-  have hx2 : (2 : ℝ) ^ (2 * σ) ≤ 5.7 := by
-    have h1 : (2 : ℝ) ^ (2 * σ) ≤ (2 : ℝ) ^ (5 / 2 : ℝ) :=
-      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
-    have h2 : ((2 : ℝ) ^ (5 / 2 : ℝ)) ^ (2 : ℕ) = 32 := by
-      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
-    have h3 : 0 ≤ (2 : ℝ) ^ (5 / 2 : ℝ) := by positivity
-    nlinarith
-  have hx3 : (3 : ℝ) ^ (2 * σ) ≤ 15.7 := by
-    have h1 : (3 : ℝ) ^ (2 * σ) ≤ (3 : ℝ) ^ (5 / 2 : ℝ) :=
-      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
-    have h2 : ((3 : ℝ) ^ (5 / 2 : ℝ)) ^ (2 : ℕ) = 243 := by
-      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
-    have h3 : 0 ≤ (3 : ℝ) ^ (5 / 2 : ℝ) := by positivity
-    nlinarith
-  have hp2 : 0 < (2 : ℝ) ^ (2 * σ) := by positivity
-  have hp3 : 0 < (3 : ℝ) ^ (2 * σ) := by positivity
-  have hi2 : 1 / 5.7 ≤ 1 / (2 : ℝ) ^ (2 * σ) := one_div_le_one_div_of_le hp2 hx2
-  have hi3 : 1 / 15.7 ≤ 1 / (3 : ℝ) ^ (2 * σ) := one_div_le_one_div_of_le hp3 hx3
-  rw [hZ σ hσ, hZ (2 * σ) h2σ, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs,
-    Real.norm_eq_abs, abs_of_nonneg (hZnn σ), abs_of_nonneg (hZnn (2 * σ))]
-  have hs1 : 0 < σ - 1 := by linarith
-  have h4 : (σ - 1) * (∑' n : ℕ, 1 / (n + 1 : ℝ) ^ σ) ≤ σ := by
-    have := mul_le_mul_of_nonneg_left hup hs1.le
-    rw [mul_div_cancel₀ _ hs1.ne'] at this
-    exact this
-  have hnum : (1 : ℝ) / 5 ≤ 1 / 5.7 + 1 / 15.7 := by norm_num
-  linarith
+  sorry
 
 /-- The exact statement of the leaf `iwaniec_display14_15_1122`, from the 3-4-1 inequality, the
 comparison with `ζ` and the bound for `ζ'/ζ`. -/
