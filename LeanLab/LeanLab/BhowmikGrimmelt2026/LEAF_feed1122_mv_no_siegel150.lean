@@ -46,7 +46,12 @@ theorem leaf_exceptional_count_fixed_level150 (c C : ℝ) (hc : 0 < c)
       (¬ ∃ (r : ℕ) (_ : NeZero r) (χ : DirichletCharacter ℂ r) (β : ℝ),
         SiegelZero (X ^ ϑ) r χ β) →
       (Edy X : ℝ) ≤ K * Real.exp (-(c / ϑ)) * X ^ (1 - ϑ) * (Real.log X) ^ 8 := by
-  sorry
+  have h_main : ∃ (K X₀ : ℝ), 0 ≤ K ∧ ∀ X : ℝ, 2 ≤ X → X₀ ≤ X →
+    (¬ ∃ (r : ℕ) (_ : NeZero r) (χ : DirichletCharacter ℂ r) (β : ℝ),
+      SiegelZero (X ^ ϑ) r χ β) →
+    (Edy X : ℝ) ≤ K * Real.exp (-(c / ϑ)) * X ^ (1 - ϑ) * (Real.log X) ^ 8 := by
+    sorry
+  exact h_main
 
 /-- The no Siegel zero half of Theorem 5.1, the statement of `mv_no_siegel150_split`
 unchanged, assembled from the fixed level count above and the proved leaves
