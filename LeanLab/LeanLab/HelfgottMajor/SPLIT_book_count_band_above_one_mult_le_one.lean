@@ -1,5 +1,7 @@
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le
 import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le_one_level_le_six
+import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le_one_level_le_twelve
+import LeanLab.HelfgottMajor.SPLIT_book_count_band_above_one_mult_le_one_level_le_seventeen
 
 /-!
 # Split of `book_count_band_above_one_mult_le_one`
@@ -113,7 +115,7 @@ theorem book_count_band_above_one_mult_le_one_level_le_twelve (χ : DirichletCha
     (hχ : χ.IsPrimitive) (hq7 : 7 ≤ q) (hq12 : q ≤ 12) :
     ∀ ρ ∈ (stripZeros_finite χ (2 * Real.pi * Real.exp 1 / (q : ℝ))).toFinset.filter
       (fun ρ => 0 ≤ ρ.im ∧ 1 < ρ.im), (mult χ ρ : ℝ) ≤ 1 := by
-  sorry
+  exact book_count_band_above_one_mult_le_one_level_le_twelve_of_leaves χ hχ hq7 hq12
 
 /-- LEAF. Conductors `13` to `17`, at the top height of the band: for a primitive character of
 modulus `q` in that range every strip zero of `L(·, χ)` whose imaginary part lies in
@@ -124,7 +126,7 @@ theorem book_count_band_above_one_mult_le_one_level_le_seventeen (χ : Dirichlet
     (hχ : χ.IsPrimitive) (hq13 : 13 ≤ q) (hq17 : q ≤ 17) :
     ∀ ρ ∈ (stripZeros_finite χ (2 * Real.pi * Real.exp 1 / (q : ℝ))).toFinset.filter
       (fun ρ => 0 ≤ ρ.im ∧ 1 < ρ.im), (mult χ ρ : ℝ) ≤ 1 := by
-  sorry
+  exact book_count_band_above_one_mult_le_one_level_le_seventeen_of_leaves χ hχ hq13 hq17
 
 /-- Assembly: the pointwise multiplicity bound of the band follows from the four conductor
 blocks and the two arithmetic facts about the band. The band caps the height at `2πe / q`, the
