@@ -12,6 +12,7 @@ The large conductor sector stays the existing LEAF `Decomp324.large_conductor_se
 It is CONDITIONAL ON the LEAFs. Chen's theorem is known; binary Goldbach is OPEN.
 -/
 import LeanLab.ChenExplicit.Decomp324a
+import LeanLab.ChenExplicit.Decomp1552bL72Small
 
 open Finset Real
 open scoped Classical
@@ -51,7 +52,7 @@ theorem small_sector_of_prime_sum (N : ℕ) (hN : exp (exp 36) < N) (q₁ : ℕ)
     (hX : log Y ^ 10 < X) (hXupper : X ≤ N / z8 N) (hXY : X * Y < 2 * N)
     (hY : z8 N < Y) (hZ : z8 N ≤ Z) :
     sectorMass true q₁ c X Y Z ≤ exp (-146) * X * Y / log Y ^ 4 := by
-  sorry
+  exact Small1552b.small_sector_of_leaves N hN q₁ hP c X Y Z hc hX hXupper hXY hY hZ
 
 /-- The small conductor sector of `Decomp324`, assembled from the two new LEAFs.
 CONDITIONAL ON `small_cond_prime_sum` and `small_sector_of_prime_sum`. -/
