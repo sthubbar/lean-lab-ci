@@ -1,0 +1,10 @@
+import LeanLab.AlmostPrimes.SPLIT_bjs_chen_3273Feed1122Count
+
+#print axioms LeanLab.AlmostPrimes.leaf_bjs_theorem3
+#print axioms LeanLab.AlmostPrimes.leaf_twinC_ge_half
+#print axioms LeanLab.AlmostPrimes.U_ge_half_of_leaves
+#print axioms LeanLab.AlmostPrimes.chenCount_le_filter_card
+#print axioms LeanLab.AlmostPrimes.bjs_chen_3273_count_of_leaves
+#print axioms LeanLab.AlmostPrimes.bjs_chen_3273_leaf_count_low_of_leaves
+#print axioms LeanLab.AlmostPrimes.bjs_chen_3273_leaf_count_mid_of_leaves
+#print axioms LeanLab.AlmostPrimes.bjs_chen_3273_leaf_count_high_of_leaves
