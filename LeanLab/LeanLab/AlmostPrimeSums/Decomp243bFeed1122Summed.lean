@@ -1,5 +1,6 @@
 import LeanLab.AlmostPrimeSums.Base243
 import LeanLab.AlmostPrimeSums.Lower243
+import LeanLab.AlmostPrimeSums.S146PiBounds
 
 /-!
 AI wrote this Lean code, burst S82 burst-20261122 feed1122. Binary Goldbach is open.
@@ -239,8 +240,8 @@ theorem leaf_summed_remainder_BV (h : LevelBV) :
 `π(N) ≤ N/log N + 2N/(log N)^2`; passes from `X = π(N)` to the ideal mass of
 BJS p. 52 equation 164. Class MEDIUM. -/
 theorem leaf_pi_upper_sharp : ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
-    (Nat.primeCounting N : ℝ) ≤ N / log N + 2 * N / log N ^ 2 := by
-  sorry
+    (Nat.primeCounting N : ℝ) ≤ N / log N + 2 * N / log N ^ 2 :=
+  LeanLab.AlmostPrimeSums.S146PiBounds.pi_upper_nat
 
 /-- A uniform positive lower bound for `U_N`. -/
 theorem U_ge' (N : ℕ) : 2 * exp (-eulerMascheroniConstant) * twinC ≤ U N := by
