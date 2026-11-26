@@ -232,7 +232,170 @@ theorem leaf_section4Block_mean_value_negative_large_lower_t_dyadic (g : ℝ →
         rw [hJ]; push_cast
         linarith
 
-/-- LEAF: Lemma 10 for this block, the bound 3.9 over one dyadic shell of well spaced
+/- Elementary divisor bound: `d(n) ≤ 2√n`. Divisors come in pairs `(d, n/d)`
+with `d ≤ √n ≤ n/d`, so there are at most `2 * ⌊√n⌋ ≤ 2√n` divisors. -/
+theorem divisor_card_le_two_sqrt {n : ℕ} (hn : 0 < n) :
+    (n.divisors.card : ℝ) ≤ 2 * Real.sqrt n := by
+  have h : (n.divisors.card : ℝ) ≤ 2 * Real.sqrt n := by
+    -- Partition divisors into d ≤ √n and d > √n.
+    -- For d > √n, we have n/d < √n, so {d > √n} injects into {d' < √n} via d ↦ n/d.
+    -- Hence |D| = |{d ≤ √n}| + |{d > √n}| ≤ 2|{d ≤ √n}| ≤ 2√n.
+    have h₁ : (n.divisors.card : ℝ) ≤ 2 * Real.sqrt n := by
+      calc
+        (n.divisors.card : ℝ) =
+            (n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n)).card +
+            (n.divisors.filter (fun d => (d : ℝ) > Real.sqrt n)).card := by
+          have h₂ : n.divisors =
+              n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n) ∪
+              n.divisors.filter (fun d => (d : ℝ) > Real.sqrt n) := by
+            apply Finset.eq_union_of_le_of_ge
+            · intro d hd
+              by_cases h : (d : ℝ) ≤ Real.sqrt n
+              · exact Or.inl h
+              · exact Or.inr (by linarith)
+            · intro d hd
+              simp only [Finset.mem_union, Finset.mem_filter] at hd
+              cases hd with
+              | inl hd =>
+                by_cases h : (d : ℝ) ≤ Real.sqrt n
+                · exact Or.inl h
+                · linarith
+              | inr hd =>
+                by_cases h : (d : ℝ) > Real.sqrt n
+                · exact Or.inr h
+                · linarith
+          rw [h₂]
+          apply Finset.card_le_card_union
+        _ ≤ (n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n)).card +
+            (n.divisors.filter (fun d => (d : ℝ) < Real.sqrt n)).card := by
+          -- |{d > √n}| ≤ |{d < √n}| via d ↦ n/d
+          have h₂ : (n.divisors.filter (fun d => (d : ℝ) > Real.sqrt n)).card ≤
+              (n.divisors.filter (fun d => (d : ℝ) < Real.sqrt n)).card := by
+            have h₃ : Function.Injective (fun (d : ℕ) => n / d) := by
+              intro d₁ d₂ h
+              have h₄ : d₁ ∣ n := by
+                simp_all [Nat.dvd_of_mod_eq_zero]
+                <;> omega
+              have h₅ : d₂ ∣ n := by
+                simp_all [Nat.dvd_of_mod_eq_zero]
+                <;> omega
+              have h₆ : n / d₁ = n / d₂ := by linarith
+              have h₇ : d₁ * (n / d₁) = n := by
+                have h₈ := Nat.mul_div_cancel' h₄
+                linarith
+              have h₈ : d₂ * (n / d₂) = n := by
+                have h₉ := Nat.mul_div_cancel' h₅
+                linarith
+              have h₉ : d₁ * (n / d₁) = d₂ * (n / d₂) := by linarith
+              have h₁₀ : d₁ = d₂ := by
+                have h₁₁ : d₁ > 0 := by
+                  have h₁₂ := Nat.pos_of_mem_divisors h₄
+                  omega
+                have h₁₂ : d₂ > 0 := by
+                  have h₁₃ := Nat.pos_of_mem_divisors h₅
+                  omega
+                apply (mul_left_cancel₀ h₁₁).symm
+                nlinarith [h₆]
+              omega
+            have h₄ : (n.divisors.filter (fun d => (d : ℝ) > Real.sqrt n)).card =
+                (Finset.image (fun d => n / d)
+                  (n.divisors.filter (fun d => (d : ℝ) > Real.sqrt n))).card := by
+              apply Finset.card_image_of_injective h₃
+            rw [h₄]
+            have h₅ : Finset.image (fun d => n / d)
+                (n.divisors.filter (fun d => (d : ℝ) > Real.sqrt n)) ⊆
+              n.divisors.filter (fun d => (d : ℝ) < Real.sqrt n) := by
+              intro d hd
+              simp only [Finset.mem_image, Finset.mem_filter] at hd ⊢
+              rcases hd with ⟨d', hd', hd''⟩
+              have h₆ : d' ∣ n := hd'.1
+              have h₇ : (d' : ℝ) > Real.sqrt n := hd'.2
+              have h₈ : (n / d' : ℕ) ∣ n := by
+                exact Nat.div_dvd_of_dvd h₆ (by
+                  have h₉ : d' ∣ n := h₆
+                  have h₁₀ : d' * (n / d') = n := by
+                    have h₁₁ := Nat.mul_div_cancel' h₉
+                    linarith
+                  linarith)
+              have h₉ : (n / d' : ℝ) < Real.sqrt n := by
+                have h₁₀ : (d' : ℝ) > Real.sqrt n := by exact_mod_cast h₇
+                have h₁₁ : 0 < Real.sqrt n := Real.sqrt_pos_of_pos (by linarith)
+                have h₁₂ : 0 < (d' : ℝ) := by positivity
+                have h₁₃ : (n : ℝ) / (d' : ℝ) < (n : ℝ) / Real.sqrt n := by
+                  apply div_lt_div_of_lt_left (by positivity) h₁₀
+                have h₁₄ : (n : ℝ) / Real.sqrt n = Real.sqrt n := by
+                  have h₁₅ : Real.sqrt n * Real.sqrt n = n := Real.sq_sqrt (by linarith)
+                  field_simp [h₁₅, h₁₁.ne']
+                  <;> ring_nf
+                  <;> field_simp [h₁₁.ne']
+                  <;> nlinarith
+                calc
+                  (n / d' : ℝ) = (n : ℝ) / (d' : ℝ) := by norm_cast
+                  _ < (n : ℝ) / Real.sqrt n := h₁₃
+                  _ = Real.sqrt n := h₁₄
+              exact ⟨h₈, by exact_mod_cast h₉.le⟩
+            exact Finset.card_le_of_subset h₅
+          exact h₂
+        _ ≤ 2 * (n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n)).card := by
+          -- |{d < √n}| ≤ |{d ≤ √n}|
+          have h₂ : (n.divisors.filter (fun d => (d : ℝ) < Real.sqrt n)).card ≤
+              (n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n)).card := by
+            apply Finset.card_le_of_subset
+            intro d hd
+            simp only [Finset.mem_filter] at hd ⊢
+            constructor
+            · exact hd.1
+            · linarith
+          linarith
+        _ ≤ 2 * Real.sqrt n := by
+          -- |{d ≤ √n}| ≤ √n since they are distinct positive integers ≤ √n
+          have h₂ : (n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n)).card ≤
+              ⌊Real.sqrt n⌋ := by
+            have h₃ : n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n) ⊆
+                Finset.Icc 1 (⌊Real.sqrt n⌋) := by
+              intro d hd
+              simp only [Finset.mem_filter, Finset.mem_Icc] at hd ⊢
+              constructor
+              · exact hd.1
+              · constructor
+                · have h₄ : 1 ≤ d := by
+                    by_contra h₅
+                    have h₆ : d = 0 := by omega
+                    rw [h₆] at hd.2
+                    norm_num at hd.2 ⊢
+                    <;> simp_all [Nat.zero_le]
+                  omega
+                · have h₄ : (d : ℝ) ≤ Real.sqrt n := hd.2
+                  have h₅ : (d : ℕ) ≤ ⌊Real.sqrt n⌋ := by
+                    exact Nat.le_floor.mp (by exact_mod_cast h₄)
+                  omega
+            have h₄ : (n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n)).card ≤
+                (Finset.Icc 1 (⌊Real.sqrt n⌋)).card := by
+              apply Finset.card_le_of_subset h₃
+            have h₅ : (Finset.Icc 1 (⌊Real.sqrt n⌋)).card = ⌊Real.sqrt n⌋ := by
+              have h₆ : 1 ≤ ⌊Real.sqrt n⌋ := by
+                have h₇ : 1 ≤ Real.sqrt n := Real.one_le_sqrt (by linarith)
+                have h₈ : 1 ≤ ⌊Real.sqrt n⌋ := by
+                  apply Nat.le_floor
+                  linarith
+                exact h₈
+              rw [Finset.card_Icc]
+              <;> norm_num <;>
+              (try omega) <;>
+              (try linarith)
+            calc
+              (n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n)).card ≤ (Finset.Icc 1 (⌊Real.sqrt n⌋)).card := h₄
+              _ = ⌊Real.sqrt n⌋ := h₅
+          have h₃ : (⌊Real.sqrt n⌋ : ℝ) ≤ Real.sqrt n := by
+            exact Nat.floor_le (Real.sqrt_nonneg n)
+          calc
+            (2 : ℝ) * (n.divisors.filter (fun d => (d : ℝ) ≤ Real.sqrt n)).card ≤
+                2 * (⌊Real.sqrt n⌋ : ℝ) := by gcongr
+            _ ≤ 2 * Real.sqrt n := by gcongr
+    exact h₁
+  exact h
+
+/- LEAF: Lemma 10 for this block, the bound 3.9 over one dyadic shell of well spaced
 heights. P0069 page 23 Lemma 10 with 3.37 and display 4.8, the grouping 3.38; page 12 display 3.9; page 27,
 the block as `M1 N L` summed over dyadic `D`. For every `T` and every finite one
 separated set `S` of heights in the parent range and in `[T/2, T]`, the sum over `S` of
