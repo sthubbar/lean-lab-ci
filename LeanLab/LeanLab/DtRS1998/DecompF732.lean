@@ -20,6 +20,70 @@ namespace LeanLab.DtRS1998.Decomp270c
 
 open LeanLab Task71.Paper Decomp270a
 
+private def f732_c3 (x base : ℕ) : ℕ :=
+  (2 * ((x % 3 + 3 - base % 3) % 3)) % 3
+
+private def f732_c5 (x base : ℕ) : ℕ :=
+  (3 * ((x % 5 + 5 - base % 5) % 5)) % 5
+
+private def f732_c7 (x base : ℕ) : ℕ :=
+  (4 * ((x % 7 + 7 - base % 7) % 7)) % 7
+
+private def f732_c11 (x base : ℕ) : ℕ :=
+  (6 * ((x % 11 + 11 - base % 11) % 11)) % 11
+
+private def f732_crt (x0 x1 x2 x3 base : ℕ) : ℕ :=
+  (385 * f732_c3 x0 base + 231 * f732_c5 x1 base +
+    330 * f732_c7 x2 base + 210 * f732_c11 x3 base) % 1155
+
+private lemma f732_c3_spec (x base : ℕ) :
+    (base + 2 * f732_c3 x base) % 3 = x % 3 := by
+  have hx := Nat.mod_lt x (by omega : 0 < 3)
+  have hb := Nat.mod_lt base (by omega : 0 < 3)
+  simp [f732_c3]
+  omega
+
+private lemma f732_c5_spec (x base : ℕ) :
+    (base + 2 * f732_c5 x base) % 5 = x % 5 := by
+  have hx := Nat.mod_lt x (by omega : 0 < 5)
+  have hb := Nat.mod_lt base (by omega : 0 < 5)
+  simp [f732_c5]
+  omega
+
+private lemma f732_c7_spec (x base : ℕ) :
+    (base + 2 * f732_c7 x base) % 7 = x % 7 := by
+  have hx := Nat.mod_lt x (by omega : 0 < 7)
+  have hb := Nat.mod_lt base (by omega : 0 < 7)
+  simp [f732_c7]
+  omega
+
+private lemma f732_c11_spec (x base : ℕ) :
+    (base + 2 * f732_c11 x base) % 11 = x % 11 := by
+  have hx := Nat.mod_lt x (by omega : 0 < 11)
+  have hb := Nat.mod_lt base (by omega : 0 < 11)
+  simp [f732_c11]
+  omega
+
+private lemma f732_crt_mod3 (x0 x1 x2 x3 base : ℕ) :
+    f732_crt x0 x1 x2 x3 base % 3 = f732_c3 x0 base % 3 := by
+  simp [f732_crt, f732_c3, f732_c5, f732_c7, f732_c11,
+    Nat.add_mod, Nat.mul_mod]
+
+private lemma f732_crt_mod5 (x0 x1 x2 x3 base : ℕ) :
+    f732_crt x0 x1 x2 x3 base % 5 = f732_c5 x1 base % 5 := by
+  simp [f732_crt, f732_c3, f732_c5, f732_c7, f732_c11,
+    Nat.add_mod, Nat.mul_mod]
+
+private lemma f732_crt_mod7 (x0 x1 x2 x3 base : ℕ) :
+    f732_crt x0 x1 x2 x3 base % 7 = f732_c7 x2 base % 7 := by
+  simp [f732_crt, f732_c3, f732_c5, f732_c7, f732_c11,
+    Nat.add_mod, Nat.mul_mod]
+
+private lemma f732_crt_mod11 (x0 x1 x2 x3 base : ℕ) :
+    f732_crt x0 x1 x2 x3 base % 11 = f732_c11 x3 base % 11 := by
+  simp [f732_crt, f732_c3, f732_c5, f732_c7, f732_c11,
+    Nat.add_mod, Nat.mul_mod]
+
 /-- LEAF 1 of 4: the first sub-block of the block, `j ≤ 7812500`, is covered by
 a list of at most 4 primes.  This is the first range cut of the block, the
 sub-block containing the smallest offsets including `j = 0`; it carries the

@@ -1,0 +1,9 @@
+import Mathlib
+#check Nat.modEq_iff_mod_eq
+#check Nat.ModEq.refl
+#check Nat.ModEq.symm
+#check Nat.ModEq.trans
+#check Nat.ModEq.of_dvd
+#check of_decide_eq_true
+#check Nat.modEq_iff_dvd
+#print Nat.ModEq
