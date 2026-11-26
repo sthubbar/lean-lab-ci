@@ -161,9 +161,8 @@ theorem logTransferMargin_of (H4 : Lemma4) (H5 : Lemma5) (δ : ℝ) (hδ : 0 < �
     _ = 4 * |C4| * |C5| * (X * ((n : ℝ) ^ (1 - γ) * y)) := by ring
     _ ≤ 4 * |C4| * |C5| * (y ^ 2 / Real.log (n : ℝ) ^ 4) := by gcongr
 
-/-- The corrected statement with the lab's proved Lemma 4 and Lemma 5. -/
-theorem logTransferMargin (δ : ℝ) (hδ : 0 < δ) : LogTransferMarginDQ δ :=
-  logTransferMargin_of Decomp139.song_lemma4_decomposed song_lemma5 δ hδ
+/- The sealed logTransferMargin declaration now lives in Repair688Margin.lean.
+That downstream file uses the closed Lemma 4 route without an import cycle. -/
 
 /-- Vacuity instance: at gamma 89/90 and delta 1/32 the window hypotheses hold at
 n equal to 2 to the 64 and y equal to n over 3. -/
