@@ -8,6 +8,7 @@ so the exact parent statement is assembled here as
 AI wrote this Lean code. Binary Goldbach is OPEN.
 -/
 import LeanLab.Hathi2021.Flag1737
+import LeanLab.PNTSieve.MertensProduct
 
 open Finset Real MeasureTheory
 
@@ -129,11 +130,1322 @@ theorem majorIntegral_asymptotic_residual (C η : ℝ) (hC : 1 < C) (hη : 0 < �
           η * n / Real.log (Real.log n₁) := by
   sorry
 
+
+
+section LocalFactors702
+
+open scoped Classical
+/-- Hu page 193. Match the standard modular character with the paper exponential. -/
+theorem stdAddChar_eq_e_int (q : ℕ) [NeZero q] (z : ℤ) :
+    ZMod.stdAddChar (z : ZMod q) = e ((z : ℝ) / q) := by
+  rw [ZMod.stdAddChar_coe]
+  unfold e
+  push_cast
+  congr 1
+  ring
+
+
+
+
+
+
+/-- Hu page 193. Reindex the coprime residues from 1 through q by modular units. -/
+theorem sum_coprime_eq_sum_units (q : ℕ) [NeZero q] (hq : 2 ≤ q)
+    (f : ZMod q → ℂ) :
+    (∑ m ∈ (Finset.Icc 1 q).filter (fun m => Nat.Coprime m q), f m) =
+      ∑ x : (ZMod q)ˣ, f x := by
+  classical
+  letI : Fact (1 < q) := ⟨by omega⟩
+  apply Finset.sum_bij (fun (m : ℕ) hm => ZMod.unitOfCoprime m (Finset.mem_filter.mp hm).2)
+  · intro m hm; exact Finset.mem_univ _
+  · intro m hm k hk heq
+    have hlt (v : ℕ) (hv : v ∈ (Finset.Icc 1 q).filter (fun m => Nat.Coprime m q)) : v < q := by
+      have h := Finset.mem_Icc.mp (Finset.mem_filter.mp hv).1
+      have hc := (Finset.mem_filter.mp hv).2
+      have hn : v ≠ q := by intro he; subst v; simp at hc; omega
+      omega
+    have hv := congrArg (fun u : (ZMod q)ˣ => (u : ZMod q).val) heq
+    simpa [ZMod.val_natCast_of_lt (hlt m hm), ZMod.val_natCast_of_lt (hlt k hk)] using hv
+  · intro x hx
+    have hpos : 0 < (x : ZMod q).val := ZMod.val_pos.mpr (Units.ne_zero x)
+    refine ⟨(x : ZMod q).val, Finset.mem_filter.mpr
+      ⟨Finset.mem_Icc.mpr ⟨hpos, (ZMod.val_lt _).le⟩, ZMod.val_coe_unit_coprime x⟩, ?_⟩
+    apply Units.ext
+    simp
+  · intro m hm
+    simp
+
+/-- Hu page 193. Express C of degree d as a sum of standard characters over units. -/
+theorem residueSum_eq_sum_units (q a d : ℕ) [NeZero q] (hq : 2 ≤ q) :
+    residueSum q a d = ∑ x : (ZMod q)ˣ,
+      ZMod.stdAddChar ((a : ZMod q) * (x : ZMod q) ^ d) := by
+  unfold residueSum
+  convert sum_coprime_eq_sum_units q hq (fun x => ZMod.stdAddChar ((a : ZMod q) * x ^ d)) using 1
+  apply Finset.sum_congr rfl
+  intro m hm
+  have hc : (a : ZMod q) * (m : ZMod q) ^ d = ((a : ℤ) * (m : ℤ) ^ d : ℤ) := by push_cast; rfl
+  rw [hc, stdAddChar_eq_e_int]
+  push_cast
+  rfl
+
+
+
+/-- Hu page 193. Finite orthogonality counts two unit squares and one unit.
+This is a finite density identity for every positive modulus. -/
+theorem unit_fourier_count (q : ℕ) [NeZero q] (r : ℤ) :
+    (∑ a : ZMod q,
+      (∑ x : (ZMod q)ˣ, ZMod.stdAddChar (a * (x : ZMod q))) *
+      (∑ y : (ZMod q)ˣ, ZMod.stdAddChar (a * (y : ZMod q) ^ 2)) ^ 2 *
+      ZMod.stdAddChar (-a * (r : ZMod q))) =
+    ∑ x : (ZMod q)ˣ, ∑ y : (ZMod q)ˣ, ∑ z : (ZMod q)ˣ,
+      if (x : ZMod q) ^ 2 + (y : ZMod q) ^ 2 + (z : ZMod q) = (r : ZMod q)
+      then (q : ℂ) else 0 := by
+  classical
+  have hterm (a : ZMod q) :
+      (∑ x : (ZMod q)ˣ, ZMod.stdAddChar (a * (x : ZMod q))) *
+      (∑ y : (ZMod q)ˣ, ZMod.stdAddChar (a * (y : ZMod q) ^ 2)) ^ 2 *
+      ZMod.stdAddChar (-a * (r : ZMod q)) =
+      ∑ x : (ZMod q)ˣ, ∑ y : (ZMod q)ˣ, ∑ z : (ZMod q)ˣ,
+        ZMod.stdAddChar (a * ((x : ZMod q) ^ 2 + (y : ZMod q) ^ 2 + (z : ZMod q) - (r : ZMod q))) := by
+    simp only [pow_two, Finset.sum_mul, Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro x hx
+    apply Finset.sum_congr rfl
+    intro y hy
+    apply Finset.sum_congr rfl
+    intro z hz
+    rw [← AddChar.map_add_eq_mul, ← AddChar.map_add_eq_mul, ← AddChar.map_add_eq_mul]
+    congr 1
+    ring
+  simp_rw [hterm]
+  rw [Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro x hx
+  rw [Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro y hy
+  rw [Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro z hz
+  have h := AddChar.sum_mulShift
+    ((x : ZMod q) ^ 2 + (y : ZMod q) ^ 2 + (z : ZMod q) - (r : ZMod q))
+    (ZMod.isPrimitive_stdAddChar q)
+  have hc : (∑ a : ZMod q, ZMod.stdAddChar
+      (a * ((x : ZMod q) ^ 2 + (y : ZMod q) ^ 2 + (z : ZMod q) - (r : ZMod q)))) =
+      if (x : ZMod q) ^ 2 + (y : ZMod q) ^ 2 + (z : ZMod q) - (r : ZMod q) = 0
+      then (q : ℂ) else 0 := by
+    simpa only [ZMod.card, Nat.cast_ite, Nat.cast_zero] using h
+  simpa only [sub_eq_zero] using hc
+
+
+
+/-- Hu page 193. At a prime modulus the units and zero partition all residues. -/
+theorem sum_units_add_zero (p : ℕ) [Fact p.Prime] (f : ZMod p → ℂ) :
+    (∑ u : (ZMod p)ˣ, f u) + f 0 = ∑ x : ZMod p, f x := by
+  classical
+  have hu : (∑ x ∈ (Finset.univ : Finset (ZMod p)).erase 0, f x) =
+      ∑ u : (ZMod p)ˣ, f u := by
+    calc _ = ∑ x : {x : ZMod p // x ≠ 0}, f x :=
+          Finset.sum_subtype _ (by simp) f
+      _ = _ := (Fintype.sum_equiv unitsEquivNeZero _ _ (fun x => rfl)).symm
+  rw [← hu]
+  exact Finset.sum_erase_add _ _ (Finset.mem_univ _)
+
+/-- Hu page 193. Reindex the exact coefficient A using modular units. -/
+theorem singularCoefficient_eq_units (q : ℕ) [NeZero q] (hq : 2 ≤ q) (r : ℤ) :
+    singularCoefficient r q =
+      (∑ a : (ZMod q)ˣ,
+        (∑ x : (ZMod q)ˣ, ZMod.stdAddChar ((a : ZMod q) * (x : ZMod q))) *
+        (∑ y : (ZMod q)ˣ, ZMod.stdAddChar ((a : ZMod q) * (y : ZMod q) ^ 2)) ^ 2 *
+        ZMod.stdAddChar (-(a : ZMod q) * (r : ZMod q))) / (Nat.totient q : ℂ) ^ 3 := by
+  unfold singularCoefficient
+  simp_rw [residueSum_eq_sum_units q _ _ hq, pow_one]
+  congr 1
+  convert sum_coprime_eq_sum_units q hq (fun a =>
+        (∑ x : (ZMod q)ˣ, ZMod.stdAddChar (a * (x : ZMod q))) *
+        (∑ y : (ZMod q)ˣ, ZMod.stdAddChar (a * (y : ZMod q) ^ 2)) ^ 2 *
+        ZMod.stdAddChar (-a * (r : ZMod q))) using 1
+  apply Finset.sum_congr rfl
+  intro a ha
+  congr 1
+  have hc : -(a : ZMod q) * (r : ZMod q) = (-(a : ℤ) * r : ℤ) := by push_cast; rfl
+  rw [hc, stdAddChar_eq_e_int]
+  congr 1
+  push_cast
+  ring
+
+
+
+/-- Hu page 193. One plus A at a prime equals its normalized local density.
+The first two unit variables are squared and the third unit variable is linear. -/
+theorem prime_local_factor_eq_density (p : ℕ) [Fact p.Prime] (r : ℤ) :
+    (1 : ℂ) + singularCoefficient r p =
+      (∑ x : (ZMod p)ˣ, ∑ y : (ZMod p)ˣ, ∑ z : (ZMod p)ˣ,
+        if (x : ZMod p) ^ 2 + (y : ZMod p) ^ 2 + (z : ZMod p) = (r : ZMod p)
+        then (p : ℂ) else 0) / (Nat.totient p : ℂ) ^ 3 := by
+  classical
+  have hp : p.Prime := Fact.out
+  let F (a : ZMod p) : ℂ :=
+      (∑ x : (ZMod p)ˣ, ZMod.stdAddChar (a * (x : ZMod p))) *
+      (∑ y : (ZMod p)ˣ, ZMod.stdAddChar (a * (y : ZMod p) ^ 2)) ^ 2 *
+      ZMod.stdAddChar (-a * (r : ZMod p))
+  have hF : F 0 = (Nat.totient p : ℂ) ^ 3 := by
+    simp [F, ZMod.card_units_eq_totient]
+    ring
+  have hsplit := sum_units_add_zero p F
+  rw [hF] at hsplit
+  rw [singularCoefficient_eq_units p hp.two_le r]
+  change 1 + (∑ a : (ZMod p)ˣ, F a) / (Nat.totient p : ℂ) ^ 3 = _
+  have ht : (Nat.totient p : ℂ) ^ 3 ≠ 0 := by
+    exact pow_ne_zero _ (by exact_mod_cast (Nat.totient_pos.mpr hp.pos).ne')
+  rw [← unit_fourier_count p r]
+  change 1 + (∑ a : (ZMod p)ˣ, F a) / (Nat.totient p : ℂ) ^ 3 =
+    (∑ a : ZMod p, F a) / (Nat.totient p : ℂ) ^ 3
+  rw [← hsplit]
+  rw [add_div, div_self ht]
+  ring
+
+
+
+/-- Hu page 193. Every prime local factor has nonnegative real part.
+This finite statement does not identify the infinite series with an Euler product. -/
+theorem prime_local_factor_nonneg (p : ℕ) [Fact p.Prime] (r : ℤ) :
+    0 ≤ 1 + (singularCoefficient r p).re := by
+  classical
+  have h := congrArg Complex.re (prime_local_factor_eq_density p r)
+  simp only [Complex.add_re, Complex.one_re] at h
+  rw [h]
+  have hden : (Nat.totient p : ℂ) ^ 3 = (((Nat.totient p : ℝ) ^ 3 : ℝ) : ℂ) := by
+    push_cast; rfl
+  rw [hden, Complex.div_ofReal_re]
+  apply div_nonneg _ (by positivity)
+  simp only [Complex.re_sum]
+  apply Finset.sum_nonneg
+  intro x hx
+  apply Finset.sum_nonneg
+  intro y hy
+  apply Finset.sum_nonneg
+  intro z hz
+  split_ifs <;> simp
+
+/-- Hu page 193. One finite certificate for the unit residues at 2 and 3.
+It supplies the small prime steps for every integer residual. -/
+theorem small_prime_units : (∀ x : (ZMod 2)ˣ, (x : ZMod 2) = 1) ∧
+    (∀ x : (ZMod 3)ˣ, (x : ZMod 3) ^ 2 = 1) := by decide +kernel
+
+/-- Hu page 193. The local factor at 2 is 2 on odd residuals and 0 on even residuals. -/
+theorem prime_local_factor_two (r : ℤ) :
+    (1 : ℂ) + singularCoefficient r 2 = if (r : ZMod 2) = 1 then 2 else 0 := by
+  classical
+  rw [prime_local_factor_eq_density]
+  norm_num [small_prime_units.1, ZMod.card_units_eq_totient, eq_comm]
+  congr 2
+
+/-- Hu page 193. The local factor at 3 vanishes on residuals congruent to 2 modulo 3. -/
+theorem prime_local_factor_three_zero (r : ℤ) (hr : (r : ZMod 3) = 2) :
+    (1 : ℂ) + singularCoefficient r 3 = 0 := by
+  classical
+  rw [prime_local_factor_eq_density]
+  have hn (x y z : (ZMod 3)ˣ) :
+      (x : ZMod 3) ^ 2 + (y : ZMod 3) ^ 2 + (z : ZMod 3) ≠ (r : ZMod 3) := by
+    rw [small_prime_units.2 x, small_prime_units.2 y, hr]
+    intro he
+    apply Units.ne_zero z
+    linear_combination he
+  simp only [ite_eq_right (hn _ _ _), Finset.sum_const_zero, zero_div]
+
+/-- Hu page 193. The product of the real prime local factors is nonnegative.
+No equality with the sealed series definition is asserted here. -/
+theorem prime_local_product_nonneg (r : ℤ) :
+    0 ≤ ∏' p : Nat.Primes, (1 + (singularCoefficient r p.val).re) := by
+  apply tprod_nonneg
+  intro p
+  letI : Fact p.val.Prime := ⟨p.prop⟩
+  exact prime_local_factor_nonneg p.val r
+
+/-- Hu page 193. Every prime local factor is at most p divided by phi of p.
+This bound alone does not imply a log log bound for the infinite series. -/
+theorem prime_local_factor_le_totient (p : ℕ) [Fact p.Prime] (r : ℤ) :
+    1 + (singularCoefficient r p).re ≤ (p : ℝ) / Nat.totient p := by
+  classical
+  have hz (b : ZMod p) :
+      (∑ z : (ZMod p)ˣ, if (z : ZMod p) = b then (p : ℝ) else 0) ≤ p := by
+    calc _ = ∑ z ∈ (Finset.univ : Finset (ZMod p)ˣ).image (fun (z : (ZMod p)ˣ) => (z : ZMod p)),
+          if z = b then (p : ℝ) else 0 := by
+            symm
+            apply Finset.sum_image
+            intro x hx y hy he
+            exact Units.ext he
+      _ ≤ ∑ z : ZMod p, if z = b then (p : ℝ) else 0 := by
+        exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _) (by
+          intro z hz hn
+          split_ifs <;> positivity)
+      _ = p := by simp
+  have h := congrArg Complex.re (prime_local_factor_eq_density p r)
+  simp only [Complex.add_re, Complex.one_re] at h
+  rw [h]
+  have hden : (Nat.totient p : ℂ) ^ 3 = (((Nat.totient p : ℝ) ^ 3 : ℝ) : ℂ) := by
+    push_cast; rfl
+  rw [hden, Complex.div_ofReal_re]
+  have hphi : (0 : ℝ) < Nat.totient p := by
+    exact_mod_cast Nat.totient_pos.mpr (Fact.out : p.Prime).pos
+  have hsum :
+      ((∑ x : (ZMod p)ˣ, ∑ y : (ZMod p)ˣ, ∑ z : (ZMod p)ˣ,
+        if (x : ZMod p) ^ 2 + (y : ZMod p) ^ 2 + (z : ZMod p) = (r : ZMod p)
+        then (p : ℂ) else 0) : ℂ).re ≤ (Nat.totient p : ℝ) ^ 2 * p := by
+    simp only [Complex.re_sum, apply_ite Complex.re, Complex.natCast_re, Complex.zero_re]
+    calc _ ≤ ∑ _x : (ZMod p)ˣ, ∑ _y : (ZMod p)ˣ, (p : ℝ) := by
+          apply Finset.sum_le_sum
+          intro x hx
+          apply Finset.sum_le_sum
+          intro y hy
+          convert hz ((r : ZMod p) - (x : ZMod p) ^ 2 - (y : ZMod p) ^ 2) using 1
+          apply Finset.sum_congr rfl
+          intro z hz
+          congr 1
+          apply propext
+          constructor <;> intro he <;> linear_combination he
+      _ = _ := by simp [ZMod.card_units_eq_totient]; ring
+  calc _ ≤ ((Nat.totient p : ℝ) ^ 2 * p) / (Nat.totient p : ℝ) ^ 3 :=
+        div_le_div_of_nonneg_right hsum (by positivity)
+    _ = _ := by field_simp
+
+
+/-- Hu page 193. The denominator one term of the singular series is 1. -/
+theorem singularCoefficient_one (r : ℤ) : singularCoefficient r 1 = 1 := by
+  have he (z : ℤ) : e (z : ℝ) = 1 := by
+    have h := stdAddChar_eq_e_int 1 z
+    have hz : (z : ZMod 1) = 0 := Subsingleton.elim _ _
+    simpa only [hz, AddChar.map_zero_eq_one, Nat.cast_one, div_one] using h.symm
+  have he1 : e 1 = 1 := by simpa using he 1
+  have hen : e (-(r : ℝ)) = 1 := by simpa using he (-r)
+  simp [singularCoefficient, residueSum, he1, hen]
+
+
+/-- Hu page 193. The printed linear residue sum C1 equals minus one at a prime
+when the frequency is coprime to that prime. -/
+theorem residueSum_prime_linear (p a : ℕ) [Fact p.Prime] (ha : Nat.Coprime a p) :
+    residueSum p a 1 = -1 := by
+  classical
+  have hp : p.Prime := Fact.out
+  have ha0 : (a : ZMod p) ≠ 0 := ((ZMod.isUnit_iff_coprime a p).2 ha).ne_zero
+  have hs := sum_units_add_zero p (fun x => ZMod.stdAddChar ((a : ZMod p) * x))
+  have hf : (∑ x : ZMod p, ZMod.stdAddChar ((a : ZMod p) * x)) = 0 := by
+    simpa only [mul_comm, ite_eq_right ha0, Nat.cast_zero] using
+      AddChar.sum_mulShift (a : ZMod p) (ZMod.isPrimitive_stdAddChar p)
+  rw [hf] at hs
+  simp only [mul_zero, AddChar.map_zero_eq_one] at hs
+  rw [residueSum_eq_sum_units p a 1 hp.two_le]
+  simp only [pow_one]
+  linear_combination hs
+
+
+/-- Hu page 193. Reindex a unit sum as a sum over all residues with the unit indicator. -/
+theorem sum_units_eq_sum_isUnit (q : ℕ) [NeZero q] (f : ZMod q → ℂ) :
+    (∑ u : (ZMod q)ˣ, f u) = ∑ x : ZMod q, if IsUnit x then f x else 0 := by
+  classical
+  rw [← Finset.sum_filter]
+  apply Finset.sum_bij (fun (u : (ZMod q)ˣ) _ => (u : ZMod q))
+  · intro u hu
+    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, u.isUnit⟩
+  · intro u hu v hv he
+    exact Units.ext he
+  · intro x hx
+    have hu := (Finset.mem_filter.mp hx).2
+    exact ⟨hu.unit, Finset.mem_univ _, hu.unit_spec⟩
+  · intro u hu
+    rfl
+
+/-- Hu page 193. Finite cancellation under translation by a nilpotent residue.
+If the translation phase differs from 1, the unit character sum vanishes. -/
+theorem unit_character_sum_eq_zero_of_nilpotent (q : ℕ) [NeZero q]
+    (a b : ZMod q) (hb : IsNilpotent b) (hphase : ZMod.stdAddChar (a * b) ≠ 1) :
+    (∑ u : (ZMod q)ˣ, ZMod.stdAddChar (a * (u : ZMod q))) = 0 := by
+  classical
+  have hu (x : ZMod q) : IsUnit (x + b) ↔ IsUnit x := by
+    constructor
+    · intro hx
+      have h := hb.neg.isUnit_add_left_of_commute hx (Commute.all _ _)
+      simpa using h
+    · intro hx
+      exact hb.isUnit_add_left_of_commute hx (Commute.all _ _)
+  rw [sum_units_eq_sum_isUnit q (fun x => ZMod.stdAddChar (a * x))]
+  let f (x : ZMod q) : ℂ := if IsUnit x then ZMod.stdAddChar (a * x) else 0
+  have hs := Equiv.sum_comp (Equiv.addRight b) f
+  change (∑ x : ZMod q, f (x + b)) = ∑ x : ZMod q, f x at hs
+  have hx (x : ZMod q) : f (x + b) = f x * ZMod.stdAddChar (a * b) := by
+    dsimp only [f]
+    simp only [hu, mul_add, AddChar.map_add_eq_mul]
+    split_ifs <;> simp
+  simp_rw [hx] at hs
+  rw [← Finset.sum_mul] at hs
+  have hzero : (∑ x : ZMod q, f x) * (ZMod.stdAddChar (a * b) - 1) = 0 := by
+    linear_combination hs
+  exact (mul_eq_zero.mp hzero).resolve_right (sub_ne_zero.mpr hphase)
+
+/-- Hu page 193. The linear residue sum is zero at prime powers with exponent
+at least two and frequencies coprime to the modulus. -/
+theorem residueSum_prime_power_linear (p k a : ℕ) [Fact p.Prime]
+    (ha : Nat.Coprime a (p ^ (k + 2))) :
+    residueSum (p ^ (k + 2)) a 1 = 0 := by
+  classical
+  have hp : p.Prime := Fact.out
+  let q := p ^ (k + 2)
+  letI : NeZero q := ⟨pow_ne_zero _ hp.ne_zero⟩
+  let b : ZMod q := (p ^ (k + 1) : ℕ)
+  have hb : IsNilpotent b := by
+    refine ⟨2, ?_⟩
+    have hd : p ^ (k + 2) ∣ (p ^ (k + 1)) ^ 2 := by
+      rw [← pow_mul]
+      exact pow_dvd_pow p (by omega)
+    change ((p ^ (k + 1) : ℕ) : ZMod q) ^ 2 = 0
+    rw [← Nat.cast_pow]
+    exact (ZMod.natCast_eq_zero_iff _ _).2 hd
+  have hb0 : b ≠ 0 := by
+    have hlt : p ^ (k + 1) < q := by
+      exact Nat.pow_lt_pow_right hp.one_lt (by omega)
+    intro he
+    have he' := congrArg ZMod.val he
+    change (((p ^ (k + 1) : ℕ) : ZMod q)).val = (0 : ZMod q).val at he'
+    rw [ZMod.val_natCast_of_lt hlt, ZMod.val_zero] at he'
+    exact (pow_pos hp.pos _).ne' he'
+  have hau : IsUnit (a : ZMod q) := (ZMod.isUnit_iff_coprime a q).2 ha
+  have hphase : ZMod.stdAddChar ((a : ZMod q) * b) ≠ 1 := by
+    intro he
+    have hz : (a : ZMod q) * b = 0 := ZMod.injective_stdAddChar (by simpa using he)
+    apply hb0
+    exact hau.mul_left_cancel (by simpa using hz)
+  rw [residueSum_eq_sum_units _ _ _ (by exact Nat.one_lt_pow (by omega) hp.one_lt)]
+  simp only [pow_one]
+  exact unit_character_sum_eq_zero_of_nilpotent q (a : ZMod q) b hb hphase
+
+
+
+/-- Hu page 193. Every coefficient A at a prime power with exponent at least two is zero. -/
+theorem singularCoefficient_prime_power (p k : ℕ) [Fact p.Prime] (r : ℤ) :
+    singularCoefficient r (p ^ (k + 2)) = 0 := by
+  classical
+  unfold singularCoefficient
+  have hs : (∑ a ∈ (Finset.Icc 1 (p ^ (k + 2))).filter
+      (fun a => Nat.Coprime a (p ^ (k + 2))),
+      residueSum (p ^ (k + 2)) a 1 * residueSum (p ^ (k + 2)) a 2 ^ 2 *
+        LeanLab.Hathi2021.Decomp319a.e (-(a : ℝ) * r / (p ^ (k + 2)))) = 0 := by
+    apply Finset.sum_eq_zero
+    intro a ha
+    rw [residueSum_prime_power_linear p k a (Finset.mem_filter.mp ha).2, zero_mul, zero_mul]
+  simp only [Nat.cast_pow]
+  rw [hs, zero_div]
+
+/-- Hu page 193. Split an integer frequency character across two positive moduli
+using an integer Bezout identity. -/
+theorem stdAddChar_mul_moduli (m n : ℕ) [NeZero m] [NeZero n] (u v z : ℤ)
+    (hbez : u * (m : ℤ) + v * (n : ℤ) = 1) :
+    ZMod.stdAddChar (z : ZMod (m * n)) =
+      ZMod.stdAddChar ((v * z : ℤ) : ZMod m) * ZMod.stdAddChar ((u * z : ℤ) : ZMod n) := by
+  rw [stdAddChar_eq_e_int, stdAddChar_eq_e_int, stdAddChar_eq_e_int, ← e_add]
+  congr 1
+  have hm : (m : ℝ) ≠ 0 := by exact_mod_cast NeZero.ne m
+  have hn : (n : ℝ) ≠ 0 := by exact_mod_cast NeZero.ne n
+  have hbez' : (u : ℝ) * m + (v : ℝ) * n = 1 := by exact_mod_cast hbez
+  push_cast
+  field_simp
+  linear_combination -(z : ℝ) * hbez'
+
+
+/-- Hu page 193. The residue sum C with its frequency indexed in ZMod. -/
+noncomputable def unitExpSum (q : ℕ) [NeZero q] (a : ZMod q) (d : ℕ) : ℂ :=
+  ∑ x : (ZMod q)ˣ, ZMod.stdAddChar (a * (x : ZMod q) ^ d)
+
+
+/-- Hu page 193. The standard character factors through the Chinese remainder projections
+with the Bezout frequency weights. -/
+theorem stdAddChar_crt (m n : ℕ) [NeZero m] [NeZero n] (hmn : Nat.Coprime m n)
+    (u v : ℤ) (hbez : u * (m : ℤ) + v * (n : ℤ) = 1) (z : ZMod (m * n)) :
+    ZMod.stdAddChar z =
+      ZMod.stdAddChar ((v : ZMod m) * (ZMod.chineseRemainder hmn z).1) *
+      ZMod.stdAddChar ((u : ZMod n) * (ZMod.chineseRemainder hmn z).2) := by
+  obtain ⟨z, rfl⟩ := ZMod.intCast_surjective z
+  simpa only [map_intCast, Prod.fst_intCast, Prod.snd_intCast, Int.cast_mul] using
+    stdAddChar_mul_moduli m n u v z hbez
+
+
+/-- Hu page 193. The unit residue sum factors across coprime moduli
+with the Bezout frequency weights. -/
+theorem unitExpSum_crt (m n : ℕ) [NeZero m] [NeZero n] (hmn : Nat.Coprime m n)
+    (u v : ℤ) (hbez : u * (m : ℤ) + v * (n : ℤ) = 1) (a : ZMod (m * n)) (d : ℕ) :
+    unitExpSum (m * n) a d =
+      unitExpSum m ((v : ZMod m) * (ZMod.chineseRemainder hmn a).1) d *
+      unitExpSum n ((u : ZMod n) * (ZMod.chineseRemainder hmn a).2) d := by
+  classical
+  let e := (Units.mapEquiv (ZMod.chineseRemainder hmn).toMulEquiv).trans MulEquiv.prodUnits
+  unfold unitExpSum
+  calc (∑ x : (ZMod (m * n))ˣ, ZMod.stdAddChar (a * (x : ZMod (m * n)) ^ d)) =
+      ∑ xy : (ZMod m)ˣ × (ZMod n)ˣ,
+        ZMod.stdAddChar (a * ((e.symm xy : (ZMod (m * n))ˣ) : ZMod (m * n)) ^ d) :=
+        (Equiv.sum_comp e.toEquiv.symm _).symm
+    _ = _ := by
+      rw [Fintype.sum_prod_type, Finset.sum_mul_sum]
+      apply Finset.sum_congr rfl
+      intro x hx
+      apply Finset.sum_congr rfl
+      intro y hy
+      have he : ZMod.chineseRemainder hmn
+          ((e.symm (x, y) : (ZMod (m * n))ˣ) : ZMod (m * n)) =
+          ((x : ZMod m), (y : ZMod n)) := by
+        exact congrArg (fun xy : (ZMod m)ˣ × (ZMod n)ˣ =>
+          ((xy.1 : ZMod m), (xy.2 : ZMod n))) (e.apply_symm_apply (x, y))
+      rw [stdAddChar_crt m n hmn u v hbez]
+      simp only [map_mul, map_pow, he, Prod.fst_mul, Prod.snd_mul]
+      change ZMod.stdAddChar ((v : ZMod m) * ((ZMod.chineseRemainder hmn a).1 * (x : ZMod m) ^ d)) *
+        ZMod.stdAddChar ((u : ZMod n) * ((ZMod.chineseRemainder hmn a).2 * (y : ZMod n) ^ d)) = _
+      congr 1 <;> congr 1 <;> ring
+
+
+/-- Hu page 193. The exact coefficient A is multiplicative for two moduli at least two.
+This form carries the integer Bezout coefficients explicitly. -/
+theorem singularCoefficient_mul_of_bezout (m n : ℕ) [NeZero m] [NeZero n]
+    (hm : 2 ≤ m) (hn : 2 ≤ n) (hmn : Nat.Coprime m n)
+    (u v : ℤ) (hbez : u * (m : ℤ) + v * (n : ℤ) = 1) (r : ℤ) :
+    singularCoefficient r (m * n) = singularCoefficient r m * singularCoefficient r n := by
+  classical
+  let F (q : ℕ) [NeZero q] (a : ZMod q) : ℂ :=
+    unitExpSum q a 1 * unitExpSum q a 2 ^ 2 * ZMod.stdAddChar (-a * (r : ZMod q))
+  have hFm : singularCoefficient r m = (∑ a : (ZMod m)ˣ, F m a) / (Nat.totient m : ℂ) ^ 3 := by
+    simpa only [F, unitExpSum, pow_one] using singularCoefficient_eq_units m hm r
+  have hFn : singularCoefficient r n = (∑ a : (ZMod n)ˣ, F n a) / (Nat.totient n : ℂ) ^ 3 := by
+    simpa only [F, unitExpSum, pow_one] using singularCoefficient_eq_units n hn r
+  have hFmn : singularCoefficient r (m * n) =
+      (∑ a : (ZMod (m * n))ˣ, F (m * n) a) / (Nat.totient (m * n) : ℂ) ^ 3 := by
+    simpa only [F, unitExpSum, pow_one] using
+      singularCoefficient_eq_units (m * n) (by nlinarith) r
+  have hv : (v : ZMod m) * (n : ZMod m) = 1 := by
+    have h := congrArg (fun z : ℤ => (z : ZMod m)) hbez
+    simpa only [Int.cast_add, Int.cast_mul, Int.cast_natCast, Int.cast_one,
+      ZMod.natCast_self, mul_zero, zero_add] using h
+  have hu : (u : ZMod n) * (m : ZMod n) = 1 := by
+    have h := congrArg (fun z : ℤ => (z : ZMod n)) hbez
+    simpa only [Int.cast_add, Int.cast_mul, Int.cast_natCast, Int.cast_one,
+      ZMod.natCast_self, mul_zero, add_zero] using h
+  let vm : (ZMod m)ˣ := ⟨v, n, hv, by rw [mul_comm]; exact hv⟩
+  let un : (ZMod n)ˣ := ⟨u, m, hu, by rw [mul_comm]; exact hu⟩
+  have hvm : (∑ x : (ZMod m)ˣ, F m ((v : ZMod m) * (x : ZMod m))) =
+      ∑ x : (ZMod m)ˣ, F m x := by
+    exact Equiv.sum_comp (Equiv.mulLeft vm) (fun x : (ZMod m)ˣ => F m x)
+  have hun : (∑ x : (ZMod n)ˣ, F n ((u : ZMod n) * (x : ZMod n))) =
+      ∑ x : (ZMod n)ˣ, F n x := by
+    exact Equiv.sum_comp (Equiv.mulLeft un) (fun x : (ZMod n)ˣ => F n x)
+  have hF (a : ZMod (m * n)) : F (m * n) a =
+      F m ((v : ZMod m) * (ZMod.chineseRemainder hmn a).1) *
+      F n ((u : ZMod n) * (ZMod.chineseRemainder hmn a).2) := by
+    unfold F
+    rw [unitExpSum_crt m n hmn u v hbez a 1,
+      unitExpSum_crt m n hmn u v hbez a 2, stdAddChar_crt m n hmn u v hbez]
+    simp only [map_mul, map_neg, map_intCast, Prod.fst_mul, Prod.snd_mul,
+      Prod.fst_neg, Prod.snd_neg, Prod.fst_intCast, Prod.snd_intCast]
+    have hmphase : (v : ZMod m) * (-((ZMod.chineseRemainder hmn a).1) * (r : ZMod m)) =
+        -((v : ZMod m) * (ZMod.chineseRemainder hmn a).1) * (r : ZMod m) := by ring
+    have hnphase : (u : ZMod n) * (-((ZMod.chineseRemainder hmn a).2) * (r : ZMod n)) =
+        -((u : ZMod n) * (ZMod.chineseRemainder hmn a).2) * (r : ZMod n) := by ring
+    rw [hmphase, hnphase]
+    ring
+  let e := (Units.mapEquiv (ZMod.chineseRemainder hmn).toMulEquiv).trans MulEquiv.prodUnits
+  have hsum : (∑ a : (ZMod (m * n))ˣ, F (m * n) a) =
+      (∑ a : (ZMod m)ˣ, F m a) * (∑ a : (ZMod n)ˣ, F n a) := by
+    calc _ = ∑ xy : (ZMod m)ˣ × (ZMod n)ˣ, F (m * n) (e.symm xy) :=
+          (Equiv.sum_comp e.toEquiv.symm _).symm
+      _ = (∑ x : (ZMod m)ˣ, F m ((v : ZMod m) * (x : ZMod m))) *
+          (∑ y : (ZMod n)ˣ, F n ((u : ZMod n) * (y : ZMod n))) := by
+        rw [Fintype.sum_prod_type, Finset.sum_mul_sum]
+        apply Finset.sum_congr rfl
+        intro x hx
+        apply Finset.sum_congr rfl
+        intro y hy
+        have he : ZMod.chineseRemainder hmn
+            ((e.symm (x, y) : (ZMod (m * n))ˣ) : ZMod (m * n)) =
+            ((x : ZMod m), (y : ZMod n)) := by
+          exact congrArg (fun xy : (ZMod m)ˣ × (ZMod n)ˣ =>
+            ((xy.1 : ZMod m), (xy.2 : ZMod n))) (e.apply_symm_apply (x, y))
+        rw [hF, he]
+      _ = _ := by rw [hvm, hun]
+  rw [hFmn, hFm, hFn, hsum, Nat.totient_mul hmn, Nat.cast_mul, mul_pow]
+  exact mul_div_mul_comm _ _ _ _
+
+
+/-- Hu page 193. The sealed coefficient definition extends to zero modulus with value zero.
+The paper series itself starts at denominator one. -/
+theorem singularCoefficient_zero (r : ℤ) : singularCoefficient r 0 = 0 := by
+  simp [singularCoefficient, residueSum]
+
+
+/-- Hu page 193. The exact coefficient A is multiplicative on coprime moduli,
+including its zero and one extensions. -/
+theorem singularCoefficient_multiplicative (r : ℤ) (m n : ℕ) (hmn : Nat.Coprime m n) :
+    singularCoefficient r (m * n) = singularCoefficient r m * singularCoefficient r n := by
+  by_cases hm0 : m = 0
+  · subst m; simp [singularCoefficient_zero]
+  by_cases hn0 : n = 0
+  · subst n; simp [singularCoefficient_zero]
+  by_cases hm1 : m = 1
+  · subst m; simp [singularCoefficient_one]
+  by_cases hn1 : n = 1
+  · subst n; simp [singularCoefficient_one]
+  letI : NeZero m := ⟨hm0⟩
+  letI : NeZero n := ⟨hn0⟩
+  have hbez := Nat.gcd_eq_gcd_ab m n
+  rw [hmn.gcd_eq_one] at hbez
+  apply singularCoefficient_mul_of_bezout m n (by omega) (by omega) hmn
+    (Nat.gcdA m n) (Nat.gcdB m n) _ r
+  linear_combination -hbez
+
+
+/-- Hu page 193. A prime local factor equals the complex embedding of its real part. -/
+theorem prime_local_factor_real (p : ℕ) [Fact p.Prime] (r : ℤ) :
+    (1 : ℂ) + singularCoefficient r p = ((1 + (singularCoefficient r p).re : ℝ) : ℂ) := by
+  have him : ((1 : ℂ) + singularCoefficient r p).im = 0 := by
+    rw [prime_local_factor_eq_density]
+    have hden : (Nat.totient p : ℂ) ^ 3 = (((Nat.totient p : ℝ) ^ 3 : ℝ) : ℂ) := by
+      push_cast; rfl
+    rw [hden, Complex.div_ofReal_im]
+    simp only [Complex.im_sum, apply_ite Complex.im, Complex.natCast_im,
+      Complex.zero_im, ite_self, Finset.sum_const_zero, zero_div]
+  apply Complex.ext
+  · simp
+  · simpa using him
+
+
+/-- Hu page 193. The prime power series equals one plus A at the prime.
+All higher prime power terms vanish. -/
+theorem prime_power_series (p : ℕ) [Fact p.Prime] (r : ℤ) :
+    (∑' k : ℕ, singularCoefficient r (p ^ k)) = (1 : ℂ) + singularCoefficient r p := by
+  calc _ = ∑ k ∈ ({0, 1} : Finset ℕ), singularCoefficient r (p ^ k) := by
+          apply tsum_eq_sum
+          intro k hk
+          have hk2 : 2 ≤ k := by
+            simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hk
+            omega
+          obtain ⟨l, rfl⟩ := Nat.exists_eq_add_of_le hk2
+          simpa only [Nat.add_comm] using singularCoefficient_prime_power p l r
+    _ = _ := by simp [singularCoefficient_one]
+
+
+/-- Hu page 193. At modulus one, every frequency and degree residue sum is 1. -/
+theorem residueSum_modulus_one (a d : ℕ) : residueSum 1 a d = 1 := by
+  have he : e (a : ℝ) = 1 := by
+    have h := stdAddChar_eq_e_int 1 (a : ℤ)
+    have hz : ((a : ℤ) : ZMod 1) = 0 := Subsingleton.elim _ _
+    simpa only [hz, AddChar.map_zero_eq_one, Nat.cast_one, div_one, Int.cast_natCast] using h.symm
+  simp [residueSum, he]
+
+/-- Hu page 193. A coprime frequency does not change the linear residue sum. -/
+theorem residueSum_linear_frequency (q a : ℕ) (ha : Nat.Coprime a q) :
+    residueSum q a 1 = residueSum q 1 1 := by
+  by_cases hq0 : q = 0
+  · subst q; simp [residueSum]
+  by_cases hq1 : q = 1
+  · subst q; simp [residueSum_modulus_one]
+  letI : NeZero q := ⟨hq0⟩
+  rw [residueSum_eq_sum_units q a 1 (by omega), residueSum_eq_sum_units q 1 1 (by omega)]
+  simp only [pow_one, Nat.cast_one, one_mul]
+  let au := ZMod.unitOfCoprime a ha
+  exact Equiv.sum_comp (Equiv.mulLeft au) (fun x : (ZMod q)ˣ => ZMod.stdAddChar (x : ZMod q))
+
+/-- Hu page 193. The linear residue sum at frequency one is multiplicative on coprime moduli. -/
+theorem residueSum_linear_multiplicative (m n : ℕ) (hmn : Nat.Coprime m n) :
+    residueSum (m * n) 1 1 = residueSum m 1 1 * residueSum n 1 1 := by
+  classical
+  by_cases hm0 : m = 0
+  · subst m; simp [residueSum]
+  by_cases hn0 : n = 0
+  · subst n; simp [residueSum]
+  by_cases hm1 : m = 1
+  · subst m; simp [residueSum_modulus_one]
+  by_cases hn1 : n = 1
+  · subst n; simp [residueSum_modulus_one]
+  have hm2 : 2 ≤ m := by omega
+  have hn2 : 2 ≤ n := by omega
+  letI : NeZero m := ⟨hm0⟩
+  letI : NeZero n := ⟨hn0⟩
+  let u := Nat.gcdA m n
+  let v := Nat.gcdB m n
+  have hbez : u * (m : ℤ) + v * (n : ℤ) = 1 := by
+    have h := Nat.gcd_eq_gcd_ab m n
+    rw [hmn.gcd_eq_one] at h
+    dsimp [u, v]
+    linear_combination -h
+  have hvn : (v : ZMod m) * (n : ZMod m) = 1 := by
+    have h := congrArg (fun z : ℤ => (z : ZMod m)) hbez
+    simpa only [Int.cast_add, Int.cast_mul, Int.cast_natCast, Int.cast_one,
+      ZMod.natCast_self, mul_zero, zero_add] using h
+  have hum : (u : ZMod n) * (m : ZMod n) = 1 := by
+    have h := congrArg (fun z : ℤ => (z : ZMod n)) hbez
+    simpa only [Int.cast_add, Int.cast_mul, Int.cast_natCast, Int.cast_one,
+      ZMod.natCast_self, mul_zero, add_zero] using h
+  have hv : IsUnit (v : ZMod m) := IsUnit.of_mul_eq_one (n : ZMod m) hvn
+  have hu : IsUnit (u : ZMod n) := IsUnit.of_mul_eq_one (m : ZMod n) hum
+  have hf (q : ℕ) [NeZero q] (a : (ZMod q)ˣ) :
+      unitExpSum q (a : ZMod q) 1 = unitExpSum q 1 1 := by
+    unfold unitExpSum
+    simp only [pow_one, one_mul]
+    exact Equiv.sum_comp (Equiv.mulLeft a) (fun x : (ZMod q)ˣ => ZMod.stdAddChar (x : ZMod q))
+  rw [residueSum_eq_sum_units (m * n) 1 1 (by nlinarith),
+    residueSum_eq_sum_units m 1 1 (by omega), residueSum_eq_sum_units n 1 1 (by omega)]
+  simp only [Nat.cast_one]
+  change unitExpSum (m * n) 1 1 = unitExpSum m 1 1 * unitExpSum n 1 1
+  rw [unitExpSum_crt m n hmn u v hbez 1 1]
+  simp only [map_one, Prod.fst_one, Prod.snd_one, mul_one]
+  rw [show unitExpSum m (v : ZMod m) 1 = unitExpSum m 1 1 from by simpa using hf m hv.unit,
+    show unitExpSum n (u : ZMod n) 1 = unitExpSum n 1 1 from by simpa using hf n hu.unit]
+
+/-- Hu page 193, printed C1 equals mu identity. The linear residue sum equals
+the Moebius function when the frequency is coprime to the modulus. -/
+theorem residueSum_linear_eq_moebius (q a : ℕ) (ha : Nat.Coprime a q) :
+    residueSum q a 1 = (ArithmeticFunction.moebius q : ℂ) := by
+  rw [residueSum_linear_frequency q a ha]
+  clear ha a
+  induction q using Nat.recOnPosPrimePosCoprime with
+  | zero => simp [residueSum]
+  | one => simp [residueSum_modulus_one]
+  | prime_pow p k hp hk =>
+    letI : Fact p.Prime := ⟨hp⟩
+    by_cases hk1 : k = 1
+    · subst k
+      simp [ArithmeticFunction.moebius_apply_prime hp,
+        residueSum_prime_linear p 1 (by simp)]
+    · have hk2 : 2 ≤ k := by omega
+      obtain ⟨l, rfl⟩ := Nat.exists_eq_add_of_le hk2
+      have hC : residueSum (p ^ (2 + l)) 1 1 = 0 := by
+        simpa only [Nat.add_comm] using residueSum_prime_power_linear p l 1 (by simp)
+      rw [hC, ArithmeticFunction.moebius_apply_prime_pow hp (by omega), ite_eq_right (by omega), Int.cast_zero]
+  | coprime m n hm hn hmn ihm ihn =>
+    rw [residueSum_linear_multiplicative m n hmn, ihm, ihn,
+      ArithmeticFunction.isMultiplicative_moebius.map_mul_of_coprime hmn, Int.cast_mul]
+
+/-- Hu pages 191 and 193. A vanishing prime local factor makes the exact
+singular series definition zero. No analytic convergence input is assumed. -/
+theorem singularSeries_eq_zero_of_local_factor (r : ℤ) (p : ℕ) (hp : p.Prime)
+    (hfactor : (1 : ℂ) + singularCoefficient r p = 0) : singularSeries r = 0 := by
+  classical
+  by_cases hs : Summable (fun q : ℕ => singularCoefficient r (q + 1))
+  · have hfull : Summable (fun q : ℕ => singularCoefficient r q) :=
+      (summable_nat_add_iff 1).mp hs
+    have hshift := hfull.sum_add_tsum_nat_add 1
+    simp only [Finset.sum_range_one, singularCoefficient_zero, zero_add] at hshift
+    have hpowers (p : Nat.Primes) : (∑' k : ℕ, singularCoefficient r (p.val ^ k)) =
+        (1 : ℂ) + singularCoefficient r p.val := by
+      letI : Fact p.val.Prime := ⟨p.prop⟩
+      exact prime_power_series p.val r
+    have hprod := EulerProduct.eulerProduct_hasProd (singularCoefficient_one r)
+      (fun {m n} h => singularCoefficient_multiplicative r m n h) hfull.norm
+      (singularCoefficient_zero r)
+    simp_rw [hpowers] at hprod
+    have hzero : HasProd (fun q : Nat.Primes => (1 : ℂ) + singularCoefficient r q.val) 0 :=
+      hasProd_zero_of_exists_eq_zero ⟨⟨p, hp⟩, hfactor⟩
+    unfold singularSeries
+    rw [hshift, hprod.unique hzero, Complex.zero_re]
+  · simp [singularSeries, tsum_eq_zero_of_not_summable hs]
+
+/-- Hu pages 191 and 193. The singular series vanishes at every even residual. -/
+theorem singularSeries_eq_zero_of_even (r : ℤ) (hr : Even r) : singularSeries r = 0 := by
+  apply singularSeries_eq_zero_of_local_factor r 2 Nat.prime_two
+  rw [prime_local_factor_two]
+  have hz : (r : ZMod 2) = 0 := hr.intCast_zmod_two
+  simp [hz]
+
+/-- Hu pages 191 and 193. The singular series vanishes at residuals congruent to 2 modulo 3. -/
+theorem singularSeries_eq_zero_of_mod_three (r : ℤ) (hr : (r : ZMod 3) = 2) :
+    singularSeries r = 0 :=
+  singularSeries_eq_zero_of_local_factor r 3 Nat.prime_three
+    (prime_local_factor_three_zero r hr)
+
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem sum_comp_sq_quadraticChar {F : Type*} [Field F] [Fintype F]
+    (hF : ringChar F ≠ 2) (f : F → ℂ) :
+    (∑ x : F, f (x ^ 2)) = ∑ y : F, ((quadraticChar F y + 1 : ℤ) : ℂ) * f y := by
+  classical
+  calc _ = ∑ y : F, ∑ x : F, if x ^ 2 = y then f y else 0 := by
+          rw [Finset.sum_comm]
+          apply Finset.sum_congr rfl
+          intro x hx
+          simp
+    _ = ∑ y : F, (((Finset.univ : Finset F).filter (fun x => x ^ 2 = y)).card : ℂ) * f y := by
+          apply Finset.sum_congr rfl
+          intro y hy
+          rw [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul]
+    _ = _ := by
+          apply Finset.sum_congr rfl
+          intro y hy
+          congr 1
+          have h := quadraticChar_card_sqrts hF y
+          have hset : {x : F | x ^ 2 = y}.toFinset =
+              (Finset.univ : Finset F).filter (fun x => x ^ 2 = y) := by ext x; simp
+          rw [hset] at h
+          exact_mod_cast h
+
+
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem unitExpSum_quadratic_gauss (p : ℕ) [Fact p.Prime] (hp : p ≠ 2) (a : (ZMod p)ˣ) :
+    unitExpSum p (a : ZMod p) 2 =
+      gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ))
+        (ZMod.stdAddChar.mulShift (a : ZMod p)) - 1 := by
+  classical
+  have hF : ringChar (ZMod p) ≠ 2 := by simpa only [ZMod.ringChar_zmod_n] using hp
+  have hs := sum_units_add_zero p (fun x => ZMod.stdAddChar ((a : ZMod p) * x ^ 2))
+  have ha0 : (a : ZMod p) ≠ 0 := Units.ne_zero a
+  have hz : (∑ y : ZMod p, ZMod.stdAddChar ((a : ZMod p) * y)) = 0 := by
+    simpa only [mul_comm, ite_eq_right ha0, Nat.cast_zero] using
+      AddChar.sum_mulShift (a : ZMod p) (ZMod.isPrimitive_stdAddChar p)
+  have hq := sum_comp_sq_quadraticChar hF (fun y => ZMod.stdAddChar ((a : ZMod p) * y))
+  have he : (∑ x : ZMod p, ZMod.stdAddChar ((a : ZMod p) * x ^ 2)) =
+      gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ))
+        (ZMod.stdAddChar.mulShift (a : ZMod p)) := by
+    rw [hq]
+    simp only [Int.cast_add, Int.cast_one, add_mul, one_mul, Finset.sum_add_distrib, hz, add_zero]
+    simp only [gaussSum, MulChar.ringHomComp_apply, AddChar.mulShift_apply, Int.coe_castRingHom]
+    congr!
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero,
+    AddChar.map_zero_eq_one] at hs
+  rw [he] at hs
+  unfold unitExpSum
+  linear_combination hs
+
+
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem quadratic_gauss_sq_eval (p : ℕ) [Fact p.Prime] (hp : p ≠ 2) :
+    gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ))
+      ZMod.stdAddChar ^ 2 =
+      (((quadraticChar (ZMod p) (-1) : ℤ) : ℂ)) * (p : ℂ) := by
+  classical
+  have hF : ringChar (ZMod p) ≠ 2 := by simpa only [ZMod.ringChar_zmod_n] using hp
+  let χ : MulChar (ZMod p) ℂ := (quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ)
+  have hχ1 : χ ≠ 1 := by
+    apply (MulChar.ringHomComp_ne_one_iff (f := Int.castRingHom ℂ)
+      (by intro x y h; change (x : ℂ) = (y : ℂ) at h; exact_mod_cast h)).mpr
+    exact quadraticChar_ne_one hF
+  have hχ2 : χ.IsQuadratic := (quadraticChar_isQuadratic (ZMod p)).comp (Int.castRingHom ℂ)
+  simpa only [χ, MulChar.ringHomComp_apply, Int.coe_castRingHom, ZMod.card] using
+    gaussSum_sq hχ1 hχ2 (ZMod.isPrimitive_stdAddChar p)
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem quadratic_gauss_sq_norm (p : ℕ) [Fact p.Prime] (hp : p ≠ 2) :
+    ‖gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ))
+      ZMod.stdAddChar ^ 2‖ = (p : ℝ) := by
+  classical
+  have hF : ringChar (ZMod p) ≠ 2 := by simpa only [ZMod.ringChar_zmod_n] using hp
+  let χ : MulChar (ZMod p) ℂ := (quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ)
+  have hχ1 : χ ≠ 1 := by
+    apply (MulChar.ringHomComp_ne_one_iff (f := Int.castRingHom ℂ)
+      (by intro x y h; change (x : ℂ) = (y : ℂ) at h; exact_mod_cast h)).mpr
+    exact quadraticChar_ne_one hF
+  have hχ2 : χ.IsQuadratic := (quadraticChar_isQuadratic (ZMod p)).comp (Int.castRingHom ℂ)
+  have hnorm (x : ZMod p) (hx : x ≠ 0) : ‖χ x‖ = 1 := by
+    rcases quadraticChar_dichotomy hx with h | h <;> simp [χ, h]
+  have hsq := gaussSum_sq hχ1 hχ2 (ZMod.isPrimitive_stdAddChar p)
+  change ‖gaussSum χ ZMod.stdAddChar ^ 2‖ = (p : ℝ)
+  rw [hsq, norm_mul, hnorm (-1) (neg_ne_zero.mpr one_ne_zero), one_mul]
+  simp [ZMod.card]
+
+
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem unitExpSum_quadratic_char (p : ℕ) [Fact p.Prime] (hp : p ≠ 2) (a : (ZMod p)ˣ) :
+    unitExpSum p (a : ZMod p) 2 =
+      ((quadraticChar (ZMod p) (a : ZMod p) : ℤ) : ℂ) *
+        gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ))
+          ZMod.stdAddChar - 1 := by
+  rw [unitExpSum_quadratic_gauss p hp a, gaussSum_mulShift_eq]
+  have hχ := (quadraticChar_isQuadratic (ZMod p)).comp (Int.castRingHom ℂ)
+  rw [hχ.inv]
+  rfl
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem unitExpSum_linear_nonzero (p : ℕ) [Fact p.Prime] (a : ZMod p) (ha : a ≠ 0) :
+    unitExpSum p a 1 = -1 := by
+  have hs := sum_units_add_zero p (fun x => ZMod.stdAddChar (a * x))
+  have hz : (∑ y : ZMod p, ZMod.stdAddChar (a * y)) = 0 := by
+    simpa only [mul_comm, ite_eq_right ha, Nat.cast_zero] using
+      AddChar.sum_mulShift a (ZMod.isPrimitive_stdAddChar p)
+  simp only [mul_zero, AddChar.map_zero_eq_one, hz] at hs
+  unfold unitExpSum
+  simp only [pow_one]
+  linear_combination hs
+
+
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem prime_coefficient_gauss_formula (p : ℕ) [Fact p.Prime] (hp : p ≠ 2)
+    (r : ℤ) (hr : (r : ZMod p) ≠ 0) :
+    singularCoefficient r p =
+      ((1 + 2 * (((quadraticChar (ZMod p) (-(r : ZMod p)) : ℤ) : ℂ))) *
+        gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ))
+          ZMod.stdAddChar ^ 2 + 1) / (Nat.totient p : ℂ) ^ 3 := by
+  classical
+  let χ : MulChar (ZMod p) ℂ := (quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ)
+  let G := gaussSum χ ZMod.stdAddChar
+  have hχ2 : χ.IsQuadratic := (quadraticChar_isQuadratic (ZMod p)).comp (Int.castRingHom ℂ)
+  have hχsq (a : (ZMod p)ˣ) : (χ (a : ZMod p)) ^ 2 = 1 := by
+    rcases quadraticChar_dichotomy (Units.ne_zero a) with h | h <;> simp [χ, h]
+  have hlin (a : (ZMod p)ˣ) :
+      (∑ x : (ZMod p)ˣ, ZMod.stdAddChar ((a : ZMod p) * (x : ZMod p))) = -1 :=
+    by simpa [unitExpSum] using unitExpSum_linear_nonzero p a (Units.ne_zero a)
+  have hs : (∑ a : (ZMod p)ˣ, ZMod.stdAddChar (-(a : ZMod p) * (r : ZMod p))) = -1 := by
+    simpa only [unitExpSum, pow_one, neg_mul, mul_neg, mul_comm] using
+      unitExpSum_linear_nonzero p (-(r : ZMod p)) (neg_ne_zero.mpr hr)
+  have hw : (∑ a : (ZMod p)ˣ, χ (a : ZMod p) *
+      ZMod.stdAddChar (-(a : ZMod p) * (r : ZMod p))) = χ (-(r : ZMod p)) * G := by
+    let b : (ZMod p)ˣ := Units.mk0 (-(r : ZMod p)) (neg_ne_zero.mpr hr)
+    have hf := sum_units_add_zero p (fun x => χ x * ZMod.stdAddChar ((b : ZMod p) * x))
+    have hg := gaussSum_mulShift_eq χ ZMod.stdAddChar b
+    rw [hχ2.inv] at hg
+    simp only [MulChar.map_zero, zero_mul, add_zero] at hf
+    calc _ = gaussSum χ (ZMod.stdAddChar.mulShift (b : ZMod p)) := by
+          change _ = ∑ x : ZMod p, χ x * ZMod.stdAddChar ((b : ZMod p) * x)
+          rw [← hf]
+          apply Finset.sum_congr rfl
+          intro a ha
+          congr 2
+          dsimp [b]
+          ring
+      _ = _ := hg
+  rw [singularCoefficient_eq_units p (Fact.out : p.Prime).two_le]
+  simp_rw [hlin]
+  change (∑ a : (ZMod p)ˣ, -1 * (unitExpSum p (a : ZMod p) 2) ^ 2 *
+      ZMod.stdAddChar (-(a : ZMod p) * (r : ZMod p))) / _ = _
+  simp_rw [unitExpSum_quadratic_char p hp]
+  have ht (a : (ZMod p)ˣ) :
+      -1 * (χ (a : ZMod p) * G - 1) ^ 2 *
+        ZMod.stdAddChar (-(a : ZMod p) * (r : ZMod p)) =
+      -(G ^ 2 + 1) * ZMod.stdAddChar (-(a : ZMod p) * (r : ZMod p)) +
+        (2 * G) * (χ (a : ZMod p) * ZMod.stdAddChar (-(a : ZMod p) * (r : ZMod p))) := by
+    linear_combination -G ^ 2 * ZMod.stdAddChar (-(a : ZMod p) * (r : ZMod p)) * hχsq a
+  change (∑ a : (ZMod p)ˣ, -1 * (χ (a : ZMod p) * G - 1) ^ 2 * _) / _ = _
+  simp_rw [ht]
+  rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum, hs, hw]
+  dsimp [G, χ]
+  simp only [MulChar.ringHomComp_apply, Int.coe_castRingHom]
+  ring
+
+
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem prime_coefficient_norm_bound (p : ℕ) [Fact p.Prime] (hp : p ≠ 2)
+    (r : ℤ) (hr : (r : ZMod p) ≠ 0) :
+    ‖singularCoefficient r p‖ ≤ (3 * (p : ℝ) + 1) / (Nat.totient p : ℝ) ^ 3 := by
+  let χ : MulChar (ZMod p) ℂ := (quadraticChar (ZMod p)).ringHomComp (Int.castRingHom ℂ)
+  let G := gaussSum χ ZMod.stdAddChar
+  have hc : ‖1 + 2 * χ (-(r : ZMod p))‖ ≤ 3 := by
+    rcases quadraticChar_dichotomy (neg_ne_zero.mpr hr) with h | h <;> norm_num [χ, h]
+  have hG : ‖G ^ 2‖ = (p : ℝ) := quadratic_gauss_sq_norm p hp
+  have hnum : ‖(1 + 2 * χ (-(r : ZMod p))) * G ^ 2 + 1‖ ≤ 3 * (p : ℝ) + 1 := by
+    calc _ ≤ ‖(1 + 2 * χ (-(r : ZMod p))) * G ^ 2‖ + ‖(1 : ℂ)‖ := norm_add_le _ _
+      _ = ‖1 + 2 * χ (-(r : ZMod p))‖ * (p : ℝ) + 1 := by rw [norm_mul, hG, norm_one]
+      _ ≤ _ := by nlinarith [mul_le_mul_of_nonneg_right hc (Nat.cast_nonneg p)]
+  rw [prime_coefficient_gauss_formula p hp r hr, norm_div, norm_pow, Complex.norm_natCast]
+  exact div_le_div_of_nonneg_right hnum (by positivity)
+
+
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem prime_coefficient_norm_le_inv_sq (p : ℕ) [Fact p.Prime] (hp : p ≠ 2)
+    (r : ℤ) (hr : (r : ZMod p) ≠ 0) :
+    ‖singularCoefficient r p‖ ≤ 32 / (p : ℝ) ^ 2 := by
+  have hp2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast (Fact.out : p.Prime).two_le
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hm : (0 : ℝ) < (p : ℝ) - 1 := by linarith
+  refine (prime_coefficient_norm_bound p hp r hr).trans ?_
+  rw [Nat.totient_prime (Fact.out : p.Prime)]
+  rw [Nat.cast_sub ((Fact.out : p.Prime).one_lt.le : 1 ≤ p), Nat.cast_one]
+  apply (div_le_div_iff₀ (pow_pos hm 3) (pow_pos hp0 2)).mpr
+  have h3 := mul_nonneg (sq_nonneg ((p : ℝ) - 2)) (by linarith : 0 ≤ (p : ℝ) - 2)
+  nlinarith [sq_nonneg ((p : ℝ) - 2)]
+
+
+
+/-- Hu page 193. Quadratic character evaluation of the exact local coefficient.
+This algebraic helper uses the Mathlib Gauss sum identities. -/
+theorem prime_coefficient_quadratic_formula (p : ℕ) [Fact p.Prime] (hp : p ≠ 2)
+    (r : ℤ) (hr : (r : ZMod p) ≠ 0) :
+    singularCoefficient r p =
+      ((1 + 2 * (((quadraticChar (ZMod p) (-(r : ZMod p)) : ℤ) : ℂ))) *
+        (((quadraticChar (ZMod p) (-1) : ℤ) : ℂ)) * (p : ℂ) + 1) /
+        (Nat.totient p : ℂ) ^ 3 := by
+  rw [prime_coefficient_gauss_formula p hp r hr, quadratic_gauss_sq_eval p hp]
+  ring
+
+
+/-- Hu page 193. Outside the prime divisors of r the local factor has a summable exponential bound. -/
+theorem prime_local_factor_le_exp_of_nonzero (p : ℕ) [Fact p.Prime]
+    (r : ℤ) (hr : (r : ZMod p) ≠ 0) :
+    1 + (singularCoefficient r p).re ≤ Real.exp (32 / (p : ℝ) ^ 2) := by
+  by_cases hp : p = 2
+  · subst p
+    have h := prime_local_factor_le_totient 2 r
+    have he := Real.add_one_le_exp (8 : ℝ)
+    norm_num [Nat.totient_prime (by decide : Nat.Prime 2)] at h ⊢
+    linarith
+  · have h := prime_coefficient_norm_le_inv_sq p hp r hr
+    have hre := Complex.re_le_norm (singularCoefficient r p)
+    have he := Real.add_one_le_exp (32 / (p : ℝ) ^ 2)
+    linarith
+
+
+
+/-- Hu page 193. Bound the exact Euler product by the exceptional prime divisor factors. -/
+theorem finite_prime_local_product_le (r : ℕ) (hr : r ≠ 0) (s : Finset ℕ)
+    (hs : ∀ p ∈ s, p.Prime) :
+    (∏ p ∈ s, (1 + (singularCoefficient (r : ℤ) p).re)) ≤
+      (∏ p ∈ r.primeFactors, (p : ℝ) / ((p : ℝ) - 1)) *
+        Real.exp (∑' n : ℕ, 32 / (n : ℝ) ^ 2) := by
+  let A := s.filter (fun p => p ∈ r.primeFactors)
+  let B := s.filter (fun p => p ∉ r.primeFactors)
+  have hratio (p : ℕ) (hp : p.Prime) : 1 ≤ (p : ℝ) / ((p : ℝ) - 1) := by
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast hp.two_le
+    apply (le_div_iff₀ (by linarith)).mpr
+    linarith
+  have hsmall : (∏ p ∈ A, (1 + (singularCoefficient (r : ℤ) p).re)) ≤
+      ∏ p ∈ r.primeFactors, (p : ℝ) / ((p : ℝ) - 1) := by
+    calc _ ≤ ∏ p ∈ A, (p : ℝ) / ((p : ℝ) - 1) := by
+          apply Finset.prod_le_prod₀
+          · intro p hp
+            letI : Fact p.Prime := ⟨hs p (Finset.mem_filter.mp hp).1⟩
+            exact prime_local_factor_nonneg p r
+          · intro p hp
+            have hp' := hs p (Finset.mem_filter.mp hp).1
+            letI : Fact p.Prime := ⟨hp'⟩
+            simpa only [Nat.totient_prime hp', Nat.cast_sub hp'.one_lt.le, Nat.cast_one] using
+              prime_local_factor_le_totient p r
+      _ ≤ _ := by
+          apply Finset.prod_le_prod_of_subset_of_one_le₀
+          · intro p hp; exact (Finset.mem_filter.mp hp).2
+          · intro p hp
+            exact le_trans zero_le_one (hratio p (hs p (Finset.mem_filter.mp hp).1))
+          · intro p hp hpA
+            exact hratio p (Nat.prime_of_mem_primeFactors hp)
+  have hsum : Summable (fun n : ℕ => 32 / (n : ℝ) ^ 2) := by
+    simpa only [mul_one_div] using
+      (summable_one_div_nat_pow.mpr (by norm_num : 1 < (2 : ℕ))).mul_left 32
+  have hlarge : (∏ p ∈ B, (1 + (singularCoefficient (r : ℤ) p).re)) ≤
+      Real.exp (∑' n : ℕ, 32 / (n : ℝ) ^ 2) := by
+    calc _ ≤ ∏ p ∈ B, Real.exp (32 / (p : ℝ) ^ 2) := by
+          apply Finset.prod_le_prod₀
+          · intro p hp
+            letI : Fact p.Prime := ⟨hs p (Finset.mem_filter.mp hp).1⟩
+            exact prime_local_factor_nonneg p r
+          · intro p hp
+            rcases Finset.mem_filter.mp hp with ⟨hp, hpr⟩
+            have hp' := hs p hp
+            letI : Fact p.Prime := ⟨hp'⟩
+            apply prime_local_factor_le_exp_of_nonzero p r
+            intro hzero
+            have hdvd : p ∣ r := (ZMod.natCast_eq_zero_iff r p).mp (by simpa using hzero)
+            exact hpr (Nat.mem_primeFactors.mpr ⟨hp', hdvd, hr⟩)
+      _ = Real.exp (∑ p ∈ B, 32 / (p : ℝ) ^ 2) := (Real.exp_sum B _).symm
+      _ ≤ _ := Real.exp_le_exp.mpr (hsum.sum_le_tsum B (fun n hn => by positivity))
+  have hsplit := Finset.prod_filter_mul_prod_filter_not s (fun p => p ∈ r.primeFactors)
+    (fun p => 1 + (singularCoefficient (r : ℤ) p).re)
+  change (∏ p ∈ A, (1 + (singularCoefficient (r : ℤ) p).re)) *
+      (∏ p ∈ B, (1 + (singularCoefficient (r : ℤ) p).re)) = _ at hsplit
+  rw [← hsplit]
+  exact mul_le_mul hsmall hlarge (Finset.prod_nonneg (fun p hp => by
+    letI : Fact p.Prime := ⟨hs p (Finset.mem_filter.mp hp).1⟩
+    exact prime_local_factor_nonneg p r)) (Finset.prod_nonneg (fun p hp =>
+      le_trans zero_le_one (hratio p (Nat.prime_of_mem_primeFactors hp))))
+
+
+
+/-- Hu page 193. Bound the exact Euler product by the exceptional prime divisor factors. -/
+theorem singularSeries_le_primeFactors (r : ℕ) (hr : r ≠ 0) :
+    singularSeries (r : ℤ) ≤
+      (∏ p ∈ r.primeFactors, (p : ℝ) / ((p : ℝ) - 1)) *
+        Real.exp (∑' n : ℕ, 32 / (n : ℝ) ^ 2) := by
+  classical
+  let R := (∏ p ∈ r.primeFactors, (p : ℝ) / ((p : ℝ) - 1)) *
+        Real.exp (∑' n : ℕ, 32 / (n : ℝ) ^ 2)
+  by_cases hs : Summable (fun q : ℕ => singularCoefficient (r : ℤ) (q + 1))
+  · have hfull : Summable (fun q : ℕ => singularCoefficient (r : ℤ) q) :=
+      (summable_nat_add_iff 1).mp hs
+    have hshift := hfull.sum_add_tsum_nat_add 1
+    simp only [Finset.sum_range_one, singularCoefficient_zero, zero_add] at hshift
+    have hpowers (p : Nat.Primes) : (∑' k : ℕ, singularCoefficient (r : ℤ) (p.val ^ k)) =
+        (1 : ℂ) + singularCoefficient (r : ℤ) p.val := by
+      letI : Fact p.val.Prime := ⟨p.prop⟩
+      exact prime_power_series p.val r
+    have hprod := EulerProduct.eulerProduct_hasProd (singularCoefficient_one (r : ℤ))
+      (fun {m n} h => singularCoefficient_multiplicative (r : ℤ) m n h) hfull.norm
+      (singularCoefficient_zero (r : ℤ))
+    simp_rw [hpowers] at hprod
+    have hlim := Complex.continuous_re.continuousAt.tendsto.comp hprod
+    have hbound (s : Finset Nat.Primes) :
+        (∏ p ∈ s, ((1 : ℂ) + singularCoefficient (r : ℤ) p.val)).re ≤ R := by
+      have heq : (∏ p ∈ s, ((1 : ℂ) + singularCoefficient (r : ℤ) p.val)) =
+          (((∏ p ∈ s, (1 + (singularCoefficient (r : ℤ) p.val).re : ℝ)) : ℝ) : ℂ) := by
+        calc _ = ∏ p ∈ s, ((1 + (singularCoefficient (r : ℤ) p.val).re : ℝ) : ℂ) := by
+                apply Finset.prod_congr rfl
+                intro p hp
+                letI : Fact p.val.Prime := ⟨p.prop⟩
+                exact prime_local_factor_real p.val r
+          _ = _ := by push_cast; rfl
+      have hcast := congrArg Complex.re heq
+      simp only [Complex.ofReal_re] at hcast
+      rw [hcast]
+      have hnat := finite_prime_local_product_le r hr (s.image Subtype.val) (by
+        intro p hp
+        obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp hp
+        exact q.prop)
+      calc _ = ∏ p ∈ s.image Subtype.val, (1 + (singularCoefficient (r : ℤ) p).re) := by
+              symm
+              apply Finset.prod_image
+              intro a ha b hb hab
+              exact Subtype.ext hab
+        _ ≤ R := hnat
+    unfold singularSeries
+    rw [hshift]
+    exact le_of_tendsto' hlim hbound
+  · have hzero : singularSeries (r : ℤ) = 0 := by
+      simp [singularSeries, tsum_eq_zero_of_not_summable hs]
+    rw [hzero]
+    apply mul_nonneg _ (Real.exp_pos _).le
+    apply Finset.prod_nonneg
+    intro p hp
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).two_le
+    exact div_nonneg (by positivity) (by linarith)
+
+
+
+
+/-- Hu page 193. Prime divisor cutoff estimate for the exact singular series.
+The Mertens input is the proved shared PNTSieve theorem. -/
+theorem card_primeFactors_log_bound (n : ℕ) (hn : n ≠ 0) :
+    (n.primeFactors.card : ℝ) * Real.log 2 ≤ Real.log n := by
+  have hp : 2 ^ n.primeFactors.card ≤ n := by
+    calc _ = ∏ p ∈ n.primeFactors, 2 := by simp
+      _ ≤ ∏ p ∈ n.primeFactors, p := by
+        apply Finset.prod_le_prod
+        intro p hp
+        exact (Nat.prime_of_mem_primeFactors hp).two_le
+      _ ≤ n := Nat.le_of_dvd (Nat.pos_of_ne_zero hn) (Nat.prod_primeFactors_dvd n)
+  have hpr : (2 : ℝ) ^ n.primeFactors.card ≤ n := by exact_mod_cast hp
+  have hlog := Real.log_le_log (by positivity : (0 : ℝ) < 2 ^ n.primeFactors.card) hpr
+  simpa only [Real.log_pow] using hlog
+
+
+
+/-- Hu page 193. Prime divisor cutoff estimate for the exact singular series.
+The Mertens input is the proved shared PNTSieve theorem. -/
+theorem prime_ratio_le_exp (p : ℕ) (hp : p.Prime) :
+    (p : ℝ) / ((p : ℝ) - 1) ≤ Real.exp (2 / (p : ℝ)) := by
+  have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast hp.two_le
+  have hp0 : (0 : ℝ) < p := by linarith
+  have hm : (0 : ℝ) < (p : ℝ) - 1 := by linarith
+  have hi : 1 / ((p : ℝ) - 1) ≤ 2 / (p : ℝ) := by
+    apply (div_le_div_iff₀ hm hp0).mpr
+    linarith
+  calc (p : ℝ) / ((p : ℝ) - 1) = 1 + 1 / ((p : ℝ) - 1) := by field_simp; ring
+    _ ≤ 1 + 2 / (p : ℝ) := by linarith
+    _ ≤ _ := by simpa [add_comm] using Real.add_one_le_exp (2 / (p : ℝ))
+
+
+/-- Hu page 193. Prime divisor cutoff estimate for the exact singular series.
+The Mertens input is the proved shared PNTSieve theorem. -/
+theorem prime_ratio_product_le_log (N : ℕ) (hN : 2 ≤ N) :
+    (∏ p ∈ (Icc 1 N).filter Nat.Prime, (p : ℝ) / ((p : ℝ) - 1)) ≤
+      Real.exp 16 * Real.log N := by
+  let S := (Icc 1 N).filter Nat.Prime
+  have hlog : 0 < Real.log N := Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hpos : 0 < ∏ p ∈ S, (1 - (1 : ℝ) / p) := by
+    apply Finset.prod_pos
+    intro p hp
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Finset.mem_filter.mp hp).2.two_le
+    have hi : (1 : ℝ) / p < 1 := (div_lt_one (by linarith)).mpr (by linarith)
+    linarith
+  have hlo := LeanLab.PNTSieve.Mertens.mertens_product_ge N hN
+  have hid : (∏ p ∈ S, (p : ℝ) / ((p : ℝ) - 1)) =
+      (∏ p ∈ S, (1 - (1 : ℝ) / p))⁻¹ := by
+    rw [← Finset.prod_inv_distrib]
+    apply Finset.prod_congr rfl
+    intro p hp
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Finset.mem_filter.mp hp).2.two_le
+    have hp0 : (p : ℝ) ≠ 0 := by linarith
+    have hp1 : (p : ℝ) - 1 ≠ 0 := by linarith
+    field_simp
+  change (∏ p ∈ S, (p : ℝ) / ((p : ℝ) - 1)) ≤ _
+  rw [hid]
+  calc _ ≤ (Real.exp (-16) / Real.log N)⁻¹ := by
+          simpa only [one_div, S] using one_div_le_one_div_of_le (div_pos (Real.exp_pos _) hlog) hlo
+    _ = _ := by simp [div_eq_mul_inv, Real.exp_neg]; ring
+
+
+
+/-- Hu page 193. Prime divisor cutoff estimate for the exact singular series.
+The Mertens input is the proved shared PNTSieve theorem. -/
+theorem primeFactors_product_cutoff (n T : ℕ) (hn : n ≠ 0) (hT : 2 ≤ T)
+    (hlog : Real.log n ≤ 2 * (T : ℝ)) :
+    (∏ p ∈ n.primeFactors, (p : ℝ) / ((p : ℝ) - 1)) ≤
+      Real.exp (16 + 4 / Real.log 2) * Real.log T := by
+  let A := n.primeFactors.filter (fun p => p ≤ T)
+  let B := n.primeFactors.filter (fun p => ¬p ≤ T)
+  have hT0 : (0 : ℝ) < T := by exact_mod_cast (show 0 < T by omega)
+  have h20 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hprime (p : ℕ) (hp : p ∈ n.primeFactors) := Nat.prime_of_mem_primeFactors hp
+  have hratio (p : ℕ) (hp : p ∈ n.primeFactors) : 1 ≤ (p : ℝ) / ((p : ℝ) - 1) := by
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (hprime p hp).two_le
+    apply (le_div_iff₀ (by linarith)).mpr
+    linarith
+  have hsmall : (∏ p ∈ A, (p : ℝ) / ((p : ℝ) - 1)) ≤ Real.exp 16 * Real.log T := by
+    refine le_trans ?_ (prime_ratio_product_le_log T hT)
+    apply Finset.prod_le_prod_of_subset_of_one_le₀
+    · intro p hp
+      rcases Finset.mem_filter.mp hp with ⟨hp, hpt⟩
+      exact Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨(hprime p hp).one_lt.le, hpt⟩, hprime p hp⟩
+    · intro p hp
+      exact le_trans zero_le_one (hratio p (Finset.mem_filter.mp hp).1)
+    · intro p hp hpA
+      have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Finset.mem_filter.mp hp).2.two_le
+      apply (le_div_iff₀ (by linarith)).mpr
+      linarith
+  have hcount : (B.card : ℝ) * Real.log 2 ≤ 2 * (T : ℝ) := by
+    have hc : (B.card : ℝ) ≤ n.primeFactors.card := by exact_mod_cast Finset.card_filter_le n.primeFactors (fun p => ¬p ≤ T)
+    have hc' := mul_le_mul_of_nonneg_right hc h20.le
+    exact hc'.trans ((card_primeFactors_log_bound n hn).trans hlog)
+  have hexp : (B.card : ℝ) * (2 / (T : ℝ)) ≤ 4 / Real.log 2 := by
+    apply (le_div_iff₀ h20).mpr
+    have ht := (mul_le_mul_of_nonneg_right hcount (show 0 ≤ 2 / (T : ℝ) by positivity))
+    have hid : (2 * (T : ℝ)) * (2 / (T : ℝ)) = 4 := by field_simp; ring
+    rw [hid] at ht
+    nlinarith
+  have hlarge : (∏ p ∈ B, (p : ℝ) / ((p : ℝ) - 1)) ≤ Real.exp (4 / Real.log 2) := by
+    calc _ ≤ ∏ p ∈ B, Real.exp (2 / (T : ℝ)) := by
+          apply Finset.prod_le_prod₀
+          · intro p hp
+            exact le_trans zero_le_one (hratio p (Finset.mem_filter.mp hp).1)
+          · intro p hp
+            rcases Finset.mem_filter.mp hp with ⟨hp, hpt⟩
+            refine (prime_ratio_le_exp p (hprime p hp)).trans (Real.exp_le_exp.mpr ?_)
+            have hpt' : (T : ℝ) ≤ p := by exact_mod_cast (show T ≤ p by omega)
+            exact div_le_div_of_nonneg_left (by norm_num) hT0 hpt'
+      _ = Real.exp ((B.card : ℝ) * (2 / (T : ℝ))) := by rw [Finset.prod_const, ← Real.exp_nat_mul]
+      _ ≤ _ := Real.exp_le_exp.mpr hexp
+  have hsplit := Finset.prod_filter_mul_prod_filter_not n.primeFactors (fun p => p ≤ T)
+    (fun p => (p : ℝ) / ((p : ℝ) - 1))
+  change (∏ p ∈ A, (p : ℝ) / ((p : ℝ) - 1)) *
+      (∏ p ∈ B, (p : ℝ) / ((p : ℝ) - 1)) = _ at hsplit
+  rw [← hsplit]
+  calc _ ≤ (Real.exp 16 * Real.log T) * Real.exp (4 / Real.log 2) :=
+        mul_le_mul hsmall hlarge (Finset.prod_nonneg (fun p hp => le_trans zero_le_one
+          (hratio p (Finset.mem_filter.mp hp).1))) (by positivity)
+    _ = _ := by rw [Real.exp_add]; ring
+
+
+
+/-- Hu page 193. Prime divisor cutoff estimate for the exact singular series.
+The Mertens input is the proved shared PNTSieve theorem. -/
+theorem primeFactors_product_le_loglog :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ n : ℕ, 3 ≤ n →
+      (∏ p ∈ n.primeFactors, (p : ℝ) / ((p : ℝ) - 1)) ≤
+        K * Real.log (Real.log n) := by
+  let C := Real.exp (16 + 4 / Real.log 2)
+  let D := Real.exp 2 / Real.log (Real.log 3)
+  have hL3 : (1 : ℝ) < Real.log 3 := by linarith [Real.log_three_gt_d9]
+  have hLL3 : 0 < Real.log (Real.log 3) := Real.log_pos hL3
+  have hC : 0 ≤ C := (Real.exp_pos _).le
+  have hD : 0 ≤ D := by dsimp [D]; positivity
+  refine ⟨C + D, add_nonneg hC hD, ?_⟩
+  intro n hn
+  have hn0 : n ≠ 0 := by omega
+  have hn3 : (3 : ℝ) ≤ n := by exact_mod_cast hn
+  have hnpos : (0 : ℝ) < n := by linarith
+  have hLn : Real.log 3 ≤ Real.log n := Real.log_le_log (by norm_num) hn3
+  have hLLn : Real.log (Real.log 3) ≤ Real.log (Real.log n) :=
+    Real.log_le_log (by linarith) hLn
+  by_cases hlarge : 2 ≤ Real.log n
+  · let T := ⌊Real.log n⌋₊
+    have hT : 2 ≤ T := (Nat.le_floor_iff (by linarith : (0 : ℝ) ≤ Real.log n)).mpr hlarge
+    have hTf : (T : ℝ) ≤ Real.log n := Nat.floor_le (by linarith)
+    have hTc : Real.log n < (T : ℝ) + 1 := Nat.lt_floor_add_one _
+    have hT2 : (2 : ℝ) ≤ T := by exact_mod_cast hT
+    have hlt : Real.log n ≤ 2 * (T : ℝ) := by linarith
+    have hlogT : Real.log T ≤ Real.log (Real.log n) := Real.log_le_log (by linarith) hTf
+    calc _ ≤ C * Real.log T := primeFactors_product_cutoff n T hn0 hT hlt
+      _ ≤ C * Real.log (Real.log n) := mul_le_mul_of_nonneg_left hlogT hC
+      _ ≤ _ := by nlinarith [mul_nonneg hD (show 0 ≤ Real.log (Real.log n) by linarith)]
+  · have hlt : Real.log n < 2 := lt_of_not_ge hlarge
+    have hnexp : (n : ℝ) < Real.exp 2 := by
+      have h := Real.exp_lt_exp.mpr hlt
+      rwa [Real.exp_log hnpos] at h
+    have hprod : (∏ p ∈ n.primeFactors, (p : ℝ) / ((p : ℝ) - 1)) ≤ n := by
+      calc _ ≤ ∏ p ∈ n.primeFactors, (p : ℝ) := by
+            apply Finset.prod_le_prod₀
+            · intro p hp
+              have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).two_le
+              exact div_nonneg (by positivity) (by linarith)
+            · intro p hp
+              have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).two_le
+              apply (div_le_iff₀ (by linarith)).mpr
+              nlinarith
+        _ ≤ n := by
+            rw [← Nat.cast_prod]
+            exact_mod_cast Nat.le_of_dvd (Nat.pos_of_ne_zero hn0) (Nat.prod_primeFactors_dvd n)
+    have hD_eq : D * Real.log (Real.log 3) = Real.exp 2 := by dsimp [D]; field_simp
+    calc _ ≤ (n : ℝ) := hprod
+      _ ≤ Real.exp 2 := hnexp.le
+      _ = D * Real.log (Real.log 3) := hD_eq.symm
+      _ ≤ D * Real.log (Real.log n) := mul_le_mul_of_nonneg_left hLLn hD
+      _ ≤ _ := by nlinarith [mul_nonneg hC (show 0 ≤ Real.log (Real.log n) by linarith)]
+
+
+end LocalFactors702
+
 /-- LEAF: Hu page 193, the singular series S of n for one prime and two prime
 squares is nonnegative, by its Euler product of local densities.
 Class HARD. P0101 page 193 definition of S of n, used in Lemma 2.1 and 2.2. -/
 theorem singularSeries_nonneg (r : ℤ) : 0 ≤ singularSeries r := by
-  sorry
+  classical
+  by_cases hs : Summable (fun q : ℕ => singularCoefficient r (q + 1))
+  · have hfull : Summable (fun q : ℕ => singularCoefficient r q) :=
+      (summable_nat_add_iff 1).mp hs
+    have hshift := hfull.sum_add_tsum_nat_add 1
+    simp only [Finset.sum_range_one, singularCoefficient_zero, zero_add] at hshift
+    have hpowers (p : Nat.Primes) : (∑' k : ℕ, singularCoefficient r (p.val ^ k)) =
+        (1 : ℂ) + singularCoefficient r p.val := by
+      letI : Fact p.val.Prime := ⟨p.prop⟩
+      exact prime_power_series p.val r
+    have hprod := EulerProduct.eulerProduct_hasProd (singularCoefficient_one r)
+      (fun {m n} h => singularCoefficient_multiplicative r m n h) hfull.norm
+      (singularCoefficient_zero r)
+    simp_rw [hpowers] at hprod
+    have hlim := Complex.continuous_re.continuousAt.tendsto.comp hprod
+    have hpos (s : Finset Nat.Primes) :
+        0 ≤ (∏ p ∈ s, ((1 : ℂ) + singularCoefficient r p.val)).re := by
+      have heq : (∏ p ∈ s, ((1 : ℂ) + singularCoefficient r p.val)) =
+          (((∏ p ∈ s, (1 + (singularCoefficient r p.val).re : ℝ)) : ℝ) : ℂ) := by
+        calc _ = ∏ p ∈ s, ((1 + (singularCoefficient r p.val).re : ℝ) : ℂ) := by
+                apply Finset.prod_congr rfl
+                intro p hp
+                letI : Fact p.val.Prime := ⟨p.prop⟩
+                exact prime_local_factor_real p.val r
+          _ = _ := by push_cast; rfl
+      have hcast := congrArg Complex.re heq
+      simp only [Complex.ofReal_re] at hcast
+      rw [hcast]
+      apply Finset.prod_nonneg
+      intro p hp
+      letI : Fact p.val.Prime := ⟨p.prop⟩
+      exact prime_local_factor_nonneg p.val r
+    unfold singularSeries
+    rw [hshift]
+    exact ge_of_tendsto' hlim hpos
+  · simp [singularSeries, tsum_eq_zero_of_not_summable hs]
 
 /-- LEAF: Hu page 193, the standard upper bound of the singular series S of n by a
 constant times log log n, from its Euler product, only primes dividing n contribute
@@ -141,7 +1453,22 @@ factors of size one plus O of one over p.
 Class HARD. P0101 page 193 definition of S of n. -/
 theorem singularSeries_le_loglog :
     ∃ K : ℝ, ∀ r : ℤ, 3 ≤ r → singularSeries r ≤ K * Real.log (Real.log r) := by
-  sorry
+  obtain ⟨K, hK, hb⟩ := primeFactors_product_le_loglog
+  let E := Real.exp (∑' n : ℕ, 32 / (n : ℝ) ^ 2)
+  have hE : 0 ≤ E := (Real.exp_pos _).le
+  refine ⟨K * E, ?_⟩
+  intro r hr
+  let n := r.toNat
+  have hn3 : 3 ≤ n := by omega
+  have hn0 : n ≠ 0 := by omega
+  have hnr : (n : ℤ) = r := Int.toNat_of_nonneg (by omega)
+  have hnrR : (n : ℝ) = (r : ℝ) := by exact_mod_cast hnr
+  calc singularSeries r = singularSeries (n : ℤ) := by rw [hnr]
+    _ ≤ (∏ p ∈ n.primeFactors, (p : ℝ) / ((p : ℝ) - 1)) * E :=
+      singularSeries_le_primeFactors n hn0
+    _ ≤ (K * Real.log (Real.log n)) * E := mul_le_mul_of_nonneg_right (hb n hn3) hE
+    _ = _ := by rw [hnrR]; ring
+
 
 /-- Page 194, elementary growth: a constant times log log x squared is eventually
 below log x. Used to move the singular integral from m to N. -/
@@ -561,5 +1888,7 @@ theorem major_arc_singular_comparison_of_leaves (C η : ℝ) (hC : 1 < C) (hη :
           have : 0 ≤ L n₁ := by linarith
           positivity
   linarith
+
+
 
 end LeanLab.Hathi2021.Decomp570aLeavesMajor

@@ -1,0 +1,269 @@
+{
+  "edgeCutoff": {
+    "twin": "The short interval cutoff is the product of two smooth transition ramps of width epsilon times x to power theta. It is the permitted choice of g, transported to the lopsided interval.",
+    "page": "12 second paragraph",
+    "instance": "x one, theta one, epsilon one quarter and t one give a point strictly inside the constant one region.",
+    "status": "DATA",
+    "next": "Next verify its nonnegativity."
+  },
+  "edgeCutoff_nonneg": {
+    "twin": "The chosen cutoff is nonnegative for every real input.",
+    "page": "12 second paragraph",
+    "instance": "x one, theta one, epsilon one quarter and t one give cutoff one.",
+    "next": "Next verify its upper bound."
+  },
+  "edgeCutoff_le_one": {
+    "twin": "The chosen cutoff is at most one for every real input.",
+    "page": "12 second paragraph",
+    "instance": "x one, theta one, epsilon one quarter and t one attain equality.",
+    "next": "Next verify the interior edge weight vanishes."
+  },
+  "one_sub_edgeCutoff_eq_zero_of_inner": {
+    "twin": "For positive ramp width, one minus the cutoff vanishes at points at least that width from each endpoint.",
+    "page": "12 unsmoothing displays",
+    "instance": "x one, theta one, epsilon one quarter and t one have left distance one third and right distance one.",
+    "next": "Next verify the edge weight range."
+  },
+  "one_sub_edgeCutoff_mem_Icc": {
+    "twin": "One minus the cutoff lies in the closed unit interval for every real input.",
+    "page": "12 unsmoothing displays",
+    "instance": "x one, theta one, epsilon one quarter and t one give edge weight zero.",
+    "next": "Next verify the uniform unweighted edge count."
+  },
+  "edge_count_bound": {
+    "twin": "For positive theta and epsilon strictly between zero and one, all sufficiently large x have W times the norm of the edge character sum in every wheel class at most eight epsilon x to power theta. This counts unweighted edges and asserts no weighted sieve estimate.",
+    "page": "12 main term unsmoothing",
+    "instance": "theta three fifths and epsilon one quarter satisfy the parameter hypotheses. Class one modulo W is permitted at every sufficiently large x.",
+    "next": "Next verify the finite unsmoothing inequality."
+  },
+  "unsmoothing_norm_bound": {
+    "twin": "For nonnegative coefficients and a cutoff at most one, the unsmoothed Fourier error is at most the smoothed error plus the nonnegative weighted edge mass plus the absolute mean times the unweighted edge Fourier norm. All phases have norm one.",
+    "page": "12 three unsmoothing displays",
+    "instance": "s containing one, coefficient two, cutoff one half, phase one and mean two give zero error with a nonzero weighted edge mass one.",
+    "next": "Next verify smoothness and support of the cutoff."
+  },
+  "edgeProfile704": {
+    "twin": "The unit scale cutoff is the product of smooth transitions at u divided by epsilon and at four thirds minus u divided by epsilon.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter and u one third give value one.",
+    "status": "DATA",
+    "next": "Next verify the next cutoff regularity component and retain the analytic cancellation blocker."
+  },
+  "edgeProfile704_contDiff": {
+    "twin": "The unit scale cutoff is smooth at every finite order for every real epsilon.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter and derivative order two.",
+    "status": "PROVED",
+    "next": "Next verify the next cutoff regularity component and retain the analytic cancellation blocker."
+  },
+  "edgeProfile704_zero_outside": {
+    "twin": "For positive epsilon the profile vanishes at and outside zero and four thirds.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter and u zero give value zero.",
+    "status": "PROVED",
+    "next": "Next verify the next cutoff regularity component and retain the analytic cancellation blocker."
+  },
+  "edgeProfile704_hasCompactSupport": {
+    "twin": "For positive epsilon the unit profile has compact support inside zero through four thirds.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter gives a nonzero profile at u one third.",
+    "status": "PROVED",
+    "next": "Next verify the next cutoff regularity component and retain the analytic cancellation blocker."
+  },
+  "edgeProfile704_deriv_hasCompactSupport": {
+    "twin": "Every iterated derivative of the unit profile has compact support for positive epsilon.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter and order two.",
+    "status": "PROVED",
+    "next": "Next verify the next cutoff regularity component and retain the analytic cancellation blocker."
+  },
+  "edgeProfile704_deriv_bound": {
+    "twin": "For positive epsilon and a fixed derivative order there is a positive constant bounding that derivative at every real argument.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter and derivative order two admit the positive bound constructed by compactness.",
+    "status": "PROVED",
+    "next": "Next verify the next cutoff regularity component and retain the analytic cancellation blocker."
+  },
+  "edgeCutoff_eq_profile704": {
+    "twin": "At positive x the actual cutoff equals the unit profile at t minus the lower endpoint divided by x to power theta.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "x one, theta one, epsilon one quarter and t one give unit coordinate one third.",
+    "status": "PROVED",
+    "next": "Next verify the next cutoff regularity component and retain the analytic cancellation blocker."
+  },
+  "edgeCutoff_iteratedDeriv704": {
+    "twin": "The jth derivative of the cutoff is the jth unit profile derivative at the rescaled argument times the inverse jth power of x to power theta.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "x one, theta one, epsilon one quarter, t one and order one.",
+    "status": "PROVED",
+    "next": "Next verify the next cutoff regularity component and retain the analytic cancellation blocker."
+  },
+  "edgeCutoff_deriv_bound704": {
+    "twin": "For positive epsilon and each order j a positive constant fixed before theta, x and t bounds the absolute jth cutoff derivative by that constant divided by the jth power of x to power theta for positive x.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter, theta three fifths, positive x one and order two.",
+    "status": "PROVED",
+    "next": "Next verify the next cutoff regularity component and retain the analytic cancellation blocker."
+  },
+  "edgeCutoff_contDiff704": {
+    "twin": "The actual cutoff is smooth at every finite order for positive x.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter, theta three fifths, x one and order two.",
+    "status": "PROVED",
+    "next": "Next audit the analytic leaf and the remaining open targets."
+  },
+  "edgeCutoff_zero_outside704": {
+    "twin": "For positive epsilon and x the cutoff vanishes at and outside both endpoints of the lopsided short interval.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter, theta one, x one and t two give the upper endpoint.",
+    "status": "PROVED",
+    "next": "Next audit the analytic leaf and the remaining open targets."
+  },
+  "edgeCutoff_hasCompactSupport704": {
+    "twin": "For positive epsilon and x the actual cutoff has compact support inside the required short interval.",
+    "page": "11 Proposition 5.1 and page 12 choice of g",
+    "instance": "epsilon one quarter, theta one and x one give support inside two thirds through two and a nonzero value at one.",
+    "status": "PROVED",
+    "next": "Next audit the analytic leaf and the remaining open targets."
+  },
+  "hyp1_of_unsmoothing_estimates704": {
+    "twin": "For positive theta, any nonnegative coefficient family and real mean function satisfy eventual Hyp1 if supplied with a smoothed Fourier estimate for every positive cutoff width below one, a weighted edge bound with one constant uniform in the width, and an eventual absolute mean bound. The three analytic inputs remain explicit hypotheses. This is the generic unsmoothing implication and supplies no estimate for the actual Harman coefficients.",
+    "page": "12 three unsmoothing displays",
+    "instance": "The identically zero coefficient family and mean satisfy all three hypotheses with edge constant zero and mean bound zero. Choosing every smoothed threshold at least two makes its nonnegative error budget well defined. The finite unsmoothing lemma also has a nonzero one index model.",
+    "status": "CONDITIONAL ON the supplied smoothed Fourier estimate, weighted edge sieve estimate and bounded reference mean",
+    "next": "Next audit the exact original leaf and all remaining open declarations."
+  },
+  "roughIndicator_le_one704": {
+    "twin": "Every rough indicator is at most one.",
+    "page": "11 equation 5.1",
+    "instance": "n seven and cutoff two give one.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "roughIndicator_antitone704": {
+    "twin": "Increasing the cutoff can only decrease the rough indicator.",
+    "page": "11 equation 5.1",
+    "instance": "n seven with cutoffs two and three gives one at both cutoffs.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "roughIndicator_mul704": {
+    "twin": "The rough indicator of a product is the product of the two rough indicators at the same cutoff.",
+    "page": "11 equation 5.1",
+    "instance": "factors seven and eleven and cutoff two give one on both sides.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "harmanMajorant_zero_of_rough_zero704": {
+    "twin": "For x at least one, failure of roughness at the tenth root cutoff forces the explicit Harman majorant to vanish.",
+    "page": "11 equation 5.1",
+    "instance": "x exp twenty and n two have a small prime divisor two below the tenth root cutoff.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "rough_primeFactors_card_le704": {
+    "twin": "For x at least exp one hundred, a positive integer at most twice x that is rough at the tenth root cutoff has at most ten distinct prime factors.",
+    "page": "11 equation 5.1, derived multiplicity bound",
+    "instance": "x exp one hundred and n one satisfy the hypotheses. The empty prime factor set has size zero.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "harmanMajorant_le_card_cube704": {
+    "twin": "At positive n the majorant is at most one plus the cube of the number of distinct prime factors of n. The candidate ordered triples are a subset of the cube of that factor set.",
+    "page": "11 equation 5.1",
+    "instance": "x one and n seven give a nonempty prime factor set containing seven.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "harmanMajorant_le_rough704": {
+    "twin": "For x at least exp one hundred and positive n at most twice x, the majorant is at most 1001 times the rough indicator at the tenth root cutoff.",
+    "page": "11 equation 5.1, derived bound for page 12",
+    "instance": "x exp one hundred and n one give nonzero rough and majorant values.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "ap_sifted_card_upper704": {
+    "twin": "The number of integers in a positive interval of length y in one class modulo positive q and coprime to the product of primes at most z that do not divide q is at most twice y divided by phi q log z plus three z times one plus log z cubed, for z above one. This reuses the lab AP Selberg proof and its Apache 2.0 port.",
+    "page": "12 simple upper sieve, derived from PNTSieve.BrunTitchmarshAP",
+    "instance": "interval one through two, z two, modulus one and class zero leave the survivor one.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "rough_ap_sum_upper704": {
+    "twin": "For a roughness cutoff r strictly above z above one, the rough count in any positive interval and class modulo positive q has the same AP Selberg upper bound.",
+    "page": "12 simple upper sieve",
+    "instance": "interval one through two, z two, r three, modulus one and class zero give rough count one.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "harman_edge_mass_le_rough704": {
+    "twin": "For x at least exp one hundred, theta at most one and positive epsilon, the weighted cutoff loss in every wheel class is at most 1001 times the sum of the rough counts on the two closed edge intervals of length epsilon x to power theta.",
+    "page": "12 unsmoothing displays",
+    "instance": "theta one, x exp one hundred, epsilon one quarter and class one satisfy all scalar hypotheses.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "eventual_edge_sieve_budget704": {
+    "twin": "For theta greater than one twentieth and positive epsilon, the AP sieve error with level x to power one twentieth is eventually at most epsilon x to power theta divided by phi W log x. The threshold is chosen after epsilon.",
+    "page": "12 simple upper sieve, derived error absorption",
+    "instance": "theta three fifths and epsilon one quarter have positive exponent gap.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "harman_edge_sieve_upper704": {
+    "twin": "For each theta strictly between 11 over 20 and one, the weighted cutoff loss has a constant uniform in epsilon strictly between zero and one. The proof supplies C equal to 82082. Every sufficiently large x and every reduced wheel class satisfy the bound C epsilon x to power theta divided by phi W log x. No prime distribution or reference mean hypothesis is used.",
+    "page": "12 second paragraph and unsmoothing displays",
+    "instance": "theta three fifths meets both exponent hypotheses. Epsilon one quarter is admissible. The constructed real threshold leaves a nonempty unbounded x domain.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unconditional weighted edge sieve supply."
+  },
+  "referenceMean_bounded_by_sieve704": {
+    "twin": "The actual normalized reference mean is eventually bounded in absolute value by one fixed nonnegative real constant. The proof uses the AP upper sieve, the fixed positive profile mass and the reference interval length bound. It assumes no prime mean limit or Fourier cancellation estimate.",
+    "page": "11 reference mean and page 12 unsmoothing, derived upper bound",
+    "instance": "The produced threshold admits x equal to its maximum with exp two hundred fifty six. The actual reference normalization integral is positive there and the mean satisfies the constructed bound. This is a closed existence theorem with no hypotheses.",
+    "status": "PROVED",
+    "next": "Next check the exact unsmoothing connection and finish the full folder baseline."
+  },
+  "shifted_range_character_bound704": {
+    "twin": "For a complex sequence of norm at most one with shift W multiplying every term by z, the norm of z minus one times its first N term sum is at most twice W.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "The constant sequence one with z one, W one and N three satisfies the hypotheses.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "ap_partial_sum_bound704": {
+    "twin": "For positive delta at most the norm of e of W gamma minus one, every initial sum of the character in one residue class modulo W has norm at most twice W divided by delta.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "W one, c zero, N four, gamma one half and delta one satisfy the phase lower bound.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "smoothed_range_norm_bound704": {
+    "twin": "If a complex sequence has all initial sums through N bounded by nonnegative B and a real weight has absolute value at most one with consecutive differences at most nonnegative D, the weighted N term sum has norm at most B times one plus N D.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "The constant complex sequence one, real weight one half, N three, B three and D zero satisfy every hypothesis and give a nonzero weighted sum.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "cutoff_ap_sum_bound704": {
+    "twin": "For positive epsilon there is a positive constant D fixed before theta, x, W, c, q and gamma. For x at least exp one hundred, theta at most one and positive q, a phase norm at least two divided by q bounds the smoothed progression sum by W q times one plus three x D divided by x to power theta.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "Epsilon one quarter, theta three fifths, x exp one hundred, W one, c zero, q two and gamma one half satisfy the phase and scalar conditions.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "rational_spacing_lower704": {
+    "twin": "For positive W below q, a coprime rational a over q, Q at least twice W and absolute q gamma minus a below one over Q, the norm of e of W gamma minus one is at least two divided by q.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "W one, q two, a one, gamma one half and Q two have zero approximation error and a positive phase norm.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "minor_arc_main704": {
+    "twin": "For theta strictly between eleven twentieths and one, epsilon strictly between zero and one and A at least one, the actual normalized reference main term times the cutoff character sum in any reduced wheel class is eventually at most eta x to power theta divided by phi W log x. The estimate is uniform over coprime numerators and denominators with denominator at least log x to power five A and at most Q. It assumes absolute q gamma minus a below one over Q. This proves the unweighted minor arc main term from the burst. It supplies no weighted Harman cancellation.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "Theta three fifths, epsilon one quarter, A one and eta one quarter satisfy the outer hypotheses. The produced real threshold has an unbounded x domain. At sufficiently large x take q to be the ceiling of log x to power five, a and c one and gamma one over q. The rational approximation error is zero and both denominator bounds hold.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  }
+}

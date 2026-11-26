@@ -1,0 +1,25 @@
+{
+  "branch": "codex/task708",
+  "start_utc": "2026-11-24T11:12:49Z",
+  "hard_stop_utc": "2026-11-24T14:12:49Z",
+  "baseline_pid": 930,
+  "watch_session": 81149,
+  "expected_baseline_modules": 194,
+  "proved": [
+    "Cofactor708.sifted_multiples_card",
+    "Model708.modelSifted_eq_cofactor",
+    "Scales708.region4_power_scales"
+  ],
+  "open": [
+    "Decomp568a.model4_asymptotic",
+    "Decomp568a.region4_transfer_exception"
+  ],
+  "remaining": [
+    "push codex/task708",
+    "open PR CODEX task708: Languasco2004"
+  ],
+  "phase": "publishing",
+  "baseline_attempts_checkpoint": 194,
+  "baseline_complete": true,
+  "work_end_utc": "2026-11-24T13:42:26Z"
+}

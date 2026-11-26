@@ -1,0 +1,12 @@
+{
+  "baseline_pid": 904,
+  "current_child": 18058,
+  "names": [
+    "shifted_range_character_bound704",
+    "ap_partial_sum_bound704",
+    "smoothed_range_norm_bound704",
+    "cutoff_ap_sum_bound704",
+    "rational_spacing_lower704",
+    "minor_arc_main704"
+  ]
+}

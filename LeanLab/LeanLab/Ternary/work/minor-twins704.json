@@ -1,0 +1,44 @@
+{
+  "shifted_range_character_bound704": {
+    "twin": "For a complex sequence of norm at most one with shift W multiplying every term by z, the norm of z minus one times its first N term sum is at most twice W.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "The constant sequence one with z one, W one and N three satisfies the hypotheses.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "ap_partial_sum_bound704": {
+    "twin": "For positive delta at most the norm of e of W gamma minus one, every initial sum of the character in one residue class modulo W has norm at most twice W divided by delta.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "W one, c zero, N four, gamma one half and delta one satisfy the phase lower bound.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "smoothed_range_norm_bound704": {
+    "twin": "If a complex sequence has all initial sums through N bounded by nonnegative B and a real weight has absolute value at most one with consecutive differences at most nonnegative D, the weighted N term sum has norm at most B times one plus N D.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "The constant complex sequence one, real weight one half, N three, B three and D zero satisfy every hypothesis and give a nonzero weighted sum.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "cutoff_ap_sum_bound704": {
+    "twin": "For positive epsilon there is a positive constant D fixed before theta, x, W, c, q and gamma. For x at least exp one hundred, theta at most one and positive q, a phase norm at least two divided by q bounds the smoothed progression sum by W q times one plus three x D divided by x to power theta.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "Epsilon one quarter, theta three fifths, x exp one hundred, W one, c zero, q two and gamma one half satisfy the phase and scalar conditions.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "rational_spacing_lower704": {
+    "twin": "For positive W below q, a coprime rational a over q, Q at least twice W and absolute q gamma minus a below one over Q, the norm of e of W gamma minus one is at least two divided by q.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "W one, q two, a one, gamma one half and Q two have zero approximation error and a positive phase norm.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  },
+  "minor_arc_main704": {
+    "twin": "For theta strictly between eleven twentieths and one, epsilon strictly between zero and one and A at least one, the actual normalized reference main term times the cutoff character sum in any reduced wheel class is eventually at most eta x to power theta divided by phi W log x. The estimate is uniform over coprime numerators and denominators with denominator at least log x to power five A and at most Q. It assumes absolute q gamma minus a below one over Q. This proves the unweighted minor arc main term from the burst. It supplies no weighted Harman cancellation.",
+    "page": "12 minor arc main term and unsmoothing, derived finite summation step",
+    "instance": "Theta three fifths, epsilon one quarter, A one and eta one quarter satisfy the outer hypotheses. The produced real threshold has an unbounded x domain. At sufficiently large x take q to be the ceiling of log x to power five, a and c one and gamma one over q. The rational approximation error is zero and both denominator bounds hold.",
+    "status": "PROVED",
+    "next": "Next verify the next component of the unweighted minor arc main term and retain the actual weighted cancellation blocker."
+  }
+}
