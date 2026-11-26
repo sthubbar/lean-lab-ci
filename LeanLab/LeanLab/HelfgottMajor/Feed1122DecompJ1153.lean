@@ -137,7 +137,25 @@ theorem leaf_middle_sampled_mass_le (q : ℕ) [NeZero q] (χ : DirichletCharacte
           (fun ρ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
             ‖gaussianMellin δ ρ.val‖ ^ 2) ρ ≤
       (Sec45.nTwo + Sec45.nLog) * log (q * T) := by
-  sorry
+  classical
+  set ι := {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ |ρ.im| ≤ T}
+    with hι
+  have hfin := zeros_strip_finite_f q χ T
+  haveI : Fintype ι := hι.symm ▸ hfin.fintype
+  rw [tsum_fintype]
+  refine Finset.sum_le_sum ?_
+  intro ρ _
+  rw [Set.indicator_apply]
+  split_ifs with h
+  · simp
+  · have hre := hzeros ρ.val ρ.2.1 ρ.2.2.1 ρ.2.2.2.1 ρ.2.2.2.2
+    have hm := Decomp389a.mellin_critical_norm_le δ ρ.val hre
+      HalfMoment389.gaussian_half_moment_bound
+    have hcount := ZeroCount1623.book_zero_count χ hχ hT
+    have hnonneg : 0 ≤
+        (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ) *
+          ‖gaussianMellin δ ρ.val‖ ^ 2 := by positivity
+    linarith
 
 /-- Exactly `DecompF1606.leaf_gaussian_moment_sum_le`, assembled from the proved height pull
 out and the sampling LEAF. -/
