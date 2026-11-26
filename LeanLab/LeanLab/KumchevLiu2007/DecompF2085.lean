@@ -43,7 +43,17 @@ theorem rough_a23_hyp_F2085 : ∀ A : ℝ, 0 < A → ∃ B0 : ℝ, 0 < B0 ∧ �
         (∫ t in (windowY X ε / 4)..windowY X ε,
           ‖roughShortSum (windowY X ε) (Real.log X ^ B) H α t‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  intro A hA
+  obtain ⟨B0, hB0, hb⟩ := Eq33RouteD.lemma34_rough_minor_input_route A hA
+  refine ⟨B0, hB0, ?_⟩
+  intro B hB ε hε hε7 η hη
+  obtain ⟨C, X0, hC, hX0, hk⟩ := hb B hB ε hε
+  refine ⟨C, X0, hC, hX0, ?_⟩
+  intro X H hX hlow hhigh α hα
+  apply hk X H hX
+  · nlinarith [hlow, hhigh]
+  · nlinarith [hlow, hhigh]
+  · exact hα
 
 /-- LEAF. The lower block length X to the 7/18 plus epsilon times
 log X to the B to the minus 4 eventually exceeds windowY X epsilon
