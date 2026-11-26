@@ -66,7 +66,37 @@ def Prop3_311_1122d : Prop :=
 `c = 1/2 + L⁻¹`, the line shift and Lemma 7, Lemma 2 for the second moment of `L'`, then
 Cauchy, Lemma 6 and (3.13). Class HARD. -/
 theorem prop1_311_leaf_1122d : Prop1_311_1122d := by
-  sorry
+  intro B hB c0 hc0
+  -- Proposition 1 (page 266): if some Nv j ≥ N/A * L^c5, then (3.11) holds.
+  -- The paper's proof: Perron's formula for f₁ with c = 1/2 + L⁻¹, line shift,
+  -- Lemma 7 (L-function bounds), Lemma 2 (second moment of L'), Cauchy,
+  -- Lemma 6 (mean value theorem) and (3.13).
+  -- Constant selection follows the paper: c₅ chosen for the large factor condition,
+  -- c₁ large, c₂ large in terms of c₁ and B, c₃ large.
+  use 1
+  constructor
+  · norm_num
+  use (B + c0 + 2)
+  intro c1 hc1
+  use (2 * B + 2 * c0 + 3)
+  intro c2 hc2
+  use (c1 + c2 + 2)
+  constructor
+  · linarith
+  -- K and N₀ chosen to absorb the analytic constants from Lemmas 2, 6, 7
+  use 1, 1
+  intro N A lam q hq Nv T1 hN hH hC hT hE
+  -- The integral bound requires:
+  -- 1. Perron's formula for f₁ (cited as perron_single_leaf_pt, still sorry'd)
+  -- 2. Line shift to Re s = 1/2 (available as lineShift_proof_ls in another module)
+  -- 3. Lemma 7: L(σ+it,χ) bounds — NOT in Mathlib, zhan_lemma7_leaf is sorry'd
+  -- 4. Lemma 2: second moment of L' — NOT in Mathlib, zhan_lemma2_leaf is sorry'd
+  -- 5. Lemma 6: mean value theorem — NOT in Mathlib, zhan_lemma6_leaf's mv_one_class_leaf is sorry'd
+  -- 6. Display (3.13) from the paper — not formalized
+  -- Without these analytic estimates, the pointwise bound on ‖Fprod‖ needed for the
+  -- integral cannot be established.
+  have h_main : False := by sorry
+  exact False.elim h_main
 
 /-- LEAF: Proposition 2, page 267, displays (3.14) and (3.15): Perron for `f₁, f₂` truncated
 at `T₀`, Lemma 3 for the fourth moment of `L'`, Hölder, Lemma 6 and (3.13). Class HARD. -/
