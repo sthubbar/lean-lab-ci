@@ -4,14 +4,14 @@ Lemma 2", the mean value of a Mellin type integral over `y` in `[Y/2, 3Y]`.
 
 This file proves the lab statement `S64LowExcCharNP.leaf_mellin_mean_value` as
 `mellin_mean_value_of_leaves`, by the standard proof of Gallagher [8] Lemma 2 type bounds,
-from steps that are now all PROVED:
+from ONE remaining LEAF:
 * `leaf_mellin_exp_substitution`, PROVED: the substitution `y = e^u`, under which
   `y^(1/2+it) = e^(u/2) e^(iut)` and `dy = e^u du`, so the integrand becomes
   `e^(2u) |F(u)|^2 ≤ (3Y)^2 |F(u)|^2` with `F(u) = ∫_{-T}^{T} g(t) e^(iut) dt`, over an
   interval of length `log 6`;
 * `gaussian_domination`, PROVED: the indicator of that interval is at most
   `e^((log 6 / 2)^2) e^(-(u-m)^2)`;
-* `leaf_gaussian_fubini_identity`, PROVED by S130: Fubini and the Gaussian Fourier transform;
+* `leaf_gaussian_fubini_identity`, LEAF HARD: Fubini and the Gaussian Fourier transform;
 * `leaf_schur_gaussian`, PROVED: the Schur bound with `∫ e^(-v^2/4) = 2 sqrt π`;
 * `leaf_local_fourier_l2` and `mellin_mean_value_of_leaves`, PROVED assemblies.
 No Plancherel and no log factor are used.
@@ -146,39 +146,12 @@ theorem gaussian_domination (c T : ℝ) (hT : 0 ≤ T) (g : ℝ → ℂ) (hg : C
         setIntegral_le_integral (hG.const_mul _)
           (Filter.Eventually.of_forall fun u => by positivity)
 
-/-- Page 44, proof of Lemma 29, Gallagher [8] Lemma 2 variant, the Gaussian Fourier transform
-used in the Fubini step, PROVED: `∫_ℝ e^(-(u-m)^2) e^(iuv) du = sqrt π e^(imv) e^(-v^2/4)`, from
-Mathlib `integral_cexp_quadratic` with `b = -1`, `c = 2m + iv`, `d = -m^2`. -/
-theorem gaussian_fourier_shift (m v : ℝ) :
-    ∫ u : ℝ, ((Real.exp (-(u - m) ^ 2) : ℝ) : ℂ) * cexp ((u : ℂ) * (v : ℂ) * I) =
-      ((Real.sqrt Real.pi : ℝ) : ℂ) * cexp ((m : ℂ) * (v : ℂ) * I) *
-        ((Real.exp (-v ^ 2 / 4) : ℝ) : ℂ) := by
-  have h : ∀ u : ℝ, ((Real.exp (-(u - m) ^ 2) : ℝ) : ℂ) * cexp ((u : ℂ) * (v : ℂ) * I) =
-      cexp ((-1 : ℂ) * (u : ℂ) ^ 2 + (2 * (m : ℂ) + (v : ℂ) * I) * (u : ℂ) + (-(m : ℂ) ^ 2)) := by
-    intro u
-    rw [Complex.ofReal_exp, ← Complex.exp_add]
-    congr 1; push_cast; ring
-  simp_rw [h]
-  rw [integral_cexp_quadratic (by simp) _ _]
-  have hpi : ((Real.pi : ℂ) / -(-1 : ℂ)) ^ (1 / 2 : ℂ) = ((Real.sqrt Real.pi : ℝ) : ℂ) := by
-    rw [neg_neg, div_one, Real.sqrt_eq_rpow, Complex.ofReal_cpow Real.pi_pos.le]
-    push_cast; ring_nf
-  rw [hpi, mul_assoc, Complex.ofReal_exp, ← Complex.exp_add]
-  congr 2
-  push_cast
-  ring_nf
-  rw [Complex.I_sq]
-  ring
-
 /-- LEAF: page 44, proof of Lemma 29, Gallagher [8] Lemma 2 variant, the Fubini expansion with
 Gaussian kernel, class HARD. Writing `|F(u)|^2 = ∫∫ g(t) conj g(s) e^(iu(t-s)) dt ds`, Fubini,
 and the Gaussian Fourier transform
 `∫_ℝ e^(-(u-m)^2) e^(iuv) du = sqrt π e^(imv) e^(-v^2/4)`, available in Mathlib as
 `integral_cexp_quadratic` or `fourierIntegral_gaussian`, give
-`∫_ℝ e^(-(u-m)^2) |F(u)|^2 du = Re ∫∫ g(t) conj g(s) sqrt π e^(im(t-s)) e^(-(t-s)^2/4) dt ds`.
-PROVED by CLOUD S130, burst-20261122: pointwise `|F(u)|^2 = F(u) conj F(u)` as a double
-integral, two Fubini swaps by `intervalIntegral_integral_swap` with the integrable majorant
-`|g(t)| |g(s)| e^(-(u-m)^2)`, then `gaussian_fourier_shift`. -/
+`∫_ℝ e^(-(u-m)^2) |F(u)|^2 du = Re ∫∫ g(t) conj g(s) sqrt π e^(im(t-s)) e^(-(t-s)^2/4) dt ds`. -/
 theorem leaf_gaussian_fubini_identity (m T : ℝ) (hT : 0 ≤ T) (g : ℝ → ℂ)
     (hg : Continuous g) :
     ∫ u, Real.exp (-(u - m) ^ 2) *
@@ -186,106 +159,7 @@ theorem leaf_gaussian_fubini_identity (m T : ℝ) (hT : 0 ≤ T) (g : ℝ → �
       (∫ t in (-T)..T, ∫ s in (-T)..T, g t * (starRingEnd ℂ) (g s) *
           (((Real.sqrt Real.pi : ℝ) : ℂ) * cexp ((m : ℂ) * ((t : ℂ) - (s : ℂ)) * I) *
             ((Real.exp (-(t - s) ^ 2 / 4) : ℝ) : ℂ))).re := by
-  have hle : -T ≤ T := by linarith
-  set w : ℝ → ℝ := fun u => Real.exp (-(u - m) ^ 2) with hw
-  have hwc : Continuous w := by simp only [hw]; fun_prop
-  have hwi : Integrable w := by
-    have := (integrable_exp_neg_mul_sq (b := 1) one_pos).comp_sub_right m
-    refine this.congr (Filter.Eventually.of_forall fun u => ?_)
-    simp only [hw, neg_one_mul]
-  set F : ℝ → ℂ := fun u => ∫ t in (-T)..T, g t * cexp ((u : ℂ) * (t : ℂ) * I) with hF
-  set E : ℝ → ℝ → ℝ → ℂ := fun u t s =>
-    g t * (starRingEnd ℂ) (g s) * cexp ((u : ℂ) * ((t : ℂ) - (s : ℂ)) * I) with hE
-  -- pointwise expansion of |F u|^2
-  have hpt : ∀ u, ((w u * ‖F u‖ ^ 2 : ℝ) : ℂ) =
-      ∫ t in (-T)..T, ∫ s in (-T)..T, (w u : ℂ) * E u t s := by
-    intro u
-    have hc : ∀ x : ℝ, (starRingEnd ℂ) (cexp ((u : ℂ) * (x : ℂ) * I)) =
-        cexp ((u : ℂ) * (x : ℂ) * (-I)) := by
-      intro x; rw [← Complex.exp_conj]; congr 1; simp [map_mul, Complex.conj_ofReal]
-    have hconj : (starRingEnd ℂ) (F u) =
-        ∫ s in (-T)..T, (starRingEnd ℂ) (g s) * cexp ((u : ℂ) * (s : ℂ) * (-I)) := by
-      simp only [hF, intervalIntegral.integral_of_le hle]
-      rw [← integral_conj]
-      congr 1; ext s; rw [map_mul, hc]
-    have hsq : ((‖F u‖ ^ 2 : ℝ) : ℂ) = F u * (starRingEnd ℂ) (F u) := by
-      rw [Complex.mul_conj, Complex.normSq_eq_norm_sq]
-    rw [Complex.ofReal_mul, hsq, hconj]
-    set C := ∫ s in (-T)..T, (starRingEnd ℂ) (g s) * cexp ((u : ℂ) * (s : ℂ) * (-I))
-    have h1 : F u * C = ∫ t in (-T)..T, g t * cexp ((u : ℂ) * (t : ℂ) * I) * C := by
-      simp only [hF]; rw [intervalIntegral.integral_mul_const]
-    rw [h1, ← intervalIntegral.integral_const_mul]
-    refine intervalIntegral.integral_congr fun t _ => ?_
-    simp only [C]
-    rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul]
-    refine intervalIntegral.integral_congr fun s _ => ?_
-    simp only [hE]
-    rw [show (u : ℂ) * ((t : ℂ) - (s : ℂ)) * I = (u : ℂ) * (t : ℂ) * I + (u : ℂ) * (s : ℂ) * (-I)
-      by ring, Complex.exp_add]
-    ring
-  have hgc : Continuous fun t => ‖g t‖ := hg.norm
-  have hIoc : ∀ f : ℝ → ℝ, Continuous f → Integrable f (volume.restrict (Set.uIoc (-T) T)) := by
-    intro f hf
-    rw [Set.uIoc_of_le hle]
-    exact (hf.integrableOn_Icc).mono_set Set.Ioc_subset_Icc_self
-  set Cg := ∫ s in (-T)..T, ‖g s‖ with hCg
-  have hEn : ∀ u t s, ‖(w u : ℂ) * E u t s‖ = ‖g t‖ * ‖g s‖ * w u := by
-    intro u t s
-    have e : (u : ℂ) * ((t : ℂ) - (s : ℂ)) * I = ((u * (t - s) : ℝ) : ℂ) * I := by
-      push_cast; ring
-    simp only [hE, norm_mul, Complex.norm_conj, Complex.norm_real, Real.norm_eq_abs, e,
-      Complex.norm_exp_ofReal_mul_I, hw, abs_of_pos (Real.exp_pos _)]
-    ring
-  -- first swap, u against t
-  set Φ : ℝ → ℝ → ℂ := fun t u => ∫ s in (-T)..T, (w u : ℂ) * E u t s with hΦ
-  have hΦc : Continuous (Function.uncurry Φ) := by
-    show Continuous fun p : ℝ × ℝ => ∫ s in (-T)..T, (w p.2 : ℂ) * E p.2 p.1 s
-    refine intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' ?_ _ _
-    simp only [hE, hw]; fun_prop
-  have hΦb : ∀ t u, ‖Φ t u‖ ≤ (‖g t‖ * Cg) * w u := by
-    intro t u
-    refine (intervalIntegral.norm_integral_le_integral_norm hle).trans (le_of_eq ?_)
-    simp_rw [hEn]
-    rw [intervalIntegral.integral_mul_const, intervalIntegral.integral_const_mul]
-  have hΦi : Integrable (Function.uncurry Φ)
-      ((volume.restrict (Set.uIoc (-T) T)).prod volume) := by
-    refine ((hIoc (fun t => ‖g t‖ * Cg) (hgc.mul continuous_const)).mul_prod hwi).mono'
-      hΦc.aestronglyMeasurable (Filter.Eventually.of_forall fun p => ?_)
-    exact hΦb p.1 p.2
-  -- second swap, u against s, for fixed t
-  have hΨi : ∀ t, Integrable (Function.uncurry fun s u => (w u : ℂ) * E u t s)
-      ((volume.restrict (Set.uIoc (-T) T)).prod volume) := by
-    intro t
-    refine ((hIoc (fun s => ‖g t‖ * ‖g s‖) (continuous_const.mul hgc)).mul_prod hwi).mono'
-      ?_ (Filter.Eventually.of_forall fun p => ?_)
-    · exact (by simp only [hE, hw]; fun_prop :
-        Continuous fun p : ℝ × ℝ => (w p.2 : ℂ) * E p.2 t p.1).aestronglyMeasurable
-    · exact le_of_eq (hEn p.2 t p.1)
-  -- the Gaussian Fourier transform
-  have hinner : ∀ t s, ∫ u, (w u : ℂ) * E u t s = g t * (starRingEnd ℂ) (g s) *
-      (((Real.sqrt Real.pi : ℝ) : ℂ) * cexp ((m : ℂ) * ((t : ℂ) - (s : ℂ)) * I) *
-        ((Real.exp (-(t - s) ^ 2 / 4) : ℝ) : ℂ)) := by
-    intro t s
-    calc ∫ u, (w u : ℂ) * E u t s = g t * (starRingEnd ℂ) (g s) *
-          ∫ u : ℝ, ((Real.exp (-(u - m) ^ 2) : ℝ) : ℂ) * cexp ((u : ℂ) * ((t - s : ℝ) : ℂ) * I) := by
-          rw [← integral_const_mul]; congr 1; ext u; simp only [hE, hw]; push_cast; ring
-      _ = _ := by rw [gaussian_fourier_shift]; push_cast; ring
-  have hmain : ((∫ u, w u * ‖F u‖ ^ 2 : ℝ) : ℂ) =
-      ∫ t in (-T)..T, ∫ s in (-T)..T, g t * (starRingEnd ℂ) (g s) *
-        (((Real.sqrt Real.pi : ℝ) : ℂ) * cexp ((m : ℂ) * ((t : ℂ) - (s : ℂ)) * I) *
-          ((Real.exp (-(t - s) ^ 2 / 4) : ℝ) : ℂ)) := by
-    have hcast : ∫ u, ((w u * ‖F u‖ ^ 2 : ℝ) : ℂ) = ((∫ u, w u * ‖F u‖ ^ 2 : ℝ) : ℂ) :=
-      integral_complex_ofReal
-    rw [← hcast]
-    simp_rw [hpt]
-    rw [← intervalIntegral_integral_swap hΦi]
-    refine intervalIntegral.integral_congr fun t _ => ?_
-    simp only [hΦ]
-    rw [← intervalIntegral_integral_swap (hΨi t)]
-    exact intervalIntegral.integral_congr fun s _ => hinner t s
-  have := congrArg Complex.re hmain
-  rw [Complex.ofReal_re] at this
-  exact this
+  sorry
 
 /-- Page 44, proof of Lemma 29, Gallagher [8] Lemma 2 variant, the Schur bound for the
 Gaussian kernel, PROVED. With `|g(t)| |g(s)| ≤ (|g(t)|^2 + |g(s)|^2)/2`, symmetry in
