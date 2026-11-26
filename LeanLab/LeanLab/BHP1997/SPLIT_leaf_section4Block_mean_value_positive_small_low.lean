@@ -38,111 +38,105 @@ theorem leaf_section4Block_integral_le_two_wellspaced_sums (f : ℝ → ℝ) (hf
       (∀ s ∈ S₁, ∀ t ∈ S₁, s ≠ t → 1 ≤ |s - t|) ∧
       (∀ s ∈ S₂, ∀ t ∈ S₂, s ≠ t → 1 ≤ |s - t|) ∧
       (∫ t in a..b, f t) ≤ ∑ t ∈ S₁, f t + ∑ t ∈ S₂, f t := by
-  rcases le_or_gt b a with hba | hab
+  rcases lt_or_ge b a with hba | hab
   · refine ⟨∅, ∅, by simp, by simp, by simp, by simp, ?_⟩
-    simp only [Finset.sum_empty, add_zero]
     rw [intervalIntegral.integral_symm]
-    have : 0 ≤ ∫ t in b..a, f t := intervalIntegral.integral_nonneg hba (fun t _ => hf0 t)
+    have := intervalIntegral.integral_nonneg (μ := MeasureTheory.volume) hba.le (fun t _ => hf0 t)
+    simp only [Finset.sum_empty, add_zero]
     linarith
-  obtain ⟨N, hN⟩ : ∃ N : ℕ, N = ⌈b - a⌉₊ := ⟨_, rfl⟩
-  obtain ⟨g, hg⟩ : ∃ g : ℕ → ℝ, ∀ i, g i = min (a + i) b := ⟨_, fun _ => rfl⟩
-  have hgmono : ∀ i, g i ≤ g (i + 1) := by
-    intro i
-    rw [hg, hg]
-    push_cast
+  set e : ℕ → ℝ := fun k => min (a + k) b with he
+  have hmono : ∀ k, e k ≤ e (k + 1) := by
+    intro k; simp only [he]; push_cast
     exact min_le_min_right _ (by linarith)
-  have hgstep : ∀ i, g (i + 1) - g i ≤ 1 := by
-    intro i
-    rw [hg, hg]
-    push_cast
-    simp only [min_def]
-    split_ifs <;> linarith
-  have hex : ∀ i, ∃ t ∈ Set.Icc (g i) (g (i + 1)), IsMaxOn f (Set.Icc (g i) (g (i + 1))) t :=
-    fun i => isCompact_Icc.exists_isMaxOn (Set.nonempty_Icc.mpr (hgmono i)) hf.continuousOn
-  choose p hpmem hpmax using hex
-  have hga : ∀ i, a ≤ g i := by
-    intro i
-    rw [hg]
-    exact le_min (le_add_of_nonneg_right (Nat.cast_nonneg i)) hab.le
-  have hgb : ∀ i, g i ≤ b := fun i => by rw [hg]; exact min_le_right _ _
-  have hpab : ∀ i, a ≤ p i ∧ p i ≤ b :=
-    fun i => ⟨(hga i).trans (hpmem i).1, (hpmem i).2.trans (hgb _)⟩
-  have hgN : ∀ j, j < N → g j = a + j := by
-    intro j hj
-    have : (j : ℝ) < b - a := Nat.lt_ceil.mp (hN ▸ hj)
-    rw [hg]
-    exact min_eq_left (by linarith)
-  have hsep : ∀ i j, i < j → j < N → (j : ℝ) - i - 1 ≤ p j - p i := by
-    intro i j _ hjN
-    have h1 := (hpmem j).1
-    have h2 := (hpmem i).2
-    rw [hgN j hjN] at h1
-    have h3 : g (i + 1) ≤ a + ((i + 1 : ℕ) : ℝ) := by rw [hg]; exact min_le_left _ _
-    push_cast at h3
-    linarith
-  have hspace : ∀ r : ℕ, ∀ i ∈ (Finset.range N).filter (fun i => i % 2 = r),
-      ∀ j ∈ (Finset.range N).filter (fun i => i % 2 = r), i ≠ j → 1 ≤ |p i - p j| := by
-    intro r i hi j hj hij
-    simp only [Finset.mem_filter, Finset.mem_range] at hi hj
-    rcases lt_or_gt_of_ne hij with h | h
-    · have h2 : i + 2 ≤ j := by omega
-      have := hsep i j h hj.1
-      have h2' : ((i : ℝ) + 2 ≤ j) := by exact_mod_cast h2
-      rw [abs_sub_comm]
-      exact le_trans (by linarith) (le_abs_self _)
-    · have h2 : j + 2 ≤ i := by omega
-      have := hsep j i h hi.1
-      have h2' : ((j : ℝ) + 2 ≤ i) := by exact_mod_cast h2
-      exact le_trans (by linarith) (le_abs_self _)
-  have hinj : ∀ r, Set.InjOn p ((Finset.range N).filter (fun i => i % 2 = r)) := by
-    intro r i hi j hj hpij
+  have hex : ∀ k, ∃ t ∈ Set.Icc (e k) (e (k + 1)),
+      ∀ s ∈ Set.Icc (e k) (e (k + 1)), f s ≤ f t := by
+    intro k
+    obtain ⟨t, ht, hmax⟩ := (isCompact_Icc (a := e k) (b := e (k+1))).exists_isMaxOn
+      (Set.nonempty_Icc.2 (hmono k)) hf.continuousOn
+    exact ⟨t, ht, fun s hs => hmax hs⟩
+  choose t ht htmax using hex
+  set n : ℕ := ⌈b - a⌉₊ with hn
+  have hlt : ∀ k, k < n → (k : ℝ) < b - a := fun k hk => Nat.lt_ceil.1 hk
+  have he_k : ∀ k, k < n → e k = a + k := by
+    intro k hk; simp only [he]; exact min_eq_left (by linarith [hlt k hk])
+  have ht_lo : ∀ k, k < n → a + k ≤ t k := by
+    intro k hk; rw [← he_k k hk]; exact (ht k).1
+  have ht_hi : ∀ k, t k ≤ a + k + 1 := by
+    intro k; have := (ht k).2; simp only [he] at this; push_cast at this
+    linarith [min_le_left (a + ((k:ℝ) + 1)) b]
+  have ht_b : ∀ k, t k ≤ b := by
+    intro k; have := (ht k).2; simp only [he] at this
+    linarith [min_le_right (a + ((k+1 : ℕ):ℝ)) b]
+  have hsep : ∀ k, k < n → ∀ k', k' < n → k % 2 = k' % 2 → k < k' →
+      1 ≤ |t k - t k'| := by
+    intro k hk k' hk' hpar hkk'
+    have h2 : k + 2 ≤ k' := by omega
+    have h2' : (k : ℝ) + 2 ≤ k' := by exact_mod_cast h2
+    have := ht_lo k' hk'; have := ht_hi k
+    rw [abs_sub_comm, abs_of_nonneg (by linarith)]; linarith
+  have hsep' : ∀ k, k < n → ∀ k', k' < n → k % 2 = k' % 2 → k ≠ k' →
+      1 ≤ |t k - t k'| := by
+    intro k hk k' hk' hpar hne
+    rcases lt_or_gt_of_ne hne with h | h
+    · exact hsep k hk k' hk' hpar h
+    · rw [abs_sub_comm]; exact hsep k' hk' k hk hpar.symm h
+  have hinj : ∀ k, k < n → ∀ k', k' < n → k % 2 = k' % 2 → t k = t k' → k = k' := by
+    intro k hk k' hk' hpar heq
     by_contra hne
-    have := hspace r i hi j hj hne
-    rw [hpij, sub_self, abs_zero] at this
-    linarith
-  have hmemab : ∀ r, ∀ t ∈ ((Finset.range N).filter (fun i => i % 2 = r)).image p,
-      a ≤ t ∧ t ≤ b := by
-    intro r t ht
-    obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp ht
-    exact hpab i
-  have hsp : ∀ r, ∀ s ∈ ((Finset.range N).filter (fun i => i % 2 = r)).image p,
-      ∀ t ∈ ((Finset.range N).filter (fun i => i % 2 = r)).image p, s ≠ t → 1 ≤ |s - t| := by
-    intro r s hs t ht hst
-    obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hs
-    obtain ⟨j, hj, rfl⟩ := Finset.mem_image.mp ht
-    exact hspace r i hi j hj (fun h => hst (h ▸ rfl))
-  refine ⟨((Finset.range N).filter (fun i => i % 2 = 0)).image p,
-    ((Finset.range N).filter (fun i => i % 2 = 1)).image p,
-    hmemab 0, hmemab 1, hsp 0, hsp 1, ?_⟩
-  rw [Finset.sum_image (hinj 0), Finset.sum_image (hinj 1)]
-  have hsplit : ∑ i ∈ Finset.range N, f (p i) =
-      ∑ i ∈ (Finset.range N).filter (fun i => i % 2 = 0), f (p i) +
-      ∑ i ∈ (Finset.range N).filter (fun i => i % 2 = 1), f (p i) := by
-    rw [← Finset.sum_filter_add_sum_filter_not (Finset.range N) (fun i => i % 2 = 0)]
-    congr 1
-    apply Finset.sum_congr _ (fun _ _ => rfl)
-    ext i
-    simp only [Finset.mem_filter, Finset.mem_range]
-    omega
-  rw [← hsplit]
-  have hg0 : g 0 = a := by rw [hg]; simp [hab.le]
-  have hgNN : g N = b := by
-    rw [hg]
-    have := Nat.le_ceil (b - a)
-    rw [← hN] at this
-    exact min_eq_right (by linarith)
-  have hsum := intervalIntegral.sum_integral_adjacent_intervals (f := f) (a := g) (n := N)
-    (fun i _ => hf.intervalIntegrable (μ := MeasureTheory.volume) _ _)
-  rw [hg0, hgNN] at hsum
-  rw [← hsum]
-  apply Finset.sum_le_sum
-  intro i _
-  calc ∫ t in g i..g (i + 1), f t ≤ ∫ _ in g i..g (i + 1), f (p i) :=
-        intervalIntegral.integral_mono_on (hgmono i) (hf.intervalIntegrable _ _)
-          intervalIntegrable_const (fun t ht => hpmax i ht)
-    _ = (g (i + 1) - g i) * f (p i) := by rw [intervalIntegral.integral_const, smul_eq_mul]
-    _ ≤ 1 * f (p i) := mul_le_mul_of_nonneg_right (hgstep i) (hf0 _)
-    _ = f (p i) := one_mul _
+    have := hsep' k hk k' hk' hpar hne
+    rw [heq, sub_self, abs_zero] at this; linarith
+  set E := (Finset.range n).filter (fun k => k % 2 = 0)
+  set O := (Finset.range n).filter (fun k => ¬ k % 2 = 0)
+  have hmemSet : ∀ (P : ℕ → Prop) [DecidablePred P], ∀ s ∈ ((Finset.range n).filter P).image t,
+      a ≤ s ∧ s ≤ b := by
+    intro P _ s hs
+    obtain ⟨k, hk, rfl⟩ := Finset.mem_image.1 hs
+    have hk' := Finset.mem_range.1 (Finset.mem_filter.1 hk).1
+    exact ⟨by have := ht_lo k hk'; have : (0:ℝ) ≤ k := Nat.cast_nonneg k; linarith, ht_b k⟩
+  -- integral bound
+  have hint : (∫ s in a..b, f s) ≤ ∑ k ∈ Finset.range n, f (t k) := by
+    have he0 : e 0 = a := by simp [he, hab]
+    have hen : e n = b := by
+      simp only [he]; exact min_eq_right (by linarith [Nat.le_ceil (b - a)])
+    have hsum := intervalIntegral.sum_integral_adjacent_intervals (f := f) (a := e) (n := n)
+      (μ := MeasureTheory.volume)
+      (fun k _ => hf.intervalIntegrable _ _)
+    rw [he0, hen] at hsum
+    rw [← hsum]
+    apply Finset.sum_le_sum
+    intro k _
+    calc (∫ s in e k..e (k+1), f s) ≤ ∫ s in e k..e (k+1), f (t k) :=
+          intervalIntegral.integral_mono_on (hmono k) (hf.intervalIntegrable _ _)
+            intervalIntegrable_const (fun s hs => htmax k s hs)
+      _ = (e (k+1) - e k) * f (t k) := by rw [intervalIntegral.integral_const, smul_eq_mul]
+      _ ≤ 1 * f (t k) := by
+          apply mul_le_mul_of_nonneg_right _ (hf0 _)
+          simp only [he]; push_cast
+          rcases le_total (a + k) b with h | h
+          · rw [min_eq_left h]; linarith [min_le_left (a + ((k:ℝ) + 1)) b]
+          · rw [min_eq_right h, min_eq_right (by linarith)]; linarith
+      _ = f (t k) := one_mul _
+  refine ⟨E.image t, O.image t, hmemSet _, hmemSet _, ?_, ?_, ?_⟩
+  · intro s hs s' hs' hne
+    obtain ⟨k, hk, rfl⟩ := Finset.mem_image.1 hs
+    obtain ⟨k', hk', rfl⟩ := Finset.mem_image.1 hs'
+    simp only [E, Finset.mem_filter, Finset.mem_range] at hk hk'
+    exact hsep' k hk.1 k' hk'.1 (by omega) (fun h => hne (h ▸ rfl))
+  · intro s hs s' hs' hne
+    obtain ⟨k, hk, rfl⟩ := Finset.mem_image.1 hs
+    obtain ⟨k', hk', rfl⟩ := Finset.mem_image.1 hs'
+    simp only [O, Finset.mem_filter, Finset.mem_range] at hk hk'
+    exact hsep' k hk.1 k' hk'.1 (by omega) (fun h => hne (h ▸ rfl))
+  · rw [Finset.sum_image, Finset.sum_image]
+    · have := Finset.sum_filter_add_sum_filter_not (Finset.range n) (fun k => k % 2 = 0)
+        (fun k => f (t k))
+      rw [this]; exact hint
+    · intro k hk k' hk' heq
+      simp only [O, Finset.coe_filter, Finset.mem_range, Set.mem_ofPred_eq] at hk hk'
+      exact hinj k hk.1 k' hk'.1 (by omega) heq
+    · intro k hk k' hk' heq
+      simp only [E, Finset.coe_filter, Finset.mem_range, Set.mem_ofPred_eq] at hk hk'
+      exact hinj k hk.1 k' hk'.1 (by omega) heq
 
 /-- LEAF: the well spaced mean value for the block over the lower height range, P0069 page 12,
 Theorem 4, as applied on pages 26 and 27 through Lemma 10 to the factorization of the block of
