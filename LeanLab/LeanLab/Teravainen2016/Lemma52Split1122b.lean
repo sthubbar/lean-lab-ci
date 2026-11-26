@@ -92,6 +92,321 @@ theorem dvd_iff_mod1122b (Q n c : ℕ) (hc : c < Q) : (Q : ℤ) ∣ (n : ℤ) - 
     Nat.mod_eq_of_lt hc]
   constructor <;> intro h <;> omega
 
+/-! ### Helpers for the dual count -/
+
+private theorem eC_re1122b (t : ℝ) : (eC t).re = Real.cos (2 * Real.pi * t) := by
+  unfold eC
+  have h : (2 * (Real.pi : ℂ) * Complex.I * (t : ℂ)) =
+      (((2 * Real.pi * t : ℝ)) : ℂ) * Complex.I := by
+    push_cast; ring
+  rw [h, Complex.exp_ofReal_mul_I_re]
+
+private theorem eC_im1122b (t : ℝ) : (eC t).im = Real.sin (2 * Real.pi * t) := by
+  unfold eC
+  have h : (2 * (Real.pi : ℂ) * Complex.I * (t : ℂ)) =
+      (((2 * Real.pi * t : ℝ)) : ℂ) * Complex.I := by
+    push_cast; ring
+  rw [h, Complex.exp_ofReal_mul_I_im]
+
+/-- `‖1 - e(t)‖ = 2 |sin π t|`. -/
+private theorem norm_one_sub_eC1122b (t : ℝ) : ‖1 - eC t‖ = 2 * |Real.sin (Real.pi * t)| := by
+  have hsq : ‖1 - eC t‖ ^ 2 = (2 * |Real.sin (Real.pi * t)|) ^ 2 := by
+    rw [Complex.sq_norm, Complex.normSq_apply]
+    have h1 : (1 - eC t).re = 1 - Real.cos (2 * Real.pi * t) := by
+      simp [eC_re1122b]
+    have h2 : (1 - eC t).im = -Real.sin (2 * Real.pi * t) := by
+      simp [eC_im1122b]
+    rw [h1, h2]
+    have hc := Real.cos_two_mul' (Real.pi * t)
+    have hs := Real.sin_two_mul (Real.pi * t)
+    have hsc := Real.sin_sq_add_cos_sq (Real.pi * t)
+    rw [show 2 * Real.pi * t = 2 * (Real.pi * t) by ring]
+    have hsq1 : (2 * |Real.sin (Real.pi * t)|) ^ 2 = 4 * Real.sin (Real.pi * t) ^ 2 := by
+      rw [mul_pow, sq_abs]; norm_num
+    have h1c : 1 - Real.cos (2 * (Real.pi * t)) = 2 * Real.sin (Real.pi * t) ^ 2 := by
+      linarith [hc, hsc]
+    rw [h1c, hsq1, hs]
+    nlinarith [hsc]
+  have h1 : 0 ≤ ‖1 - eC t‖ := norm_nonneg _
+  have h2 : 0 ≤ 2 * |Real.sin (Real.pi * t)| := by positivity
+  nlinarith [hsq, h1, h2]
+
+/-- For an integer `m` within `1/2` of `γ`, `2 |γ - m| ≤ |sin π γ|`. -/
+private theorem two_mul_abs_sub_int_le_sin1122b {γ : ℝ} (m : ℤ)
+    (hm : |γ - (m : ℝ)| ≤ 1 / 2) : 2 * |γ - (m : ℝ)| ≤ |Real.sin (Real.pi * γ)| := by
+  set s : ℝ := γ - (m : ℝ) with hs
+  have hγ : γ = (m : ℝ) + s := by rw [hs]; ring
+  have hsin : Real.sin (Real.pi * γ) = (-1 : ℝ) ^ m * Real.sin (Real.pi * s) := by
+    rw [hγ, show Real.pi * ((m : ℝ) + s) = Real.pi * s + (m : ℝ) * Real.pi by ring,
+      Real.sin_add_int_mul_pi]
+  have hx0 : 0 ≤ Real.pi * |s| := by positivity
+  have hx1 : Real.pi * |s| ≤ Real.pi / 2 := by
+    have h := abs_nonneg s
+    nlinarith [Real.pi_pos, hm, h]
+  have hmul := Real.mul_le_sin hx0 hx1
+  have heq : 2 / Real.pi * (Real.pi * |s|) = 2 * |s| := by
+    field_simp
+  have hslo : -(1 / 2) ≤ s := (abs_le.mp hm).1
+  have hshi : s ≤ 1 / 2 := (abs_le.mp hm).2
+  have hsinabs : Real.sin (Real.pi * |s|) = |Real.sin (Real.pi * s)| := by
+    rcases le_total 0 s with h | h
+    · have hp : 0 ≤ Real.sin (Real.pi * s) :=
+        Real.sin_nonneg_of_nonneg_of_le_pi (by positivity) (by nlinarith [Real.pi_pos, hshi])
+      rw [abs_of_nonneg h, abs_of_nonneg hp]
+    · have hp : Real.sin (Real.pi * s) ≤ 0 :=
+        Real.sin_nonpos_of_nonpos_of_neg_pi_le (by nlinarith [Real.pi_pos, h])
+          (by nlinarith [Real.pi_pos, hslo])
+      rw [abs_of_nonpos h, mul_neg, Real.sin_neg, abs_of_nonpos hp]
+  rw [hsin, abs_mul]
+  have h1 : |((-1 : ℝ) ^ m)| = 1 := by
+    rw [abs_zpow, abs_neg, abs_one, one_zpow]
+  rw [h1, one_mul, ← hsinabs]
+  linarith [hmul, heq.le, heq.ge]
+
+/-- `‖Σ_{n < J} e(n x)‖ ≤ 1 / |sin π x|`. -/
+private theorem norm_dirichlet1122b {x : ℝ} (hx : Real.sin (Real.pi * x) ≠ 0) (J : ℕ) :
+    ‖∑ k ∈ range J, eC ((k : ℝ) * x)‖ ≤ 1 / |Real.sin (Real.pi * x)| := by
+  have hne_norm : ‖(1 : ℂ) - eC x‖ = 2 * |Real.sin (Real.pi * x)| := norm_one_sub_eC1122b x
+  have hpos : 0 < 2 * |Real.sin (Real.pi * x)| := by
+    have : |Real.sin (Real.pi * x)| ≠ 0 := abs_ne_zero.mpr hx
+    positivity
+  have hne : (1 : ℂ) - eC x ≠ 0 := by
+    intro h0
+    rw [h0, norm_zero] at hne_norm
+    linarith
+  have h1e : eC x ≠ 1 := by
+    intro h0
+    exact hne (by rw [h0, sub_self])
+  rw [Finset.sum_congr rfl (fun k (_ : k ∈ range J) => eC_nat_mul1122b k x)]
+  rw [geom_sum_eq h1e]
+  have hden : ‖eC x - 1‖ = 2 * |Real.sin (Real.pi * x)| := by
+    rw [← norm_neg, neg_sub, hne_norm]
+  rw [norm_div, hden]
+  have hnum : ‖(eC x) ^ J - 1‖ ≤ 2 := by
+    calc ‖(eC x) ^ J - 1‖ ≤ ‖(eC x) ^ J‖ + ‖(1 : ℂ)‖ := norm_sub_le _ _
+      _ = 2 := by rw [norm_pow, eC_norm1122b, norm_one]; norm_num
+  calc ‖(eC x) ^ J - 1‖ / (2 * |Real.sin (Real.pi * x)|)
+      ≤ 2 / (2 * |Real.sin (Real.pi * x)|) :=
+        div_le_div_of_nonneg_right hnum hpos.le
+    _ = 1 / |Real.sin (Real.pi * x)| := by field_simp
+
+/-- The geometric sum bound over an order convex range of `ℕ`: for an integer `m` within `1/2`
+of `γ`, `‖Σ_{n ∈ S} e(γ n)‖ · 2 |γ - m| ≤ 1`. -/
+private theorem geom_interval1122b (S : Finset ℕ)
+    (hconv : ∀ x ∈ S, ∀ z ∈ S, ∀ y, x ≤ y → y ≤ z → y ∈ S)
+    (γ : ℝ) (m : ℤ) (hm : |γ - (m : ℝ)| ≤ 1 / 2) :
+    ‖∑ n ∈ S, eC (γ * n)‖ * (2 * |γ - (m : ℝ)|) ≤ 1 := by
+  set δ : ℝ := |γ - (m : ℝ)| with hδ
+  have hδ0 : 0 ≤ δ := abs_nonneg _
+  rcases S.eq_empty_or_nonempty with rfl | hne
+  · simp
+  set p := S.min' hne with hp
+  set q := S.max' hne with hq
+  have hpq : p ≤ q := Finset.min'_le S q (Finset.max'_mem S hne)
+  have hSeq : S = Finset.Icc p q := by
+    refine Finset.Subset.antisymm ?_ ?_
+    · intro n hn
+      exact Finset.mem_Icc.2 ⟨Finset.min'_le S n hn, Finset.le_max' S n hn⟩
+    · intro n hn
+      obtain ⟨h1, h2⟩ := Finset.mem_Icc.1 hn
+      exact hconv _ (Finset.min'_mem S hne) _ (Finset.max'_mem S hne) n h1 h2
+  have hstep : ‖∑ n ∈ S, eC (γ * n)‖
+      ≤ ‖∑ i ∈ range (q + 1 - p), (eC γ) ^ i‖ := by
+    rw [hSeq, show Finset.Icc p q = Finset.Ico p (q + 1) by
+      ext n; simp, Finset.sum_Ico_eq_sum_range]
+    have hterm : ∀ i : ℕ, eC (γ * ((p + i : ℕ) : ℝ)) =
+        eC (γ * (p : ℝ)) * (eC γ) ^ i := by
+      intro i
+      rw [show γ * ((p + i : ℕ) : ℝ) = γ * (p : ℝ) + (i : ℝ) * γ by
+        push_cast; ring, eC_add1122b, eC_nat_mul1122b]
+    rw [Finset.sum_congr rfl (fun i (_ : i ∈ range (q + 1 - p)) => hterm i),
+      ← Finset.mul_sum, norm_mul, eC_norm1122b, one_mul]
+  rcases eq_or_lt_of_le hδ0 with h0 | hpos
+  · rw [← h0, mul_zero]; norm_num
+  have hsin : 2 * δ ≤ |Real.sin (Real.pi * γ)| := by
+    rw [hδ]; exact two_mul_abs_sub_int_le_sin1122b m hm
+  have hne1 : eC γ ≠ 1 := by
+    intro h
+    rw [eC_eq_one_iff1122b] at h
+    obtain ⟨j, hj⟩ := h
+    have hcast : ((j - m : ℤ) : ℝ) = γ - (m : ℝ) := by
+      push_cast [hj]; ring
+    have habs : |((j - m : ℤ) : ℝ)| ≤ 1 / 2 := by rw [hcast]; exact hm
+    have hlt : ((|j - m| : ℤ) : ℝ) < 1 := by
+      rw [Int.cast_abs]; linarith
+    have hle0 : |j - m| ≤ 0 := by
+      have h1 : |j - m| < (1 : ℤ) := by exact_mod_cast hlt
+      omega
+    have h2 : j - m = 0 := abs_eq_zero.mp (le_antisymm hle0 (abs_nonneg _))
+    have hjm : j = m := by omega
+    have hγm : γ = (m : ℝ) := by rw [hj, hjm]
+    rw [hγm, sub_self, abs_zero] at hδ
+    linarith [hδ]
+  have hnum : ‖(eC γ) ^ (q + 1 - p) - 1‖ ≤ 2 := by
+    calc ‖(eC γ) ^ (q + 1 - p) - 1‖
+        ≤ ‖(eC γ) ^ (q + 1 - p)‖ + ‖(1 : ℂ)‖ := norm_sub_le _ _
+      _ = 2 := by rw [norm_pow, eC_norm1122b, norm_one]; norm_num
+  have hden : ‖eC γ - 1‖ = 2 * |Real.sin (Real.pi * γ)| := by
+    rw [← norm_neg, neg_sub, norm_one_sub_eC1122b]
+  have hdenpos : 0 < ‖eC γ - 1‖ := by
+    rw [hden]; have := hpos; nlinarith [Real.pi_pos]
+  have hgeom : ‖∑ i ∈ range (q + 1 - p), (eC γ) ^ i‖
+      ≤ 2 / (2 * |Real.sin (Real.pi * γ)|) := by
+    rw [geom_sum_eq hne1, norm_div, hden]
+    exact div_le_div_of_nonneg_right hnum (by rw [hden] at hdenpos; linarith)
+  have hfin : 2 / (2 * |Real.sin (Real.pi * γ)|) ≤ 1 / (2 * δ) := by
+    have hs : 0 < 2 * δ := by linarith
+    have hsp : 0 < 2 * |Real.sin (Real.pi * γ)| := by linarith [hsin, hpos]
+    rw [div_le_div_iff₀ hsp hs]
+    nlinarith [hsin]
+  have h2 : 1 / (2 * δ) * (2 * δ) = 1 := by field_simp
+  calc ‖∑ n ∈ S, eC (γ * n)‖ * (2 * δ) ≤ (1 / (2 * δ)) * (2 * δ) := by
+        apply mul_le_mul_of_nonneg_right (hstep.trans (hgeom.trans hfin)) (by linarith)
+    _ = 1 := h2
+
+/-- Integers with pairwise distances at most `L` number at most `L + 1`. -/
+private theorem card_le_of_diam1122b (s : Finset ℕ) {L : ℝ} (hL : 0 ≤ L)
+    (h : ∀ x ∈ s, ∀ z ∈ s, |(x : ℝ) - (z : ℝ)| ≤ L) :
+    (s.card : ℝ) ≤ L + 1 := by
+  rcases s.eq_empty_or_nonempty with rfl | hne
+  · simp only [card_empty, Nat.cast_zero]
+    linarith
+  have hpq : s.min' hne ≤ s.max' hne := Finset.min'_le s (s.max' hne) (Finset.max'_mem s hne)
+  have hsub : s ⊆ Finset.Icc (s.min' hne) (s.max' hne) := by
+    intro n hn
+    exact Finset.mem_Icc.2 ⟨Finset.min'_le s n hn, Finset.le_max' s n hn⟩
+  have h1 : s.card ≤ s.max' hne + 1 - s.min' hne := by
+    calc s.card ≤ (Finset.Icc (s.min' hne) (s.max' hne)).card := Finset.card_le_card hsub
+      _ = s.max' hne + 1 - s.min' hne := Nat.card_Icc _ _
+  have h2 : ((s.max' hne + 1 - s.min' hne : ℕ) : ℝ)
+      = (s.max' hne : ℝ) + 1 - (s.min' hne : ℝ) := by
+    rw [Nat.cast_sub (by omega : s.min' hne ≤ s.max' hne + 1)]
+    push_cast
+    ring
+  have h3 : |(s.max' hne : ℝ) - (s.min' hne : ℝ)| ≤ L :=
+    h _ (Finset.max'_mem s hne) _ (Finset.min'_mem s hne)
+  have h4 : (s.max' hne : ℝ) - (s.min' hne : ℝ) ≤ L := (abs_le.mp h3).2
+  calc (s.card : ℝ) ≤ ((s.max' hne + 1 - s.min' hne : ℕ) : ℝ) := by exact_mod_cast h1
+    _ = (s.max' hne : ℝ) + 1 - (s.min' hne : ℝ) := h2
+    _ ≤ L + 1 := by linarith
+
+/-- The `Q` frequencies `a/Q - β`, `a < Q`, are spaced `1/Q` apart: at most `6 t Q + 3` of them
+lie within `t` of an integer, for `0 < t ≤ 1/2`. -/
+private theorem count_dual1122b (Q : ℕ) (hQ : 1 ≤ Q) (β : ℝ) {t : ℝ} (ht0 : 0 < t)
+    (ht1 : t ≤ 1 / 2) :
+    (((Finset.range Q).filter (fun a : ℕ => ∃ k : ℤ, |(a : ℝ) / Q - β - (k : ℝ)| ≤ t)).card : ℝ)
+      ≤ 6 * t * Q + 3 := by
+  have hQpos : (0 : ℝ) < (Q : ℝ) := by exact_mod_cast hQ
+  have hQ1 : (1 : ℝ) ≤ (Q : ℝ) := by exact_mod_cast hQ
+  set ξ : ℝ := (Q : ℝ) * β with hξ
+  set k₀ : ℤ := ⌊ξ / Q⌋ with hk₀
+  set y : ℝ := ξ - (k₀ : ℝ) * Q with hy
+  have hy0 : 0 ≤ y := by
+    have h := Int.floor_le (ξ / Q)
+    rw [hy]
+    have : (⌊ξ / Q⌋ : ℝ) * Q ≤ (ξ / Q) * Q := by
+      exact mul_le_mul_of_nonneg_right h (le_of_lt hQpos)
+    rw [div_mul_cancel₀ ξ (ne_of_gt hQpos)] at this
+    linarith
+  have hy1 : y < Q := by
+    have h := Int.lt_floor_add_one (ξ / Q)
+    rw [hy]
+    have h2 : (ξ / Q) * Q < ((⌊ξ / Q⌋ : ℝ) + 1) * Q := by
+      exact mul_lt_mul_of_pos_right h hQpos
+    rw [div_mul_cancel₀ ξ (ne_of_gt hQpos)] at h2
+    linarith
+  set A₁ : Finset ℕ := (Finset.range Q).filter (fun a : ℕ => |(a : ℝ) - y| ≤ t * Q) with hA₁
+  set A₂ : Finset ℕ :=
+    (Finset.range Q).filter (fun a : ℕ => |(a : ℝ) - (y + Q)| ≤ t * Q) with hA₂
+  set A₃ : Finset ℕ :=
+    (Finset.range Q).filter (fun a : ℕ => |(a : ℝ) - (y - Q)| ≤ t * Q) with hA₃
+  have hsub : (Finset.range Q).filter
+      (fun a : ℕ => ∃ k : ℤ, |(a : ℝ) / Q - β - (k : ℝ)| ≤ t) ⊆ A₁ ∪ (A₂ ∪ A₃) := by
+    intro a ha
+    obtain ⟨haQ, k, hk⟩ := Finset.mem_filter.mp ha
+    have hltQ : a < Q := by simpa using haQ
+    have haQ' : (a : ℝ) < (Q : ℝ) := by exact_mod_cast hltQ
+    have ha0 : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a
+    have h1 : |(a : ℝ) - ξ - (k : ℝ) * Q| ≤ t * Q := by
+      have hmul : ((a : ℝ) / Q - β - (k : ℝ)) * Q = (a : ℝ) - ξ - (k : ℝ) * Q := by
+        rw [hξ]
+        field_simp
+      rw [← hmul, abs_mul, abs_of_pos hQpos]
+      exact mul_le_mul_of_nonneg_right hk (le_of_lt hQpos)
+    set K : ℤ := k + k₀ with hK
+    have h2 : |(a : ℝ) - y - (K : ℝ) * Q| ≤ t * Q := by
+      have heq : (a : ℝ) - y - (K : ℝ) * Q = (a : ℝ) - ξ - (k : ℝ) * Q := by
+        have hKr : (K : ℝ) = (k : ℝ) + (k₀ : ℝ) := by
+          rw [hK]; push_cast; ring
+        rw [hKr, hy]
+        ring
+      rw [heq]; exact h1
+    have htQ : t * Q ≤ (Q : ℝ) / 2 := by nlinarith [ht1]
+    have hlow := (abs_le.mp h2).1
+    have hupp := (abs_le.mp h2).2
+    have hKlo : -(Q : ℝ) - (Q : ℝ) / 2 ≤ (K : ℝ) * Q := by
+      nlinarith [hupp, htQ, hy1, ha0]
+    have hle1 : (a : ℝ) + 1 ≤ (Q : ℝ) := by
+      exact_mod_cast (show a + 1 ≤ Q by omega)
+    have hKhi : (K : ℝ) * Q ≤ (Q : ℝ) - 1 + (Q : ℝ) / 2 := by
+      nlinarith [hlow, htQ, hy0, hle1]
+    have hKge : (-1 : ℤ) ≤ K := by
+      by_contra hcon
+      have hKle : K ≤ -2 := by omega
+      have hKr : (K : ℝ) ≤ -2 := by exact_mod_cast hKle
+      nlinarith [hKlo, hKr, hQpos, hQ1]
+    have hKle1 : K ≤ 1 := by
+      by_contra hcon
+      have hKge2 : (2 : ℤ) ≤ K := by omega
+      have hKr : (2 : ℝ) ≤ (K : ℝ) := by exact_mod_cast hKge2
+      nlinarith [hKhi, hKr, hQpos, hQ1]
+    have hm₁ : a ∈ A₁ ∨ a ∈ A₂ ∨ a ∈ A₃ := by
+      interval_cases K
+      · right; right
+        refine Finset.mem_filter.mpr ⟨haQ, ?_⟩
+        have hKr : ((-1 : ℤ) : ℝ) = -1 := by push_cast; ring
+        have heq : (a : ℝ) - (y - Q) = (a : ℝ) - y - ((-1 : ℤ) : ℝ) * Q := by
+          rw [hKr]; ring
+        rw [heq]; exact h2
+      · left
+        refine Finset.mem_filter.mpr ⟨haQ, ?_⟩
+        have hKr : ((0 : ℤ) : ℝ) = 0 := by push_cast; ring
+        have heq : (a : ℝ) - y = (a : ℝ) - y - ((0 : ℤ) : ℝ) * Q := by
+          rw [hKr]; ring
+        rw [heq]; exact h2
+      · right; left
+        refine Finset.mem_filter.mpr ⟨haQ, ?_⟩
+        have hKr : ((1 : ℤ) : ℝ) = 1 := by push_cast; ring
+        have heq : (a : ℝ) - (y + Q) = (a : ℝ) - y - ((1 : ℤ) : ℝ) * Q := by
+          rw [hKr]; ring
+        rw [heq]; exact h2
+    rcases hm₁ with h' | h' | h'
+    · exact Finset.mem_union_left _ h'
+    · exact Finset.mem_union_right _ (Finset.mem_union_left _ h')
+    · exact Finset.mem_union_right _ (Finset.mem_union_right _ h')
+  have hdiam : ∀ (c : ℝ), ((Finset.range Q).filter (fun a : ℕ => |(a : ℝ) - c| ≤ t * Q)).card
+      ≤ 2 * t * Q + 1 := by
+    intro c
+    exact card_le_of_diam1122b _ (by positivity) (by
+      intro x hx z hz
+      have hx' : |(x : ℝ) - c| ≤ t * Q := (Finset.mem_filter.mp hx).2
+      have hz' : |(z : ℝ) - c| ≤ t * Q := (Finset.mem_filter.mp hz).2
+      have h4 : |(x : ℝ) - (z : ℝ)| ≤ |(x : ℝ) - c| + |c - (z : ℝ)| := abs_sub_le _ _ _
+      have h5 : |c - (z : ℝ)| = |(z : ℝ) - c| := abs_sub_comm _ _
+      rw [h5] at h4
+      linarith)
+  have hA₁ : (A₁.card : ℝ) ≤ 2 * t * Q + 1 := hdiam y
+  have hA₂ : (A₂.card : ℝ) ≤ 2 * t * Q + 1 := hdiam (y + Q)
+  have hA₃ : (A₃.card : ℝ) ≤ 2 * t * Q + 1 := hdiam (y - Q)
+  have hstep1 : (((Finset.range Q).filter (fun a : ℕ => ∃ k : ℤ,
+      |(a : ℝ) / Q - β - (k : ℝ)| ≤ t)).card : ℝ) ≤ ((A₁ ∪ (A₂ ∪ A₃)).card : ℝ) := by
+    exact_mod_cast Finset.card_le_card hsub
+  have hstep2 : ((A₁ ∪ (A₂ ∪ A₃)).card : ℝ) ≤ (A₁.card : ℝ) + ((A₂ ∪ A₃).card : ℝ) := by
+    exact_mod_cast Finset.card_union_le A₁ (A₂ ∪ A₃)
+  have hstep3 : ((A₂ ∪ A₃).card : ℝ) ≤ (A₂.card : ℝ) + (A₃.card : ℝ) := by
+    exact_mod_cast Finset.card_union_le A₂ A₃
+  linarith
+
 /-! ### The new leaf -/
 
 /-- LEAF: the Fourier dual count of a linear exponential sum over an interval, the step of
@@ -103,7 +418,145 @@ theorem twisted_interval_bound : ∃ K : ℝ, 0 < K ∧ ∀ N Q : ℕ, 1 ≤ Q �
     ∀ S : Finset ℕ, S ⊆ range N → (∀ x ∈ S, ∀ z ∈ S, ∀ y, x ≤ y → y ≤ z → y ∈ S) →
     ∀ β : ℝ, ∑ a ∈ range Q, ‖∑ n ∈ S, eC (((a : ℝ) / Q - β) * n)‖ ≤
       K * (N + Q * Real.sqrt N) := by
-  sorry
+  refine ⟨100, by norm_num, ?_⟩
+  intro N Q hQ hNQ S hsub hconv β
+  have hQpos : (0 : ℝ) < (Q : ℝ) := by exact_mod_cast hQ
+  have hN6 : 6 ≤ N := by
+    have h1 : 6 * 1 ≤ 6 * Q ^ 2 := by
+      have : 1 ≤ Q ^ 2 := by nlinarith
+      nlinarith
+    omega
+  have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast (by omega : 0 < N)
+  set M : ℝ := Real.sqrt N with hMdef
+  have hMM : M * M = (N : ℝ) := by
+    rw [hMdef]; exact Real.mul_self_sqrt (le_of_lt hNpos)
+  have hMpos : 0 < M := by
+    rw [hMdef]
+    exact Real.sqrt_pos.mpr hNpos
+  have hM2 : 2 ≤ M := by
+    rw [hMdef]
+    have : (2 : ℝ) ^ 2 ≤ (N : ℝ) := by
+      have : (4 : ℝ) ≤ (N : ℝ) := by exact_mod_cast (by omega : 4 ≤ N)
+      nlinarith
+    exact Real.le_sqrt_of_sq_le this
+  set t₀ : ℝ := 1 / (2 * M) with ht₀
+  have ht₀pos : 0 < t₀ := by rw [ht₀]; positivity
+  have ht₀half : t₀ ≤ 1 / 2 := by
+    rw [ht₀, div_le_div_iff₀ (by positivity) (by norm_num : (0 : ℝ) < 2)]
+    nlinarith
+  have ht₀M : t₀ * M = 1 / 2 := by
+    rw [ht₀]; field_simp
+  set X : ℕ → ℝ := fun a => (a : ℝ) / Q - β with hX
+  set Δ : ℕ → ℝ := fun a => |X a - (round (X a) : ℝ)| with hΔ
+  have hΔle : ∀ a, Δ a ≤ 1 / 2 := fun a => abs_sub_round (X a)
+  -- the cardinality of the frequencies near an integer
+  have hcard : ((range Q).filter (fun a : ℕ => Δ a ≤ t₀)).card ≤ 6 * t₀ * Q + 3 := by
+    have heq : (range Q).filter (fun a : ℕ => Δ a ≤ t₀)
+        = (range Q).filter (fun a : ℕ => ∃ k : ℤ, |(a : ℝ) / Q - β - (k : ℝ)| ≤ t₀) := by
+      refine Finset.filter_congr fun a _ => ?_
+      constructor
+      · intro h
+        exact ⟨round (X a), h⟩
+      · rintro ⟨k, hk⟩
+        exact le_trans (round_le (X a) k) hk
+    rw [heq]
+    exact count_dual1122b Q hQ β ht₀pos ht₀half
+  -- the pointwise bound
+  have hpt : ∀ a : ℕ, ‖∑ n ∈ S, eC (X a * n)‖ ≤ if Δ a ≤ t₀ then (N : ℝ) else M := by
+    intro a
+    by_cases h : Δ a ≤ t₀
+    · rw [if_pos h]
+      have h1 : ‖∑ n ∈ S, eC (X a * n)‖ ≤ (S.card : ℝ) := by
+        calc ‖∑ n ∈ S, eC (X a * n)‖ ≤ ∑ n ∈ S, ‖eC (X a * n)‖ := norm_sum_le _ _
+          _ = (S.card : ℝ) := by simp [eC_norm1122b]
+      have h2 : (S.card : ℝ) ≤ (N : ℝ) := by
+        have h3 : S.card ≤ N := by
+          calc S.card ≤ (range N).card := Finset.card_le_card hsub
+            _ = N := Finset.card_range N
+        exact_mod_cast h3
+      linarith
+    · rw [if_neg h]
+      have hlt : t₀ < Δ a := not_le.mp h
+      have hpos : 0 < Δ a := lt_trans ht₀pos hlt
+      have hg := geom_interval1122b S hconv (X a) (round (X a)) (hΔle a)
+      have h2δ : 0 < 2 * Δ a := by linarith
+      have hb : ‖∑ n ∈ S, eC (X a * n)‖ ≤ 1 / (2 * Δ a) := by
+        rw [le_div_iff₀ h2δ]
+        linarith [hg]
+      have hfin : 1 / (2 * Δ a) ≤ 1 / (2 * t₀) := by
+        apply one_div_le_one_div_of_le (by linarith)
+        linarith
+      have hMeq : 1 / (2 * t₀) = M := by
+        rw [ht₀]; field_simp
+      linarith [hb, hfin, hMeq.le, hMeq.ge]
+  -- the split by the threshold
+  have hsplit := Finset.sum_filter_add_sum_filter_not (Finset.range Q)
+    (fun a : ℕ => Δ a ≤ t₀) (fun a : ℕ => ‖∑ n ∈ S, eC (X a * n)‖)
+  have hpart1 : ∑ a ∈ (range Q).filter (fun a : ℕ => Δ a ≤ t₀),
+      ‖∑ n ∈ S, eC (X a * n)‖ ≤ (6 * t₀ * Q + 3) * N := by
+    have h1 : ∑ a ∈ (range Q).filter (fun a : ℕ => Δ a ≤ t₀),
+        ‖∑ n ∈ S, eC (X a * n)‖
+        ≤ ∑ a ∈ (range Q).filter (fun a : ℕ => Δ a ≤ t₀), (N : ℝ) := by
+      refine Finset.sum_le_sum fun a ha => ?_
+      have hh := hpt a
+      rwa [if_pos (Finset.mem_filter.mp ha).2] at hh
+    have h2 : ∑ a ∈ (range Q).filter (fun a : ℕ => Δ a ≤ t₀), (N : ℝ)
+        = (((range Q).filter (fun a : ℕ => Δ a ≤ t₀)).card : ℝ) * N := by
+      rw [Finset.sum_const, nsmul_eq_mul]
+    have h3 : (((range Q).filter (fun a : ℕ => Δ a ≤ t₀)).card : ℝ) ≤ 6 * t₀ * Q + 3 := by
+      exact_mod_cast hcard
+    have hNnn : (0 : ℝ) ≤ N := le_of_lt hNpos
+    calc ∑ a ∈ (range Q).filter (fun a : ℕ => Δ a ≤ t₀), ‖∑ n ∈ S, eC (X a * n)‖
+        ≤ (((range Q).filter (fun a : ℕ => Δ a ≤ t₀)).card : ℝ) * N := by rw [← h2]; exact h1
+      _ ≤ (6 * t₀ * Q + 3) * N := by
+          apply mul_le_mul_of_nonneg_right h3 hNnn
+  have hpart2 : ∑ a ∈ (range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀),
+      ‖∑ n ∈ S, eC (X a * n)‖ ≤ (Q : ℝ) * M := by
+    have h1 : ∑ a ∈ (range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀),
+        ‖∑ n ∈ S, eC (X a * n)‖
+        ≤ ∑ a ∈ (range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀), M := by
+      refine Finset.sum_le_sum fun a ha => ?_
+      have hh := hpt a
+      rwa [if_neg (Finset.mem_filter.mp ha).2] at hh
+    have h2 : ∑ a ∈ (range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀), M
+        = (((range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀)).card : ℝ) * M := by
+      rw [Finset.sum_const, nsmul_eq_mul]
+    have h3 : ((range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀)).card ≤ Q := by
+      calc ((range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀)).card ≤ (range Q).card :=
+            Finset.card_le_card (Finset.filter_subset _ _)
+        _ = Q := Finset.card_range Q
+    have h3' : (((range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀)).card : ℝ) ≤ (Q : ℝ) := by
+      exact_mod_cast h3
+    have hMnn : (0 : ℝ) ≤ M := le_of_lt hMpos
+    calc ∑ a ∈ (range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀), ‖∑ n ∈ S, eC (X a * n)‖
+        ≤ (((range Q).filter (fun a : ℕ => ¬ Δ a ≤ t₀)).card : ℝ) * M := by
+          rw [← h2]; exact h1
+      _ ≤ (Q : ℝ) * M := by
+          apply mul_le_mul_of_nonneg_right h3' hMnn
+  have htotal : ∑ a ∈ range Q, ‖∑ n ∈ S, eC (X a * n)‖ ≤ (6 * t₀ * Q + 3) * N + Q * M := by
+    rw [← hsplit]
+    linarith [hpart1, hpart2]
+  have hkey : 6 * t₀ * (Q : ℝ) * N = 3 * (Q : ℝ) * M := by
+    have hNeq : (N : ℝ) = M * M := hMM.symm
+    have h1 : t₀ * M = 1 / 2 := ht₀M
+    rw [hNeq]
+    -- 6 * t₀ * Q * (M * M) = 3 * Q * M
+    have : 6 * t₀ * (Q : ℝ) * (M * M) = 3 * (Q : ℝ) * M * (2 * (t₀ * M)) := by ring
+    rw [this, h1]
+    ring
+  have hfin1 : (6 * t₀ * (Q : ℝ) + 3) * (N : ℝ) + (Q : ℝ) * M
+      = 4 * ((Q : ℝ) * M) + 3 * (N : ℝ) := by
+    calc (6 * t₀ * (Q : ℝ) + 3) * (N : ℝ) + (Q : ℝ) * M
+        = 6 * t₀ * (Q : ℝ) * (N : ℝ) + 3 * (N : ℝ) + (Q : ℝ) * M := by ring
+      _ = 3 * ((Q : ℝ) * M) + 3 * (N : ℝ) + (Q : ℝ) * M := by rw [hkey]; ring
+      _ = 4 * ((Q : ℝ) * M) + 3 * (N : ℝ) := by ring
+  have hQnn : (0 : ℝ) ≤ (Q : ℝ) := le_of_lt hQpos
+  have hMnn : (0 : ℝ) ≤ M := le_of_lt hMpos
+  calc ∑ a ∈ range Q, ‖∑ n ∈ S, eC (X a * ↑n)‖
+      ≤ 4 * ((Q : ℝ) * M) + 3 * (N : ℝ) := htotal.trans (le_of_eq hfin1)
+    _ ≤ 100 * ((N : ℝ) + (Q : ℝ) * Real.sqrt N) := by
+        rw [show Real.sqrt N = M from hMdef.symm]
+        nlinarith [hQnn, hMnn, hNpos.le]
 
 /-! ### The coefficient bound from the premise on `𝒬` -/
 
