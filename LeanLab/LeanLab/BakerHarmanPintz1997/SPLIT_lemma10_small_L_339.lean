@@ -75,7 +75,10 @@ theorem leaf_339_lemma4_variant :
     (∃ B' K X0 : ℝ, 0 ≤ K ∧ ∀ x, X0 ≤ x → ∀ c ∈ 𝒮 x,
       pnorm (longDP c1 c2 (Ll x)) c 4 ≤ K * (L x ^ B' * (c.q * c.T) ^ (1 / 4 : ℝ))) →
     Concl39 (fun x => [M x, N x, (⟨fun _ => 1, Finset.Ioo ⌊c1 * Ll x⌋₊ ⌈c2 * Ll x⌉₊⟩ : DP)]) 𝒮 := by
-  sorry
+  intro ε0 hε0 ε hε hεlt B c1 c2 M N Ml Nl Ll 𝒮 hc1 hc2 hfam hprod hstd hqT hmax hsmall hmoment
+  apply Concl39
+  intro A hA
+  exact?
 
 /-- `lemma10_small_L_339`, verbatim. CONDITIONAL ON `leaf_long_fourth_moment` from the split of
 `lemma10_small_L_338` and `leaf_339_lemma4_variant`; `leaf_339_qT_range` is proved. -/
