@@ -9,6 +9,7 @@ on [X1, 1e325] the maximum on a grid of 6001 points is 0.2455632, at X1, margin 
 These are float grid checks, not proofs. AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.HelfgottArcs.Decomp119LeavesIIS124CaseB
+import LeanLab.HelfgottArcs.Decomp119LeavesIIS124CaseBRatioHigh
 
 namespace LeanLab.HelfgottArcs.Decomp119LeavesIIS124CaseBRatio
 open LeanLab.HelfgottArcs.Decomp119 LeanLab.HelfgottArcs.Decomp119LeavesIIS124CaseB
@@ -24,7 +25,7 @@ Class MEDIUM, a numerical and asymptotic bound; float maximum 0.2455632 at x = 1
 term 1 peaks near 0.1755 at about 1e40 and every term ratio tends to 0. -/
 theorem caseB_ratio_high (x : ℝ) (hx1 : 1e25 ≤ x) :
     caseBDisplay x ≤ 0.24956 * x ^ ((5 : ℝ) / 6) * Real.log x ^ ((3 : ℝ) / 2) := by
-  sorry
+  exact Decomp119LeavesIIS124CaseBRatioHigh.caseB_ratio_high_of_leaves x hx1
 
 /-- Assembly of caseB_ratio from the two leaves by cases on x ≤ 1e25, exact parent statement. -/
 theorem caseB_ratio (x : ℝ) (hx : 2.16e20 ≤ x) :
