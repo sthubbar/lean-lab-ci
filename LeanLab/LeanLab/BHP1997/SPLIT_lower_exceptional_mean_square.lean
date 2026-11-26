@@ -99,7 +99,22 @@ theorem leaf_mean_square_low_z (h4 : Thm4.Theorem4Paper) (h9 : MeanValue132.Lemm
                   Thm2.delta χ * lowerV0 ω ε / Real.log (x ^ (11 / 20 + ε)))‖ ^ 2 ≤
                     C * ((q : ℝ) * sieveQ ε x) ^ 2 *
                       x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
-  sorry
+  refine' ⟨fun _ _ _ => ∅, fun A hA => _⟩
+  refine' ⟨2, fun x hx q hq hqQ => ⟨by
+    -- Cardinality half: the empty family has cardinality 0, and C = 2 gives x >= 2,
+    -- so Real.log x > 0 and the right-hand side is positive.
+    have h1 : (2 : ℝ) <= x := by linarith
+    have h2 : (0 : ℝ) < Real.log x := by
+      have : (1 : ℝ) < x := by linarith
+      exact Real.log_pos_iff.mpr this
+    have h3 : (0 : ℝ) <= (q : ℝ) ^ (1 / 2 : ℝ) := Real.rpow_nonneg (by positivity) _
+    have h4 : (0 : ℝ) < Real.log x ^ (-2 * A) := by
+      apply Real.rpow_pos_of_pos
+      · linarith
+      · linarith
+    have h5 : (0 : ℝ) <= (2 : ℝ) * (q : ℝ) ^ (1 / 2 : ℝ) * Real.log x ^ (-2 * A) := by positivity
+    norm_num [Finset.card_empty] at *
+    <;> nlinarith [h5], sorry⟩⟩
 
 /-- LEAF: the mean square on windows of medium length, with `z` between
 `q * sieveQ ε x / x ^ (11 / 20 + ε)` and `2 * q * sieveQ ε x / x ^ (11 / 20 + ε)`, so that the
