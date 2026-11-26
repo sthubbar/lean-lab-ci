@@ -99,7 +99,35 @@ def ByParts_ps : Prop :=
 /-- LEAF: page 264, the display after "Hence", step S1: Abel summation
 `Σ_{N-A<n≤N} Λ(n)χ(n)e(nλ) = Psum(N)e(λN) - ∫_{N-A}^N Psum(u) 2πiλ e(λu) du`. Class EASY. -/
 theorem abelSum_leaf_ps : AbelSum_ps := by
-  sorry
+  intro N A lam q χ hA1 hAN
+  have hNA : (0 : ℝ) ≤ (N : ℝ) - A := by linarith
+  have hNAleN : (N : ℝ) - A ≤ N := by linarith
+  constructor
+  · -- Interval integrability of Psum * 2πiλ * e(λu)
+    sorry
+  · -- Abel summation formula
+    have h_sum_repr : ∀ (u : ℝ), (N : ℝ) - A ≤ u → u ≤ N → Psum_ps χ N A u = ∑ n ∈ shortWin N A, (Λ n : ℂ) * χ n * (if (n : ℝ) ≤ u then (1 : ℂ) else 0) := by
+      intro u hu1 hu2
+      have h₁ : Psum_ps χ N A u = ∑ n ∈ (Finset.Icc 1 ⌊u⌋₊).filter (fun n : ℕ => (N : ℝ) - A < (n : ℝ)), (Λ n : ℂ) * χ n := by
+        dsimp [Psum_ps]
+        <;> simp_all [shortWin]
+  
+      have h₂ : (Finset.Icc 1 ⌊u⌋₊).filter (fun n : ℕ => (N : ℝ) - A < (n : ℝ)) = (shortWin N A).filter (fun n : ℕ => (n : ℝ) ≤ u) := by
+        sorry
+  
+      have h₃ : (∑ n ∈ (Finset.Icc 1 ⌊u⌋₊).filter (fun n : ℕ => (N : ℝ) - A < (n : ℝ)), (Λ n : ℂ) * χ n) = ∑ n ∈ (shortWin N A).filter (fun n : ℕ => (n : ℝ) ≤ u), (Λ n : ℂ) * χ n := by
+        rw [h₂]
+  
+      have h₄ : (∑ n ∈ (shortWin N A).filter (fun n : ℕ => (n : ℝ) ≤ u), (Λ n : ℂ) * χ n) = ∑ n ∈ shortWin N A, (Λ n : ℂ) * χ n * (if (n : ℝ) ≤ u then (1 : ℂ) else 0) := by
+        sorry
+  
+      calc
+        Psum_ps χ N A u = ∑ n ∈ (Finset.Icc 1 ⌊u⌋₊).filter (fun n : ℕ => (N : ℝ) - A < (n : ℝ)), (Λ n : ℂ) * χ n := h₁
+        _ = ∑ n ∈ (shortWin N A).filter (fun n : ℕ => (n : ℝ) ≤ u), (Λ n : ℂ) * χ n := h₃
+        _ = ∑ n ∈ shortWin N A, (Λ n : ℂ) * χ n * (if (n : ℝ) ≤ u then (1 : ℂ) else 0) := h₄
+    have h_main : Schi χ lam N A = Psum_ps χ N A N * ee (lam * N) - ∫ u in ((N : ℝ) - A)..N, Psum_ps χ N A u * (2 * π * Complex.I * lam * ee (lam * u)) := by
+      sorry
+    exact h_main
 
 /-- LEAF: page 264, the display after "Hence", step S2 first half: integration by parts for
 the line integral `Vline` on `Re s = 1/2`, which is differentiable in `u > 0` and vanishes at
@@ -183,6 +211,46 @@ and page 265 first display: differentiation of `Vline` in `u`, Fubini over `t �
 `u ∈ [N-A, N]`, and Lemma 1 on the at most two pieces where `G/F'` is monotone, giving
 `≪ N^{-1/2} wt38`. Class MEDIUM. -/
 theorem innerBound_leaf_ps (h1 : Lemma1) : InnerBound_ps := by
+  obtain ⟨K₁, hK₁⟩ := h1
+  have h_main : ∃ (K N₀ : ℝ), 0 < K ∧ ∀ (N : ℕ) (A lam T : ℝ) (q : ℕ) (χ : DirichletCharacter ℂ q)
+    (Nv : Fin 20 → ℝ), N₀ ≤ N → 1 ≤ A → A ≤ (N : ℝ) ^ (2 / 3 : ℝ) → 1 ≤ T →
+    ‖∫ u in ((N : ℝ) - A)..N, deriv (fun v => Vline_ps Nv χ N A (1 / 2) T v) u * ee (lam * u)‖
+      ≤ K * (N : ℝ) ^ (-(1 / 2) : ℝ) *
+        ∫ t in Set.Icc (-T) T, wt38 N A lam t * ‖Fprod Nv χ (1 / 2 + t * Complex.I)‖ := by
+    use (16 * π * |K₁| + 1 : ℝ), 1024
+    constructor
+    · positivity
+    · intro N A lam T q χ Nv hN hA1 hA2 hT
+      have hN₁ : (1 : ℝ) ≤ N := by linarith [hN]
+      have hApos : 0 < A := by linarith
+      have hAN : A ≤ N := by
+        have h₁ : (N : ℝ) ^ (2 / 3 : ℝ) ≤ (N : ℝ) := by
+          calc
+            (N : ℝ) ^ (2 / 3 : ℝ) ≤ (N : ℝ) ^ (1 : ℝ) := by
+              apply Real.rpow_le_rpow_of_exponent_le
+              · linarith [hN]
+              · norm_num
+            _ = (N : ℝ) := by rw [Real.rpow_one]
+        -- A ≤ N^(2/3) ≤ N
+        linarith
+      have hNApos : 0 < (N : ℝ) - A := by
+        have h₁ : (N : ℝ) ^ (2 / 3 : ℝ) < (N : ℝ) := by
+          calc
+            (N : ℝ) ^ (2 / 3 : ℝ) < (N : ℝ) ^ (1 : ℝ) := by
+              have h₂ : 1 < (N : ℝ) := by
+                have h₃ : (1024 : ℕ) ≤ N := by exact_mod_cast hN
+                have h₄ : (1 : ℕ) < N := by omega
+                exact_mod_cast h₄
+              have h₃ : (2 / 3 : ℝ) < (1 : ℝ) := by norm_num
+              apply Real.rpow_lt_rpow_of_exponent_lt
+              · linarith
+              · linarith
+            _ = (N : ℝ) := by rw [Real.rpow_one]
+        -- A ≤ N^(2/3) < N, so A < N
+        have h₂ : A < (N : ℝ) := by linarith
+        linarith
+      have hT₁ : (1 : ℝ) ≤ T := by linarith
+      sorry
   sorry
 
 /-- PROVED from the approximation step and the inner bound: the target `PartialSumLemma1`,
