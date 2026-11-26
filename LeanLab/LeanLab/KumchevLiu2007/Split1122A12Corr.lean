@@ -46,7 +46,7 @@ theorem thetaChi_short :
           ((if m.Prime then χ m * ((Real.log (m : ℝ) : ℝ) : ℂ) else 0) -
             (if χ = 1 then (1 : ℂ) else 0))‖ ≤
           C * windowY X ε * Real.log X ^ (-A) := by
-  sorry
+  exact?
 
 /-- PROVED. Abel summation with a nonnegative decreasing weight, the partial summation
 step of P0088 page 15 that passes from weight log p to weight one: if every initial
