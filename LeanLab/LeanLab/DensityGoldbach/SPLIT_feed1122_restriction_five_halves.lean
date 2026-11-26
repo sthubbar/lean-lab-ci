@@ -44,6 +44,77 @@ theorem large_spectrum_mid_nine_quarters :
           ∀ δ : ℝ, 0 < δ → δ < δ₀ →
             K * δ ^ (-(9 / 4 : ℝ)) < 2 * Real.log ((primorial z : ℝ) * N) * δ ^ (-(2 : ℝ)) →
             ((univ.filter (fun r => δ ≤ ‖hatE N f r‖)).card : ℝ) ≤ K * δ ^ (-(9 / 4 : ℝ)) := by
+  classical
+  -- Take δ₀ = 1/4, K = 1, z₁ = 1. The only hard step is the large spectrum bound itself.
+  use 1 / 4
+  constructor · norm_num
+  use 1
+  constructor · norm_num
+  use 1
+  intro z hz b hb hcop
+  -- Choose N₀ so that avg ν ≤ 2 for every large prime N (nu_avg_close with c = 1).
+  obtain ⟨Nc, hNc⟩ := nu_avg_close (primorial z) b hb hcop 1 one_pos
+  refine ⟨Nc, fun N _ hNp hN f hf δ hδ hδ₀' hcond => _⟩
+  set ν := nuW (primorial z) b N with hν
+  set L : ℝ := Real.log ((primorial z : ℝ) * N) with hLdef
+  have hA : avg N ν ≤ 2 := by
+    have := hNc N (le_of_max_le_right hN)
+    linarith [(abs_le.1 this).2]
+  have hLpos : 0 < L := by
+    have hW : 1 ≤ primorial z := by
+      have := primorial_pos z
+      omega
+    have hN : 1 ≤ N := by exact_mod_cast Nat.one_le_iff_ne_zero.2 (NeZero.ne N)
+    have : 1 < (primorial z : ℝ) * N := by nlinarith
+    have : 0 < Real.log ((primorial z : ℝ) * N) := Real.log_pos (by nlinarith)
+    simp only [hLdef]
+  have hL_bd : ∀ (n : ZMod N), (ν : ZMod N → ℝ) n ≤ L := by
+    intro n
+    have h₁ : (nuW (primorial z) b N : ZMod N → ℝ) n ≤ Real.log ((primorial z : ℝ) * N) :=
+      nuW_le_log (primorial z) b N hb n
+    have h₂ : (ν : ZMod N → ℝ) n = (nuW (primorial z) b N : ZMod N → ℝ) n := by rw [hν]
+    rw [h₂] at *
+    simp only [hLdef] at h₁ ⊢
+    exact h₁
+  -- Parseval: count · δ² ≤ L · avg ν ≤ 2L, i.e. count ≤ 2L δ⁻².
+  have hc : ((univ.filter (fun r : ZMod N => δ ≤ ‖hatE N f r‖)).card : ℝ) * δ ^ 2 ≤
+      L * avg N ν := by
+    have h₁ : ∀ n, 0 ≤ f n ∧ f n ≤ ν n := hf
+    have h₂ : ∀ n, (ν : ZMod N → ℝ) n ≤ L := hL_bd
+    exact parseval_count f ν h₁ L h₂ δ hδ
+  have hparseval : ((univ.filter (fun r : ZMod N => δ ≤ ‖hatE N f r‖)).card : ℝ) ≤
+      2 * L * δ ^ (-(2 : ℝ)) := by
+    have h₁ : avg N ν ≤ 2 := hA
+    have h₂ : 0 < δ := hδ
+    have h₃ : 0 < L := hLpos
+    have h₄ : ((univ.filter (fun r : ZMod N => δ ≤ ‖hatE N f r‖)).card : ℝ) * δ ^ 2 ≤
+        L * avg N ν := hc
+    have h₅ : L * avg N ν ≤ 2 * L := by
+      calc L * avg N ν ≤ L * 2 := by gcongr <;> simp_all [h₁]
+        _ = 2 * L := by ring
+    have h₆ : ((univ.filter (fun r : ZMod N => δ ≤ ‖hatE N f r‖)).card : ℝ) * δ ^ 2 ≤
+        2 * L := by linarith
+    have h₇ : 0 < δ ^ 2 := by positivity
+    calc ((univ.filter (fun r : ZMod N => δ ≤ ‖hatE N f r‖)).card : ℝ) ≤ (2 * L : ℝ) / δ ^ 2 := by
+      rw [le_div_iff₀ h₇]
+      nlinarith
+    _ = 2 * L * δ ^ (-(2 : ℝ)) := by
+      have h₈ : δ ^ (-(2 : ℝ)) = (δ ^ 2)⁻¹ := by
+        rw [Real.rpow_neg h₂.le]; norm_cast
+      rw [h₈]
+      have h₉ : 0 < δ ^ 2 := by positivity
+      field_simp [h₉]
+      <;> ring
+      <;> field_simp [h₉]
+      <;> linarith
+  -- hcond : δ ^ (-9/4) < 2 * L * δ ^ (-2) (with K = 1).
+  -- Parseval gives count ≤ 2 * L * δ ^ (-2), which is strictly LARGER than the required
+  -- δ ^ (-9/4) precisely because hcond says δ ^ (-9/4) < 2 * L * δ ^ (-2).
+  -- Closing the goal here requires Bourgain's large spectrum estimate at exponent 9/4
+  -- (equivalently a restriction/moment bound at p = 9/4, i.e. a moment of the Ramanujan
+  -- majorant higher than the eighth used in U1502Core). That estimate is not available in
+  -- the lab: the strongest results are exponents 3 (Green 6.6, axiomatic) and 8/3 (eighth
+  -- moment, axiomatic), both weaker than 9/4 for small δ. This is the gap.
   sorry
 
 /-- The large spectrum bound at exponent `9/4` for all levels `δ < δ₀`: Parseval handles the
