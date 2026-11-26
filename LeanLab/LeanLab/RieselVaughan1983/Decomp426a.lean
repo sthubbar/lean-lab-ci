@@ -22,7 +22,69 @@ theorem schoenfeld_relative_rows (b u ε t : ℝ)
         List (ℝ × ℝ × ℝ)))
     (ht : 0 < t) (hb : b ≤ log t) (hu : log t ≤ u) :
     |psi t - t| < ε * t := by
-  sorry
+  have h₁ : (b, u, ε) ∈
+    ([(921 / 50, 20, 11976 / 10000000), (20, 35, 65759 / 100000000),
+      (35, 1000, 18314 / 1000000000), (1000, 1950, 70481 / 10000000000)] :
+      List (ℝ × ℝ × ℝ)) := hrow
+  have h₂ : b = 921 / 50 ∧ u = 20 ∧ ε = 11976 / 10000000 ∨ b = 20 ∧ u = 35 ∧ ε = 65759 / 100000000 ∨ b = 35 ∧ u = 1000 ∧ ε = 18314 / 1000000000 ∨ b = 1000 ∧ u = 1950 ∧ ε = 70481 / 10000000000 := by
+    simp [List.mem_cons] at h₁ ⊢
+    <;> tauto
+  rcases h₂ with (⟨hb₁, hu₁, hε₁⟩ | ⟨hb₂, hu₂, hε₂⟩ | ⟨hb₃, hu₃, hε₃⟩ | ⟨hb₄, hu₄, hε₄⟩)
+  · -- Row 1: b = 921 / 50, u = 20, ε = 11976 / 10000000, i.e. 18.42 ≤ log t ≤ 20
+    norm_num at hb₁ hu₁ hε₁ hb hu ⊢
+    have h₄ : 1 < t := by
+      have h₄₁ : 0 < Real.log t := by linarith [hb₁]
+      by_contra h₄₃
+      have h₄₄ : t ≤ 1 := by linarith
+      have h₄₅ : Real.log t ≤ Real.log 1 := Real.log_le_log (by linarith) h₄₄
+      linarith [Real.log_one]
+    have h₃ : ψ t ≤ Real.log 4 * t + 2 * Real.sqrt t * Real.log t := by
+      exact Chebyshev.psi_le (by linarith)
+    have h₄ : ψ t ≥ (t - 1) * Real.log 2 - Real.log (t + 2) := by
+      linarith [Chebyshev.psi_ge' (by linarith : (0 : ℝ) ≤ t)]
+    -- Mathlib's only psi estimates give |ψ t - t| ≤ 0.386.. * t + o(t),
+    -- not below ε * t = 0.0011976 * t. The explicit page 358 bound needs Schoenfeld's
+    -- analytic machinery (explicit formula, zero-free region, zero counting), absent from Mathlib.
+    sorry
+  · -- Row 2: b = 20, u = 35, ε = 65759 / 100000000
+    norm_num at hb₂ hu₂ hε₂ hb hu ⊢
+    have h₄ : 1 < t := by
+      have h₄₁ : 0 < Real.log t := by linarith [hb₂]
+      by_contra h₄₃
+      have h₄₄ : t ≤ 1 := by linarith
+      have h₄₅ : Real.log t ≤ Real.log 1 := Real.log_le_log (by linarith) h₄₄
+      linarith [Real.log_one]
+    have h₃ : ψ t ≤ Real.log 4 * t + 2 * Real.sqrt t * Real.log t := by
+      exact Chebyshev.psi_le (by linarith)
+    have h₄ : ψ t ≥ (t - 1) * Real.log 2 - Real.log (t + 2) := by
+      linarith [Chebyshev.psi_ge' (by linarith : (0 : ℝ) ≤ t)]
+    sorry
+  · -- Row 3: b = 35, u = 1000, ε = 18314 / 1000000000
+    norm_num at hb₃ hu₃ hε₃ hb hu ⊢
+    have h₄ : 1 < t := by
+      have h₄₁ : 0 < Real.log t := by linarith [hb₃]
+      by_contra h₄₃
+      have h₄₄ : t ≤ 1 := by linarith
+      have h₄₅ : Real.log t ≤ Real.log 1 := Real.log_le_log (by linarith) h₄₄
+      linarith [Real.log_one]
+    have h₃ : ψ t ≤ Real.log 4 * t + 2 * Real.sqrt t * Real.log t := by
+      exact Chebyshev.psi_le (by linarith)
+    have h₄ : ψ t ≥ (t - 1) * Real.log 2 - Real.log (t + 2) := by
+      linarith [Chebyshev.psi_ge' (by linarith : (0 : ℝ) ≤ t)]
+    sorry
+  · -- Row 4: b = 1000, u = 1950, ε = 70481 / 10000000000
+    norm_num at hb₄ hu₄ hε₄ hb hu ⊢
+    have h₄ : 1 < t := by
+      have h₄₁ : 0 < Real.log t := by linarith [hb₄]
+      by_contra h₄₃
+      have h₄₄ : t ≤ 1 := by linarith
+      have h₄₅ : Real.log t ≤ Real.log 1 := Real.log_le_log (by linarith) h₄₄
+      linarith [Real.log_one]
+    have h₃ : ψ t ≤ Real.log 4 * t + 2 * Real.sqrt t * Real.log t := by
+      exact Chebyshev.psi_le (by linarith)
+    have h₄ : ψ t ≥ (t - 1) * Real.log 2 - Real.log (t + 2) := by
+      linarith [Chebyshev.psi_ge' (by linarith : (0 : ℝ) ≤ t)]
+    sorry
 
 /-- The logarithmic threshold for the first selected page 358 row. -/
 theorem schoenfeld_log_threshold (t : ℝ) (ht : 10 ^ 8 ≤ t) :
