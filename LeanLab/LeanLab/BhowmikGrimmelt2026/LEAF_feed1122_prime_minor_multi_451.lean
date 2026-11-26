@@ -23,7 +23,7 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BhowmikGrimmelt2026.Decomp451a
 import LeanLab.BhowmikGrimmelt2026.SPLIT_minor_bare_family328
-import LeanLab.BhowmikGrimmelt2026.LEAF_feed1122_prime_minor_multi_451_p2
+import LeanLab.BhowmikGrimmelt2026.Decomp384b
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -31,19 +31,91 @@ open MeasureTheory ArithmeticFunction NNReal
 
 attribute [local instance] Classical.propDecidable
 
-/-- LEAF: P0029 page 27, proof of Lemma 7.3, display 7.8, minor arc part, the step from the
-von Mangoldt sum S of display 4.8 to its prime part. Class MEDIUM. For every X at least two,
+/-- PROVED in this file, no sorry, formerly a LEAF. P0029 page 27, proof of Lemma 7.3, display 7.8,
+minor arc part, the step from the von Mangoldt sum S of display 4.8 to its prime part. Class MEDIUM. For every X at least two,
 every partial length m at most X and every real alpha, the partial sum of S up to m minus its
 prime restricted part, which is the sum of Lambda of n times e of alpha n over the higher
 prime powers n at most m, has modulus at most two times X to four fifths times the square of
 log X. Proof sketch: the modulus is at most the sum of Lambda over higher prime powers up to
-X, which is at most log X times the number of perfect powers up to X, at most the square root
-of X times log X over log two. -/
+X, which is psi of m minus theta of m, at most two times the square root of m times log m by
+Mathlib's `Chebyshev.psi_sub_theta_le`; for X below four no higher prime power occurs. -/
 theorem leaf_nonprime_partial_feed1122 {X m : ℕ} (hX : 2 ≤ X) (hm : m ≤ X) (α : ℝ) :
     ‖Ssum m α - ∑ n ∈ (Finset.Icc 1 m).filter (fun n => n.Prime),
         (vonMangoldt n : ℂ) * ee (α * n)‖ ≤
-      2 * (X : ℝ) ^ (4 / 5 : ℝ) * Real.log X ^ 2 :=
-  nonprime_partial_aux451 hX hm α
+      2 * (X : ℝ) ^ (4 / 5 : ℝ) * Real.log X ^ 2 := by
+  have hdiff : Ssum m α - ∑ n ∈ (Finset.Icc 1 m).filter (fun n => n.Prime),
+        (vonMangoldt n : ℂ) * ee (α * n) =
+      ∑ n ∈ Finset.range (m + 1),
+        (((vonMangoldt n - if n.Prime then vonMangoldt n else 0 : ℝ)) : ℂ) * ee (α * n) := by
+    unfold Ssum
+    rw [Finset.sum_filter, ← Finset.sum_sub_distrib]
+    have hsub : (∑ n ∈ Finset.Icc 1 m,
+        (((vonMangoldt n - if n.Prime then vonMangoldt n else 0 : ℝ)) : ℂ) * ee (α * n)) =
+        ∑ n ∈ Finset.range (m + 1),
+        (((vonMangoldt n - if n.Prime then vonMangoldt n else 0 : ℝ)) : ℂ) * ee (α * n) := by
+      apply Finset.sum_subset
+      · intro x hx
+        simp only [Finset.mem_Icc] at hx
+        simp only [Finset.mem_range]
+        omega
+      · intro x hx hx'
+        have hx0 : x = 0 := by
+          simp only [Finset.mem_range, Finset.mem_Icc] at hx hx'
+          omega
+        subst hx0
+        simp
+    rw [← hsub]
+    apply Finset.sum_congr rfl
+    intro n _
+    by_cases hp : n.Prime <;> simp [hp]
+  have hX1 : (1 : ℝ) ≤ X := by exact_mod_cast (by omega : 1 ≤ X)
+  have hXp : (0 : ℝ) < X := by linarith
+  have hlogX : 0 ≤ Real.log X := Real.log_nonneg hX1
+  have hnorm : ‖Ssum m α - ∑ n ∈ (Finset.Icc 1 m).filter (fun n => n.Prime),
+        (vonMangoldt n : ℂ) * ee (α * n)‖ ≤ Chebyshev.psi m - Chebyshev.theta m := by
+    rw [hdiff, ← nonprime_mass_eq384]
+    refine (norm_sum_le _ _).trans (le_of_eq (Finset.sum_congr rfl ?_))
+    intro n _
+    rw [norm_mul, ee_eq_library84, LeanLab.PNTPort.LargeSieve.norm_e, mul_one,
+      Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg]
+    by_cases hp : n.Prime
+    · simp [hp]
+    · simp [hp, vonMangoldt_nonneg]
+  refine hnorm.trans ?_
+  rcases Nat.eq_zero_or_pos m with rfl | hm1
+  · simp [Chebyshev.psi, Chebyshev.theta]
+    positivity
+  by_cases hX4 : X < 4
+  · have hm4 : m < 4 := by omega
+    have : Chebyshev.psi m - Chebyshev.theta m = 0 := by
+      rw [← nonprime_mass_eq384]
+      apply Finset.sum_eq_zero
+      intro n hn
+      have hn4 : n < 4 := by simp at hn; omega
+      interval_cases n <;> simp [vonMangoldt_apply_prime, Nat.prime_two, Nat.prime_three]
+    rw [this]; positivity
+  have hm1' : (1 : ℝ) ≤ m := by exact_mod_cast hm1
+  have hmX : (m : ℝ) ≤ X := by exact_mod_cast hm
+  have h4 : (4 : ℝ) ≤ X := by exact_mod_cast (by omega : 4 ≤ X)
+  have hlog1 : 1 ≤ Real.log X := by
+    have := Real.add_one_le_exp 1
+    rw [Real.le_log_iff_exp_le hXp]
+    have : Real.exp 1 < 3 := by
+      have := Real.exp_one_lt_d9; norm_num at this ⊢; linarith
+    linarith
+  have hsq : Real.sqrt m ≤ (X : ℝ) ^ (4 / 5 : ℝ) := by
+    rw [Real.sqrt_eq_rpow]
+    calc (m : ℝ) ^ (1 / 2 : ℝ) ≤ (X : ℝ) ^ (1 / 2 : ℝ) :=
+          Real.rpow_le_rpow (by positivity) hmX (by norm_num)
+      _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hX1 (by norm_num)
+  have hlm : Real.log m ≤ Real.log X := Real.log_le_log (by linarith) hmX
+  have hlm0 : 0 ≤ Real.log m := Real.log_nonneg hm1'
+  calc Chebyshev.psi m - Chebyshev.theta m ≤ 2 * Real.sqrt m * Real.log m :=
+        Chebyshev.psi_sub_theta_le hm1'
+    _ ≤ 2 * (X : ℝ) ^ (4 / 5 : ℝ) * (Real.log X * Real.log X) := by
+        gcongr
+        nlinarith
+    _ = _ := by ring
 
 /-- PROVED in this file, no sorry. P0029 page 27, proof of Lemma 7.3, display 7.8, minor arc
 part, the transfer of the minor arc estimate from S to the smoothed sum S_phi by summation by
@@ -168,8 +240,8 @@ theorem leaf_prime_family_feed1122 {ϕ : ℝ → ℝ} (hϕ : IsPhi ϕ) :
           (∑ k ∈ (Finset.range (X + 1)).filter (fun k => k.Prime),
             ((vonMangoldt k * ϕ (k / N) : ℝ) : ℂ) * ee (α * k)) ^ 2 * W α *
             ee (-(N * α))‖ ^ 2 ≤
-        K * B ^ 2 * U ^ 2 * X * Real.log X :=
-  prime_family_aux451 hϕ
+        K * B ^ 2 * U ^ 2 * X * Real.log X := by
+  sorry
 
 /-- Assembly: `prime_minor_multi_451` with exactly its statement, from the reused leaf
 `split_leaf_ssum_minor_log2` and the three leaves above. -/
