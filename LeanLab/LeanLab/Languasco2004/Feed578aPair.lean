@@ -6,6 +6,7 @@ dyadic block union LEAF for Lemma 17. Both remain OPEN.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Languasco2004.Decomp565c
+import LeanLab.Languasco2004.Feed578aBlocks17
 
 namespace LeanLab.Languasco2004.Feed578aPair
 open Finset Real Decomp279a Decomp316a Source565 Decomp565c
@@ -60,7 +61,8 @@ theorem lemma17_blocks_uniform :
         0.00000001 * scale N (localization N ε) n <
           ∑ j ∈ range ⌈K * log N⌉₊,
             |progressionRemainder N (localization N ε) (M j N) n (a j N)|)).card : ℝ) ≤
-      C * windowLength N ε / Real.log N ^ B := by sorry
+      C * windowLength N ε / Real.log N ^ B :=
+  Feed578aBlocks17.lemma17_blocks_uniform_from_leaves
 
 /-- Jia page 283 display 58: exact type of Decomp578a.pair_sieve_transfer.
 CONDITIONAL ON the two LEAFs pair_sieve_reduction and lemma17_blocks_uniform.
