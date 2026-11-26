@@ -45,7 +45,23 @@ character modulo `6` factors through `ZMod 3`, since `(ZMod 6)ˣ → (ZMod 3)ˣ`
 its conductor divides `3` and no character modulo `6` is primitive. Class MEDIUM: finite
 group facts about `(ZMod 6)ˣ` and `DirichletCharacter.FactorsThrough`. -/
 theorem one6_no_primitive_six (χ : DirichletCharacter ℂ q) (hq : q = 6) : ¬ χ.IsPrimitive := by
-  sorry
+  subst hq
+  -- The reduction on unit groups `(ZMod 6)ˣ → (ZMod 3)ˣ` is injective: the kernel is trivial,
+  -- so every character modulo `6` factors through level `3`. This mirrors the level fourteen
+  -- argument of `LeanLab.HelfgottMajor.Conductor669`.
+  have hi : Function.Injective (ZMod.unitsMap (show 3 ∣ 6 by norm_num)) := by
+    decide
+  have hf : χ.FactorsThrough 3 := by
+    apply (DirichletCharacter.factorsThrough_iff_ker_unitsMap (by norm_num : 3 ∣ 6)).mpr
+    intro x hx
+    have hx1 : x = 1 := hi (by simpa using hx)
+    rw [hx1]
+    exact map_one χ.toUnitHom
+  have hc : χ.conductor ≤ 3 := Nat.sInf_le hf
+  intro hχ
+  change χ.conductor = 6 at hχ
+  rw [hχ] at hc
+  omega
 
 /-- LEAF: zero free rectangle for the primitive character modulo `3`, the window
 `(1, 2πe / 3]` of the band at conductor `3` holds no strip zero of `L(·, χ)`. Numerically the
