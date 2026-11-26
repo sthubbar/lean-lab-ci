@@ -29,6 +29,55 @@ the ratio of the largest partial sum to the cutoff free bound is at most `0.754`
 namespace LeanLab.HelfgottMajor.PolyaVinogradov123
 open Real
 
+/-- For a primitive character `χ` modulo `q`, the Gauss sum `∑ a, χ a * e^(2πi a/q)` has complex
+norm `√q`. This follows from `gaussSum_mul_gaussSum_eq_card` together with
+`star_gaussSum_eq`: `gaussSum χ stdAddChar * conj (gaussSum χ stdAddChar) = q`. -/
+lemma gaussSum_abs_sqrt {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (hχ : χ.IsPrimitive) (h_odd : χ (-1) ≠ 1) :
+    ‖gaussSum χ stdAddChar‖ = Real.sqrt q := by
+  have h₁ : (χ : MulChar (ZMod q) ℂ) ≠ 1 := by
+    intro h
+    have h₂ : χ ((-1 : ℤ) : ZMod q) = (1 : ℂ) := by
+      rw [h]
+      simp [MulChar.one_apply]
+    have h₃ : χ ((-1 : ℤ) : ZMod q) ≠ (1 : ℂ) := by
+      exact h_odd
+    contradiction
+  
+  have h₂ : IsPrimitive (stdAddChar : AddChar (ZMod q) ℂ) := isPrimitive_stdAddChar
+  
+  have h₃ : gaussSum χ stdAddChar * gaussSum χ⁻¹ (stdAddChar⁻¹) = (q : ℂ) := by
+    apply gaussSum_mul_gaussSum_eq_card
+    <;> simp_all [IsDomain]
+    <;> norm_num
+    <;> try assumption
+  
+  have h₄ : star (gaussSum χ stdAddChar) = gaussSum χ⁻¹ (stdAddChar⁻¹) := by
+    apply star_gaussSum_eq
+  
+  have h₅ : ‖gaussSum χ stdAddChar‖ ^ 2 = (q : ℝ) := by
+    calc
+      ‖gaussSum χ stdAddChar‖ ^ 2 = ‖gaussSum χ stdAddChar * star (gaussSum χ stdAddChar)‖ := by
+        rw [← Complex.norm_mul]
+        have h : ‖star (gaussSum χ stdAddChar)‖ = ‖gaussSum χ stdAddChar‖ := by
+          rw [Complex.norm_conj]
+        rw [h]
+        <;> ring_nf
+        <;> simp [Complex.norm_sq]
+        <;> ring_nf
+      _ = ‖(q : ℂ)‖ := by
+        rw [h₃, h₄]
+      _ = (q : ℝ) := by simp [Complex.norm_ofReal]
+  
+  have h₆ : ‖gaussSum χ stdAddChar‖ = Real.sqrt q := by
+    rw [Real.sqrt_eq_iff_sq_eq (by positivity)]
+    rw [h₅]
+    <;> norm_cast
+    <;> simp [Real.sqrt_eq_iff_sq_eq]
+    <;> nlinarith
+  
+  exact h₆
+
 /-- LEAF: sharpened explicit odd Polya-Vinogradov, large moduli. For an odd primitive character
 modulo `q > 1200`, every partial sum is at most `sqrt q / pi * (1/2 log q + log log q + 17/10)`,
 that is `1/(2 pi) sqrt q log q + 1/pi sqrt q log log q + 0.542 sqrt q`. This is the Polya Fourier
