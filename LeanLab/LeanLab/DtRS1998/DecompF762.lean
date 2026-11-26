@@ -15,11 +15,9 @@ certificate, and the parent theorem `leaf_quarter_three_block_two` stays open.
 
 Binary Goldbach is open.
 -/
-import LeanLab.DtRS1998.SPLIT_cover_quarter_three
+import Mathlib
 
 namespace LeanLab.DtRS1998.Decomp270c
-
-open LeanLab Task71.Paper Decomp270a
 
 /-- LEAF 1 of 2: the first sub-block of the block, `281250001 ≤ j ≤ 296875000`,
 is covered by a list of at most 7 primes.  This is the first range cut of the
