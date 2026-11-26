@@ -13,11 +13,52 @@ assembly into the delay differential system 8 are proved here.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Cai2002.Split306Theorem6
-import LeanLab.Cai2002.Prove2672Series8
 
 open Finset Real
 noncomputable section
 namespace LeanLab.Cai2002
+
+/-! ### Summability of the series 13 and 14, display 18 with Lemma 8 -/
+
+/-- `h` of display 18 is at most `e ^ (-2)` for `s ≥ 1`. -/
+private theorem hSieve_le_x8 (s : ℝ) (hs : 1 ≤ s) :
+    LeanLab.ChenExplicit.hSieve s ≤ exp (-2) := by
+  unfold LeanLab.ChenExplicit.hSieve
+  split_ifs with h2 h3
+  · exact le_rfl
+  · exact exp_le_exp.mpr (by linarith)
+  · have hinv : 3 * s⁻¹ ≤ 1 := by
+      rw [← div_eq_mul_inv, div_le_one (by linarith)]; linarith
+    have he : exp (-s) ≤ exp (-2) := exp_le_exp.mpr (by linarith)
+    calc 3 * s⁻¹ * exp (-s) ≤ 1 * exp (-2) :=
+          mul_le_mul hinv he (exp_pos _).le (by norm_num)
+      _ = exp (-2) := one_mul _
+
+/-- The uniform majorant of display 18 with `c_n = 0.9607`, Lemma 8, for every `n ≥ 1`:
+`2 e ^ 2 · 0.9607 ^ (n - 1) · e ^ (-2)`, summable as a geometric series. -/
+private theorem summable_maj_x8 :
+    Summable (fun n : ℕ => 2 * exp 2 * (0.9607 : ℝ) ^ (n - 1) * exp (-2)) := by
+  rw [← summable_nat_add_iff 1]
+  have hg : Summable (fun m : ℕ => (2 * exp 2 * exp (-2)) * (0.9607 : ℝ) ^ m) :=
+    (summable_geometric_of_lt_one (by norm_num) (by norm_num)).mul_left _
+  refine hg.congr (fun m => ?_)
+  rw [show m + 1 - 1 = m by omega]
+  ring
+
+/-- Each term of the restricted series is bounded by the uniform majorant. -/
+private theorem term_le_maj_x8 (P : ℕ → Prop) [DecidablePred P] (s : ℝ) (hs1 : 1 ≤ s)
+    (hP : ∀ n, P n → (Odd n ∧ 1 ≤ s) ∨ (Even n ∧ 2 ≤ s)) (n : ℕ) :
+    ‖(if P n then bjsF306 n s else 0)‖ ≤
+      2 * exp 2 * (0.9607 : ℝ) ^ (n - 1) * exp (-2) := by
+  split_ifs with h
+  · have h0 := leaf306_fn_nonneg n s (hP n h)
+    rw [Real.norm_eq_abs, abs_of_nonneg h0]
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · subst hn; simp only [bjsF306]; positivity
+    · refine (key_l8306 n hn s (hP n h)).trans ?_
+      have h2 : 0 ≤ 2 * exp 2 * (0.9607 : ℝ) ^ (n - 1) := by positivity
+      exact mul_le_mul_of_nonneg_left (hSieve_le_x8 s hs1) h2
+  · simp only [norm_zero]; positivity
 
 /-- LEAF: BJS display 18 with Lemma 8, Nathanson Lemma 9.7, page 6: f_n(s) ≤ 2 e ^ 2 c_n ^ (n - 1) h(s)
 with c_n ≤ 0.9607 for n ≥ 2, so the series 13 converges for s ≥ 1 and the series 14
@@ -26,26 +67,131 @@ nonnegativity, leaf306_fn_nonneg. -/
 theorem leaf8_summable :
     (∀ s : ℝ, 1 ≤ s → Summable (fun n : ℕ => if Odd n then bjsF306 n s else 0)) ∧
     (∀ s : ℝ, 2 ≤ s → Summable (fun n : ℕ => if Even n then bjsF306 n s else 0)) := by
-  have hsum (P : ℕ → Prop) [DecidablePred P] (s : ℝ)
-      (hP : ∀ n, P n → (Odd n ∧ 1 ≤ s) ∨ (Even n ∧ 2 ≤ s)) :
-      Summable (fun n : ℕ => if P n then bjsF306 n s else 0) := by
-    rw [← summable_nat_add_iff 1]
-    refine Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_)
-      ((summable_geometric_of_lt_one (by norm_num : (0 : ℝ) ≤ 0.9607)
-        (by norm_num)).mul_left (2 * exp 2 * |LeanLab.ChenExplicit.hSieve s|))
-    · split_ifs with h
-      · exact leaf306_fn_nonneg _ s (hP _ h)
-      · exact le_rfl
-    · split_ifs with h
-      · have hb := key_l8306 (n + 1) (by omega) s (hP _ h)
-        rw [Nat.add_sub_cancel] at hb
-        calc bjsF306 (n + 1) s
-            ≤ 2 * exp 2 * (0.9607 : ℝ) ^ n * |LeanLab.ChenExplicit.hSieve s| :=
-              hb.trans (mul_le_mul_of_nonneg_left (le_abs_self _) (by positivity))
-          _ = _ := by ring
-      · positivity
-  exact ⟨fun s hs => hsum Odd s (fun _ h => Or.inl ⟨h, hs⟩),
-    fun s hs => hsum Even s (fun _ h => Or.inr ⟨h, hs⟩)⟩
+  constructor
+  · intro s hs
+    exact Summable.of_norm_bounded summable_maj_x8
+      (fun n => term_le_maj_x8 Odd s hs (fun _ h => Or.inl ⟨h, hs⟩) n)
+  · intro s hs
+    exact Summable.of_norm_bounded summable_maj_x8
+      (fun n => term_le_maj_x8 Even s (by linarith) (fun _ h => Or.inr ⟨h, hs⟩) n)
+
+/-! ### Continuity of the sums of the series 13 and 14 -/
+
+/-- The tail integral `s ↦ ∫ over t > s of g` is continuous on `[a, ∞)` when `g` is
+integrable on `(a, ∞)`. -/
+private theorem contOn_tail_integral_x8 (g : ℝ → ℝ) (a : ℝ)
+    (hg : MeasureTheory.IntegrableOn g (Set.Ioi a)) :
+    ContinuousOn (fun s => ∫ t in Set.Ioi s, g t) (Set.Ici a) := by
+  set g' := (Set.Ioi a).indicator g with hg'def
+  have hg' : MeasureTheory.Integrable g' :=
+    (MeasureTheory.integrable_indicator_iff measurableSet_Ioi).2 hg
+  have hprim : Continuous fun b => ∫ x in a..b, g' x :=
+    intervalIntegral.continuous_primitive (fun _ _ => hg'.intervalIntegrable) a
+  refine ((continuous_const (y := ∫ t in Set.Ioi a, g t)).sub hprim).continuousOn.congr ?_
+  intro s hs
+  have hs' : a ≤ s := hs
+  have hsplit : ∫ t in Set.Ioi a, g t = (∫ t in Set.Ioc a s, g t) + ∫ t in Set.Ioi s, g t := by
+    rw [← MeasureTheory.setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi
+      (hg.mono_set Set.Ioc_subset_Ioi_self) (hg.mono_set (Set.Ioi_subset_Ioi hs')),
+      Set.Ioc_union_Ioi_eq_Ioi hs']
+  have hint : ∫ x in a..s, g' x = ∫ t in Set.Ioc a s, g t := by
+    rw [intervalIntegral.integral_of_le hs']
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun t ht => ?_)
+    simp only [hg'def]
+    exact Set.indicator_of_mem (Set.Ioc_subset_Ioi_self ht) g
+  simp only [Pi.sub_apply]
+  rw [hint]
+  linarith
+
+/-- Integrability of `t ↦ f_m(t - 1)` on `(a, ∞)` from continuity, nonnegativity and display 18
+with the integrable shifted `h`. -/
+private theorem integrableOn_shift_x8 (m : ℕ) (hm : 1 ≤ m) (a : ℝ) (ha : 1 ≤ a)
+    (hcont : ContinuousOn (fun t => bjsF306 m (t - 1)) (Set.Ioi a))
+    (hdom : ∀ t, a < t → (Odd m ∧ 1 ≤ t - 1) ∨ (Even m ∧ 2 ≤ t - 1)) :
+    MeasureTheory.IntegrableOn (fun t => bjsF306 m (t - 1)) (Set.Ioi a) := by
+  have hK := ((leaf306_hshift_integrable a ha).const_mul (2 * exp 2 * (0.9607 : ℝ) ^ (m - 1)))
+  refine MeasureTheory.Integrable.mono' hK (hcont.aestronglyMeasurable measurableSet_Ioi) ?_
+  filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
+  have h0 := leaf306_fn_nonneg m (t - 1) (hdom t ht)
+  rw [Real.norm_eq_abs, abs_of_nonneg h0]
+  exact key_l8306 m hm (t - 1) (hdom t ht)
+
+/-- Shift of continuity: `f` continuous on `[a - 1, ∞)` gives `t ↦ f(t - 1)` continuous on
+`[a, ∞)`. -/
+private theorem contOn_shift_x8 (f : ℝ → ℝ) (a : ℝ) (hf : ContinuousOn f (Set.Ici (a - 1))) :
+    ContinuousOn (fun t => f (t - 1)) (Set.Ici a) :=
+  hf.comp (continuousOn_id.sub continuousOn_const) (fun t ht => by
+    simp only [Set.mem_Ici] at ht ⊢; linarith)
+
+/-- `f_1` of display 15 is continuous on `[1, ∞)`. -/
+private theorem contOn_f1_x8 : ContinuousOn (bjsF306 1) (Set.Ici 1) := by
+  have h1 : ContinuousOn (fun s : ℝ => (3 - s) / s) (Set.Ici 1) :=
+    (continuousOn_const.sub continuousOn_id).div continuousOn_id
+      (fun s hs => by simp only [Set.mem_Ici] at hs; positivity)
+  have h2 : ContinuousOn (fun s : ℝ => max ((3 - s) / s) 0) (Set.Ici 1) :=
+    (continuous_id.max continuous_const).comp_continuousOn h1
+  refine h2.congr (fun s hs => ?_)
+  have hs' : (1 : ℝ) ≤ s := hs
+  simp only [bjsF306]
+  split_ifs with h
+  · exact (max_eq_left (div_nonneg (by linarith) (by linarith))).symm
+  · exact (max_eq_right (div_nonpos_of_nonpos_of_nonneg (by linarith) (by linarith))).symm
+
+/-- Continuity of each `f_n` where the paper uses it: odd `n` on `[1, ∞)` and even `n` on
+`[2, ∞)`, by induction on `n`. -/
+private theorem contOn_fn_x8 (n : ℕ) :
+    (Odd n → ContinuousOn (bjsF306 n) (Set.Ici 1)) ∧
+    (Even n → ContinuousOn (bjsF306 n) (Set.Ici 2)) := by
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+    match n, ih with
+    | 0, _ =>
+      refine ⟨fun h => absurd h (by decide), fun _ => ?_⟩
+      simp only [bjsF306]; exact continuousOn_const
+    | 1, _ => exact ⟨fun _ => contOn_f1_x8, fun h => absurd h (by decide)⟩
+    | m + 2, ih =>
+      rcases Nat.even_or_odd (m + 2) with he | ho
+      · have hodd1 : Odd (m + 1) := by
+          rcases Nat.even_or_odd (m + 1) with he' | ho'
+          · exact absurd he (by rw [Nat.not_even_iff_odd]; exact he'.add_one)
+          · exact ho'
+        have hc1 := (ih (m + 1) (by omega)).1 hodd1
+        have hg : ContinuousOn (fun t => bjsF306 (m + 1) (t - 1)) (Set.Ici 2) :=
+          contOn_shift_x8 _ 2 (by norm_num; exact hc1)
+        have hI := integrableOn_shift_x8 (m + 1) (by omega) 2 (by norm_num)
+          (hg.mono Set.Ioi_subset_Ici_self)
+          (fun t ht => Or.inl ⟨hodd1, by linarith [show (2 : ℝ) < t from ht]⟩)
+        have hT := contOn_tail_integral_x8 _ 2 hI
+        have hne : ¬ Odd (m + 2) := by rw [Nat.not_odd_iff_even]; exact he
+        refine ⟨fun h => absurd h hne, fun _ => ?_⟩
+        refine (hT.div continuousOn_id (fun s hs => by
+          simp only [Set.mem_Ici] at hs; simp only [id]; linarith)).congr (fun s hs => ?_)
+        simp only [Pi.div_apply, id]
+        simp only [bjsF306, hne, false_and, ite_false]
+      · have hev1 : Even (m + 1) := by
+          rcases Nat.even_or_odd (m + 1) with he' | ho'
+          · exact he'
+          · exact absurd ho (by rw [Nat.not_odd_iff_even]; exact ho'.add_one)
+        have hc1 := (ih (m + 1) (by omega)).2 hev1
+        have hg : ContinuousOn (fun t => bjsF306 (m + 1) (t - 1)) (Set.Ici 3) :=
+          contOn_shift_x8 _ 3 (by norm_num; exact hc1)
+        have hI := integrableOn_shift_x8 (m + 1) (by omega) 3 (by norm_num)
+          (hg.mono Set.Ioi_subset_Ici_self)
+          (fun t ht => Or.inr ⟨hev1, by linarith [show (3 : ℝ) < t from ht]⟩)
+        have hT := contOn_tail_integral_x8 _ 3 hI
+        have hTm : ContinuousOn
+            (fun s : ℝ => ∫ t in Set.Ioi (max s 3), bjsF306 (m + 1) (t - 1)) (Set.Ici 1) :=
+          hT.comp (continuous_id.max continuous_const).continuousOn
+            (fun s _ => by simp only [Set.mem_Ici]; exact le_max_right _ _)
+        have hne : ¬ Even (m + 2) := by rw [Nat.not_even_iff_odd]; exact ho
+        refine ⟨fun _ => ?_, fun h => absurd h hne⟩
+        refine (hTm.div continuousOn_id (fun s hs => by
+          simp only [Set.mem_Ici] at hs; simp only [id]; linarith)).congr (fun s hs => ?_)
+        simp only [Pi.div_apply, id]
+        simp only [bjsF306, ho, true_and]
+        split_ifs with h3
+        · rw [max_eq_right h3]
+        · rw [max_eq_left (le_of_lt (not_le.mp h3))]
 
 /-- LEAF: continuity of the sums of the series 13 and 14 of BJS page 6, Nathanson
 Theorem 9.4: each f_n is continuous where used, displays 15 to 17, and the bound 18
@@ -54,20 +200,249 @@ theorem leaf8_continuous :
     ContinuousOn (fun s : ℝ => ∑' n : ℕ, if Odd n then bjsF306 n s else 0) (Set.Ici 1) ∧
     ContinuousOn (fun s : ℝ => ∑' n : ℕ, if Even n then bjsF306 n s else 0) (Set.Ici 2) := by
   constructor
-  · refine continuousOn_tsum (u := Series8Proof2672.majU8) (fun n => ?_)
-      Series8Proof2672.majU8_summable
-      (fun n s hs => Series8Proof2672.term_le_majU8 Odd s
-        (fun _ h => Or.inl ⟨h, hs⟩) n)
+  · refine continuousOn_tsum (u := fun n : ℕ => 2 * exp 2 * (0.9607 : ℝ) ^ (n - 1) * exp (-2))
+      (fun n => ?_) summable_maj_x8
+      (fun n s hs => term_le_maj_x8 Odd s hs (fun _ h => Or.inl ⟨h, hs⟩) n)
     by_cases h : Odd n
-    · simp only [h, ite_true]; exact (Series8Proof2672.contOn_fn_c8 n).1 h
+    · simp only [h, ite_true]; exact (contOn_fn_x8 n).1 h
     · simp only [h, ite_false]; exact continuousOn_const
-  · refine continuousOn_tsum (u := Series8Proof2672.majU8) (fun n => ?_)
-      Series8Proof2672.majU8_summable
-      (fun n s hs => Series8Proof2672.term_le_majU8 Even s
+  · refine continuousOn_tsum (u := fun n : ℕ => 2 * exp 2 * (0.9607 : ℝ) ^ (n - 1) * exp (-2))
+      (fun n => ?_) summable_maj_x8
+      (fun n s hs => term_le_maj_x8 Even s (le_trans (by norm_num) hs)
         (fun _ h => Or.inr ⟨h, hs⟩) n)
     by_cases h : Even n
-    · simp only [h, ite_true]; exact (Series8Proof2672.contOn_fn_c8 n).2 h
+    · simp only [h, ite_true]; exact (contOn_fn_x8 n).2 h
     · simp only [h, ite_false]; exact continuousOn_const
+
+/-! ### Termwise differentiation of the even series, display 16 -/
+
+/-- `h(s) ≤ e ^ (-2)` for every real `s`. -/
+private theorem hSieve_le_all_x8d (x : ℝ) : LeanLab.ChenExplicit.hSieve x ≤ exp (-2) := by
+  unfold LeanLab.ChenExplicit.hSieve
+  split_ifs with h1 h2
+  · exact le_rfl
+  · exact exp_le_exp.mpr (by linarith)
+  · have hx : 3 < x := by linarith
+    have h3 : 3 * x⁻¹ ≤ 1 := by
+      rw [← div_eq_mul_inv, div_le_one (by linarith)]; linarith
+    have he : exp (-x) ≤ exp (-2) := exp_le_exp.mpr (by linarith)
+    have hp := exp_pos (-x)
+    nlinarith
+
+/-- Display 18 with Lemma 8, two sided: `|f_k(x)| ≤ 2 e ^ 2 0.9607 ^ (k - 1) h(x)`. -/
+private theorem abs_fn_le_x8d (k : ℕ) (hk : 1 ≤ k) (x : ℝ)
+    (hx : (Odd k ∧ 1 ≤ x) ∨ (Even k ∧ 2 ≤ x)) :
+    |bjsF306 k x| ≤ 2 * exp 2 * (0.9607 : ℝ) ^ (k - 1) * LeanLab.ChenExplicit.hSieve x := by
+  rw [abs_of_nonneg (leaf306_fn_nonneg k x hx)]
+  exact key_l8306 k hk x hx
+
+/-- The integrand of display 16, `t ↦ f_k(t - 1)`, is integrable on `t > a` when `f_k` is
+continuous beyond `a - 1` and the parity range of display 18 holds there. -/
+private theorem phi_integrable_x8d (k : ℕ) (a : ℝ) (ha : 1 ≤ a)
+    (hpar : ∀ x, a - 1 < x → (Odd k ∧ 1 ≤ x) ∨ (Even k ∧ 2 ≤ x))
+    (hc : ContinuousOn (bjsF306 k) (Set.Ioi (a - 1))) :
+    MeasureTheory.IntegrableOn (fun u => bjsF306 k (u - 1)) (Set.Ioi a) := by
+  rcases Nat.eq_zero_or_pos k with h0 | hk
+  · subst h0
+    simp [bjsF306]
+  have hc' : ContinuousOn (fun u => bjsF306 k (u - 1)) (Set.Ioi a) := by
+    refine hc.comp (continuousOn_id.sub continuousOn_const) ?_
+    intro u hu
+    show a - 1 < u - 1
+    have : a < u := hu
+    linarith
+  have hI := (leaf306_hshift_integrable a ha).const_mul (2 * exp 2 * (0.9607 : ℝ) ^ (k - 1))
+  refine hI.mono' (hc'.aestronglyMeasurable measurableSet_Ioi) ?_
+  filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with u hu
+  have hu' : a < u := hu
+  rw [Real.norm_eq_abs]
+  exact abs_fn_le_x8d k hk (u - 1) (hpar _ (by linarith))
+
+/-- The tail integral `z ↦ ∫ over t > z of φ` is continuous on `[a, ∞)` when `φ` is integrable
+on `t > a`. -/
+private theorem contG_x8d (φ : ℝ → ℝ) (a : ℝ) (hi : MeasureTheory.IntegrableOn φ (Set.Ioi a)) :
+    ContinuousOn (fun z => ∫ u in Set.Ioi z, φ u) (Set.Ici a) := by
+  set ψ := (Set.Ioi a).indicator φ with hψ
+  have hψi : MeasureTheory.Integrable ψ :=
+    (MeasureTheory.integrable_indicator_iff measurableSet_Ioi).2 hi
+  have hcont : Continuous fun z => (∫ u in Set.Ioi a, φ u) - ∫ u in a..z, ψ u :=
+    continuous_const.sub (intervalIntegral.continuous_primitive
+      (fun _ _ => hψi.intervalIntegrable) a)
+  refine hcont.continuousOn.congr ?_
+  intro z hz
+  have hz' : a ≤ z := hz
+  show ∫ u in Set.Ioi z, φ u = (∫ u in Set.Ioi a, φ u) - ∫ u in a..z, ψ u
+  have h1 : ∫ u in a..z, ψ u = ∫ u in a..z, φ u := by
+    rw [intervalIntegral.integral_of_le hz', intervalIntegral.integral_of_le hz']
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun u hu => ?_)
+    exact Set.indicator_of_mem (show u ∈ Set.Ioi a from hu.1) φ
+  rw [h1, ← intervalIntegral.integral_Ioi_sub_Ioi hi hz']
+  ring
+
+/-- Fundamental theorem of calculus for the tail integral of display 16. -/
+private theorem derivG_x8d (φ : ℝ → ℝ) (a s : ℝ) (has : a < s)
+    (hi : MeasureTheory.IntegrableOn φ (Set.Ioi a)) (hc : ContinuousAt φ s) :
+    HasDerivAt (fun z => ∫ u in Set.Ioi z, φ u) (-φ s) s := by
+  have hII : IntervalIntegrable φ MeasureTheory.volume a s :=
+    (intervalIntegrable_iff_integrableOn_Ioc_of_le has.le).2
+      (hi.mono_set Set.Ioc_subset_Ioi_self)
+  have hmeas : StronglyMeasurableAtFilter φ (nhds s) :=
+    AEStronglyMeasurable.stronglyMeasurableAtFilter_of_mem hi.aestronglyMeasurable
+      (Ioi_mem_nhds has)
+  have hd := (intervalIntegral.integral_hasDerivAt_right hII hmeas hc).const_sub
+    (∫ u in Set.Ioi a, φ u)
+  refine hd.congr_of_eventuallyEq ?_
+  filter_upwards [Ioi_mem_nhds has] with z hz
+  have hz' : a ≤ z := le_of_lt hz
+  rw [← intervalIntegral.integral_Ioi_sub_Ioi hi hz']
+  ring
+
+/-- Display 15: on `s > 1`, `f_1(s) = max (3 - s) 0 / s`. -/
+private theorem f1_eq_x8d (s : ℝ) (hs : 1 < s) : bjsF306 1 s = max (3 - s) 0 / s := by
+  simp only [bjsF306]
+  split_ifs with h
+  · rw [max_eq_left (by linarith)]
+  · rw [max_eq_right (by linarith), zero_div]
+
+/-- Continuity of the functions `f_n` of displays 15 to 17 where the paper uses them: odd `n`
+on `s > 1` and even `n` on `s > 2`. -/
+private theorem fn_continuous_x8d (k : ℕ) :
+    (Odd k → ContinuousOn (bjsF306 k) (Set.Ioi 1)) ∧
+    (Even k → ContinuousOn (bjsF306 k) (Set.Ioi 2)) := by
+  induction k using Nat.strong_induction_on with
+  | _ k ih =>
+    match k, ih with
+    | 0, _ =>
+      refine ⟨fun h => absurd h (by decide), fun _ => ?_⟩
+      simp only [bjsF306]; exact continuousOn_const
+    | 1, _ =>
+      refine ⟨fun _ => ?_, fun h => absurd h (by decide)⟩
+      have hc : ContinuousOn (fun s : ℝ => max (3 - s) 0 / s) (Set.Ioi 1) := by
+        refine ContinuousOn.div (by fun_prop) continuousOn_id ?_
+        intro x hx; have : (1 : ℝ) < x := hx; exact ne_of_gt (by linarith)
+      exact hc.congr (fun s hs => f1_eq_x8d s hs)
+    | m + 2, ih =>
+      refine ⟨fun ho => ?_, fun he => ?_⟩
+      · have hev : Even (m + 1) := by
+          rcases Nat.even_or_odd (m + 1) with h | h
+          · exact h
+          · exact absurd ho (by rw [Nat.not_odd_iff_even]; exact h.add_one)
+        have hc1 := (ih (m + 1) (by omega)).2 hev
+        have hi := phi_integrable_x8d (m + 1) 3 (by norm_num)
+          (fun x hx => Or.inr ⟨hev, by linarith⟩) (by norm_num; exact hc1)
+        have hG := contG_x8d (fun u => bjsF306 (m + 1) (u - 1)) 3 hi
+        have hcomp : ContinuousOn
+            (fun s : ℝ => (∫ u in Set.Ioi (max s 3), bjsF306 (m + 1) (u - 1)) / s)
+            (Set.Ioi 1) := by
+          refine ContinuousOn.div ?_ continuousOn_id ?_
+          · refine hG.comp (continuous_id.max continuous_const).continuousOn ?_
+            intro x _; exact le_max_right x 3
+          · intro x hx; have : (1 : ℝ) < x := hx; exact ne_of_gt (by linarith)
+        refine hcomp.congr (fun s hs => ?_)
+        simp only [bjsF306]
+        split_ifs with h
+        · rw [max_eq_right h.2]
+        · have : 3 < s := by
+            by_contra hc
+            exact h ⟨ho, by linarith⟩
+          rw [max_eq_left this.le]
+      · have hod : Odd (m + 1) := by
+          rcases Nat.even_or_odd (m + 1) with h | h
+          · exact absurd he (by rw [Nat.not_even_iff_odd]; exact h.add_one)
+          · exact h
+        have hc1 := (ih (m + 1) (by omega)).1 hod
+        have hi := phi_integrable_x8d (m + 1) 2 (by norm_num)
+          (fun x hx => Or.inl ⟨hod, by linarith⟩) (by norm_num; exact hc1)
+        have hG := contG_x8d (fun u => bjsF306 (m + 1) (u - 1)) 2 hi
+        have hcomp : ContinuousOn
+            (fun s : ℝ => (∫ u in Set.Ioi s, bjsF306 (m + 1) (u - 1)) / s) (Set.Ioi 2) := by
+          refine ContinuousOn.div (hG.mono Set.Ioi_subset_Ici_self) continuousOn_id ?_
+          intro x hx; have : (2 : ℝ) < x := hx; exact ne_of_gt (by linarith)
+        refine hcomp.congr (fun s hs => ?_)
+        have hno : ¬ (Odd (m + 2) ∧ s ≤ 3) := fun h =>
+          absurd h.1 (by rw [Nat.not_odd_iff_even]; exact he)
+        simp only [bjsF306, if_neg hno]
+
+/-- Display 16 differentiated: for even `n = m + 2` and `y > 2`,
+`(s f_n(s))' = - f_(n-1)(y - 1)` at `s = y`. -/
+private theorem deriv_term_even_x8d (m : ℕ) (he : Even (m + 2)) (y : ℝ) (hy : 2 < y) :
+    HasDerivAt (fun z => z * bjsF306 (m + 2) z) (-bjsF306 (m + 1) (y - 1)) y := by
+  have hod : Odd (m + 1) := by
+    rcases Nat.even_or_odd (m + 1) with h | h
+    · exact absurd he (by rw [Nat.not_even_iff_odd]; exact h.add_one)
+    · exact h
+  have hc1 := (fn_continuous_x8d (m + 1)).1 hod
+  have hi := phi_integrable_x8d (m + 1) 2 (by norm_num)
+    (fun x hx => Or.inl ⟨hod, by linarith⟩) (by norm_num; exact hc1)
+  have hca : ContinuousAt (fun u => bjsF306 (m + 1) (u - 1)) y := by
+    have : ContinuousAt (bjsF306 (m + 1)) (y - 1) :=
+      hc1.continuousAt (Ioi_mem_nhds (by linarith))
+    exact ContinuousAt.comp_of_eq this (by fun_prop) rfl
+  have hd := derivG_x8d (fun u => bjsF306 (m + 1) (u - 1)) 2 y hy hi hca
+  refine hd.congr_of_eventuallyEq ?_
+  filter_upwards [Ioi_mem_nhds hy] with z hz
+  have hz' : (2 : ℝ) < z := hz
+  have hno : ¬ (Odd (m + 2) ∧ z ≤ 3) := fun h =>
+    absurd h.1 (by rw [Nat.not_odd_iff_even]; exact he)
+  simp only [bjsF306, if_neg hno]
+  field_simp
+
+/-- The summable bound on the termwise derivatives, uniform for `y > 2`, from display 18. -/
+private theorem deriv_bound_x8d (n : ℕ) (y : ℝ) (hy : 2 < y) :
+    ‖(if Even n then -bjsF306 (n - 1) (y - 1) else 0)‖ ≤
+      2 * (0.9607 : ℝ) ^ (n - 2) := by
+  have hu : 0 ≤ 2 * (0.9607 : ℝ) ^ (n - 2) := by positivity
+  split_ifs with he
+  · match n, he with
+    | 0, _ => simpa [bjsF306] using hu
+    | 1, he => exact absurd he (by decide)
+    | m + 2, he =>
+      have hod : Odd (m + 1) := by
+        rcases Nat.even_or_odd (m + 1) with h | h
+        · exact absurd he (by rw [Nat.not_even_iff_odd]; exact h.add_one)
+        · exact h
+      rw [show m + 2 - 1 = m + 1 by omega, show m + 2 - 2 = m by omega, norm_neg,
+        Real.norm_eq_abs]
+      have h1 := abs_fn_le_x8d (m + 1) (by omega) (y - 1) (Or.inl ⟨hod, by linarith⟩)
+      rw [show m + 1 - 1 = m by omega] at h1
+      have h2 := hSieve_le_all_x8d (y - 1)
+      have h3 : exp 2 * exp (-2) = 1 := by rw [← exp_add]; norm_num
+      have h4 : 0 ≤ 2 * exp 2 * (0.9607 : ℝ) ^ m := by positivity
+      calc |bjsF306 (m + 1) (y - 1)|
+          ≤ 2 * exp 2 * (0.9607 : ℝ) ^ m * LeanLab.ChenExplicit.hSieve (y - 1) := h1
+        _ ≤ 2 * exp 2 * (0.9607 : ℝ) ^ m * exp (-2) := mul_le_mul_of_nonneg_left h2 h4
+        _ = 2 * (0.9607 : ℝ) ^ m * (exp 2 * exp (-2)) := by ring
+        _ = 2 * (0.9607 : ℝ) ^ m := by rw [h3, mul_one]
+  · simpa using hu
+
+/-- The bound sequence `2 · 0.9607 ^ (n - 2)` is summable. -/
+private theorem bound_summable_x8d : Summable (fun n : ℕ => 2 * (0.9607 : ℝ) ^ (n - 2)) := by
+  rw [← summable_nat_add_iff 2]
+  have : (fun m : ℕ => 2 * (0.9607 : ℝ) ^ (m + 2 - 2)) = fun m => 2 * (0.9607 : ℝ) ^ m := by
+    funext m; rw [show m + 2 - 2 = m by omega]
+  rw [this]
+  exact (summable_geometric_of_lt_one (by norm_num) (by norm_num)).mul_left _
+
+/-- The series of `s f_n(s)` over even `n` converges for `s ≥ 2`, display 18 with Lemma 8. -/
+private theorem even_summable_x8d (s : ℝ) (hs : 2 ≤ s) :
+    Summable (fun n : ℕ => if Even n then s * bjsF306 n s else 0) := by
+  rw [← summable_nat_add_iff 1]
+  have hspos : 0 ≤ s := by linarith
+  have hh := hSieve_nonneg306 s hspos
+  set C := s * (2 * exp 2 * LeanLab.ChenExplicit.hSieve s) with hC
+  refine Summable.of_nonneg_of_le (fun k => ?_) (fun k => ?_)
+    ((summable_geometric_of_lt_one (by norm_num : (0 : ℝ) ≤ 0.9607) (by norm_num)).mul_left C)
+  · split_ifs with h
+    · exact mul_nonneg hspos (leaf306_fn_nonneg _ s (Or.inr ⟨h, hs⟩))
+    · exact le_rfl
+  · split_ifs with h
+    · have := key_l8306 (k + 1) (by omega) s (Or.inr ⟨h, hs⟩)
+      rw [show k + 1 - 1 = k by omega] at this
+      rw [hC]
+      have : s * bjsF306 (k + 1) s ≤ s * (2 * exp 2 * (0.9607 : ℝ) ^ k *
+          LeanLab.ChenExplicit.hSieve s) := mul_le_mul_of_nonneg_left this hspos
+      linarith
+    · positivity
 
 /-- LEAF: display 16 for even n ≥ 2 differentiated and summed, BJS page 6, Nathanson
 Theorem 9.4: (s f_n(s))' = - f_(n-1)(s - 1) for s > 2, summed over even n, which needs
@@ -86,6 +461,7 @@ theorem leaf8_deriv_even (s : ℝ) (hs : 2 < s) :
     split_ifs <;> simp
   have hderiv : ∀ n y, y ∈ Set.Ioi (2 : ℝ) → HasDerivAt (g n) (g' n y) y := by
     intro n y hy
+    have hy' : (2 : ℝ) < y := hy
     by_cases he : Even n
     · match n, he with
       | 0, _ =>
@@ -94,23 +470,17 @@ theorem leaf8_deriv_even (s : ℝ) (hs : 2 < s) :
       | 1, he => exact absurd he (by decide)
       | m + 2, he =>
         simp only [hg, hg', if_pos he, show m + 2 - 1 = m + 1 by omega]
-        exact Series8Proof2672.deriv_term_even_d8 m he y hy
+        exact deriv_term_even_x8d m he y hy'
     · simp only [hg, hg', if_neg he]
       exact hasDerivAt_const y (0 : ℝ)
-  have hanchor : Summable (fun n => g n s) :=
-    ((leaf8_summable.2 s hs.le).mul_left s).congr (fun n => by
-      simp only [hg]
-      split_ifs <;> simp)
-  have hmain := hasDerivAt_tsum_of_isPreconnected Series8Proof2672.bound_summable_d8
-    isOpen_Ioi isPreconnected_Ioi hderiv
-    (fun n y hy => Series8Proof2672.deriv_bound_d8 n y hy)
-    (show s ∈ Set.Ioi (2 : ℝ) from hs) hanchor
+  have hmain := hasDerivAt_tsum_of_isPreconnected bound_summable_x8d isOpen_Ioi
+    isPreconnected_Ioi hderiv (fun n y hy => deriv_bound_x8d n y hy)
+    (show s ∈ Set.Ioi (2 : ℝ) from hs) (even_summable_x8d s hs.le)
     (show s ∈ Set.Ioi (2 : ℝ) from hs)
   rw [hfun]
   convert hmain using 1
   have hsum : Summable (fun n => g' n s) :=
-    Summable.of_norm_bounded Series8Proof2672.bound_summable_d8
-      (fun n => Series8Proof2672.deriv_bound_d8 n s hs)
+    Summable.of_norm_bounded bound_summable_x8d (fun n => deriv_bound_x8d n s hs)
   rw [hsum.tsum_eq_zero_add]
   have h0 : g' 0 s = 0 := by simp [hg', bjsF306]
   rw [h0, zero_add, ← tsum_neg]
@@ -127,34 +497,185 @@ theorem leaf8_deriv_odd :
         (-(∑' n : ℕ, if Even n then bjsF306 n (s - 1) else 0)) s) ∧
     HasDerivWithinAt (fun t : ℝ => t * ∑' n : ℕ, if Odd n then bjsF306 n t else 0)
         (-(∑' n : ℕ, if Even n then bjsF306 n 2 else 0)) (Set.Ici 3) 3 := by
+  -- each odd term on `[3, ∞)` is the restriction of a globally differentiable function
+  let phiExt : ℕ → ℝ → ℝ := fun m u => bjsF306 (m + 1) (max u 3 - 1)
+  let KExt : ℕ → ℝ → ℝ := fun m t =>
+    (∫ u in Set.Ioi (3 : ℝ), bjsF306 (m + 1) (u - 1)) - ∫ u in (3 : ℝ)..t, phiExt m u
+  let gOdd : ℕ → ℝ → ℝ := fun n t => if Odd n ∧ 2 ≤ n then KExt (n - 2) t else 0
+  let gOdd' : ℕ → ℝ → ℝ := fun n y => if Odd n ∧ 2 ≤ n then -phiExt (n - 2) y else 0
+  have fnEvenIci : ∀ k : ℕ, Even k → ContinuousOn (bjsF306 k) (Set.Ici 2) := by
+    intro k he
+    match k, he with
+    | 0, _ => simp only [bjsF306]; exact continuousOn_const
+    | 1, he => exact absurd he (by decide)
+    | j + 2, he =>
+      have hod : Odd (j + 1) := by
+        rcases Nat.even_or_odd (j + 1) with h | h
+        · exact absurd he (by rw [Nat.not_even_iff_odd]; exact h.add_one)
+        · exact h
+      have hc1 := (fn_continuous_x8d (j + 1)).1 hod
+      have hi := phi_integrable_x8d (j + 1) 2 (by norm_num)
+        (fun x hx => Or.inl ⟨hod, by linarith⟩) (by norm_num; exact hc1)
+      have hG := contG_x8d (fun u => bjsF306 (j + 1) (u - 1)) 2 hi
+      have hcomp : ContinuousOn
+          (fun s : ℝ => (∫ u in Set.Ioi s, bjsF306 (j + 1) (u - 1)) / s) (Set.Ici 2) := by
+        refine ContinuousOn.div hG continuousOn_id ?_
+        intro x hx; have : (2 : ℝ) ≤ x := hx; exact ne_of_gt (by linarith)
+      refine hcomp.congr (fun s hs => ?_)
+      have hno : ¬ (Odd (j + 2) ∧ s ≤ 3) := fun h =>
+        absurd h.1 (by rw [Nat.not_odd_iff_even]; exact he)
+      simp only [bjsF306, if_neg hno]
+  have phiExt_cont : ∀ m : ℕ, Even (m + 1) → Continuous (phiExt m) := by
+    intro m he
+    have hc := fnEvenIci (m + 1) he
+    dsimp only [phiExt]
+    refine hc.comp_continuous (by fun_prop) (fun u => ?_)
+    show (2 : ℝ) ≤ max u 3 - 1
+    have := le_max_right u 3; linarith
+  have KExt_eq : ∀ m : ℕ, Even (m + 1) → ∀ t : ℝ, 3 ≤ t →
+      KExt m t = ∫ u in Set.Ioi t, bjsF306 (m + 1) (u - 1) := by
+    intro m he t ht
+    have hc1 := fnEvenIci (m + 1) he
+    have hi := phi_integrable_x8d (m + 1) 3 (by norm_num)
+      (fun x hx => Or.inr ⟨he, by linarith⟩)
+      (hc1.mono (fun x hx => by have : (3 : ℝ) - 1 < x := hx; show (2 : ℝ) ≤ x; linarith))
+    dsimp only [KExt]
+    have h1 : ∫ u in (3 : ℝ)..t, phiExt m u =
+        ∫ u in (3 : ℝ)..t, bjsF306 (m + 1) (u - 1) := by
+      refine intervalIntegral.integral_congr (fun u hu => ?_)
+      rw [Set.uIcc_of_le ht] at hu
+      have hu1 : (3 : ℝ) ≤ u := hu.1
+      simp only [phiExt, max_eq_left hu1]
+    rw [h1, ← intervalIntegral.integral_Ioi_sub_Ioi hi ht]
+    ring
+  have KExt_deriv : ∀ m : ℕ, Even (m + 1) → ∀ y : ℝ,
+      HasDerivAt (KExt m) (-phiExt m y) y := by
+    intro m he y
+    have h := ((phiExt_cont m he).integral_hasStrictDerivAt 3 y).hasDerivAt.const_sub
+      (∫ u in Set.Ioi (3 : ℝ), bjsF306 (m + 1) (u - 1))
+    exact h
+  have evenOfOdd : ∀ m : ℕ, Odd (m + 2) → Even (m + 1) := by
+    intro m ho
+    rcases Nat.even_or_odd (m + 1) with h | h
+    · exact h
+    · exact absurd ho (by rw [Nat.not_odd_iff_even]; exact h.add_one)
+  have gOdd_eq : ∀ (n : ℕ) (t : ℝ), 3 ≤ t →
+      gOdd n t = if Odd n then t * bjsF306 n t else 0 := by
+    intro n t ht
+    have htp : t ≠ 0 := by intro h; linarith
+    match n with
+    | 0 => simp [gOdd]
+    | 1 =>
+      simp only [gOdd, show ¬ (Odd 1 ∧ 2 ≤ 1) from by omega, if_false, if_pos odd_one,
+        bjsF306]
+      split_ifs with h
+      · have : t = 3 := le_antisymm h ht
+        subst this; norm_num
+      · simp
+    | m + 2 =>
+      by_cases ho : Odd (m + 2)
+      · have he := evenOfOdd m ho
+        simp only [gOdd, if_pos (And.intro ho (by omega : 2 ≤ m + 2)), if_pos ho,
+          show m + 2 - 2 = m by omega, KExt_eq m he t ht, bjsF306]
+        split_ifs with h
+        · have : t = 3 := le_antisymm h.2 ht
+          subst this; field_simp
+        · field_simp
+      · simp [gOdd, ho]
+  have gOdd_deriv : ∀ (n : ℕ) (y : ℝ), HasDerivAt (gOdd n) (gOdd' n y) y := by
+    intro n y
+    by_cases h : Odd n ∧ 2 ≤ n
+    · have hfun : gOdd n = KExt (n - 2) := by
+        funext t; simp only [gOdd, if_pos h]
+      rw [hfun]; simp only [gOdd', if_pos h]
+      obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 := ⟨n - 2, by omega⟩
+      rw [show m + 2 - 2 = m by omega]
+      exact KExt_deriv m (evenOfOdd m h.1) y
+    · have hfun : gOdd n = fun _ => 0 := by
+        funext t; simp only [gOdd, if_neg h]
+      rw [hfun]; simp only [gOdd', if_neg h]
+      exact hasDerivAt_const y (0 : ℝ)
+  have gOdd_bound : ∀ (n : ℕ) (y : ℝ), ‖gOdd' n y‖ ≤ 2 * (0.9607 : ℝ) ^ (n - 2) := by
+    intro n y
+    have hu : 0 ≤ 2 * (0.9607 : ℝ) ^ (n - 2) := by positivity
+    simp only [gOdd']
+    split_ifs with h
+    · obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 := ⟨n - 2, by omega⟩
+      have he := evenOfOdd m h.1
+      rw [show m + 2 - 2 = m by omega, norm_neg, Real.norm_eq_abs]
+      dsimp only [phiExt]
+      have hx : (2 : ℝ) ≤ max y 3 - 1 := by have := le_max_right y 3; linarith
+      have h1 := abs_fn_le_x8d (m + 1) (by omega) (max y 3 - 1) (Or.inr ⟨he, hx⟩)
+      rw [show m + 1 - 1 = m by omega] at h1
+      have h2 := hSieve_le_all_x8d (max y 3 - 1)
+      have h3 : exp 2 * exp (-2) = 1 := by rw [← exp_add]; norm_num
+      have h4 : 0 ≤ 2 * exp 2 * (0.9607 : ℝ) ^ m := by positivity
+      calc |bjsF306 (m + 1) (max y 3 - 1)|
+          ≤ 2 * exp 2 * (0.9607 : ℝ) ^ m * LeanLab.ChenExplicit.hSieve (max y 3 - 1) := h1
+        _ ≤ 2 * exp 2 * (0.9607 : ℝ) ^ m * exp (-2) := mul_le_mul_of_nonneg_left h2 h4
+        _ = 2 * (0.9607 : ℝ) ^ m * (exp 2 * exp (-2)) := by ring
+        _ = 2 * (0.9607 : ℝ) ^ m := by rw [h3, mul_one]
+    · simpa using hu
+  have odd_summable : ∀ s : ℝ, 1 ≤ s →
+      Summable (fun n : ℕ => if Odd n then s * bjsF306 n s else 0) := by
+    intro s hs
+    rw [← summable_nat_add_iff 1]
+    have hspos : 0 ≤ s := by linarith
+    have hh := hSieve_nonneg306 s hspos
+    set C := s * (2 * exp 2 * LeanLab.ChenExplicit.hSieve s) with hC
+    refine Summable.of_nonneg_of_le (fun k => ?_) (fun k => ?_)
+      ((summable_geometric_of_lt_one (by norm_num : (0 : ℝ) ≤ 0.9607) (by norm_num)).mul_left C)
+    · split_ifs with h
+      · exact mul_nonneg hspos (leaf306_fn_nonneg _ s (Or.inl ⟨h, hs⟩))
+      · exact le_rfl
+    · split_ifs with h
+      · have := key_l8306 (k + 1) (by omega) s (Or.inl ⟨h, hs⟩)
+        rw [show k + 1 - 1 = k by omega] at this
+        rw [hC]
+        have : s * bjsF306 (k + 1) s ≤ s * (2 * exp 2 * (0.9607 : ℝ) ^ k *
+            LeanLab.ChenExplicit.hSieve s) := mul_le_mul_of_nonneg_left this hspos
+        linarith
+      · positivity
+  have gsum_deriv : ∀ y : ℝ,
+      HasDerivAt (fun z => ∑' n, gOdd n z) (∑' n, gOdd' n y) y := by
+    intro y
+    have hs3 : Summable (fun n => gOdd n 3) := by
+      have h := odd_summable 3 (by norm_num)
+      refine h.congr (fun n => ?_)
+      exact (gOdd_eq n 3 le_rfl).symm
+    exact hasDerivAt_tsum_of_isPreconnected bound_summable_x8d isOpen_univ isPreconnected_univ
+      (fun n y _ => gOdd_deriv n y) (fun n y _ => gOdd_bound n y) (Set.mem_univ 3) hs3
+      (Set.mem_univ y)
+  have gsum'_eq : ∀ y : ℝ, 3 ≤ y →
+      ∑' n, gOdd' n y = -(∑' n : ℕ, if Even n then bjsF306 n (y - 1) else 0) := by
+    intro y hy
+    have hsum : Summable (fun n => gOdd' n y) :=
+      Summable.of_norm_bounded bound_summable_x8d (fun n => gOdd_bound n y)
+    rw [hsum.tsum_eq_zero_add]
+    have h0 : gOdd' 0 y = 0 := by simp [gOdd']
+    rw [h0, zero_add, ← tsum_neg]
+    congr 1; funext k
+    rcases k with _ | k
+    · simp [gOdd', bjsF306]
+    · have hmax : max y 3 = y := max_eq_left hy
+      simp only [gOdd', phiExt, hmax, show k + 1 + 1 - 2 = k by omega,
+        show 2 ≤ k + 1 + 1 by omega, and_true, Nat.odd_add_one, Nat.not_odd_iff_even]
+      split_ifs <;> simp_all [Nat.even_add_one]
   have hF : ∀ t : ℝ, 3 ≤ t →
-      (t * ∑' n : ℕ, if Odd n then bjsF306 n t else 0) =
-        ∑' n, Series8Proof2672.gOdd_o8 n t := by
+      (t * ∑' n : ℕ, if Odd n then bjsF306 n t else 0) = ∑' n, gOdd n t := by
     intro t ht
     rw [← tsum_mul_left]
     congr 1; funext n
-    rw [Series8Proof2672.gOdd_eq_o8 n t ht]
+    rw [gOdd_eq n t ht]
     split_ifs <;> simp
-  have hanchor : Summable (fun n => Series8Proof2672.gOdd_o8 n 3) :=
-    ((leaf8_summable.1 3 (by norm_num)).mul_left 3).congr (fun n => by
-      rw [Series8Proof2672.gOdd_eq_o8 n 3 le_rfl]
-      split_ifs <;> simp)
-  have hd (y : ℝ) :
-      HasDerivAt (fun z => ∑' n, Series8Proof2672.gOdd_o8 n z)
-        (∑' n, Series8Proof2672.gOdd'_o8 n y) y :=
-    hasDerivAt_tsum_of_isPreconnected Series8Proof2672.bound_summable_d8
-      isOpen_univ isPreconnected_univ
-      (fun n y _ => Series8Proof2672.gOdd_deriv_o8 n y)
-      (fun n y _ => Series8Proof2672.gOdd_bound_o8 n y)
-      (Set.mem_univ 3) hanchor (Set.mem_univ y)
   refine ⟨fun s hs => ?_, ?_⟩
-  · have h := hd s
-    rw [Series8Proof2672.gsum'_eq_o8 s hs.le] at h
+  · have h := gsum_deriv s
+    rw [gsum'_eq s hs.le] at h
     refine h.congr_of_eventuallyEq ?_
     filter_upwards [Ioi_mem_nhds hs] with z hz
     exact hF z (le_of_lt hz)
-  · have h := (hd 3).hasDerivWithinAt (s := Set.Ici 3)
-    rw [Series8Proof2672.gsum'_eq_o8 3 le_rfl, show (3 : ℝ) - 1 = 2 by norm_num] at h
+  · have h := (gsum_deriv 3).hasDerivWithinAt (s := Set.Ici 3)
+    rw [gsum'_eq 3 le_rfl, show (3 : ℝ) - 1 = 2 by norm_num] at h
     exact h.congr (fun t ht => hF t ht) (hF 3 le_rfl)
 
 /-- LEAF: the analytic core of Nathanson Theorem 9.4 as used by BJS page 6, display 13 at
@@ -164,7 +685,6 @@ through the asymptotics F(s), f(s) → 1 and the adjoint function argument. -/
 theorem leaf8_F3 :
     HasSum (fun n : ℕ => if Odd n then bjsF306 n 3 else 0)
       (2 * exp eulerMascheroniConstant / 3 - 1) := by
-  convert (leaf8_summable.1 3 (by norm_num)).hasSum using 1
   sorry
 
 /-- LEAF: Nathanson Theorem 9.4 as used by BJS page 6, display 14 at s = 2: the sum of
@@ -172,7 +692,6 @@ f_n(2) over even n is 1, that is f(2) = 0, the continuity of f at 2 in display 8
 Class HARD: a boundary value of the series 14, part of the analytic core with leaf8_F3. -/
 theorem leaf8_f2 :
     HasSum (fun n : ℕ => if Even n then bjsF306 n 2 else 0) 1 := by
-  convert (leaf8_summable.2 2 (by norm_num)).hasSum using 1
   sorry
 
 /-- Odd n ≥ 2 is at least 3. Helper. -/
@@ -377,8 +896,3 @@ theorem leaf306_series_solve8_twin :
 end LeanLab.Cai2002
 
 #print axioms LeanLab.Cai2002.leaf306_series_solve8_twin
-
-#print axioms LeanLab.Cai2002.leaf8_summable
-#print axioms LeanLab.Cai2002.leaf8_continuous
-#print axioms LeanLab.Cai2002.leaf8_deriv_even
-#print axioms LeanLab.Cai2002.leaf8_deriv_odd
