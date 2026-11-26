@@ -70,15 +70,24 @@ theorem zero_weight_finite_support {q : ℕ} [NeZero q] (χ : DirichletCharacter
   cases ho : analyticOrderAt (DirichletCharacter.LFunction χ) ρ <;>
     simp_all [analyticOrderNatAt]
 
-/-- LEAF. Page 38, display 4.26 with 4.25.
+/-- PROVED, CONDITIONAL ON ZeroCount1623.book_zero_count. Page 38, display 4.26 with 4.25.
 The upper side of the explicit zero count cited from Rosser and McCurley.
 The negative logarithmic constant is retained for reuse at height 1.
+This is ZeroCount1623.strip_count: zeroCount is the same multiplicity sum written over all of the
+complex plane with an indicator, so tsum_subtype moves it to the strip zero index.
+Design queue decision lean-autoformalization 20261126T0803Z, retiring the re-cut request
+on SPLIT_zero_count_explicit_upper and its sub-splits. AI wrote this Lean code.
 -/
 theorem zero_count_explicit_upper (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
     (hχ : χ.IsPrimitive) (t : ℝ) (ht : 1 ≤ t) :
     zeroCount χ t ≤ t / π * log (q * t / (2 * π * exp 1)) +
       0.5 * log (q * t) + 17.7 := by
-  sorry
+  have h := LeanLab.HelfgottMajor.ZeroCount1623.strip_count χ hχ t ht
+  have e : zeroCount χ t = ∑' ρ : LeanLab.HelfgottMajor.ZeroCount1623.ZeroIdx χ t,
+      (LeanLab.HelfgottMajor.ZeroCount1623.mult χ ρ.val : ℝ) := by
+    unfold zeroCount zeroWeight
+    exact (tsum_subtype _ _).symm
+  rw [e]; exact h
 
 /-- The loose upper count follows from display 4.26 by dropping a negative constant.
 Source P0014 page 38. This depends on the explicit count leaf.

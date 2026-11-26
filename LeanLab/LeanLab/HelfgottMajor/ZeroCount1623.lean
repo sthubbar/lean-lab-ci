@@ -85,9 +85,15 @@ noncomputable def bookMain (q : ℕ) (T : ℝ) : ℝ :=
 /-- The error function of book page 431, display 16.21. -/
 noncomputable def bookError (q : ℕ) (T : ℝ) : ℝ := 0.15 * Real.log ((q : ℝ) * T) + 3.389
 
-/-- LEAF. Book chapter 16, pages 431 and 432, proof of Lemma 16.9, with error display 16.21:
+/-- CITED. Book chapter 16, pages 431 and 432, proof of Lemma 16.9, with error display 16.21:
 N of T and chi equals T over 2 pi times log of qT over 2 pi e, up to the error g of T.
-The book cites this as display 3.95. That page is NOT FOUND IN EITHER paper store.
+The book cites this as display 3.95, Part I page 86, found 2026-11-26 in copies/Helfgott-book-PartI.txt
+line 3512: Trudgian 2015, Theorem 1, improving McCurley 1984, Theorem 2.1, for chi primitive and
+non-trivial and T at least 1, and by the first zeta zero at height 14.13 also for chi trivial.
+N of T and chi there counts zeros with real part in 0 to 1 and imaginary part in 0 to T, half
+at the end heights, with multiplicity, exactly bookCount. Accepted by the design queue,
+lean-autoformalization 20261126T0803Z, as a published input and a named hypothesis of the
+conditional HelfgottMajor entry; its split tree under SPLIT_book_zero_count is no prover unit.
 The range T at least 1 is the range y at least 1 of Lemma 16.9.
 Numerics for q equal to 1 and 5 are in the HelfgottMajor progress note of U-1623.
 -/

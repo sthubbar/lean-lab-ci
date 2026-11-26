@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp348a
+import LeanLab.ChenDoubleSieve.Feed1122_S148_PiCompare
 
 /-!
 Feed split of `main4_compare` in Feed1122_Decomp348b_main4_lower, Wu 2004 page 39.
@@ -22,8 +23,8 @@ used to replace the total size pi of N of the sequence N minus p. It follows fro
 lab's Chebyshev psi form of the prime number theorem in PNTPort by partial summation.
 Class MEDIUM. -/
 theorem primeCounting_pnt :
-    Tendsto (fun N : ℕ => (Nat.primeCounting N : ℝ) * log N / N) atTop (𝓝 1) := by
-  sorry
+    Tendsto (fun N : ℕ => (Nat.primeCounting N : ℝ) * log N / N) atTop (𝓝 1) :=
+  LeanLab.ChenDoubleSieve.Feed1122.S148.primeCounting_pnt_proved
 
 /-- LEAF: Wu 2004 page 39, boundedness of the Upsilon 4 prime pair sum in equation 10.5.
 For N large every level `lowerLevel B N (p q)` with p q below N to the 2 kappa2 lies in
