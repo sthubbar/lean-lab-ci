@@ -1,9 +1,27 @@
 /-
-P0059, Kadiri and Lumley 2014, arXiv 1407.7902v1, page 9 display 2.64 and page 13 Table 2.
-SPLIT of endpoint_budget_numeric from SPLIT_table_endpoint_budget_low.lean, by row,
-ROUTE BURST S98 burst-20261122. Each row leaf is the page 9 display 2.64 check at the
-endpoint of one printed row of Table 2, with the two per row zero budgets. The four rows
-of log index 58, 59, 60 and 150 are excluded by the hypothesis log index at most 57.
+P0059, Kadiri and Lumley 2014, arXiv 1407.7902v1, page 2 display 2.3, page 3 display 2.7,
+page 9 display 2.64 and page 13 Table 2. SPLIT of Task92.endpoint_budget_numeric from
+SPLIT_table_endpoint_budget_low.lean, ROUTE BURST S1 burst-20261124.
+After dividing display 2.64 at the row endpoint by the positive factor (e^u - 1) X, its
+left side is the sum of three pieces: the enlarged Brun Titchmarsh term
+2 (1 + delta) times the logarithm quotient of display 2.7 times the endpoint mass ratio
+nu over the weight mass of display 2.3, the omega square root term, and u over 2 X.
+Each piece gets its own per row bound, and the final comparison of rationals is proved.
+The bounds were computed in exact rational arithmetic for the mass ratio, by expanding
+the weight polynomial, and in double precision for the logarithm quotient, then rounded
+up at the fourth decimal for the quotient and the fifth for the mass ratio, each raised
+by one more unit. Per row, log index, quotient bound, mass ratio bound, computed values:
+  log 4e18 1.7791 0.03185 from 1.77890 0.031830,  43 1.7786 0.03319 from 1.77840 0.033170,
+  44 1.7863 0.03274 from 1.78620 0.032730,  45 1.7915 0.03420 from 1.79130 0.034180,
+  46 1.7952 0.03672 from 1.79510 0.036700,  47 1.7962 0.04436 from 1.79600 0.044340,
+  48 1.7999 0.04903 from 1.79970 0.049010,  49 1.8074 0.04584 from 1.80730 0.045820,
+  50 1.8092 0.05515 from 1.80900 0.055140,  51 1.8066 0.07710 from 1.80640 0.077080,
+  52 1.7964 0.11712 from 1.79630 0.117100,  53 1.7779 0.16599 from 1.77770 0.165980,
+  54 1.7563 0.20682 from 1.75620 0.206810,  55 1.7335 0.23640 from 1.73340 0.236380,
+  56 1.7124 0.25615 from 1.71230 0.256130,  57 1.6913 0.27025 from 1.69120 0.270230.
+The square root and u over 2 X terms together are at most 1.5e-4 of (e^u - 1) X on
+every row, against the budget 2e-4 used here. The smallest rational margin is 0.01037,
+at row 57, matching the falsifier margin 0.01069 of the parent note.
 AI wrote this Lean code. Goldbach is open.
 -/
 import LeanLab.KadiriLumley2014.SPLIT_table_endpoint_budget_low
@@ -12,278 +30,83 @@ namespace LeanLab.KadiriLumley2014.Task92
 open Real Set MeasureTheory
 open Task64
 
-/-
-Row log 4e18: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.58620, high budget 0.02561, remaining margin 0.27479 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log 4e18 on page 13, with the
-zero sum replaced by the low budget 0.58620 plus the high budget 0.02561; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.27479. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row0 (r : PrintedRow) (hr : r = ⟨0, 5, 35800, 272519712, 92, 2129, 36082898⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
+/-- Per row upper bound for the logarithm quotient of page 3 display 2.7 at the row
+endpoint, by log index; data only, values in the file header. -/
+noncomputable def logRatioBound : ℕ → ℝ
+  | 0 => 1.7791 | 43 => 1.7786 | 44 => 1.7863 | 45 => 1.7915
+  | 46 => 1.7952 | 47 => 1.7962 | 48 => 1.7999 | 49 => 1.8074
+  | 50 => 1.8092 | 51 => 1.8066 | 52 => 1.7964 | 53 => 1.7779
+  | 54 => 1.7563 | 55 => 1.7335 | 56 => 1.7124 | 57 => 1.6913
+  | _ => 0
+
+/-- Per row upper bound for the endpoint mass ratio nu over the weight mass of page 2
+display 2.3 at the cut aQ + 1/10000, by log index; data only, values in the file header. -/
+noncomputable def nuRatioBound : ℕ → ℝ
+  | 0 => 0.03185 | 43 => 0.03319 | 44 => 0.03274 | 45 => 0.03420
+  | 46 => 0.03672 | 47 => 0.04436 | 48 => 0.04903 | 49 => 0.04584
+  | 50 => 0.05515 | 51 => 0.07710 | 52 => 0.11712 | 53 => 0.16599
+  | 54 => 0.20682 | 55 => 0.23640 | 56 => 0.25615 | 57 => 0.27025
+  | _ => 0
+
+/-- LEAF: page 2 display 2.3 and page 9, the endpoint mass nu of the polynomial weight
+(4 t (1 - t))^m at the cut aQ + 1/10000 of Table 2 on page 13, divided by the full weight
+mass 2^(2m) (m!)^2 / (2m+1)! of WeightMass.weight_mass, for the sixteen rows with log
+index at most 57. Both integrals are integrals of explicit polynomials with rational
+endpoints, so this is a finite rational evaluation. Exact rational values in the header.
+Class MEDIUM. -/
+theorem endpoint_nu_ratio_le {r : PrintedRow} (hr : r ∈ tableTwo)
+    (hlow : r.logIndex ≤ 57) :
+    tailMass r.m ((r.aQ : ℝ) + 1 / 10000) / (∫ t in (0 : ℝ)..1, weight r.m t) ≤
+      nuRatioBound r.logIndex := by
   sorry
 
-/-
-Row log index 43: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.57871, high budget 0.03815, remaining margin 0.26500 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 43 on page 13, with the
-zero sum replaced by the low budget 0.57871 plus the high budget 0.03815; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.26500. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row43 (r : PrintedRow) (hr : r = ⟨43, 5, 33490, 291316980, 92, 2147, 38753947⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
+/-- LEAF: page 3 display 2.7, the logarithm quotient log (e^u X (1 + delta)) over
+log (X (e^u - 1)) in the enlarged Brun Titchmarsh coefficient, at the row endpoint
+X = threshold / (e^u (1 + delta)) for the sixteen Table 2 rows on page 13 with log index
+at most 57. Needs only interval bounds for exp and log at the printed parameters.
+Double precision values in the header. Class MEDIUM. -/
+theorem endpoint_log_ratio_le {r : PrintedRow} (hr : r ∈ tableTwo)
+    (hlow : r.logIndex ≤ 57) :
+    Real.log (Real.exp r.uQ * rowEndpointX r * (1 + (r.deltaQ : ℝ))) /
+        Real.log (rowEndpointX r * (Real.exp r.uQ - 1)) ≤
+      logRatioBound r.logIndex := by
   sorry
 
-/-
-Row log index 44: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.56710, high budget 0.01118, remaining margin 0.30465 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 44 on page 13, with the
-zero sum replaced by the low budget 0.56710 plus the high budget 0.01118; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.30465. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row44 (r : PrintedRow) (hr : r = ⟨44, 6, 23300, 488509984, 92, 2324, 61162616⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
+/-- LEAF: page 9 display 2.64, the omega term 2.05022e-3 sqrt X and the term u over 2 X at
+the row endpoint are together at most 2e-4 of (e^u - 1) X, for the sixteen Table 2 rows
+on page 13 with log index at most 57. Uses only u sqrt X at least 13.6 on these rows.
+Class EASY. -/
+theorem endpoint_small_terms_le {r : PrintedRow} (hr : r ∈ tableTwo)
+    (hlow : r.logIndex ≤ 57) :
+    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) + (r.uQ : ℝ) / (2 * rowEndpointX r) ≤
+      2 / 10000 * ((Real.exp r.uQ - 1) * rowEndpointX r) := by
   sorry
 
-/-
-Row log index 45: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.54479, high budget 0.00764, remaining margin 0.32496 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 45 on page 13, with the
-zero sum replaced by the low budget 0.54479 plus the high budget 0.00764; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.32496. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row45 (r : PrintedRow) (hr : r = ⟨45, 7, 16280, 797398875, 92, 2494, 95381241⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
+/-- Page 9 display 2.64 with every piece replaced by its per row bound: a comparison of
+rationals over the sixteen Table 2 rows on page 13 with log index at most 57.
+AI wrote this Lean code, burst-20261124. -/
+theorem endpoint_budget_rational_check {r : PrintedRow} (hr : r ∈ tableTwo)
+    (hlow : r.logIndex ≤ 57) :
+    2 * (1 + (r.deltaQ : ℝ)) * logRatioBound r.logIndex * nuRatioBound r.logIndex +
+        2 / 10000 <
+      1 + (r.deltaQ : ℝ) / 2 - (lowZeroBudget r.logIndex + highZeroBudget r.logIndex) := by
+  simp only [tableTwo, List.mem_cons, List.not_mem_nil, or_false] at hr
+  rcases hr with h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h | h
+  all_goals
+    subst h
+    first
+      | (exfalso; norm_num at hlow; done)
+      | norm_num [PrintedRow.deltaQ, logRatioBound, nuRatioBound, lowZeroBudget,
+          highZeroBudget]
 
-/-
-Row log index 46: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.51919, high budget 0.01257, remaining margin 0.33633 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 46 on page 13, with the
-zero sum replaced by the low budget 0.51919 plus the high budget 0.01257; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.33633. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row46 (r : PrintedRow) (hr : r = ⟨46, 8, 11340, 1284120197, 92, 2651, 148306019⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
+/-- The bound quotient is nonnegative on every row. -/
+theorem logRatioBound_nonneg (k : ℕ) : 0 ≤ logRatioBound k := by
+  unfold logRatioBound
+  split <;> norm_num
 
-/-
-Row log index 47: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.47893, high budget 0.03821, remaining margin 0.32344 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 47 on page 13, with the
-zero sum replaced by the low budget 0.47893 plus the high budget 0.03821; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.32344. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row47 (r : PrintedRow) (hr : r = ⟨47, 9, 8080, 1996029891, 92, 2836, 227619375⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 48: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.44157, high budget 0.03820, remaining margin 0.34368 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 48 on page 13, with the
-zero sum replaced by the low budget 0.44157 plus the high budget 0.03820; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.34368. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row48 (r : PrintedRow) (hr : r = ⟨48, 11, 6000, 3204848430, 93, 3050, 346582570⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 49: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.40912, high budget 0.01473, remaining margin 0.41037 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 49 on page 13, with the
-zero sum replaced by the low budget 0.40912 plus the high budget 0.01473; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.41037. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row49 (r : PrintedRow) (hr : r = ⟨49, 15, 4682, 5415123831, 93, 3275, 518958776⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 50: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.35074, high budget 0.02260, remaining margin 0.42702 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 50 on page 13, with the
-zero sum replaced by the low budget 0.35074 plus the high budget 0.02260; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.42702. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row50 (r : PrintedRow) (hr : r = ⟨50, 20, 3889, 8466793105, 93, 3543, 753575355⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 51: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.27324, high budget 0.03496, remaining margin 0.41318 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 51 on page 13, with the
-zero sum replaced by the low budget 0.27324 plus the high budget 0.03496; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.41318. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row51 (r : PrintedRow) (hr : r = ⟨51, 28, 3625, 12399463961, 93, 3849, 1037917449⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 52: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.18750, high budget 0.04548, remaining margin 0.34622 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 52 on page 13, with the
-zero sum replaced by the low budget 0.18750 plus the high budget 0.04548; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.34622. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row52 (r : PrintedRow) (hr : r = ⟨52, 39, 3803, 16139006408, 93, 4127, 1313524036⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 53: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.11754, high budget 0.05308, remaining margin 0.23918 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 53 on page 13, with the
-zero sum replaced by the low budget 0.11754 plus the high budget 0.05308; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.23918. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row53 (r : PrintedRow) (hr : r = ⟨53, 48, 4088, 18290358817, 93, 4301, 1524171138⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 54: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.07173, high budget 0.05622, remaining margin 0.14562 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 54 on page 13, with the
-zero sum replaced by the low budget 0.07173 plus the high budget 0.05622; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.14562. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row54 (r : PrintedRow) (hr : r = ⟨54, 54, 4311, 19412056863, 93, 4398, 1670398039⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 55: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.04355, high budget 0.05902, remaining margin 0.07792 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 55 on page 13, with the
-zero sum replaced by the low budget 0.04355 plus the high budget 0.05902; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.07792. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row55 (r : PrintedRow) (hr : r = ⟨55, 56, 4386, 19757119193, 93, 4445, 1770251249⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 56: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.02638, high budget 0.05819, remaining margin 0.03827 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 56 on page 13, with the
-zero sum replaced by the low budget 0.02638 plus the high budget 0.05819; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.03827. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row56 (r : PrintedRow) (hr : r = ⟨56, 59, 4508, 20210075547, 93, 4481, 1838818070⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
-/-
-Row log index 57: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
-low budget 0.01602, high budget 0.05926, remaining margin 0.01069 in units of the factor
-(e^u - 1) X of the right side.
--/
-/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 57 on page 13, with the
-zero sum replaced by the low budget 0.01602 plus the high budget 0.05926; weight integrals and nu
-of page 9 evaluated for m of this row. Uncertified margin 0.01069. Class MEDIUM. -/
-theorem endpoint_budget_numeric_row57 (r : PrintedRow) (hr : r = ⟨57, 59, 4506, 20219045843, 93, 4496, 1886389443⟩) :
-    (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
-      tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
-        (∫ t in (0 : ℝ)..1, weight r.m t) + (r.uQ : ℝ) / (2 * rowEndpointX r) <
-      (Real.exp r.uQ - 1) * rowEndpointX r *
-        (1 + (r.deltaQ : ℝ) / 2 -
-          (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  sorry
-
+/-- Task92.endpoint_budget_numeric from the three leaves above and the rational check.
+CONDITIONAL ON endpoint_nu_ratio_le, endpoint_log_ratio_le and endpoint_small_terms_le.
+AI wrote this Lean code, burst-20261124. -/
 theorem endpoint_budget_numeric_split {r : PrintedRow} (hr : r ∈ tableTwo)
     (hlow : r.logIndex ≤ 57) :
     (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
@@ -292,24 +115,54 @@ theorem endpoint_budget_numeric_split {r : PrintedRow} (hr : r ∈ tableTwo)
       (Real.exp r.uQ - 1) * rowEndpointX r *
         (1 + (r.deltaQ : ℝ) / 2 -
           (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
-  simp only [tableTwo, List.mem_cons, List.not_mem_nil, or_false] at hr
-  rcases hr with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
-  · exact endpoint_budget_numeric_row0 _ rfl
-  · exact endpoint_budget_numeric_row43 _ rfl
-  · exact endpoint_budget_numeric_row44 _ rfl
-  · exact endpoint_budget_numeric_row45 _ rfl
-  · exact endpoint_budget_numeric_row46 _ rfl
-  · exact endpoint_budget_numeric_row47 _ rfl
-  · exact endpoint_budget_numeric_row48 _ rfl
-  · exact endpoint_budget_numeric_row49 _ rfl
-  · exact endpoint_budget_numeric_row50 _ rfl
-  · exact endpoint_budget_numeric_row51 _ rfl
-  · exact endpoint_budget_numeric_row52 _ rfl
-  · exact endpoint_budget_numeric_row53 _ rfl
-  · exact endpoint_budget_numeric_row54 _ rfl
-  · exact endpoint_budget_numeric_row55 _ rfl
-  · exact endpoint_budget_numeric_row56 _ rfl
-  · exact endpoint_budget_numeric_row57 _ rfl
-  all_goals (exfalso; norm_num at hlow)
-
+  have hs := table_small_steps r hr
+  have hδ : (0 : ℝ) < r.deltaQ := by exact_mod_cast hs.1
+  have hu : (0 : ℝ) < r.uQ := by
+    have h := (Rat.cast_le (K := ℝ)).mpr hs.2.2.1
+    have h2 : (0 : ℝ) < ((1 / 10 ^ 12 : ℚ) : ℝ) := by norm_num
+    linarith
+  have hth : 0 < r.threshold := by
+    unfold PrintedRow.threshold
+    split_ifs
+    · norm_num [evenBase]
+    · exact Real.exp_pos _
+  have hX : 0 < rowEndpointX r := by
+    unfold rowEndpointX
+    have := Real.exp_pos (r.uQ : ℝ)
+    positivity
+  have hE : 0 < Real.exp (r.uQ : ℝ) - 1 := by
+    have := Real.add_one_lt_exp hu.ne'
+    linarith
+  have hP : 0 < (Real.exp r.uQ - 1) * rowEndpointX r := mul_pos hE hX
+  have hrpar := (tableTwo_rounding_arithmetic r hr).1
+  have haQ : (0 : ℝ) ≤ r.aQ := by exact_mod_cast hrpar.2.2.2.1
+  have hbQ : (r.aQ : ℝ) + 1 / 10000 ≤ 1 / 2 := by
+    have hb := (Rat.cast_le (K := ℝ)).mpr hrpar.2.2.2.2.1
+    push_cast at hb
+    norm_num at hb ⊢
+    exact hb
+  have hnu0 := (tailMass_ratio_bounds r.m (by linarith : (0 : ℝ) ≤ (r.aQ : ℝ) + 1 / 10000)
+    hbQ).1
+  have hnu := endpoint_nu_ratio_le hr hlow
+  have hlr := endpoint_log_ratio_le hr hlow
+  have hsm := endpoint_small_terms_le hr hlow
+  have hchk := endpoint_budget_rational_check hr hlow
+  set P := (Real.exp (r.uQ : ℝ) - 1) * rowEndpointX r with hPdef
+  set lr := Real.log (Real.exp r.uQ * rowEndpointX r * (1 + (r.deltaQ : ℝ))) /
+      Real.log (rowEndpointX r * (Real.exp r.uQ - 1)) with hlrdef
+  set q := tailMass r.m ((r.aQ : ℝ) + 1 / 10000) / (∫ t in (0 : ℝ)..1, weight r.m t)
+    with hqdef
+  have htail : tailCoefficient r.deltaQ r.uQ (rowEndpointX r) *
+      tailMass r.m ((r.aQ : ℝ) + 1 / 10000) / (∫ t in (0 : ℝ)..1, weight r.m t) =
+      2 * (1 + (r.deltaQ : ℝ)) * P * (lr * q) := by
+    rw [hqdef, hPdef, hlrdef]
+    unfold tailCoefficient
+    ring
+  have hprod : lr * q ≤ logRatioBound r.logIndex * nuRatioBound r.logIndex :=
+    mul_le_mul hlr hnu hnu0 (logRatioBound_nonneg _)
+  have hc : 0 ≤ 2 * (1 + (r.deltaQ : ℝ)) * P := by positivity
+  have h1 := mul_le_mul_of_nonneg_left hprod hc
+  have h2 := mul_lt_mul_of_pos_left hchk hP
+  rw [htail]
+  nlinarith
 end LeanLab.KadiriLumley2014.Task92
