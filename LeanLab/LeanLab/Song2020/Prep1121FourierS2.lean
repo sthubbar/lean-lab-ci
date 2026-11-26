@@ -9,10 +9,11 @@ majorant bound, the passage from primes to integers, the expansion of the majora
 the conjugation symmetry, partial summation, the exponent pair (1/2, 1/2) input of
 Graham and Kolesnik display 3.3.4, the frequency zero term and the final arithmetic.
 The theorem `fourier_approximation_of_leaves` at the end proves the exact statement
-of `Decomp139.fourier_approximation` from these leaves; no existing file is changed.
+of `Decomp139.fourier_approximation` from these leaves.
+CODEX task638 moves the four shared definitions to Fourier638Basic so Decomp139 can import this proof.
 Binary Goldbach is open.
 -/
-import LeanLab.Song2020.Decomp139
+import LeanLab.Song2020.Fourier638Basic
 import LeanLab.Song2020.Repair591FourierMajorant
 import LeanLab.BakerHarmanPintz1997.PortedVanDerCorput
 
@@ -1799,7 +1800,7 @@ theorem s2_final_arith (γ : ℝ) (hγ : 44 / 45 < γ) (hγ1 : γ < 1) (C0 CE : 
 
 /-! ## Proved glue -/
 
-/-- CONDITIONAL ON weighted_window_bound. Proved from the leaves. Page 4, the per frequency bound for h nonzero. -/
+/-- PROVED from weighted_window_bound and the explicit exponential sum bound. Page 4, the per frequency bound for h nonzero. -/
 theorem per_h_bound (γ : ℝ) (hγ0 : 0 < γ) (hγ1 : γ < 1) (n : ℕ) (hn : 3 ≤ n)
     (y : ℝ) (hy : y ≤ (n : ℝ) / 3) (H : ℕ) (v : ℕ → ℝ) (CE : ℝ) (hCE : 0 ≤ CE)
     (hv : ∀ t : ℝ, ∀ k : ℕ, 1 ≤ k →
@@ -1831,7 +1832,7 @@ theorem per_h_bound (γ : ℝ) (hγ0 : 0 < γ) (hγ1 : γ < 1) (n : ℕ) (hn : 3
         mul_le_mul_of_nonneg_right this hnq
     _ = (n : ℝ) ^ (1 - γ) := one_mul _
 
-/-- CONDITIONAL ON weighted_window_bound. Proved from the leaves. Page 4, the bound of one of the two majorant sums. -/
+/-- PROVED from weighted_window_bound and the explicit exponential sum bound. Page 4, the bound of one of the two majorant sums. -/
 theorem majorant_sum_bound (γ : ℝ) (hγ0 : 0 < γ) (hγ1 : γ < 1) (n : ℕ) (hn : 3 ≤ n)
     (y : ℝ) (hy0 : 0 ≤ y) (hy : y ≤ (n : ℝ) / 3) (H : ℕ) (b : ℤ → ℂ) (C0 : ℝ)
     (hb : ∀ h ∈ Finset.Icc (-(H : ℤ)) H, ‖b h‖ ≤ C0 / H) (hC0 : 0 ≤ C0)
@@ -1851,7 +1852,7 @@ theorem majorant_sum_bound (γ : ℝ) (hγ0 : 0 < γ) (hγ1 : γ < 1) (n : ℕ) 
     per_h_bound γ hγ0 hγ1 n hn y hy H v CE hCE hv h hh h0).trans ?_
   exact add_le_add (zero_frequency_term γ hγ0 hγ1 n hn y hy0 hy _) le_rfl
 
-/-- CONDITIONAL ON weighted_window_bound and exponent_pair_half. Proved from the leaves, with no sorry of its own. The exact statement of
+/-- PROVED from weighted_window_bound and exponent_pair_half. The exact statement of
 `Decomp139.fourier_approximation`, Song 2020 pages 4 and 5, the S2 bound. -/
 theorem fourier_approximation_of_leaves :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 →

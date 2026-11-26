@@ -24,6 +24,16 @@ theorem pair_low_tendsto :
         refinedWeight N q.1 / (((q.1 : ℝ) * q.2) * log ((N : ℝ) / ((q.1 : ℝ) * q.2))))
       atTop (𝓝 (36 / 5 * ∫ t in kappa1..(1 / 10 : ℝ),
         log (1 / sigma1 - 1 - t / sigma1) / (t * (1 - t) ^ 2))) := by
+  -- Obstruction: converting this two-dimensional prime sum over the curved domain
+  -- {N^kappa1 ≤ p ≤ N^(1/10), N^sigma1 ≤ q < sqrt(N/p)} with weight
+  -- 1/(p q (1 - log p/log N - log q/log N)) into the printed double integral requires
+  -- a prime partial summation lemma with uniform error control over that domain.
+  -- Mathlib v4.35.0 has Nat.primeCounting (π) but NO Prime Number Theorem
+  -- (π(x) ~ x/log x), NO prime partial summation, NO sum-over-primes tendsto lemmas.
+  -- The repo's PNTPort/StrongPNT exists but its PNT lemma was not integrated here.
+  -- The sibling file Decomp349bSplitSum leaves the analogous leaf_free_sum_tendsto
+  -- as a Class HARD sorry with no prime-sum-to-integral machinery.
+  -- This sorry requires PNT + 2D prime partial summation, OUT OF REACH in v4.35.0.
   sorry
 
 /-- LEAF: Wu 2004 page 41 equation 10.12, F9 second integral, first prime

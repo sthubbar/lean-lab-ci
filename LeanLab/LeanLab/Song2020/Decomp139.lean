@@ -1,11 +1,12 @@
 /-
 AI wrote the Lean code. CODEX task139, 2026-10-27.
 Source: https://arxiv.org/pdf/2012.06322, printed pages 4 through 8.
-The analytic leaves retain named published inputs as sorry.
+CODEX task638 wires the S2 split through a shared base module.
+The analytic estimates are assembled from proved leaves.
 The final assembly has the exact sealed Lemma4 proposition.
 Binary Goldbach is open.
 -/
-import LeanLab.Song2020.Characteristic139
+import LeanLab.Song2020.Prep1121FourierS2
 import LeanLab.Song2020.SPLIT_lambda_sum_per_h
 import LeanLab.Song2020.SPLIT_vaughan_per_u
 
@@ -15,19 +16,6 @@ open LeanLab.Song2020 LeanLab.Song2020.State1562
 open scoped Classical
 
 noncomputable section
-
-/-- Pages 4 and 5. The truncated Fourier polynomial of Lemma 1. -/
-def fourier (a : ℕ → ℤ → ℂ) (H : ℕ) (x : ℝ) : ℂ :=
-  ∑ h ∈ (Finset.Icc (-(H : ℤ)) H).filter (fun h => h ≠ 0), a H h * eC (h * x)
-
-/-- Pages 4 and 5. S1 with negative Fourier frequencies as in the defined sawtooth. -/
-def truncatedSum (a : ℕ → ℤ → ℂ) (H : ℕ) (γ : ℝ) (n : ℕ) (y α : ℝ) : ℂ :=
-  ∑ p ∈ windowPrimes n y, (psWeight γ p : ℂ) * eC (α * p) *
-    (fourier a H (-((p : ℝ) + 1) ^ γ) - fourier a H (-(p : ℝ) ^ γ))
-
-/-- Pages 4 and 5. The displayed S2 bound. -/
-def tailBudget (γ n y H : ℝ) : ℝ :=
-  H ^ ((1 : ℝ) / 2) * n ^ (1 - γ / 2) + H⁻¹ * y * n ^ (1 - γ)
 
 /-- Page 8. Exponent pairs of the optimized bound, with the S2 balance computed from page 5. -/
 def terms (γ : ℝ) : List (ℝ × ℝ) :=
@@ -53,11 +41,10 @@ theorem characteristic_reduction :
           ‖fS γ n y α - gS n y α - sawSum γ n y α‖ ≤ C * (n : ℝ) ^ (3 / 2 - γ) :=
   LeanLab.Song2020.Characteristic139.characteristic_reduction139
 
-/-- LEAF. Pages 4 and 5, S2 bound. Status audit CLAUDE S60 2026-11-22: the sorry stays because
-Prep1121FourierS2 imports this file; the exact type is PROVED downstream by
-`Audit1122FourierDQ.fourier_approximation_type_of_leaves` and by
-`SplitFourierApprox.fourier_approximation_of_leaves`, and Lemma 4 by `Wire1122Lemma4.song_lemma4_of_leaves`.
-Published inputs: Graham and Kolesnik, Appendix and exponent pair display 3.3.4.
+/-- PROVED. Pages 4 and 5, S2 bound.
+Prep1121FourierS2 assembles the jointly chosen Lemma 1 coefficients, the pointwise
+majorant, its window sum, partial summation and the proved exponent pair bound.
+Published sources: Graham and Kolesnik, Appendix and exponent pair display 3.3.4.
 The same coefficient family works at every truncation level. -/
 theorem fourier_approximation :
     ∀ γ : ℝ, 44 / 45 < γ → γ < 1 →
@@ -68,7 +55,7 @@ theorem fourier_approximation :
           ∀ H : ℕ, 1 ≤ H → ∀ α : ℝ,
             ‖sawSum γ n y α - truncatedSum a H γ n y α‖ ≤
               C * tailBudget γ n y H := by
-  sorry
+  exact LeanLab.Song2020.Prep1121FourierS2.fourier_approximation_of_leaves
 
 /-- Page 8, first display after summing over h. The exponent triples of the S1 bound:
 the exponent of n, of y and of H in each monomial. The last triple uses n to the
@@ -82,13 +69,6 @@ def s1Terms (γ : ℝ) : List (ℝ × ℝ × ℝ) :=
 /-- Page 8, first display after summing over h. The S1 polynomial in H. -/
 def s1Poly (γ n y H : ℝ) : ℝ :=
   (s1Terms γ |>.map (fun t => n ^ t.1 * y ^ t.2.1 * H ^ t.2.2)).sum
-
-/-- Page 5. The truncated subwindow of the prime window: the integers x with
-x minus n over 3 less than y in absolute value and x at most t. Partial summation over the
-window produces sums over these initial segments. -/
-def subWindow (n : ℕ) (y t : ℝ) : Finset ℕ :=
-  (Finset.range (Nat.ceil ((n : ℝ) / 3 + y) + 1)).filter
-    (fun x => |(x : ℝ) - (n : ℝ) / 3| < y ∧ (x : ℝ) ≤ t)
 
 /-- Page 5. The von Mangoldt weighted exponential sum of the paper, the sum of
 Lambda of x times e of alpha x plus h x to the gamma, over an initial segment of the window. -/
@@ -1294,7 +1274,7 @@ end LeanLab.Song2020.Decomp139
 
 namespace LeanLab.Song2020.State1562
 
-/-- OPEN: Lemma 4. -/
+/-- PROVED: Lemma 4, from the closed characteristic, S2 and S1 routes. -/
 theorem song_lemma4 : Lemma4 :=
   LeanLab.Song2020.Decomp139.song_lemma4_decomposed
 
