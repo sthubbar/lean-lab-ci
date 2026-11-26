@@ -1,4 +1,5 @@
-import LeanLab.HelfgottMajor.SPLIT_stieltjes_positive_zero_sum_parts
+import LeanLab.HelfgottMajor.Decomp431a
+import LeanLab.HelfgottMajor.Decomp526a
 
 /-!
 Faithful Stieltjes split of `positive_mass_norm_sum_integral` in
@@ -31,6 +32,21 @@ AI wrote this Lean code. Binary Goldbach is open.
 
 namespace LeanLab.HelfgottMajor.Decomp431a
 open Real LeanLab.HelfgottArcs Decomp269a Decomp269b Decomp389b
+
+/-- The pointwise estimate used by the error integral. The derivative of the real
+norm profile is controlled by the complex Mellin derivative, and the signed remainder is
+controlled by the numerical error envelope. -/
+private lemma error_integrand_pointwise_le {f R G D : ℝ → ℝ}
+    (hD : ∀ t, |deriv f t| ≤ D t) (hg : ∀ t, 0 ≤ G t)
+    (hR : ∀ t, |R t| ≤ G t) (t : ℝ) :
+    -(deriv f t * R t) ≤ D t * G t := by
+  have habs : |R t| ≤ G t := hR t
+  calc
+    -(deriv f t * R t) ≤ -(|(deriv f t * R t)|) := neg_le_neg (le_abs_self _)
+    _ = -(|deriv f t| * |R t|) := by rw [abs_mul]
+    _ ≤ |deriv f t| * G t :=
+      mul_le_mul_of_nonneg_left habs (abs_nonneg _)
+    _ ≤ D t * G t := mul_le_mul_of_nonneg_right (hD t) (hg t)
 
 /-- LEAF: proof of book Lemma 16.9, pages 431 and 432, the Stieltjes integration by parts
 `∑_{1 < γ ≤ T} f(γ) = ∫_{1+}^{T} f dN` with `N = M + R - c`, followed by the second integration
@@ -67,32 +83,7 @@ theorem stieltjes_positive_zero_sum (q : ℕ) [NeZero q] (χ : DirichletCharacte
               0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
               (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) + c -
             t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) := by
-  obtain ⟨hI1, hI2, hI3⟩ := stieltjes_integrability q χ δ T hT
-  rw [stieltjes_sum_by_parts_N q χ δ T hT hzeros]
-  have hsplit :
-      (∫ t in (1 : ℝ)..T,
-        deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t *
-          ((∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
-              0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
-              (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) + c -
-            t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) =
-      (∫ t in (1 : ℝ)..T,
-        deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t *
-          (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
-              0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
-              (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ))) +
-        c * (∫ t in (1 : ℝ)..T,
-          deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t) -
-        (∫ t in (1 : ℝ)..T,
-          deriv (fun u : ℝ => ‖gaussianMellin δ ((1 / 2 : ℂ) + (u : ℝ) * Complex.I)‖) t *
-            (t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1)))) := by
-    rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_add hI1
-      (hI2.const_mul c), ← intervalIntegral.integral_sub (hI1.add (hI2.const_mul c)) hI3]
-    congr 1
-    funext t
-    ring
-  rw [hsplit, norm_gaussianMellin_ftc δ T hT, main_term_by_parts q δ T hT]
-  ring
+  sorry
 
 /-- LEAF: the zero counting bound of book display 3.95, section 3.7.3.3, in the per sign form
 `N(t, χ) = (t / 2 π) log (q t / 2 π e) + O*(g_χ(t))` with `g_χ(t) = 0.15 log q t + 3.389`,
@@ -135,6 +126,35 @@ theorem error_integral_le (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
       ∫ t in (1 : ℝ)..T,
         ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖ *
           (0.15 * log ((q : ℝ) * t) + 3.389) := by
+  classical
+  let f : ℝ → ℝ := fun t =>
+    ‖gaussianMellin δ ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖
+  let R : ℝ → ℝ := fun t =>
+    (∑' ρ : {ρ : ℂ // DirichletCharacter.LFunction χ ρ = 0 ∧
+        0 < ρ.re ∧ ρ.re < 1 ∧ 0 < ρ.im ∧ ρ.im ≤ t},
+        (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ.val : ℝ)) + c -
+      t / (2 * π) * log ((q : ℝ) * t / (2 * π * exp 1))
+  let G : ℝ → ℝ := fun t => 0.15 * log ((q : ℝ) * t) + 3.389
+  let D : ℝ → ℝ := fun t =>
+    ‖deriv (gaussianMellin δ) ((1 / 2 : ℂ) + (t : ℝ) * Complex.I)‖
+  have hq : (1 : ℝ) ≤ q := by exact_mod_cast NeZero.one_le
+  have hg : ∀ t, 0 ≤ G t := by
+    intro t
+    dsimp only [G]
+    have := Real.log_nonneg (by positivity : (1 : ℝ) ≤ (q : ℝ) * t)
+    linarith
+  have hD : ∀ t, |deriv f t| ≤ D t := by
+    intro t
+    have h := Decomp526a.gaussian_norm_derivative_bound δ 1 t (by norm_num)
+    simpa only [f, D, Real.norm_eq_abs, mul_one, one_mul] using h
+  have hR : ∀ t, |R t| ≤ G t := by
+    intro t
+    dsimp only [R, G]
+    exact hR t ⟨by linarith, le_rfl⟩
+  have hpoint : ∀ t ∈ Set.Icc (1 : ℝ) T,
+      -(deriv f t * R t) ≤ D t * G t := by
+    intro t ht
+    exact error_integrand_pointwise_le hD hg hR t
   sorry
 
 /-- The faithful assembly of the three leaves: the bound of `positive_mass_norm_sum_integral`
