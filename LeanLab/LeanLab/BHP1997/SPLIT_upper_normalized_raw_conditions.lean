@@ -32,7 +32,7 @@ theorem upper_split_rescaled_short_distribution
       Task308.ShortDistribution ε
         (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
           upperDeletedIntegral ω ε) (upperNormCoeff ε lam) := by
-  sorry
+  exact upper_normalized_raw_conditions_slack h4 h9 hω hz hε hε8 (by positivity)
 
 /-- LEAF: the short mean square condition follows from the short distribution condition for the
 normalized coefficient, with the same rescaling and the same density. Once the centered short
@@ -49,7 +49,7 @@ theorem upper_split_mean_square_transfer
     Task308.ShortMeanSquare ε
         (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
           upperDeletedIntegral ω ε) (upperNormCoeff ε lam) := by
-  sorry
+  exact Task308.shortDistribution_to_shortMeanSquare hdist
 
 /-- The target `upper_normalized_raw_conditions` of UpperShortC165Leaves, verbatim, assembled from
 the two leaves. Take the rescaling and its bound from the distribution leaf, and get the mean
