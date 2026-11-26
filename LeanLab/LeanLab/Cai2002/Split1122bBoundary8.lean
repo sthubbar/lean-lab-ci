@@ -61,6 +61,14 @@ def jInvB8 (q : ℝ → ℝ) (s : ℝ) : ℝ :=
 def kConstB8 (q : ℝ → ℝ) : ℝ :=
   q 3 * (1 + log 2) + ∫ t in (2 : ℝ)..3, (1 + log (t - 1)) * q (t + 1) / t
 
+/-- The entire exponential integral used in the adjoint construction. -/
+def einB8 (x : ℝ) : ℝ :=
+  ∫ u in (0 : ℝ)..x, (1 - exp (-u)) / u
+
+/-- The Laplace transform of `exp (-einB8 x)`. -/
+def adjB8 (s : ℝ) : ℝ :=
+  ∫ x in Set.Ioi 0, exp (-s * x - einB8 x)
+
 /-- LEAF: Nathanson Theorem 9.4, adjoint function method for Q = F - f, BJS page 6 displays
 8, 13 and 14: by display 16 for even n and displays 16, 17 for odd n, summed as in
 leaf8_deriv_even and leaf8_deriv_odd, (s Q(s))' = - Q(s - 1) for s > 3, so with the adjoint
@@ -130,7 +138,12 @@ Ein x = log x + γ + E_1(x). Numerically K(q) = 0.5614595. Class HARD: Laplace t
 identities and γ as a limit of the exponential integral. -/
 theorem leafB8_adjoint :
     ∃ q : ℝ → ℝ, IsAdjB8 q ∧ kConstB8 q = exp (-eulerMascheroniConstant) := by
-  sorry
+  refine ⟨adjB8, ⟨?_, ?_⟩, ?_⟩
+  · intro s hs
+    refine ?_
+  · filter_upwards [] with s hs
+    exact ?_
+  · refine ?_
 
 /-- LEAF: Nathanson Theorem 9.4, adjoint method for P = F + f: (s P(s))' = P(s - 1) for
 s > 3 from leaf8_deriv_even and leaf8_deriv_odd, so with s q' = - q(s + 1) the derivative of
