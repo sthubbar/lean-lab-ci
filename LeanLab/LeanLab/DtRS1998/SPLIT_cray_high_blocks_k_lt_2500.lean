@@ -8,10 +8,12 @@ The assembly is a case split on the window holding k; it adds no input.
 -/
 
 import LeanLab.DtRS1998.SPLIT_cray_high_blocks
+import LeanLab.DtRS1998.Certificate294
 
 namespace LeanLab.DtRS1998.Decomp270e
 
 open LeanLab Task71.Paper Decomp270a
+open LeanLab.DtRS1998.Certificate294
 
 /-- LEAF. First sub-window of the 0..2499 block family: every block with k < 500
 carries a finite prime list qs and a successful Boolean offset check, i.e. for each
@@ -25,7 +27,19 @@ theorem cray_high_blocks_k_lt_500 :
         qs.any (fun q => decide
           (q ≤ 9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime))) = true := by
-  sorry
+  intro k hk
+  -- Use offsets_certificate with B = 9*10^13 + 10^9*k and L = 10^9.
+  -- We need a Ds : List ℕ such that:
+  --   (1) ∀ d ∈ Ds, d ≤ B        (easy, since B ≈ 10^14)
+  --   (2) ∀ even x ≤ 10^9, ∃ d ∈ Ds, (x + d).Prime   (covering, precomputed)
+  --   (3) ∀ d ∈ Ds, (B - d).Prime   (Pocklington certificates, per k)
+  -- Then qs := Ds.map (fun d => B - d) and offsets_certificate gives the result.
+  have h_main : ∃ (qs : List ℕ), (∀ q ∈ qs, q.Prime) ∧
+      (List.range ((10 ^ 9) / 2 + 1)).all (fun j =>
+        qs.any (fun q => decide
+          (q ≤ 9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
+            (9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime))) = true := by sorry
+  exact h_main
 
 /-- LEAF. Second sub-window: every block with 500 ≤ k < 1000 carries a finite
 prime list qs and a successful Boolean offset check on every j < (10 ^ 9) / 2 + 1.
