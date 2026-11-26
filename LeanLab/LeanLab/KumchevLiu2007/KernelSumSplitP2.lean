@@ -11,9 +11,13 @@ the harmonic sum over squares of the decay weight, LEAF edge_sum_bound MEDIUM; a
 the Y/X term, small_term PROVED.
 inner_window_bound_twin and outer_square_bound_twin are PROVED from these leaves with the exact
 types of the two leaves of KernelSumSplit1122, checked by type_of%.
+S154, step kernel-sum-split-p3: weight_variation is PROVED, from window_abs_kernel_sum and
+log_variation of the new file KernelSumWeightVar1123, both PROVED there. kernel_window_sum and
+edge_sum_bound remain LEAFs.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.KernelSumCount1122
+import LeanLab.KumchevLiu2007.KernelSumWeightVar1123
 
 namespace LeanLab.KumchevLiu2007.KernelSumSplitP2
 
@@ -32,17 +36,6 @@ theorem kernel_window_sum :
     ∃ C : ℝ, 0 < C ∧ ∀ b : ℝ, 0 < b → b ≤ 1 / 2 → ∀ X Y : ℝ, 1 ≤ X - Y → ∀ n m2 : ℕ,
       |∑ m1 ∈ primeWindow X Y, Kb b (-(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ))| ≤
         C * edgeDecay X Y b n m2 := by
-  sorry
-
-/-- LEAF: P0088 page 7, the display before 27, inner_window_bound, partial summation in 1/log.
-MEDIUM. For m1 in [X - Y, X), |1/log m1 - 1/log X| is O(Y/(X log^2 X)) by the mean value
-theorem, and the sum of |K_b| over the window is at most 1 + (2/pi)(1 + log(Y + 1)) by
-Kb_abs_le, so the variation part is O(Y/X). -/
-theorem weight_variation :
-    ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 → ∃ C X0 : ℝ, 0 < C ∧ ∀ X : ℝ, X0 ≤ X →
-      ∀ b : ℝ, 0 ≤ b → b ≤ 1 → ∀ n m2 : ℕ,
-        |∑ m1 ∈ primeWindow X (windowY X ε), (1 / Real.log (m1 : ℝ) - 1 / Real.log X) *
-            Kb b (-(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ))| ≤ C * (windowY X ε / X) := by
   sorry
 
 /-- PROVED: P0088 page 7, the display before 27, range checks for inner_window_bound.
@@ -88,6 +81,51 @@ theorem inner_ranges :
       rw [← Real.rpow_add hX0]; norm_num
     have h79 : 0 ≤ X ^ (7 / 9 : ℝ) := Real.rpow_nonneg hX0.le _
     nlinarith [mul_nonneg (sub_nonneg.2 hBd) h79]
+
+/-- PROVED from KernelSumWeightVar1123.window_abs_kernel_sum and log_variation, both PROVED, and
+inner_ranges, S154. P0088 page 7, the display before 27, inner_window_bound, partial summation
+in 1/log. For m1 in [X - Y, X), |1/log m1 - 1/log X| is O(Y/(X log^2 X)) by the mean value
+theorem, and the sum of |K_b| over the window is at most 1 + (2/pi)(1 + log(Y + 1)) by
+Kb_abs_le, so the variation part is O(Y/X). -/
+theorem weight_variation :
+    ∀ ε : ℝ, 0 < ε → ε ≤ 7 / 18 → ∃ C X0 : ℝ, 0 < C ∧ ∀ X : ℝ, X0 ≤ X →
+      ∀ b : ℝ, 0 ≤ b → b ≤ 1 → ∀ n m2 : ℕ,
+        |∑ m1 ∈ primeWindow X (windowY X ε), (1 / Real.log (m1 : ℝ) - 1 / Real.log X) *
+            Kb b (-(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ))| ≤ C * (windowY X ε / X) := by
+  intro ε hε hε'
+  obtain ⟨X1, hL⟩ := KernelSumWeightVar1123.log_variation ε hε hε'
+  obtain ⟨X2, hR⟩ := inner_ranges 1 one_pos ε hε hε'
+  refine ⟨4, max (max X1 X2) (Real.exp 2), by norm_num, fun X hX b hb0 hb1 n m2 => ?_⟩
+  have hX1 : X1 ≤ X := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hX
+  have hX2 : X2 ≤ X := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hX
+  have hXe : Real.exp 2 ≤ X := le_trans (le_max_right _ _) hX
+  have hX0 : 0 < X := lt_of_lt_of_le (Real.exp_pos 2) hXe
+  have hlog2 : 2 ≤ Real.log X := (Real.le_log_iff_exp_le hX0).2 hXe
+  obtain ⟨_, _, hXY, hXone⟩ := hR X hX2 1 le_rfl (by rw [Real.rpow_one]; push_cast; linarith)
+  set Y := windowY X ε with hYdef
+  set L := Real.log X with hLdef
+  have hY : 0 ≤ Y := Real.rpow_nonneg hX0.le _
+  have hK := KernelSumWeightVar1123.window_abs_kernel_sum b hb0 hb1 X Y hXone hXY n m2
+  have hYX : 0 ≤ Y / X := div_nonneg hY hX0.le
+  have hL2 : 0 < L ^ 2 := by positivity
+  have hw : 0 ≤ 4 * (Y / X) / L ^ 2 := by positivity
+  calc |∑ m1 ∈ primeWindow X Y, (1 / Real.log (m1 : ℝ) - 1 / L) *
+          Kb b (-(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ))|
+        ≤ ∑ m1 ∈ primeWindow X Y, |(1 / Real.log (m1 : ℝ) - 1 / L) *
+          Kb b (-(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ))| := Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ m1 ∈ primeWindow X Y, 4 * (Y / X) / L ^ 2 *
+          |Kb b (-(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ))| := by
+        refine Finset.sum_le_sum fun m1 hm => ?_
+        rw [abs_mul]
+        exact mul_le_mul_of_nonneg_right (hL X hX1 m1 hm) (abs_nonneg _)
+    _ = 4 * (Y / X) / L ^ 2 *
+          ∑ m1 ∈ primeWindow X Y, |Kb b (-(n : ℤ) + (m1 : ℤ) + ((m2 ^ 2 : ℕ) : ℤ))| := by
+        rw [Finset.mul_sum]
+    _ ≤ 4 * (Y / X) / L ^ 2 * (2 + L) := mul_le_mul_of_nonneg_left hK hw
+    _ ≤ 4 * (Y / X) := by
+        rw [div_mul_eq_mul_div, div_le_iff₀ hL2]
+        have h2 : 2 + L ≤ L ^ 2 := by nlinarith
+        nlinarith [mul_le_mul_of_nonneg_left h2 hYX]
 
 /-- PROVED from kernel_window_sum, weight_variation and inner_ranges: the exact type of
 KernelSumSplit1122.inner_window_bound. -/
