@@ -29,10 +29,13 @@ edge stretch described above, class MEDIUM, elementary, by the hyperbola bound
 for tau over a short interval; and the integral reduction edge_integral_le,
 PROVED.
 
+S154, step second-dyadic-edges-p2: edge_pointwise is PROVED from coef_norm_le, PROVED, and
+the LEAF tau_edge_sum MEDIUM of the new file SecondDyadicEdgePoint1123.
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.SecondDyadicCases1122
 import LeanLab.KumchevLiu2007.SecondDyadicCase3Split1122
+import LeanLab.KumchevLiu2007.SecondDyadicEdgePoint1123
 
 namespace LeanLab.KumchevLiu2007.SecondDyadicEdges1123
 
@@ -58,8 +61,10 @@ theorem edge_integral_le (S : Finset ℕ) (c : ℕ → ℂ) (Y H K : ℝ) (hH : 
     _ = 2 * H * K := by
         rw [intervalIntegral.integral_const, smul_eq_mul]; ring
 
-/-- LEAF: P0088 pages 11 to 12, Lemma 3.4 Cases 1 to 3, the edge stretch
-t in [Y - 2H, Y] of the second sum of display 52 in window form. Class MEDIUM.
+/-- PROVED from coef_norm_le, PROVED, and the LEAF tau_edge_sum of SecondDyadicEdgePoint1123,
+S154.
+P0088 pages 11 to 12, Lemma 3.4 Cases 1 to 3, the edge stretch
+t in [Y - 2H, Y] of the second sum of display 52 in window form.
 The pointwise bound of the squared short sum, uniform in alpha, M and D: the
 coefficient of m has modulus at most 2 tau of m, the m lie in an interval of
 length at most 2H Y^(-1/2) below Y^(1/2), and the elementary hyperbola bound
@@ -87,7 +92,49 @@ theorem edge_pointwise (A : ℝ) (hA : 0 < A) :
                 ((ArithmeticFunction.moebius d : ℤ) : ℂ)) *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2 ≤
             C * H / Real.log X ^ A := by
-  sorry
+  obtain ⟨B0, hB0, h⟩ := SecondDyadicEdgePoint1123.tau_edge_sum A hA
+  refine ⟨B0, hB0, fun B hB ε hε hε' => ?_⟩
+  obtain ⟨C, X0, hC, hX0, k⟩ := h B hB ε hε hε'
+  refine ⟨4 * C, X0, by linarith, hX0, ?_⟩
+  intro X H hX hlo hhi α M D t ht1 ht2
+  have hX1 : 1 ≤ X := by linarith
+  have hk := k X H hX hlo hhi t ht1 ht2
+  set S := (squareWindow (windowY X ε)).filter
+    (fun m : ℕ => t < (m : ℝ) ^ 2 ∧ (m : ℝ) ^ 2 ≤ t + H) with hS
+  set T := ∑ m ∈ S, (m.divisors.card : ℝ) with hT
+  have hT0 : 0 ≤ T := Finset.sum_nonneg fun m _ => Nat.cast_nonneg _
+  have hnorm : ‖∑ m ∈ S,
+      (∑ p ∈ ((Finset.range (m + 1)).filter (fun p : ℕ => p.Prime ∧
+          windowY X ε ^ (1 / 6 + ε / 2) ≤ (p : ℝ) ∧
+          (p : ℝ) < windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ) ∧
+          p ∣ m)).filter
+          (fun p : ℕ => M ≤ (p : ℝ) ∧ (p : ℝ) < 2 * M),
+        ∑ d ∈ ((m / p).divisors.filter (fun d : ℕ => ∀ r : ℕ, r.Prime → r ∣ d →
+            (r : ℝ) < windowY X ε ^ (1 / 6 + ε / 2))).filter
+            (fun d : ℕ => D ≤ (d : ℝ) ∧ (d : ℝ) < 2 * D),
+          ((ArithmeticFunction.moebius d : ℤ) : ℂ)) *
+        fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ≤ 2 * T := by
+    refine (norm_sum_le _ _).trans ?_
+    rw [hT, Finset.mul_sum]
+    refine Finset.sum_le_sum fun m hm => ?_
+    have hf : ‖fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ = 1 := Circle.norm_coe _
+    rw [norm_mul, hf, mul_one]
+    exact SecondDyadicEdgePoint1123.coef_norm_le X ε B M D hX1 hε m (Finset.mem_filter.1 hm).1
+  have hn0 := norm_nonneg (∑ m ∈ S,
+      (∑ p ∈ ((Finset.range (m + 1)).filter (fun p : ℕ => p.Prime ∧
+          windowY X ε ^ (1 / 6 + ε / 2) ≤ (p : ℝ) ∧
+          (p : ℝ) < windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ) ∧
+          p ∣ m)).filter
+          (fun p : ℕ => M ≤ (p : ℝ) ∧ (p : ℝ) < 2 * M),
+        ∑ d ∈ ((m / p).divisors.filter (fun d : ℕ => ∀ r : ℕ, r.Prime → r ∣ d →
+            (r : ℝ) < windowY X ε ^ (1 / 6 + ε / 2))).filter
+            (fun d : ℕ => D ≤ (d : ℝ) ∧ (d : ℝ) < 2 * D),
+          ((ArithmeticFunction.moebius d : ℤ) : ℂ)) *
+        fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ)))
+  calc _ ≤ (2 * T) ^ 2 := pow_le_pow_left₀ hn0 hnorm 2
+    _ = 4 * T ^ 2 := by ring
+    _ ≤ 4 * (C * H / Real.log X ^ A) := by linarith [hk]
+    _ = 4 * C * H / Real.log X ^ A := by ring
 
 /-- PROVED. H is nonnegative in the H range of Theorem 1. -/
 theorem H_nonneg (X H B ε : ℝ) (hX : 2 ≤ X)
