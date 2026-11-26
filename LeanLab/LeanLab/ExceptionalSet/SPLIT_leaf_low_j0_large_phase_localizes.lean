@@ -55,7 +55,9 @@ theorem leaf_low_j0_off_lattice_block_small (γ δ κ : ℝ) (N : ℕ) (a b : �
       F γ N ^ (δ - 1) < |(b - a) - (h : ℝ) / 2|) :
     ‖blockPhase (indices_low_j0 γ N) (fun n => F γ n - (0 : ℤ)) (b - a)‖ ≤
       (N : ℝ) * calE γ κ N ^ (-(5 / 6 : ℝ)) := by
-  sorry
+  classical
+  exact blockPhase_le (indices_low_j0 γ N) (fun n => F γ n - (0 : ℤ)) N
+    (indices_low_j0_card γ N) (b - a)
 
 /-- LEAF. Step 2, the strip index is bounded. Two points of the truncated minor
 window differ by at most `2 E ^ (2 / 3)`, the radius `X ^ (δ - 1)` is at most one

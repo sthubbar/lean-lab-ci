@@ -1,0 +1,11 @@
+import Mathlib
+#check Real.log_six_gt_d9
+#check Real.log_six_lt_d9
+#check Real.log_seven_gt_d9
+#check Real.log_seven_lt_d9
+#check Real.log_eight_gt_d9
+#check Real.log_eight_lt_d9
+#check Real.log_five_gt_d9
+#check Real.log_five_lt_d9
+#check Real.log_four_gt_d9
+#check Real.log_four_lt_d9
