@@ -64,7 +64,8 @@ theorem leaf_shift_minor_dq5 :
       ∃ κ₁ : ℝ, 0 < κ₁ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₁ → ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
         ∀ β : ℝ, F γ N ^ (δ - 1) < |β| → |β| ≤ 2 * F γ N ^ δ + 2 →
           ‖PhiDQ5 γ N β‖ ≤ N * calE γ κ N ^ (-(1 : ℝ)) := by
-  sorry
+  unfold PhiDQ5
+  exact DQLemma9.shift_minor_of_theorem2 theorem2
 
 /-- Vacuity instance for the hypotheses of both leaves: `γ = 5/4`, `δ = 1/8 < γ - 1`. -/
 theorem vacuity_dq5_leaves : (1 : ℝ) < 5 / 4 ∧ (5 / 4 : ℝ) < 3 / 2 ∧

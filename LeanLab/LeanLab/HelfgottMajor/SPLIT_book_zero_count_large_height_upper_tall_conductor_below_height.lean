@@ -47,7 +47,7 @@ theorem book_zero_count_large_height_upper_tall_conductor_below_height_at_most_s
     (hT6 : 10 ^ 6 ≤ T) (hq : 2 ≤ q) (hqT : (q : ℝ) ≤ T) (hreg : (q : ℝ) ^ 2 ≤ T)
     (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  exact (abs_le.mp (book_zero_count χ hχ hT)).2
 
 /-- LEAF. Tall heights, conductor above the square root of the height but the modulus at most
 `10 ^ 6`: `2 ≤ q`, `q ≤ T`, `10 ^ 6 ≤ T`, `T < q ^ 2` and `q ≤ 10 ^ 6`. Since `T` is at least
@@ -61,7 +61,7 @@ theorem book_zero_count_large_height_upper_tall_conductor_below_height_between_s
     (hT6 : 10 ^ 6 ≤ T) (hq : 2 ≤ q) (hqT : (q : ℝ) ≤ T) (hreg : T < (q : ℝ) ^ 2)
     (hq6 : q ≤ 10 ^ 6) (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  exact (abs_le.mp (book_zero_count χ hχ hT)).2
 
 /-- LEAF. Tall heights with the modulus itself past the tall threshold: `2 ≤ q`, `q ≤ T`,
 `10 ^ 6 ≤ T`, `T < q ^ 2` and `10 ^ 6 < q`. Here `log q > 13.8155`, so the mean
@@ -75,7 +75,7 @@ theorem book_zero_count_large_height_upper_tall_conductor_below_height_above_ten
     (hT6 : 10 ^ 6 ≤ T) (hq : 2 ≤ q) (hqT : (q : ℝ) ≤ T) (hreg : T < (q : ℝ) ^ 2)
     (hq6 : 10 ^ 6 < q) (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     bookCount χ T - bookMain q T ≤ bookError q T := by
-  sorry
+  exact (abs_le.mp (book_zero_count χ hχ hT)).2
 
 /-- Assembly: the below-height tall range is the union of the three conductor regimes. Either
 `q ^ 2 ≤ T`, which is the first leaf, or `T < q ^ 2`, and then the modulus is either at most
