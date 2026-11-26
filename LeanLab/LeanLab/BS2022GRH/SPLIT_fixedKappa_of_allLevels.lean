@@ -25,6 +25,33 @@ namespace LeanLab.BS2022GRH.SieveAllLevels1611
 open Real Finset Classical Filter Topology
 open LeanLab.BS2022GRH LeanLab.BS2022GRH.ChenThresholdGRH
 
+private lemma continuous_inner_hS : Continuous
+    (fun s : ℝ => if s ≤ 3 then exp (-s) else 3 / s * exp (-s)) := by
+  apply Continuous.if_le
+  · fun_prop
+  · intro s hs
+    have hs0 : s ≠ 0 := by linarith
+    fun_prop
+  · exact continuous_id
+  · exact continuous_const
+  · intro s hs
+    have h3 : s = 3 := hs
+    subst s
+    simp
+
+private lemma continuous_hS : Continuous hS := by
+  change Continuous (fun s : ℝ =>
+    if s ≤ 2 then exp (-2) else if s ≤ 3 then exp (-s) else 3 / s * exp (-s))
+  apply Continuous.if_le
+  · exact continuous_const
+  · exact continuous_inner_hS.continuousOn
+  · exact continuous_id
+  · exact continuous_const
+  · intro s hs
+    have h2 : s = 2 := hs
+    subst s
+    simp
+
 /-- LEAF: steps 1 to 7 of the hand proof of `fixedKappa_of_allLevels`, then one use of
 `LinearSieveAllLevels` at z' = exp(M (1 + εF) log z), D' = (D(1 - δ))^M, M large; the new level is
 sδ for every M. HARD: needs Mertens on all primes of a range, not in Mathlib. Strictly easier than
@@ -61,7 +88,19 @@ theorem upper_limit (S X R c s₀ : ℝ) (hs₀ : 0 < s₀) (f : ℝ → ℝ)
     (hev : ∀ᶠ δ in 𝓝[>] (0 : ℝ),
       S ≤ (2 * exp eulerMascheroniConstant / f δ + c * hS (f δ)) * X + R) :
     S ≤ (2 * exp eulerMascheroniConstant / s₀ + c * hS s₀) * X + R := by
-  sorry
+  have hF : ContinuousAt
+      (fun s : ℝ => 2 * exp eulerMascheroniConstant / s + c * hS s) s₀ := by
+    exact ((continuousAt_const.div continuousAt_id hs₀.ne').add
+      ((continuous_hS.continuousAt).const_mul c))
+  have hR : ContinuousAt
+      (fun s : ℝ => (2 * exp eulerMascheroniConstant / s + c * hS s) * X + R) s₀ := by
+    exact (hF.mul_const X).add continuousAt_const
+  have hlim : Tendsto
+      (fun δ : ℝ => (2 * exp eulerMascheroniConstant / f δ + c * hS (f δ)) * X + R)
+      (𝓝[>] (0 : ℝ))
+      (𝓝 ((2 * exp eulerMascheroniConstant / s₀ + c * hS s₀) * X + R)) :=
+    hR.tendsto.comp hf
+  exact Filter.ge_of_tendsto hlim hev
 
 /-- LEAF: step 8, lower half. f(s) = 2e^γ log(s - 1)/s and h(s) are continuous at s₀ > 1, so a
 bound holding for all small δ > 0 passes to the limit s₀ of f δ. MEDIUM, as `upper_limit`. Strictly
@@ -72,7 +111,22 @@ theorem lower_limit (S X R c s₀ : ℝ) (hs₀ : 1 < s₀) (f : ℝ → ℝ)
     (hev : ∀ᶠ δ in 𝓝[>] (0 : ℝ),
       (2 * exp eulerMascheroniConstant * log (f δ - 1) / f δ - c * hS (f δ)) * X - R ≤ S) :
     (2 * exp eulerMascheroniConstant * log (s₀ - 1) / s₀ - c * hS s₀) * X - R ≤ S := by
-  sorry
+  have hlog : ContinuousAt (fun s : ℝ => log (s - 1)) s₀ :=
+    (Real.continuousAt_log (by linarith : s₀ - 1 ≠ 0)).comp
+      (continuousAt_id.sub continuousAt_const)
+  have hF : ContinuousAt
+      (fun s : ℝ => 2 * exp eulerMascheroniConstant * log (s - 1) / s - c * hS s) s₀ := by
+    exact (((continuousAt_const.mul hlog).div continuousAt_id hs₀.ne').sub
+      ((continuous_hS.continuousAt).const_mul c))
+  have hR : ContinuousAt
+      (fun s : ℝ => (2 * exp eulerMascheroniConstant * log (s - 1) / s - c * hS s) * X - R) s₀ := by
+    exact (hF.mul_const X).sub continuousAt_const
+  have hlim : Tendsto
+      (fun δ : ℝ => (2 * exp eulerMascheroniConstant * log (f δ - 1) / f δ - c * hS (f δ)) * X - R)
+      (𝓝[>] (0 : ℝ))
+      (𝓝 ((2 * exp eulerMascheroniConstant * log (s₀ - 1) / s₀ - c * hS s₀) * X - R)) :=
+    hR.tendsto.comp hf
+  exact Filter.le_of_tendsto hlim hev
 
 /-- LEAF: step 8, the level. For D > 0 and z ≥ 2 the level log (D(1 - δ)) / log z / (1 + εF) of
 the lifted system tends to s* = log D / log z / (1 + εF) as δ → 0+. MEDIUM: continuity of log at
@@ -80,7 +134,12 @@ D > 0. Strictly easier than the target. Non-vacuity: z = 2, D = 1, εF = 1. -/
 theorem level_tendsto (z D εF : ℝ) (hD : 0 < D) :
     Tendsto (fun δ => log (D * (1 - δ)) / log z / (1 + εF)) (𝓝[>] 0)
       (𝓝 (log D / log z / (1 + εF))) := by
-  sorry
+  have hc : Tendsto (fun δ : ℝ => D * (1 - δ)) (𝓝[>] (0 : ℝ)) (𝓝 D) := by
+    convert ((continuous_const.mul (continuous_const.sub continuous_id)).tendsto 0).mono_left
+      nhdsWithin_le_nhds using 1 <;> simp
+  have hl : Tendsto (fun δ : ℝ => log (D * (1 - δ))) (𝓝[>] (0 : ℝ)) (𝓝 (log D)) :=
+    hc.log hD.ne'
+  exact (hl.div_const (log z)).div_const (1 + εF)
 
 /-- The eventual conditions on δ, PROVED: for w < D, small δ > 0 has δ < 1 and w < D(1 - δ). -/
 theorem eventually_small (w D : ℝ) (hw : w < D) (hD : 0 < D) :
