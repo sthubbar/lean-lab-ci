@@ -21,6 +21,7 @@ Leaves:
 AI wrote this Lean code, checked only by the Lean kernel. Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.Feed1122LeafR1TrivialBound
+import LeanLab.ExceptionalSet.Feed1122_boundary_count_of_lemma4_s134
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -52,8 +53,9 @@ theorem leaf_boundary_count (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
       ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ Δ : ℝ, 0 < Δ →
         (((Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ =>
             Int.fract (F γ n) < Δ / 2 ∨ 1 - Δ / 2 < Int.fract (F γ n))).card : ℝ)
-          ≤ B * N * (Δ + calE γ κ N ^ (-(1 / 3 : ℝ)) / Real.log (F γ N) ^ 2) := by
-  sorry
+          ≤ B * N * (Δ + calE γ κ N ^ (-(1 / 3 : ℝ)) / Real.log (F γ N) ^ 2) :=
+  -- CONDITIONAL ON `lemma4`, Lemma 4 of P0082, p. 359, itself still open in State1539.lean.
+  leaf_boundary_count_of_lemma4_s134 lemma4 γ h1 h2
 
 /-- LEAF: displays 31, 32 and 35 to 39 of P0082, p. 367-369, on the good `n`. For the `n`
 of the window with `ν_n` even and `{F(n)} ∈ [Δ/2, 1 - Δ/2]`, where
