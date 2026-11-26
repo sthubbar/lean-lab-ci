@@ -32,6 +32,7 @@ import Mathlib
 import LeanLab.Common.Goldbach
 import LeanLab.Linnik.Statements
 import LeanLab.PNTPort.Vinogradov.MinorArcs
+import LeanLab.LPZ2007.Conductor637
 
 open Finset Real MeasureTheory
 open scoped ArithmeticFunction.vonMangoldt
@@ -266,8 +267,12 @@ def RealPrimitiveModulus : Prop :=
 
 /- Davenport as quoted p.6, cited. -/
 /- CODEX task48 preserves the exact RealPrimitiveModulus Prop above.
-Old cited declaration: `theorem realPrimitiveModulus : RealPrimitiveModulus := by sorry`. -/
-theorem realPrimitiveModulus : RealPrimitiveModulus := by sorry
+Old cited declaration: `theorem realPrimitiveModulus : RealPrimitiveModulus := by
+  simpa only [RealPrimitiveModulus, oddRad, Conductor637.oddPart] using
+    Conductor637.classification`. -/
+theorem realPrimitiveModulus : RealPrimitiveModulus := by
+  simpa only [RealPrimitiveModulus, oddRad, Conductor637.oddPart] using
+    Conductor637.classification
 
 /-- Iwaniec's zero-free region as quoted p.6: for non-real primitive `χ` mod `r`, `L(s, χ)` has
 no zero with `ℜs > 1 - 1/B`, `B = 4·10^4 (log(2r') + (ℓ log(2ℓ))^{3/4})`, `ℓ = log(r(|t|+2))`. -/
@@ -485,3 +490,5 @@ theorem gallagherAsymp : GallagherAsymp := by sorry
 end LeanLab.LPZ2007
 
 #print axioms LeanLab.LPZ2007.lemma63
+
+#print axioms LeanLab.LPZ2007.realPrimitiveModulus

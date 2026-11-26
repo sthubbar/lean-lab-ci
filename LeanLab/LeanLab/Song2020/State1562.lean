@@ -494,6 +494,352 @@ theorem singular_lower : SingularLower := by
   exact hlog.tsum_le_tsum (fun p => Real.log_le_log (lowerFactor_pos139 p)
     (lowerFactor_le_singFactor139 n hn p)) hlogn
 
+/-! ### Short interval circle method integration, CODEX task648 -/
+
+/-- Page 3 Lemma 3, minor arc integration step. A supremum bound B on any measurable
+part of the unit interval bounds its cubic integral by B times the exact mean square.
+This does not supply the short interval prime supremum estimate. AI wrote this proof. -/
+theorem minor_arc_integral_le648 (n : ℕ) (y B : ℝ) (hB : 0 ≤ B)
+    (s : Set ℝ) (hs : MeasurableSet s) (hsub : s ⊆ Set.Ioc (0 : ℝ) 1)
+    (hbound : ∀ α ∈ s, ‖gS n y α‖ ≤ B) :
+    ‖∫ α in s, gS n y α ^ 3 * eC (-(n * α))‖ ≤
+      B * (windowPrimes n y).card := by
+  have hF : Continuous (fun α : ℝ => gS n y α ^ 3 * eC (-(n * α))) := by
+    unfold gS eC; fun_prop
+  have hQ : Continuous (fun α : ℝ => ‖gS n y α‖ ^ 2) := by
+    unfold gS eC; fun_prop
+  have hFI : MeasureTheory.IntegrableOn
+      (fun α : ℝ => gS n y α ^ 3 * eC (-(n * α))) s :=
+    hF.integrableOn_Ioc.mono_set hsub
+  have hQI : MeasureTheory.IntegrableOn (fun α : ℝ => ‖gS n y α‖ ^ 2) s :=
+    hQ.integrableOn_Ioc.mono_set hsub
+  have heC (x : ℝ) : ‖eC x‖ = 1 := by
+    simp [eC, Complex.norm_exp, Complex.mul_re, Complex.mul_im]
+  calc
+    _ ≤ ∫ α in s, ‖gS n y α ^ 3 * eC (-(n * α))‖ :=
+      MeasureTheory.norm_integral_le_integral_norm _
+    _ ≤ ∫ α in s, B * ‖gS n y α‖ ^ 2 := by
+      apply MeasureTheory.integral_mono_ae hFI.norm (hQI.const_mul B)
+      filter_upwards [MeasureTheory.ae_restrict_mem hs] with α hα
+      rw [norm_mul, norm_pow, heC, mul_one]
+      calc
+        ‖gS n y α‖ ^ 3 = ‖gS n y α‖ * ‖gS n y α‖ ^ 2 := by ring
+        _ ≤ B * ‖gS n y α‖ ^ 2 :=
+          mul_le_mul_of_nonneg_right (hbound α hα) (sq_nonneg _)
+    _ = B * ∫ α in s, ‖gS n y α‖ ^ 2 := MeasureTheory.integral_const_mul _ _
+    _ ≤ B * ∫ α in Set.Ioc (0 : ℝ) 1, ‖gS n y α‖ ^ 2 := by
+      apply mul_le_mul_of_nonneg_left _ hB
+      exact MeasureTheory.setIntegral_mono_set
+        (hQ.integrableOn_Icc.mono_set Set.Ioc_subset_Icc_self)
+        (Filter.Eventually.of_forall fun _ => sq_nonneg _)
+        (Filter.Eventually.of_forall hsub)
+    _ = B * (windowPrimes n y).card := by
+      rw [← intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1),
+        gS_mean_square139]
+
+/-- Page 3 Lemma 3, exact decomposition into a measurable major arc set and its complement.
+Both sets are intersected with the integration interval. AI wrote this proof. -/
+theorem gCube_split648 (n : ℕ) (y : ℝ) (M : Set ℝ) (hM : MeasurableSet M) :
+    gCube n y =
+      (∫ α in M ∩ Set.Ioc (0 : ℝ) 1, gS n y α ^ 3 * eC (-(n * α))) +
+      (∫ α in Mᶜ ∩ Set.Ioc (0 : ℝ) 1, gS n y α ^ 3 * eC (-(n * α))) := by
+  have hF : Continuous (fun α : ℝ => gS n y α ^ 3 * eC (-(n * α))) := by
+    unfold gS eC; fun_prop
+  have h := MeasureTheory.integral_add_compl
+    (μ := MeasureTheory.volume.restrict (Set.Ioc (0 : ℝ) 1)) hM hF.integrableOn_Ioc
+  rw [MeasureTheory.Measure.restrict_restrict hM,
+    MeasureTheory.Measure.restrict_restrict hM.compl] at h
+  simpa only [gCube, intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1)]
+    using h.symm
+
+/-- Page 3 Lemma 3, minor arc budget from the short interval prime supremum input.
+CONDITIONAL ON hbound. The estimate hbound is not proved here. AI wrote this proof. -/
+theorem minor_arc_log_bound648 (n : ℕ) (y C : ℝ) (hy : 1 ≤ y) (hC : 0 ≤ C)
+    (s : Set ℝ) (hs : MeasurableSet s) (hsub : s ⊆ Set.Ioc (0 : ℝ) 1)
+    (hbound : ∀ α ∈ s, ‖gS n y α‖ ≤ C * (y / Real.log n ^ 4)) :
+    ‖∫ α in s, gS n y α ^ 3 * eC (-(n * α))‖ ≤
+      4 * C * (y ^ 2 / Real.log n ^ 4) := by
+  have hy0 : 0 ≤ y := by linarith
+  have hB : 0 ≤ C * (y / Real.log n ^ 4) := by positivity
+  have hc : ((windowPrimes n y).card : ℝ) ≤ 4 * y := by
+    have := windowPrimes_card_le139 n y hy0
+    linarith
+  calc
+    _ ≤ (C * (y / Real.log n ^ 4)) * (windowPrimes n y).card :=
+      minor_arc_integral_le648 n y _ hB s hs hsub hbound
+    _ ≤ (C * (y / Real.log n ^ 4)) * (4 * y) :=
+      mul_le_mul_of_nonneg_left hc hB
+    _ = _ := by ring
+
+/-- Page 3 Lemma 3, assembly of the major arc asymptotic and minor arc supremum bound.
+CONDITIONAL ON hmajor and hminor. Neither analytic input is asserted by this theorem.
+AI wrote this proof. -/
+theorem gCube_error_of_arc_estimates648 (n : ℕ) (y A B : ℝ) (hy : 1 ≤ y)
+    (hB : 0 ≤ B) (M : Set ℝ) (hM : MeasurableSet M)
+    (hmajor : ‖(∫ α in M ∩ Set.Ioc (0 : ℝ) 1,
+      gS n y α ^ 3 * eC (-(n * α))) - (mainTerm n y : ℂ)‖ ≤
+        A * (y ^ 2 / Real.log n ^ 4))
+    (hminor : ∀ α ∈ Mᶜ ∩ Set.Ioc (0 : ℝ) 1,
+      ‖gS n y α‖ ≤ B * (y / Real.log n ^ 4)) :
+    ‖gCube n y - (mainTerm n y : ℂ)‖ ≤
+      (A + 4 * B) * (y ^ 2 / Real.log n ^ 4) := by
+  rw [gCube_split648 n y M hM]
+  have h := minor_arc_log_bound648 n y B hy hB
+    (Mᶜ ∩ Set.Ioc (0 : ℝ) 1) (hM.compl.inter measurableSet_Ioc)
+    Set.inter_subset_right hminor
+  calc
+    _ ≤ ‖(∫ α in M ∩ Set.Ioc (0 : ℝ) 1,
+          gS n y α ^ 3 * eC (-(n * α))) - (mainTerm n y : ℂ)‖ +
+        ‖∫ α in Mᶜ ∩ Set.Ioc (0 : ℝ) 1, gS n y α ^ 3 * eC (-(n * α))‖ := by
+      simpa only [add_sub_right_comm] using norm_add_le
+        ((∫ α in M ∩ Set.Ioc (0 : ℝ) 1, gS n y α ^ 3 * eC (-(n * α))) -
+          (mainTerm n y : ℂ))
+        (∫ α in Mᶜ ∩ Set.Ioc (0 : ℝ) 1, gS n y α ^ 3 * eC (-(n * α)))
+    _ ≤ A * (y ^ 2 / Real.log n ^ 4) + 4 * B * (y ^ 2 / Real.log n ^ 4) :=
+      add_le_add hmajor h
+    _ = _ := by ring
+
+/-- Page 3 Lemma 3, finite character expansion used before the major arc estimates.
+This is Mathlib character orthogonality on the unit residue classes. It asserts no
+short interval distribution estimate. AI wrote this proof. -/
+theorem unit_character_expansion648 (q : ℕ) [NeZero q] (F : ZMod q → ℂ)
+    (b : (ZMod q)ˣ) :
+    (q.totient : ℂ) * F b =
+      ∑ χ : DirichletCharacter ℂ q,
+        (∑ r : (ZMod q)ˣ, F r * χ ((r : ZMod q)⁻¹)) * χ b := by
+  symm
+  calc
+    _ = ∑ r : (ZMod q)ˣ,
+        F r * ∑ χ : DirichletCharacter ℂ q, χ ((r : ZMod q)⁻¹) * χ b := by
+      simp_rw [Finset.sum_mul]
+      rw [Finset.sum_comm]
+      apply Finset.sum_congr rfl
+      intro r _
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro χ _
+      ring
+    _ = ∑ r : (ZMod q)ˣ, if r = b then (q.totient : ℂ) * F b else 0 := by
+      apply Finset.sum_congr rfl
+      intro r _
+      rw [DirichletCharacter.sum_char_inv_mul_char_eq ℂ r.isUnit]
+      by_cases hr : r = b
+      · subst r
+        simp [mul_comm]
+      · have hr' : (r : ZMod q) ≠ (b : ZMod q) := by
+          intro h
+          exact hr (Units.ext h)
+        simp [hr, hr']
+    _ = _ := by simp
+
+/-- Page 3 Lemma 3, character expansion of the coprime part of the prime window sum.
+The factor F on residues can be chosen as the rational additive character on a major arc.
+Noncoprime primes are excluded explicitly. AI wrote this proof. -/
+theorem window_character_expansion648 (q : ℕ) [NeZero q] (n : ℕ) (y β : ℝ)
+    (F : ZMod q → ℂ) :
+    (q.totient : ℂ) *
+      (∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q),
+        F (p : ZMod q) * eC (β * p)) =
+      ∑ χ : DirichletCharacter ℂ q,
+        (∑ r : (ZMod q)ˣ, F r * χ ((r : ZMod q)⁻¹)) *
+          (∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q),
+            χ (p : ZMod q) * eC (β * p)) := by
+  classical
+  rw [Finset.mul_sum]
+  trans ∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q),
+    (∑ χ : DirichletCharacter ℂ q,
+      (∑ r : (ZMod q)ˣ, F r * χ ((r : ZMod q)⁻¹)) * χ (p : ZMod q)) *
+        eC (β * p)
+  · apply Finset.sum_congr rfl
+    intro p hp
+    have hu : IsUnit (p : ZMod q) :=
+      (ZMod.isUnit_iff_coprime p q).mpr (Finset.mem_filter.mp hp).2
+    have h := unit_character_expansion648 q F hu.unit
+    rw [hu.unit_spec] at h
+    rw [← h]
+    ring
+  · calc
+      _ = ∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q),
+          ∑ χ : DirichletCharacter ℂ q,
+            (∑ r : (ZMod q)ˣ, F r * χ ((r : ZMod q)⁻¹)) *
+              (χ (p : ZMod q) * eC (β * p)) := by
+        apply Finset.sum_congr rfl
+        intro p _
+        rw [Finset.sum_mul]
+        apply Finset.sum_congr rfl
+        intro χ _
+        ring
+      _ = _ := by
+        rw [Finset.sum_comm]
+        apply Finset.sum_congr rfl
+        intro χ _
+        rw [Finset.mul_sum]
+
+/-- Page 3 Lemma 3, the principal character term in the coprime window is exactly
+its unweighted phase sum. This identity does not estimate the phase sum. AI wrote this proof. -/
+theorem principal_window_character648 (q : ℕ) [NeZero q] (n : ℕ) (y β : ℝ) :
+    (∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q),
+      (1 : DirichletCharacter ℂ q) (p : ZMod q) * eC (β * p)) =
+      ∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q), eC (β * p) := by
+  apply Finset.sum_congr rfl
+  intro p hp
+  rw [MulChar.one_apply ((ZMod.isUnit_iff_coprime p q).mpr
+    (Finset.mem_filter.mp hp).2), one_mul]
+
+/-- Page 3 Lemma 3, uniform circle method assembly at exponent seven eighths.
+CONDITIONAL ON the major arc asymptotic hmajor and short interval minor arc bound hminor.
+The zero density and character sum estimates needed for these inputs remain open.
+AI wrote this proof. -/
+theorem lemma3_of_arc_estimates648 (M : ℕ → ℝ → Set ℝ)
+    (hM : ∀ n y, MeasurableSet (M n y)) (A B : ℝ) (hB : 0 ≤ B) (N : ℕ)
+    (hmajor : ∀ n : ℕ, Odd n → N ≤ n → ∀ y : ℝ,
+      (n : ℝ) ^ ((7 : ℝ) / 8) ≤ y → y ≤ (n : ℝ) / 3 →
+      ‖(∫ α in M n y ∩ Set.Ioc (0 : ℝ) 1,
+        gS n y α ^ 3 * eC (-(n * α))) - (mainTerm n y : ℂ)‖ ≤
+          A * (y ^ 2 / Real.log n ^ 4))
+    (hminor : ∀ n : ℕ, Odd n → N ≤ n → ∀ y : ℝ,
+      (n : ℝ) ^ ((7 : ℝ) / 8) ≤ y → y ≤ (n : ℝ) / 3 →
+      ∀ α ∈ (M n y)ᶜ ∩ Set.Ioc (0 : ℝ) 1,
+        ‖gS n y α‖ ≤ B * (y / Real.log n ^ 4)) :
+    Lemma3 (7 / 8) := by
+  refine ⟨A + 4 * B, max 1 N, ?_⟩
+  intro n hn hnN y hy hyupper
+  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast ((le_max_left 1 N).trans hnN)
+  have hy1 : 1 ≤ y :=
+    (Real.one_le_rpow hn1 (by norm_num : (0 : ℝ) ≤ 7 / 8)).trans hy
+  have hnN' : N ≤ n := (le_max_right 1 N).trans hnN
+  exact gCube_error_of_arc_estimates648 n y A B hy1 hB (M n y) (hM n y)
+    (hmajor n hn hnN' y hy hyupper) (hminor n hn hnN' y hy hyupper)
+
+/-- Page 3 Lemma 3, rational additive phases depend only on the residue class.
+This algebraic identity is used in the major arc character expansion. AI wrote this proof. -/
+theorem rational_phase_residue648 (q : ℕ) [NeZero q] (a : ℤ) (p : ℕ) :
+    eC ((a : ℝ) * p / q) = eC ((a : ℝ) * (p % q : ℕ) / q) := by
+  have hq : (q : ℝ) ≠ 0 := by exact_mod_cast NeZero.ne q
+  have hp : (p : ℝ) = (p % q : ℕ) + (q : ℝ) * (p / q : ℕ) := by
+    exact_mod_cast (Nat.mod_add_div p q).symm
+  have hphase : (a : ℝ) * p / q =
+      (a : ℝ) * (p % q : ℕ) / q + ((a * (p / q : ℕ) : ℤ) : ℝ) := by
+    simp only [Int.cast_mul, Int.cast_natCast]
+    rw [hp]
+    field_simp
+    <;> ring
+  rw [hphase]
+  change LeanLab.CircleOrth.ee _ = LeanLab.CircleOrth.ee _
+  rw [LeanLab.CircleOrth.ee_add]
+  have he : LeanLab.CircleOrth.ee (((a * (p / q : ℕ) : ℤ)) : ℝ) = 1 := by
+    unfold LeanLab.CircleOrth.ee
+    convert Complex.exp_int_mul_two_pi_mul_I (a * (p / q : ℕ)) using 1 <;>
+      push_cast <;> ring
+  rw [he, mul_one]
+
+/-- Page 3 Lemma 3, exact major arc character expansion of the coprime prime sum.
+The nonprincipal and principal character estimates are separate analytic inputs.
+AI wrote this proof. -/
+theorem major_arc_character_expansion648 (q : ℕ) [NeZero q] (n : ℕ) (y β : ℝ)
+    (a : ℤ) :
+    (q.totient : ℂ) *
+      (∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q),
+        eC (((a : ℝ) / q + β) * p)) =
+      ∑ χ : DirichletCharacter ℂ q,
+        (∑ r : (ZMod q)ˣ, eC ((a : ℝ) * (r : ZMod q).val / q) *
+          χ ((r : ZMod q)⁻¹)) *
+          (∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q),
+            χ (p : ZMod q) * eC (β * p)) := by
+  have hphase (p : ℕ) : eC (((a : ℝ) / q + β) * p) =
+      eC ((a : ℝ) * (p % q : ℕ) / q) * eC (β * p) := by
+    rw [← rational_phase_residue648 q a p]
+    change LeanLab.CircleOrth.ee _ = LeanLab.CircleOrth.ee _ * LeanLab.CircleOrth.ee _
+    rw [← LeanLab.CircleOrth.ee_add]
+    congr 1
+    ring
+  simp_rw [hphase]
+  simpa only [ZMod.val_natCast] using
+    window_character_expansion648 q n y β (fun r => eC ((a : ℝ) * r.val / q))
+
+/-- Page 3 Lemma 3, deleting the primes that are not units modulo q costs at most
+one per distinct prime divisor of q. This controls the omitted part of the character
+expansion without any prime distribution hypothesis. AI wrote this proof. -/
+theorem noncoprime_window_bound648 (q : ℕ) [NeZero q] (n : ℕ) (y α : ℝ) :
+    ‖gS n y α -
+      ∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q), eC (α * p)‖ ≤
+        q.primeFactors.card := by
+  classical
+  have hsplit := Finset.sum_filter_add_sum_filter_not (windowPrimes n y)
+    (fun p => Nat.Coprime p q) (fun p => eC (α * p))
+  have heq : gS n y α -
+      ∑ p ∈ (windowPrimes n y).filter (fun p => Nat.Coprime p q), eC (α * p) =
+      ∑ p ∈ (windowPrimes n y).filter (fun p => ¬ Nat.Coprime p q), eC (α * p) := by
+    unfold gS
+    rw [← hsplit]
+    ring
+  have hsub : (windowPrimes n y).filter (fun p => ¬ Nat.Coprime p q) ⊆ q.primeFactors := by
+    intro p hp
+    obtain ⟨hpw, hnot⟩ := Finset.mem_filter.mp hp
+    have hpprime := (Finset.mem_filter.mp hpw).2.1
+    exact hpprime.mem_primeFactors' (not_not.mp (hpprime.coprime_iff_not_dvd.not.mp hnot))
+  rw [heq]
+  calc
+    _ ≤ ∑ p ∈ (windowPrimes n y).filter (fun p => ¬ Nat.Coprime p q), ‖eC (α * p)‖ :=
+      norm_sum_le _ _
+    _ = ((windowPrimes n y).filter (fun p => ¬ Nat.Coprime p q)).card := by
+      have he (x : ℝ) : ‖eC x‖ = 1 := by
+        simp [eC, Complex.norm_exp, Complex.mul_re, Complex.mul_im]
+      simp only [he, Finset.sum_const, nsmul_eq_mul, mul_one]
+    _ ≤ q.primeFactors.card := by exact_mod_cast Finset.card_le_card hsub
+
+/-- Page 3 Lemma 3, isolate the nonprincipal character contribution.
+For residue coefficients of modulus at most one, its norm is bounded by phi q times
+the sum of norms of the nonprincipal twisted sums. Bounds for those twisted sums,
+including exceptional characters, are not asserted here. AI wrote this proof. -/
+theorem nonprincipal_character_budget648 (q : ℕ) [NeZero q] (F : ZMod q → ℂ)
+    (hF : ∀ r : (ZMod q)ˣ, ‖F r‖ ≤ 1) (T : DirichletCharacter ℂ q → ℂ) :
+    ‖(∑ χ : DirichletCharacter ℂ q,
+        (∑ r : (ZMod q)ˣ, F r * χ ((r : ZMod q)⁻¹)) * T χ) -
+      (∑ r : (ZMod q)ˣ, F r * (1 : DirichletCharacter ℂ q) ((r : ZMod q)⁻¹)) * T 1‖ ≤
+      (q.totient : ℝ) *
+        ∑ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ q)).erase 1, ‖T χ‖ := by
+  classical
+  have hc (χ : DirichletCharacter ℂ q) :
+      ‖∑ r : (ZMod q)ˣ, F r * χ ((r : ZMod q)⁻¹)‖ ≤ (q.totient : ℝ) := by
+    calc
+      _ ≤ ∑ r : (ZMod q)ˣ, ‖F r * χ ((r : ZMod q)⁻¹)‖ := norm_sum_le _ _
+      _ ≤ ∑ _r : (ZMod q)ˣ, (1 : ℝ) := by
+        apply Finset.sum_le_sum
+        intro r _
+        rw [norm_mul]
+        exact (mul_le_mul (hF r) (DirichletCharacter.norm_le_one χ _)
+          (norm_nonneg _) (by norm_num)).trans (by norm_num)
+      _ = _ := by simp [ZMod.card_units_eq_totient]
+  rw [← Finset.add_sum_erase _ _ (Finset.mem_univ (1 : DirichletCharacter ℂ q)),
+    add_sub_cancel_left, Finset.mul_sum]
+  apply (norm_sum_le _ _).trans
+  apply Finset.sum_le_sum
+  intro χ _
+  rw [norm_mul]
+  exact mul_le_mul_of_nonneg_right (hc χ) (norm_nonneg _)
+
+open Filter Asymptotics in
+/-- Route audit for page 3 Lemma 3. The full interval scale x is not bounded by
+x to the seven eighths times any fixed log power. Thus a full interval bound with
+only logarithmic saving cannot supply the short interval supremum by comparison
+of these scalar envelopes alone. This refutes no prime sum estimate. AI wrote this proof. -/
+theorem full_interval_envelope_insufficient648 (K : ℝ) :
+    ¬ (fun x : ℝ => x) =O[atTop]
+      (fun x : ℝ => x ^ ((7 : ℝ) / 8) * Real.log x ^ K) := by
+  have h := (isBigO_refl (fun x : ℝ => x ^ ((7 : ℝ) / 8)) atTop).mul_isLittleO
+    (isLittleO_log_rpow_rpow_atTop K (by norm_num : (0 : ℝ) < 1 / 8))
+  have hsmall : (fun x : ℝ => x ^ ((7 : ℝ) / 8) * Real.log x ^ K) =o[atTop]
+      (fun x : ℝ => x) := by
+    apply h.congr' Filter.EventuallyEq.rfl
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with x hx
+    rw [← Real.rpow_add hx]
+    norm_num
+  apply hsmall.not_isBigO
+  exact ((eventually_gt_atTop (1 : ℝ)).mono fun x hx =>
+    mul_ne_zero (Real.rpow_pos_of_pos (by linarith) _).ne'
+      (Real.rpow_pos_of_pos (Real.log_pos hx) _).ne').frequently
+
 /-! ### Vacuity: the hypotheses can hold, zero sorry -/
 
 /-- At `γ = 89/90` the window exponent is `15/16`. -/
@@ -595,3 +941,29 @@ end LeanLab.Song2020.State1562
 #print axioms LeanLab.Song2020.State1562.ps_window_card_le139
 
 #print axioms LeanLab.Song2020.State1562.fS_mean_square_le139
+
+#print axioms LeanLab.Song2020.State1562.minor_arc_integral_le648
+
+#print axioms LeanLab.Song2020.State1562.gCube_split648
+
+#print axioms LeanLab.Song2020.State1562.minor_arc_log_bound648
+
+#print axioms LeanLab.Song2020.State1562.gCube_error_of_arc_estimates648
+
+#print axioms LeanLab.Song2020.State1562.unit_character_expansion648
+
+#print axioms LeanLab.Song2020.State1562.window_character_expansion648
+
+#print axioms LeanLab.Song2020.State1562.principal_window_character648
+
+#print axioms LeanLab.Song2020.State1562.lemma3_of_arc_estimates648
+
+#print axioms LeanLab.Song2020.State1562.rational_phase_residue648
+
+#print axioms LeanLab.Song2020.State1562.major_arc_character_expansion648
+
+#print axioms LeanLab.Song2020.State1562.noncoprime_window_bound648
+
+#print axioms LeanLab.Song2020.State1562.nonprincipal_character_budget648
+
+#print axioms LeanLab.Song2020.State1562.full_interval_envelope_insufficient648

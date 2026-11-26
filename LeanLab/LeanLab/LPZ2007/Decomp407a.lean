@@ -1,4 +1,6 @@
 import LeanLab.LPZ2007.ZeroFamily373
+import LeanLab.LPZ2007.Extraction637
+import LeanLab.LPZ2007.Density637
 
 /-!
 Jutila 1977, Theorem 1, pages 46 and 51 to 54.
@@ -54,7 +56,7 @@ theorem separated_extraction :
             (⟨z.1, z.2.1⟩ : Σ r : ℕ, DirichletCharacter ℂ r) = ⟨w.1, w.2.1⟩ →
               1 / Real.log (P ^ 2 * T) ≤ |z.2.2.im - w.2.2.im|) ∧
           ((EZero X H T P).ncard : ℝ) ≤ C * (H + 1) * s.card := by
-  sorry
+  exact Extraction637.extraction_of_local_count Extraction637.local_window_count
 
 /-- LEAF. Jutila 1977 pages 52 to 54, displays 3.2 to 3.7 and the proof of 1.8.
 The pseudcharacter detector and the integrated Halasz kernel bound the selected
@@ -70,7 +72,35 @@ theorem separated_density :
             (⟨z.1, z.2.1⟩ : Σ r : ℕ, DirichletCharacter ℂ r) = ⟨w.1, w.2.1⟩ →
               1 / Real.log (P ^ 2 * T) ≤ |z.2.2.im - w.2.2.im|) →
           (s.card : ℝ) ≤ C * Real.exp ((15 / 4 : ℝ) * H) := by
-  sorry
+  classical
+  obtain ⟨c, hc, hdet⟩ := Density637.zero_detector
+  obtain ⟨B, hB, hres⟩ := Density637.integrated_residue c hc
+  refine ⟨2 * B / c ^ 2, by positivity, fun H T hH hT => ?_⟩
+  obtain ⟨Xd, hd⟩ := hdet H T hH hT
+  obtain ⟨Xr, hr⟩ := hres H T hH hT
+  refine ⟨max Xd Xr, fun X P hX hP hTP hPX s hs hsep => ?_⟩
+  let D := P ^ 2 * T
+  obtain ⟨ν, hν, hphase⟩ := Density637.aligned_sum s (fun z =>
+    ∑ n ∈ Density637.support D, Density637.coefficient X H D n * Density637.vector X H D z n)
+  obtain ⟨ξ, η, _, _, _, _, hξη, hkernel⟩ :=
+    hr X P ((le_max_right _ _).trans hX) hP hTP hPX s hs hsep ν hν
+  have hb : ∀ n ∈ Density637.support D, 0 < Density637.window ξ η n :=
+    fun n hn => Density637.window_pos hξη (Density637.support_pos hn)
+  have hhalasz := Halasz407.finite_arbitrary_coefficients (Density637.support D) s
+    (Density637.coefficient X H D) (Density637.vector X H D) (Density637.window ξ η) ν
+    (fun n hn => (hb n hn).le) (fun n hn _ => hb n hn)
+  rw [hphase, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (Finset.sum_nonneg (fun z _ => norm_nonneg _))] at hhalasz
+  have hlower : c * (s.card : ℝ) ≤
+      ∑ z ∈ s, ‖∑ n ∈ Density637.support D,
+        Density637.coefficient X H D n * Density637.vector X H D z n‖ := by
+    calc
+      _ = ∑ _z ∈ s, c := by simp [mul_comm]
+      _ ≤ _ := Finset.sum_le_sum (fun z hz =>
+        hd X P ((le_max_left _ _).trans hX) hP hTP hPX z (hs z hz))
+  apply Density637.absorb (by positivity) hc (by positivity : 0 ≤ B * Real.exp ((15 / 4 : ℝ) * H))
+  exact (pow_le_pow_left₀ (by positivity) hlower 2).trans
+    (hhalasz.trans hkernel)
 
 /-- Jutila page 51, the loss from extracting separated zeros is absorbed
 by the slack between fifteen quarters H and four H in P0045 page 5. -/
