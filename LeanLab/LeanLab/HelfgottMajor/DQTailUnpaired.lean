@@ -1,6 +1,7 @@
 import LeanLab.HelfgottMajor.Gaussian123Base
 import LeanLab.HelfgottMajor.MainHyps123
 import LeanLab.HelfgottMajor.MainTail123
+import LeanLab.HelfgottMajor.DQTailCountSplit
 
 /-!
 Design queue Q1, run 20261124T0803Z-14981, 2026-11-24. P0014, Helfgott, Major arcs for
@@ -29,7 +30,9 @@ ordinate between 200 and 520: the two sided envelope sum is 9.4286e-14, twice th
 ratio 0.302. The true two sided Mellin mass is 3.2149e-69 against the restated bound
 1.3204e-12.
 
-Status: `two_sided_envelope_count_le` is the one new LEAF, a sorry. The reduction
+Status: `two_sided_envelope_count_le` was the one new LEAF. Since burst-20261124 S1 it is
+proved from the two LEAFs of `DQTailCountSplit`, Stieltjes summation with the count and the
+integration by parts. The reduction
 `tail_mass_bound_unpaired_of_count` is PROVED from it as a hypothesis. The restated step
 `tail_mass_bound_unpaired` is assembled from the two.
 
@@ -89,7 +92,10 @@ theorem two_sided_envelope_count_le (hB : MainHyps123.BookZeroCount)
       2 * (TailIntegral123.expTailIntegral q T +
         TailIntegral123.gaussianTailIntegral q δ T) +
       4 * branchEnv δ T * ZeroCount1623.bookError q T := by
-  sorry
+  -- CONDITIONAL ON the two LEAFs of `DQTailCountSplit`, burst-20261124 S1.
+  unfold branchEnv
+  exact (DQTailCountSplit.envelope_sum_le_stieltjes_count hB q χ hχ δ T hT).trans
+    (DQTailCountSplit.stieltjes_integral_le_tail q δ T hT)
 
 /-- PROVED, CONDITIONAL ON hB, the book zero count of display 4.26 on page 38, on hcor, the
 k equal to 0 case of Corollary 3.2 on page 10, and on hcount, the counting bound of
