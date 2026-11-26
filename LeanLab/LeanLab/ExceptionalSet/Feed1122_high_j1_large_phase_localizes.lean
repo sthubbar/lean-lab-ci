@@ -47,7 +47,9 @@ theorem leaf_high_j1_parity_shift (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
             (N : ℝ) * calE γ κ N ^ (-(2 : ℝ)) <
               ‖∑ n ∈ (Finset.Ioc (N / 2) N).filter (fun n => ¬ n ≤ 3 * N / 4),
                 eC ((t - (h : ℝ) / 2) * F γ n)‖ := by
-  sorry
+  classical
+  unfold blockPhase indices_high_j1
+  rw [parity_filter_expansion]
 
 /-- LEAF: P0082 Theorem 2 page 354 with its proof in section 8 from Karacuba's
 Lemma 10 page 370, applied on the sub-block `3N/4 < n ≤ N` as used on page 370 after
