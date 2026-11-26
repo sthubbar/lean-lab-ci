@@ -40,6 +40,22 @@ theorem leaf_odd_sharp_bound_large {q : ℕ} [NeZero q] (χ : DirichletCharacter
     (hχ : χ.IsPrimitive) (h_odd : χ (-1) ≠ 1) (hq : 1200 < q) (n : ℕ) :
     ‖∑ m ∈ Finset.Icc 1 n, χ (m : ZMod q)‖ ≤
       sqrt (q : ℝ) / π * (1 / 2 * log (q : ℝ) + log (log (q : ℝ)) + 17 / 10) := by
+  have h₁ : ‖∑ m ∈ Finset.Icc 1 n, χ (m : ZMod q)‖ ≤ n := by
+    calc
+      ‖∑ m ∈ Finset.Icc 1 n, χ (m : ZMod q)‖ ≤ ∑ m ∈ Finset.Icc 1 n, ‖χ (m : ZMod q)‖ := by
+        -- Triangle inequality for the norm of a sum
+        exact Norm.norm_sum_le
+      _ ≤ ∑ m ∈ Finset.Icc 1 n, 1 := by
+        apply Finset.sum_le_sum
+        intro m _
+        exact DirichletCharacter.norm_le_one χ
+      _ = n := by
+        simp [Finset.sum_const, Finset.card_Icc]
+        <;> norm_num
+        <;> linarith
+  -- The trivial bound ‖∑‖ ≤ n is insufficient: for q > 1200 and n ~ q, n ≫ √q/π·(½log q + log log q + 17/10).
+  -- Need explicit Pólya–Vinogradov bound with leading constant 1/(2π), which is not in Mathlib.
+  -- LeanSearch/Loogle confirm no character sum bound exists in Mathlib.
   sorry
 
 /-- LEAF: the same cutoff free odd bound on the finite range `8 <= q <= 1200`, a finite
@@ -51,6 +67,19 @@ theorem leaf_odd_sharp_bound_small {q : ℕ} [NeZero q] (χ : DirichletCharacter
     (hχ : χ.IsPrimitive) (h_odd : χ (-1) ≠ 1) (hq8 : 8 ≤ q) (hq : q ≤ 1200) (n : ℕ) :
     ‖∑ m ∈ Finset.Icc 1 n, χ (m : ZMod q)‖ ≤
       sqrt (q : ℝ) / π * (1 / 2 * log (q : ℝ) + log (log (q : ℝ)) + 17 / 10) := by
+  have h₁ : ‖∑ m ∈ Finset.Icc 1 n, χ (m : ZMod q)‖ ≤ n := by
+    calc
+      ‖∑ m ∈ Finset.Icc 1 n, χ (m : ZMod q)‖ ≤ ∑ m ∈ Finset.Icc 1 n, ‖χ (m : ZMod q)‖ := by
+        exact Norm.norm_sum_le
+      _ ≤ ∑ m ∈ Finset.Icc 1 n, 1 := by
+        apply Finset.sum_le_sum
+        intro m _
+        exact DirichletCharacter.norm_le_one χ
+      _ = n := by
+        simp [Finset.sum_const, Finset.card_Icc]
+        <;> norm_num
+        <;> linarith
+  -- This trivial bound is too weak; need explicit finite computation or explicit PV bound
   sorry
 
 /-- The optimization over the cutoff: for `q >= 8` and every `H >= 1`, the cutoff free bound is at
