@@ -14,8 +14,8 @@ open scoped Classical
 /-- LEAF. The outer existential of Proposition 3.2: there exist positive constants `δ₀` and `C`
 that make the weighted inequality hold for all sufficiently large parameters. This step only
 chooses the two positive real constants; the analytic content lives in the second leaf. OPEN. -/
-theorem leaf_delta0_C_exists_F2551 : ∃ (δ₀ C : ℝ), 0 < δ₀ ∧ 0 < C := by
-  exact ⟨1, 1, by norm_num, by norm_num⟩
+theorem leaf_delta0_C_exists_F2551 : ∃ (δ₀ C : ℝ), 0 < δ₀ ∧ 0 < C :=
+  ⟨1, 1, one_pos, one_pos⟩
 
 /-- LEAF. The inner universal body of Proposition 3.2 for fixed positive `δ₀`, `C`: for every
 admissible `Cc`, `J`, `w` there is a threshold `N₀` such that for all `N ≥ N₀`, all nonnegative
