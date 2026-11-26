@@ -18,7 +18,7 @@ The rest is PROVED here: the factor identity `lowerFactor * V(s) / log Z = v0 / 
 from the existing `factor_unclipped_near_one` and `leaf_density_slope`; the summation by parts
 against the factor, whose increments are at most `1 / (2 Y)` by `factor_increment_of_density`;
 and the window as an integer interval. `sub_517_window_of_leaves` has exactly the statement of
-`sub_517_window`, checked by `sub_517_window_split_twin` in `DQ517WindowTwin.lean`.
+`sub_517_window`, checked by `sub_517_window_split_twin`.
 
 The `z'^2` part of the printed error is not needed in the lab form: the lab main term is
 constant per integer, by the U-1624 normalization, so no variation of the main term over the
@@ -26,7 +26,7 @@ window arises. The printed bound is still the conclusion, since `z0^2 ≥ 0`.
 
 No new definition. AI wrote the Lean code. Goldbach is open.
 -/
-import LeanLab.BHP1997.DQLowerExceptionalMeanSquareDecisions
+import LeanLab.BHP1997.DQLowerExceptional520Split
 import LeanLab.BHP1997.LowerPrincipal517e
 import LeanLab.BHP1997.DQ517StrongPNTInput
 import LeanLab.BHP1997.DQ517WindowLeaves
@@ -620,8 +620,7 @@ theorem sub_517_window_of_leaves (ω : ℝ → ℝ)
           gcongr; linarith
         exact this.trans (by gcongr)
 
-/- Feed1122 S82: the twin check `sub_517_window_split_twin` moved to `DQ517WindowTwin.lean`,
-so that this file no longer imports `DQLowerExceptional520Split` and that file can import this
-one and close `sub_517_window` with `sub_517_window_of_leaves`. -/
+/-- Twin check: `sub_517_window_of_leaves` has exactly the type of `sub_517_window`. -/
+theorem sub_517_window_split_twin : type_of% @sub_517_window := @sub_517_window_of_leaves
 
 end LeanLab.BHP1997.DQ517Window
