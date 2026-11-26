@@ -682,6 +682,36 @@ theorem mv_gallagher_lemma43 : ∀ a : ℝ, 0 < a → ∃ c₃ B δ₁ : ℝ, 0 
         ∑ r ∈ Icc 1 ⌊X ^ (6 * δ)⌋₊,
             ∑ᶠ χ : {χ : DirichletCharacter ℂ r // χ.IsPrimitive}, M r χ.1 ≤
           B * Real.exp (-(c₃ * Real.log X / Real.log (X ^ (6 * δ)))) := by
+  intro a ha
+  have h_exp_ratio : ∀ {X δ : ℝ}, 1 < X → 0 < δ → Real.exp (-(1 * Real.log X / Real.log (X ^ (6 * δ)))) = Real.exp (-(1 / (6 * δ))) := by
+    intro X hX δ hδ
+    have hlogP : Real.log (X ^ (6 * δ)) = 6 * δ * Real.log X := by
+      rw [Real.log_rpow (by positivity)]; <;> ring_nf
+      <;> norm_num at *
+      <;> linarith
+    calc
+      Real.exp (-(1 * Real.log X / Real.log (X ^ (6 * δ)))) = Real.exp (-(Real.log X / (6 * δ * Real.log X))) := by rw [hlogP]; field_simp
+      _ = Real.exp (-(1 / (6 * δ))) := by
+        have h : Real.log X ≠ 0 := by
+          have h₁ : Real.log X > 0 := Real.log_pos hX
+          linarith
+        field_simp [h]
+        <;> ring_nf
+        <;> field_simp [h]
+        <;> linarith
+  -- The exp factor is constant in X once P = X^(6δ): exp(-c₃ log X / log P) = exp(-c₃/(6δ)).
+  -- The remaining content is Gallagher 1970 Theorem 7 / MV 1975 Lemma 4.3:
+  -- Σ_{r≤P} Σ*_χ sup_{x,h} ‖sharpSum‖/(h + X/P) ≪ exp(-c₃/(6δ)), uniformly in X.
+  -- This requires:
+  --   (1) a zero-free region for complex zeros of L(s, χ), |γ| ≥ 2 (have: ZeroFree.lean)
+  --   (2) an explicit formula for ψ(x, χ) in terms of zeros (partial: PsiChi/Assembly.lean)
+  --   (3) Gallagher's density theorem / large sieve summed over all primitive characters (missing)
+  --   (4) a short-interval PNT for the r = 1 principal character (missing)
+  -- None of (3) or (4) exists in Mathlib or this lab; the lab's Gallagher module has only
+  -- Gallagher's Lemma 1 (the basic large sieve inequality), not Theorem 7.
+  -- Attempting to construct M as the supremum over windows satisfies the first conjunct by
+  -- definition, but the second conjunct (sum of suprema bounded by a constant in X) is exactly
+  -- the missing analytic input.
   sorry
 
 /-! ### Assembly from the leaves -/
