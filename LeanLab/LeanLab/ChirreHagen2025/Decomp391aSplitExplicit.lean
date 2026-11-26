@@ -1,4 +1,5 @@
 import LeanLab.ChirreHagen2025.Decomp391a
+import LeanLab.ChirreHagen2025.Decomp391aSplitZeroSum
 
 /-!
 Split of `Decomp391a.weighted_explicit_formula`.
@@ -13,8 +14,8 @@ open ArithmeticFunction MeasureTheory Set LeanLab.ChirreHagen2025.Decomp391a
 /-- LEAF: CHS page 4 equation 3.3, absolute convergence of the zero sum, from the sum of
 one over the square of the absolute value of rho over all nontrivial zeros with multiplicity.
 Class MEDIUM. -/
-theorem zeroTerm_summable (x : ℝ) (hx : 100000 ≤ x) : Summable (zeroTerm x) := by
-  sorry
+theorem zeroTerm_summable (x : ℝ) (hx : 100000 ≤ x) : Summable (zeroTerm x) :=
+  Decomp391aSplitZeroSum.zeroTerm_summable_of_leaves x (by linarith)
 
 /-- LEAF: CHS page 4, the partial summation step behind equation 3.3:
 the sum of Lambda n over n up to x equals psi x over x plus the integral from 1 to x
