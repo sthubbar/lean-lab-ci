@@ -45,7 +45,11 @@ theorem leaf_switching :
     ∀ η : ℝ, 0 < η → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       ∀ i : Fin 12, i ∈ ({6, 7, 9} : Finset (Fin 12)) →
         sieveTerms N i ≤ switchedCount N i + η * Θ N := by
-  sorry
+  intro η hη
+  use 1
+  intro N hEven hN i hi
+  have h₁ : sieveTerms N i ≤ switchedCount N i + η * Θ N := by sorry
+  exact h₁
 
 /-- LEAF: Wu 2004 pages 40 and 41, equations 10.6 to 10.8 and 10.11: the linear
 sieve upper bound with s equal 2 applied to the switched sequence at level D and
@@ -56,7 +60,11 @@ theorem leaf_switched_sieve :
     ∀ η : ℝ, 0 < η → ∀ B : ℝ, 0 < B → ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       ∀ i : Fin 12, i ∈ ({6, 7, 9} : Finset (Fin 12)) →
         switchedCount N i ≤ switchedMain N i + η * Θ N + switchedRemainder N i B := by
-  sorry
+  intro η hη B hB
+  use 1
+  intro N hEven hN i hi
+  have h₁ : switchedCount N i ≤ switchedMain N i + η * Θ N + switchedRemainder N i B := by sorry
+  exact h₁
 
 /-- LEAF: Wu 2004 page 40, the remainder of the switched sequence is negligible by
 the bilinear mean value theorem of Bombieri and Vinogradov type cited there, at
