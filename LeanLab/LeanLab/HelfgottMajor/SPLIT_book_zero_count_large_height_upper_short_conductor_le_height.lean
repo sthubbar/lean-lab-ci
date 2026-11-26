@@ -58,6 +58,15 @@ lemma bookCount_add_inv_le (χ : DirichletCharacter ℂ q) (T : ℝ) :
     have := halfWeight_le_one' T ρ.im
     nlinarith
 
+/-- Dropping the nonnegative inverse count gives a one sided bound by the full strip count.
+This does not halve a two sided estimate for a non real character. -/
+lemma bookCount_le_stripCount' (χ : DirichletCharacter ℂ q) (T : ℝ) :
+    bookCount χ T ≤
+      ∑ ρ ∈ (stripZeros_finite χ T).toFinset, (mult χ ρ : ℝ) := by
+  have hadd := bookCount_add_inv_le χ T
+  have hnonneg := bookCount_nonneg' χ⁻¹ T
+  exact le_of_add_le_of_nonneg_left hadd hnonneg
+
 /-- The main term is nonnegative once `2πe ≤ qT`. No input. -/
 lemma bookMain_nonneg' {T : ℝ} (hmain : 2 * Real.pi * Real.exp 1 ≤ (q : ℝ) * T) :
     0 ≤ bookMain q T := by
@@ -183,3 +192,5 @@ theorem book_zero_count_large_height_upper_short_conductor_le_height_split
   · exact book_one_sided_count_short_nonreal χ hχ hreal hq2 hT2 hT20 hmain
 
 end LeanLab.HelfgottMajor.ZeroCount1623
+
+#print axioms LeanLab.HelfgottMajor.ZeroCount1623.bookCount_le_stripCount'
