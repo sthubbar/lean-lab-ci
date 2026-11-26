@@ -80,7 +80,102 @@ theorem leaf_dual_count : ∃ K : ℝ, 0 < K ∧ ∀ N Q : ℕ, 1 ≤ Q → 6 * 
     ∀ g : ℕ → ℝ, (∀ a, 0 ≤ g a ∧ g a ≤ N) →
     (∀ a : ℕ, ∀ m : ℤ, |(a : ℝ) / Q - β - m| ≤ 1 / 2 → g a * (2 * |(a : ℝ) / Q - β - m|) ≤ 1) →
     ∑ a ∈ range Q, g a ≤ K * (N + Q * Real.sqrt N) := by
-  sorry
+  refine ⟨3, by norm_num, fun N Q hQ hNQ β g hg hgd => ?_⟩
+  have hN : 0 < N := by nlinarith
+  have hNr : (0 : ℝ) < N := by exact_mod_cast hN
+  have hQr : (0 : ℝ) < Q := by exact_mod_cast hQ
+  set s := Real.sqrt N with hs
+  have hs0 : 0 < s := Real.sqrt_pos.mpr hNr
+  have hss : s * s = N := Real.mul_self_sqrt hNr.le
+  set r : ℕ → ℤ := fun a => round ((a : ℝ) / Q - β) with hr
+  set A := (range Q).filter (fun a : ℕ => |(a : ℝ) / Q - β - r a| < 1 / (2 * s)) with hA
+  -- the far frequencies
+  have hfar : ∀ a ∈ (range Q).filter (fun a : ℕ => ¬ |(a : ℝ) / Q - β - r a| < 1 / (2 * s)),
+      g a ≤ s := by
+    intro a ha
+    rw [mem_filter, not_lt] at ha
+    have hh : |(a : ℝ) / Q - β - r a| ≤ 1 / 2 := abs_sub_round _
+    have h1 := hgd a (r a) hh
+    have h2 : 0 < 2 * |(a : ℝ) / Q - β - r a| := by
+      have : 0 < 1 / (2 * s) := by positivity
+      linarith
+    have h3 : 1 / s ≤ 2 * |(a : ℝ) / Q - β - r a| := by
+      have := ha.2
+      rw [div_le_iff₀ (by positivity)] at this
+      rw [div_le_iff₀ hs0]; linarith
+    have h4 : g a * (1 / s) ≤ 1 :=
+      (mul_le_mul_of_nonneg_left h3 (hg a).1).trans h1
+    rwa [mul_one_div, div_le_one hs0] at h4
+  -- the near frequencies are few
+  set k : ℕ → ℤ := fun a => (a : ℤ) - Q * r a with hk
+  have hkinj : Set.InjOn k (A : Set ℕ) := by
+    intro a ha a' ha' he
+    simp only [hA, coe_filter, mem_range, Set.mem_ofPred_eq] at ha ha'
+    simp only [hk] at he
+    have hd : ((a : ℤ) - a') = Q * (r a - r a') := by linarith
+    have hQz : (1 : ℤ) ≤ Q := by exact_mod_cast hQ
+    have ha1 : (a : ℤ) < Q := by exact_mod_cast ha.1
+    have ha2 : (a' : ℤ) < Q := by exact_mod_cast ha'.1
+    have hd0 : r a - r a' = 0 := by
+      rcases lt_trichotomy (r a - r a') 0 with h | h | h
+      · nlinarith
+      · exact h
+      · nlinarith
+    rw [hd0, mul_zero] at hd
+    exact_mod_cast (sub_eq_zero.mp hd)
+  set L : ℝ := Q / (2 * s) with hL
+  have hsub : A.image k ⊆ Icc ⌈Q * β - L⌉ ⌊Q * β + L⌋ := by
+    intro x hx
+    rw [mem_image] at hx
+    obtain ⟨a, ha, rfl⟩ := hx
+    rw [hA, mem_filter] at ha
+    have hlt := ha.2
+    have e : (a : ℝ) / Q - β - r a = ((k a : ℝ) - Q * β) / Q := by
+      simp only [hk]; push_cast; field_simp; ring
+    rw [e, abs_div, abs_of_pos hQr, div_lt_iff₀ hQr] at hlt
+    have hlt' : |(k a : ℝ) - Q * β| < L := by
+      rw [hL]; calc _ < 1 / (2 * s) * Q := hlt
+        _ = Q / (2 * s) := by ring
+    rw [abs_lt] at hlt'
+    rw [mem_Icc]
+    constructor
+    · rw [Int.ceil_le]; linarith
+    · rw [Int.le_floor]; linarith
+  have hcard : (A.card : ℝ) ≤ 2 * L + 1 := by
+    have h1 : A.card = (A.image k).card := (card_image_of_injOn hkinj).symm
+    have h2 := card_le_card hsub
+    rw [Int.card_Icc] at h2
+    have h3 : (A.card : ℤ) ≤ max (⌊Q * β + L⌋ + 1 - ⌈Q * β - L⌉) 0 := by
+      rw [← Int.toNat_eq_max]; omega
+    have h4 : ((⌊Q * β + L⌋ + 1 - ⌈Q * β - L⌉ : ℤ) : ℝ) ≤ 2 * L + 1 := by
+      push_cast
+      have := Int.floor_le (Q * β + L)
+      have := Int.le_ceil (Q * β - L)
+      linarith
+    have hL0 : 0 ≤ L := by positivity
+    have h5 : (A.card : ℝ) ≤ max (((⌊Q * β + L⌋ + 1 - ⌈Q * β - L⌉ : ℤ)) : ℝ) 0 := by
+      have := (Int.cast_le (R := ℝ)).mpr h3
+      rw [Int.cast_max, Int.cast_zero] at this
+      exact_mod_cast this
+    exact h5.trans (max_le h4 (by linarith))
+  have hsplit := (sum_filter_add_sum_filter_not (range Q)
+    (fun a : ℕ => |(a : ℝ) / Q - β - r a| < 1 / (2 * s)) g).symm
+  have hnear : ∑ a ∈ A, g a ≤ A.card * (N : ℝ) := by
+    have := sum_le_card_nsmul A g (N : ℝ) (fun a _ => (hg a).2)
+    rwa [nsmul_eq_mul] at this
+  have hfar' : ∑ a ∈ (range Q).filter (fun a : ℕ => ¬ |(a : ℝ) / Q - β - r a| < 1 / (2 * s)), g a
+      ≤ Q * s := by
+    have := sum_le_card_nsmul _ g s hfar
+    rw [nsmul_eq_mul] at this
+    refine this.trans (mul_le_mul_of_nonneg_right ?_ hs0.le)
+    have := card_filter_le (range Q) (fun a : ℕ => ¬ |(a : ℝ) / Q - β - r a| < 1 / (2 * s))
+    rw [card_range] at this
+    exact_mod_cast this
+  have hLN : 2 * L * N = Q * s := by
+    rw [hL, ← hss]; field_simp
+  rw [hsplit]
+  have hNn : (0 : ℝ) ≤ N := hNr.le
+  nlinarith [mul_le_mul_of_nonneg_right hcard hNn]
 
 /-- `twisted_interval_bound` from the two leaves. -/
 theorem twisted_interval_bound_of_leaves : ∃ K : ℝ, 0 < K ∧ ∀ N Q : ℕ, 1 ≤ Q → 6 * Q ^ 2 ≤ N →
