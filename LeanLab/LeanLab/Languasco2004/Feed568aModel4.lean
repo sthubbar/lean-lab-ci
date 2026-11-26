@@ -4,9 +4,12 @@ split of `Decomp568a.model4_asymptotic` into the uniform rough count, the weight
 and the prime double sum against the Buchstab integral.
 Source https://doi.org/10.4064/aa-77-3-207-287.
 AI wrote the Lean code. Goldbach is open.
-The three LEAF inputs remain OPEN; the assembly below is proved from them.
+pair_weight_upper is PROVED from the explicit Mertens block bound of Decomp1528b.
+The LEAF inputs rough_count_lower and kernel_sum_lower remain OPEN; the assembly below is
+proved from the three leaves.
 -/
 import LeanLab.Languasco2004.Decomp568a
+import LeanLab.AlmostPrimes.Decomp1528b
 
 namespace LeanLab.Languasco2004.Feed568aModel4
 open Finset Real Decomp568a BuchstabInitial316
@@ -39,7 +42,111 @@ theorem pair_weight_upper :
         ∑ q ∈ (range (⌊2 * Y⌋₊ + 1)).filter (fun q : ℕ => q.Prime ∧
           (p : ℝ)⁻¹ * Y ^ (41 / 90 : ℝ) < (q : ℝ) ∧ (q : ℝ) < p),
           Y / ((p : ℝ) * q * Real.log q) ≤ K * (Y / Real.log Y) := by
-  sorry
+  refine ⟨4 * (990 / 211), by norm_num, Real.exp 19, ?_⟩
+  intro Y hY
+  have hY1 : 1 < Y := by
+    have := Real.add_one_lt_exp (by norm_num : (19 : ℝ) ≠ 0)
+    linarith
+  have hY0 : 0 < Y := by linarith
+  have hL : 19 ≤ Real.log Y := by
+    have := Real.log_le_log (Real.exp_pos 19) hY
+    rwa [Real.log_exp] at this
+  set L := Real.log Y with hLdef
+  have hLpos : 0 < L := by linarith
+  set a := Y ^ (211 / 990 : ℝ) with ha
+  set b := Y ^ (8 / 33 : ℝ) with hb
+  have hapos : 0 < a := Real.rpow_pos_of_pos hY0 _
+  have hbpos : 0 < b := Real.rpow_pos_of_pos hY0 _
+  have hla : Real.log a = 211 / 990 * L := Real.log_rpow hY0 _
+  have hlb : Real.log b = 8 / 33 * L := Real.log_rpow hY0 _
+  have hla4 : 4 ≤ Real.log a := by rw [hla]; linarith
+  have ha2 : 2 ≤ a := by
+    have h1 := Real.exp_log hapos
+    have h2 := Real.exp_le_exp.mpr hla4
+    have h3 := Real.add_one_le_exp (4 : ℝ)
+    linarith
+  have hab : a ≤ b := Real.rpow_le_rpow_of_exponent_le hY1.le (by norm_num)
+  set T := (Ioc ⌊a⌋₊ ⌊b⌋₊).filter Nat.Prime with hT
+  set S := ∑ n ∈ T, (1 : ℝ) / n with hS
+  have hS2 : S ≤ 2 := by
+    have h := LeanLab.AlmostPrimes.Decomp1528b.mertens2_block ha2 hab
+    have h1 := (abs_le.mp h).2
+    have hll : Real.log (Real.log b) - Real.log (Real.log a) ≤ 1 := by
+      rw [← Real.log_div (by rw [hlb]; positivity) (by rw [hla]; positivity), hlb, hla]
+      have e : 8 / 33 * L / (211 / 990 * L) = 240 / 211 := by
+        have := hLpos.ne'; field_simp; ring
+      rw [e]
+      have := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 240 / 211)
+      linarith
+    have h4 : 4 / Real.log a ≤ 1 := by rw [div_le_one (by linarith)]; exact hla4
+    linarith
+  have hS0 : 0 ≤ S := sum_nonneg (fun _ _ => by positivity)
+  set c := 990 / 211 * (Y / L) with hc
+  have hc0 : 0 ≤ c := by positivity
+  have memT : ∀ n : ℕ, n.Prime → a < n → (n : ℝ) ≤ b → n ∈ T := by
+    intro n hn h1 h2
+    exact mem_filter.mpr ⟨mem_Ioc.mpr ⟨(Nat.floor_lt hapos.le).mpr h1, Nat.le_floor h2⟩, hn⟩
+  have hab' : a = b⁻¹ * Y ^ (41 / 90 : ℝ) := by
+    rw [ha, hb, ← Real.rpow_neg hY0.le, ← Real.rpow_add hY0]
+    norm_num
+  have hqa : ∀ p q : ℕ, 0 < (p : ℝ) → (p : ℝ) ≤ b →
+      (p : ℝ)⁻¹ * Y ^ (41 / 90 : ℝ) < q → a < q := by
+    intro p q hp hpb hq
+    rw [hab']
+    calc b⁻¹ * Y ^ (41 / 90 : ℝ) ≤ (p : ℝ)⁻¹ * Y ^ (41 / 90 : ℝ) :=
+          mul_le_mul_of_nonneg_right (inv_anti₀ hp hpb) (by positivity)
+      _ < q := hq
+  have step1 :
+      ∑ p ∈ (range (⌊2 * Y⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧
+          Y ^ (41 / 180 : ℝ) < (p : ℝ) ∧ (p : ℝ) ≤ b),
+        ∑ q ∈ (range (⌊2 * Y⌋₊ + 1)).filter (fun q : ℕ => q.Prime ∧
+          (p : ℝ)⁻¹ * Y ^ (41 / 90 : ℝ) < (q : ℝ) ∧ (q : ℝ) < p),
+          Y / ((p : ℝ) * q * Real.log q) ≤
+      ∑ p ∈ (range (⌊2 * Y⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧
+          Y ^ (41 / 180 : ℝ) < (p : ℝ) ∧ (p : ℝ) ≤ b), c * (1 / (p : ℝ)) * S := by
+    apply sum_le_sum
+    intro p hp
+    obtain ⟨_, hpP, _, hp2⟩ := mem_filter.mp hp
+    have hp0 : (0 : ℝ) < p := by exact_mod_cast hpP.pos
+    rw [hS, mul_sum]
+    refine (sum_le_sum ?_).trans (sum_le_sum_of_subset_of_nonneg ?_ ?_)
+    · intro q hq
+      obtain ⟨_, hqP, hq1, _⟩ := mem_filter.mp hq
+      have hq0 : (0 : ℝ) < q := by exact_mod_cast hqP.pos
+      have haq := hqa p q hp0 hp2 hq1
+      have hlq : 211 / 990 * L ≤ Real.log q := by
+        rw [← hla]; exact Real.log_le_log hapos haq.le
+      have e : c * (1 / (p : ℝ)) * (1 / (q : ℝ)) = Y / ((p : ℝ) * q * (211 / 990 * L)) := by
+        have := hp0.ne'; have := hq0.ne'; have := hLpos.ne'
+        rw [hc]; field_simp
+      rw [e]
+      exact div_le_div_of_nonneg_left hY0.le (by positivity)
+        (mul_le_mul_of_nonneg_left hlq (by positivity))
+    · intro q hq
+      obtain ⟨_, hqP, hq1, hq2⟩ := mem_filter.mp hq
+      exact memT q hqP (hqa p q hp0 hp2 hq1) (hq2.le.trans hp2)
+    · intro q _ _
+      positivity
+  have step2 :
+      ∑ p ∈ (range (⌊2 * Y⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧
+          Y ^ (41 / 180 : ℝ) < (p : ℝ) ∧ (p : ℝ) ≤ b), c * (1 / (p : ℝ)) * S ≤
+      ∑ p ∈ T, c * (1 / (p : ℝ)) * S := by
+    apply sum_le_sum_of_subset_of_nonneg
+    · intro p hp
+      obtain ⟨_, hpP, hp1, hp2⟩ := mem_filter.mp hp
+      have hA : a ≤ Y ^ (41 / 180 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le hY1.le (by norm_num)
+      exact memT p hpP (hA.trans_lt hp1) hp2
+    · intro p _ _
+      positivity
+  have step3 : ∑ p ∈ T, c * (1 / (p : ℝ)) * S = c * S * S := by
+    rw [← sum_mul, ← mul_sum]
+  have hSS : S * S ≤ 4 := by nlinarith
+  calc _ ≤ _ := step1
+    _ ≤ _ := step2
+    _ = c * S * S := step3
+    _ ≤ c * 4 := by rw [mul_assoc]; exact mul_le_mul_of_nonneg_left hSS hc0
+    _ = 4 * (990 / 211) * (Y / L) := by rw [hc]; ring
 
 /-- LEAF: Jia page 279 after displays 53 to 56, the prime double sum of the Buchstab main
 terms is at least the Omega4 integral times Y / log Y for large Y. HARD.
