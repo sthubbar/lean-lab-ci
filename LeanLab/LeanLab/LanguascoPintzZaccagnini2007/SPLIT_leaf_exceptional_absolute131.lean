@@ -372,7 +372,9 @@ theorem leaf_exceptional_absolute_upper_part131 :
       0 < c → AdmissibleP131 X P → ExceptionalModuli131 K₁ c X E → 4 ≤ X →
       ∀ n ∈ evenWindow131 X, 2 * (X : ℝ) / 3 ≤ n → ¬ Nonexceptional131 Cstar E n →
         |binaryMajor131 X n P| ≤ A * n * Sing n := by
-  sorry
+  obtain ⟨A, hA0, hA⟩ := leaf_exceptional_absolute131
+  exact ⟨A, hA0, fun X Cstar K₁ c P E hc hAdm hExc _ n hn _ hnone =>
+    hA X Cstar K₁ c P E hc hAdm hExc n hn hnone⟩
 
 /-- LEAF. The scales `X ≥ 4` on the strip `n < 2X/3` of the window, the part the estimate on
 `J(X)` does not reach: the same absolute bound on that strip. -/
