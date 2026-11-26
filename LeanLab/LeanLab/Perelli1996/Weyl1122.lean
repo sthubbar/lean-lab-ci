@@ -24,6 +24,19 @@ abbrev freq (k a : ℕ) (h : Fin (k - 1) → ℤ) : ℕ := k.factorial * a * (�
 tuples with 1 ≤ |h_i| ≤ H, the tuples with some h_i = 0 contributing H^(k-1), and I_h an
 interval of at most H+1 consecutive integers. The constant term of the linear difference
 and the sign of the product do not change the modulus. Class MEDIUM. -/
+
+/-- Helper: the number of k-tuples of positive integers with product m equals divisorCount k m = (ζ ^ k) m.
+Proof by induction on k using (ζ * f) n = ∑ i ∣ n, f i. -/
+lemma divisorCount_card_tuples {k m : ℕ} (hk : 0 < k) (hm : 0 < m) :
+    (Fintype.piFinset (fun _ : Fin k => Icc 1 m)).filter (fun d => (∏ i : Fin k, d i) = m).card = divisorCount k m := by
+  sorry
+
+/-- Helper: divisorCount (k-1) n ≤ divisorCount k m when n ∣ m, k ≥ 2.
+Proof: (ζ ^ k) m = ∑_{i ∣ m} (ζ ^ (k-1)) i ≥ (ζ ^ (k-1)) n since n ∣ m and all terms are ≥ 0. -/
+lemma divisorCount_le_dvd {k n m : ℕ} (hk : 2 ≤ k) (hn : 0 < n) (hm : 0 < m) (h : n ∣ m) :
+    divisorCount (k - 1) n ≤ divisorCount k m := by
+  sorry
+
 theorem leaf_iterated_differencing (F : ℤ[X]) (hF : Admissible F) (hk : 2 ≤ F.natDegree) :
     ∃ C N₀ : ℝ, 0 < C ∧ 3 ≤ N₀ ∧
       ∀ N H α : ℝ, N₀ ≤ N → 1 ≤ H → H ≤ N ^ (1 / (F.natDegree : ℝ)) →
