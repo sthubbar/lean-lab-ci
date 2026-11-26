@@ -2677,6 +2677,2356 @@ theorem lemma2_positive_square519 (B0 : ℝ) (hB0 : 0 < B0) :
       Co * ((N : ℝ) / R * Real.log N ^ 13) := add_le_add hcu hou
     _ = _ := by ring
 
+section PortB1122
+
+open MeasureTheory Set Filter Complex Metric Topology Finset
+
+set_option maxHeartbeats 1600000
+
+
+/-! ### Gamma kernel domination (from Mellin473) -/
+
+/-- P0093 page 157 Gamma kernel domination. Every positive exponential rate
+makes the cubic absolute value weight integrable on the whole real line. -/
+theorem exp_decay_cubic_integrable519x (δ : ℝ) (hδ : 0 < δ) :
+    Integrable (fun t : ℝ => Real.exp (-(δ * |t|)) * (1 + |t|) ^ 3) := by
+  have hk (k : ℕ) : IntegrableOn (fun t : ℝ => t ^ k * Real.exp (-(δ * t))) (Ioi 0) := by
+    simpa only [Real.rpow_natCast, Real.rpow_one, neg_mul] using
+      integrableOn_rpow_mul_exp_neg_mul_rpow
+        (s := (k : ℝ)) (p := 1) (b := δ) (by linarith [Nat.cast_nonneg (α := ℝ) k]) (by norm_num) hδ
+  have hp : IntegrableOn (fun t : ℝ => Real.exp (-(δ * |t|)) * (1 + |t|) ^ 3) (Ioi 0) := by
+    apply (((hk 3).add ((hk 2).const_mul 3)).add ((hk 1).const_mul 3)).add (hk 0) |>.congr_fun ?_ measurableSet_Ioi
+    intro t ht
+    dsimp only [Pi.add_apply]
+    rw [abs_of_pos (show 0 < t from ht)]
+    ring
+  have hc : IntegrableOn (fun t : ℝ => Real.exp (-(δ * |t|)) * (1 + |t|) ^ 3) (Ici 0) :=
+    (integrableOn_Ici_iff_integrableOn_Ioi).mpr hp
+  have hn : IntegrableOn (fun t : ℝ => Real.exp (-(δ * |t|)) * (1 + |t|) ^ 3) (Iic 0) := by
+    have hn := (show IntegrableOn (fun t : ℝ => Real.exp (-(δ * |t|)) * (1 + |t|) ^ 3)
+      (Ici (-0)) from by simpa using hc).comp_neg_Iic
+    simpa only [abs_neg] using hn
+  simpa only [Iic_union_Ioi, integrableOn_univ] using hn.union hp
+
+/-! ### Step: the GRH strip bound on log L (Burst1122LogBound) -/
+
+
+/-- P0093 page 155. The Euler logarithm series for one prime: the sum over k of
+chi of p to the k + 1 times p to the minus k + 1 times s over k + 1 is minus the log of
+one minus chi of p times p to the minus s, when re s exceeds 0. -/
+theorem euler_log_term_b1122x {q : ℕ} (χ : DirichletCharacter ℂ q) (s : ℂ)
+    (hs : 0 < s.re) (p : Nat.Primes) :
+    ∑' k : ℕ, (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1) =
+      -Complex.log (1 - χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) := by
+  apply HasSum.tsum_eq
+  apply Complex.hasSum_taylorSeries_neg_log'
+  have hp : 0 < (p : ℕ) := p.2.pos
+  have hp2 : (2 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.two_le
+  rw [norm_mul, Complex.norm_natCast_cpow_of_pos hp, Complex.neg_re]
+  have hχ : ‖χ (p : ℕ)‖ ≤ 1 := χ.norm_le_one _
+  have hlt : ((p : ℕ) : ℝ) ^ (-s.re) < 1 :=
+    Real.rpow_lt_one_of_one_lt_of_neg (by linarith) (by linarith)
+  calc ‖χ (p : ℕ)‖ * ((p : ℕ) : ℝ) ^ (-s.re) ≤ 1 * ((p : ℕ) : ℝ) ^ (-s.re) :=
+        mul_le_mul_of_nonneg_right hχ (by positivity)
+    _ < 1 := by rw [one_mul]; exact hlt
+
+/-- P0093 page 155 and page 159 before equation 5.1. A function G holomorphic on
+re s greater than 1/2 that equals the prime power series on re s greater than 1 is a
+logarithm of L there: exp of G is the Euler product on re s greater than 1, and the
+identity theorem on the connected half plane extends the equality. -/
+theorem exp_G_eq_LFunction_b1122x {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (hχ : χ ≠ 1) (G : ℂ → ℂ) (hGd : DifferentiableOn ℂ G {s : ℂ | 1 / 2 < s.re})
+    (hGs : ∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
+      (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1))
+    (w : ℂ) (hw : 1 / 2 < w.re) :
+    Complex.exp (G w) = DirichletCharacter.LFunction χ w := by
+  have hHo : IsOpen {s : ℂ | 1 / 2 < s.re} := isOpen_lt continuous_const Complex.continuous_re
+  have hVo : IsOpen {s : ℂ | 1 < s.re} := isOpen_lt continuous_const Complex.continuous_re
+  have h1 : ∀ s : ℂ, 1 < s.re → Complex.exp (G s) = DirichletCharacter.LFunction χ s := by
+    intro s hs
+    rw [hGs s hs, tsum_congr fun p => euler_log_term_b1122x χ s (by linarith) p,
+      DirichletCharacter.LFunction_eq_LSeries χ hs,
+      ← DirichletCharacter.LSeries_eulerProduct_exp_log χ hs]
+  have hA : AnalyticOnNhd ℂ (fun s => Complex.exp (G s)) {s : ℂ | 1 / 2 < s.re} :=
+    hGd.cexp.analyticOnNhd hHo
+  have hB : AnalyticOnNhd ℂ (DirichletCharacter.LFunction χ) {s : ℂ | 1 / 2 < s.re} :=
+    (DirichletCharacter.differentiable_LFunction hχ).differentiableOn.analyticOnNhd hHo
+  have h2 : (2 : ℂ) ∈ {s : ℂ | 1 < s.re} := by simp
+  have hev : (fun s => Complex.exp (G s)) =ᶠ[𝓝 (2 : ℂ)] DirichletCharacter.LFunction χ := by
+    filter_upwards [hVo.mem_nhds h2] with s hs
+    exact h1 s hs
+  exact hA.eqOn_of_preconnected_of_eventuallyEq hB
+    (convex_halfSpace_re_gt (r := 1 / 2)).isPreconnected (by norm_num) hev hw
+
+/-- Titchmarsh 14.2 step one, with P0093 page 159. The real part of the logarithm G is
+log of the norm of L, and the bound of L by q times the norm of w over re w gives
+re G w at most log of 2 q times 4 plus the absolute imaginary part, for re w in
+the range 1/2 to 4. -/
+theorem re_G_le_b1122x {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (hχ : χ ≠ 1) (G : ℂ → ℂ) (hGd : DifferentiableOn ℂ G {s : ℂ | 1 / 2 < s.re})
+    (hGs : ∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
+      (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1))
+    (w : ℂ) (hw : 1 / 2 < w.re) (hw4 : w.re ≤ 4) :
+    (G w).re ≤ Real.log (2 * q * (4 + |w.im|)) := by
+  have he := exp_G_eq_LFunction_b1122x χ hχ G hGd hGs w hw
+  have hn : Real.exp (G w).re = ‖DirichletCharacter.LFunction χ w‖ := by
+    rw [← he, Complex.norm_exp]
+  have hL := LeanLab.PNTPort.DirichletZF.norm_LFunction_le hχ (s := w) (by linarith)
+  have hwn : ‖w‖ ≤ 4 + |w.im| := by
+    have := Complex.norm_le_abs_re_add_abs_im w
+    rw [abs_of_pos (by linarith : 0 < w.re)] at this
+    linarith
+  have hq0 : (0 : ℝ) ≤ q := Nat.cast_nonneg q
+  have hdiv : (q : ℝ) * ‖w‖ / w.re ≤ 2 * q * ‖w‖ := by
+    rw [div_le_iff₀ (by linarith)]
+    have h0 : 0 ≤ (q : ℝ) * ‖w‖ := by positivity
+    nlinarith
+  have hfin : Real.exp (G w).re ≤ 2 * q * (4 + |w.im|) := by
+    rw [hn]
+    calc _ ≤ _ := hL
+      _ ≤ 2 * q * ‖w‖ := hdiv
+      _ ≤ 2 * q * (4 + |w.im|) := by gcongr
+  calc (G w).re = Real.log (Real.exp (G w).re) := (Real.log_exp _).symm
+    _ ≤ _ := Real.log_le_log (Real.exp_pos _) hfin
+
+/-- P0093 page 155. The constant majorant K, the sum over primes of 3/2 times p to
+the minus 2, is summable. -/
+theorem summable_K_b1122x :
+    Summable (fun p : Nat.Primes => (3 / 2 : ℝ) * ((p : ℕ) : ℝ) ^ (-2 : ℝ)) := by
+  apply Summable.mul_left
+  have h := (Real.summable_nat_rpow.mpr (by norm_num : (-2 : ℝ) < -1))
+  exact h.comp_injective Nat.Primes.coe_nat_injective
+
+/-- P0093 page 155, the center of the Borel Caratheodory disc. On re w equal to 2 the
+prime power series G w has norm at most K, the sum over primes of 3/2 times p to the
+minus 2, since each Euler logarithm is at most 3/2 times p to the minus 2. -/
+theorem norm_G_center_b1122x {q : ℕ} (χ : DirichletCharacter ℂ q) (G : ℂ → ℂ)
+    (hGs : ∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
+      (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1))
+    (w : ℂ) (hw : w.re = 2) :
+    ‖G w‖ ≤ ∑' p : Nat.Primes, (3 / 2 : ℝ) * ((p : ℕ) : ℝ) ^ (-2 : ℝ) := by
+  rw [hGs w (by rw [hw]; norm_num),
+    tsum_congr fun p => euler_log_term_b1122x χ w (by rw [hw]; norm_num) p]
+  apply tsum_of_norm_bounded summable_K_b1122x.hasSum
+  intro p
+  have hv : ‖χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-w)‖ ≤ ((p : ℕ) : ℝ) ^ (-2 : ℝ) := by
+    rw [norm_mul, Complex.norm_natCast_cpow_of_pos p.2.pos, Complex.neg_re, hw]
+    calc ‖χ (p : ℕ)‖ * ((p : ℕ) : ℝ) ^ (-2 : ℝ) ≤ 1 * ((p : ℕ) : ℝ) ^ (-2 : ℝ) :=
+          mul_le_mul_of_nonneg_right (χ.norm_le_one _) (by positivity)
+      _ = _ := one_mul _
+  have hhalf : ((p : ℕ) : ℝ) ^ (-2 : ℝ) ≤ 1 / 2 := by
+    have hp2 : (2 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.two_le
+    calc ((p : ℕ) : ℝ) ^ (-2 : ℝ) ≤ ((p : ℕ) : ℝ) ^ (-1 : ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num)
+      _ = ((p : ℕ) : ℝ)⁻¹ := Real.rpow_neg_one _
+      _ ≤ 1 / 2 := by rw [one_div]; exact inv_anti₀ (by norm_num) hp2
+  have hw2 : ‖-(χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-w))‖ ≤ 1 / 2 := by
+    rw [norm_neg]; exact hv.trans hhalf
+  have hl := Complex.norm_log_one_add_half_le_self hw2
+  rw [← sub_eq_add_neg, norm_neg] at hl
+  rw [norm_neg]
+  exact hl.trans (mul_le_mul_of_nonneg_left hv (by norm_num))
+
+/-- Titchmarsh 14.2, Borel Caratheodory step, used for P0093 page 159 before 5.1.
+With centre w0 equal to 2 + i Im s and radius 3/2 - 1/(2 l), where l at least 1 and
+1/2 + 1/l at most re s at most 2, the norm of G s is at most K plus 8 l times
+log of 2 q times the absolute imaginary part plus 6, plus K plus 1. -/
+theorem G_strip_bound_b1122x {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
+    (hχ : χ ≠ 1) (G : ℂ → ℂ) (hGd : DifferentiableOn ℂ G {s : ℂ | 1 / 2 < s.re})
+    (hGs : ∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
+      (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1))
+    (l : ℝ) (hl : 1 ≤ l) (s : ℂ) (hs1 : 1 / 2 + 1 / l ≤ s.re) (hs2 : s.re ≤ 2) :
+    ‖G s‖ ≤ (∑' p : Nat.Primes, (3 / 2 : ℝ) * ((p : ℕ) : ℝ) ^ (-2 : ℝ)) + 8 * l *
+      (Real.log (2 * q * (|s.im| + 6)) +
+        (∑' p : Nat.Primes, (3 / 2 : ℝ) * ((p : ℕ) : ℝ) ^ (-2 : ℝ)) + 1) := by
+  set K : ℝ := ∑' p : Nat.Primes, (3 / 2 : ℝ) * ((p : ℕ) : ℝ) ^ (-2 : ℝ) with hK
+  have hK0 : 0 ≤ K := tsum_nonneg fun p => by positivity
+  set t : ℝ := s.im with ht
+  set w0 : ℂ := ⟨2, t⟩ with hw0
+  have hw0re : w0.re = 2 := rfl
+  have hw0im : w0.im = t := rfl
+  have hc := norm_G_center_b1122x χ G hGs w0 hw0re
+  set R : ℝ := 3 / 2 - 1 / (2 * l) with hR
+  have hl0 : 0 < l := by linarith
+  have hinv : 1 / l ≤ 1 := by rw [div_le_one hl0]; exact hl
+  have hinv0 : 0 < 1 / l := by positivity
+  have h2l : 1 / (2 * l) = (1 / l) / 2 := by field_simp
+  have hRpos : 0 < R := by rw [hR, h2l]; linarith
+  have hR32 : R ≤ 3 / 2 := by rw [hR, h2l]; linarith
+  set M : ℝ := Real.log (2 * q * (|t| + 6)) + K + 1 with hM
+  have hq1 : (1 : ℝ) ≤ q := by
+    have : 1 ≤ q := Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+    exact_mod_cast this
+  have hlog0 : 0 ≤ Real.log (2 * q * (|t| + 6)) := by
+    apply Real.log_nonneg
+    have : 0 ≤ |t| := abs_nonneg t
+    nlinarith
+  have hMpos : 0 < M := by rw [hM]; linarith
+  set f : ℂ → ℂ := fun u => G (w0 + u) - G w0 with hf
+  have hball : ∀ u ∈ ball (0 : ℂ) R, 1 / 2 + 1 / (2 * l) < (w0 + u).re ∧
+      (w0 + u).re ≤ 4 ∧ |(w0 + u).im| ≤ |t| + 2 := by
+    intro u hu
+    have hu' : ‖u‖ < R := mem_ball_zero_iff.mp hu
+    have hre := Complex.abs_re_le_norm u
+    have him := Complex.abs_im_le_norm u
+    rw [abs_le] at hre
+    refine ⟨?_, ?_, ?_⟩
+    · simp only [Complex.add_re, hw0re]; rw [hR] at hu'; linarith [hre.1]
+    · simp only [Complex.add_re, hw0re]; linarith [hre.2]
+    · simp only [Complex.add_im, hw0im]
+      calc |t + u.im| ≤ |t| + |u.im| := abs_add_le _ _
+        _ ≤ |t| + 2 := by linarith
+  have hmaps : Set.MapsTo (fun u => w0 + u) (ball (0 : ℂ) R) {s : ℂ | 1 / 2 < s.re} := by
+    intro u hu
+    have := (hball u hu).1
+    have : 0 < 1 / (2 * l) := by positivity
+    simp only [Set.mem_ofPred_eq]; linarith
+  have hfd : DifferentiableOn ℂ f (ball (0 : ℂ) R) :=
+    (hGd.comp (differentiableOn_const _ |>.add differentiableOn_id) hmaps).sub_const _
+  have hf1 : Set.MapsTo f (ball (0 : ℂ) R) {z | z.re ≤ M} := by
+    intro u hu
+    obtain ⟨hre1, hre4, him⟩ := hball u hu
+    have hpos : 1 / 2 < (w0 + u).re := by
+      have : 0 < 1 / (2 * l) := by positivity
+      linarith
+    have hG1 := re_G_le_b1122x χ hχ G hGd hGs (w0 + u) hpos hre4
+    have hmono : Real.log (2 * q * (4 + |(w0 + u).im|)) ≤ Real.log (2 * q * (|t| + 6)) := by
+      apply Real.log_le_log
+      · have : 0 ≤ |(w0 + u).im| := abs_nonneg _
+        nlinarith
+      · have : (0 : ℝ) ≤ 2 * q := by positivity
+        nlinarith
+    have hc' : -(G w0).re ≤ K := by
+      have := Complex.abs_re_le_norm (G w0)
+      rw [abs_le] at this
+      linarith
+    simp only [Set.mem_ofPred_eq, hf, Complex.sub_re]
+    rw [hM]; linarith
+  set z : ℂ := s - w0 with hz
+  have hzeq : z = ((s.re - 2 : ℝ) : ℂ) := by
+    apply Complex.ext
+    · simp [hz, hw0re]
+    · simp [hz, hw0im, ht]
+  have hzn : ‖z‖ = 2 - s.re := by
+    rw [hzeq, Complex.norm_real, Real.norm_eq_abs, abs_of_nonpos (by linarith)]; ring
+  have hgap : 1 / (2 * l) ≤ R - ‖z‖ := by
+    rw [hzn, hR, h2l]; linarith
+  have hzR : z ∈ ball (0 : ℂ) R := by
+    rw [mem_ball_zero_iff]
+    have : 0 < 1 / (2 * l) := by positivity
+    linarith
+  have hf0 : f 0 = 0 := by simp [hf]
+  have hBC := Complex.borelCaratheodory_zero hMpos hfd hf1 hRpos hzR hf0
+  have hgap' : 1 / 2 ≤ l * (R - ‖z‖) := by
+    have h := mul_le_mul_of_nonneg_left hgap hl0.le
+    have : l * (1 / (2 * l)) = 1 / 2 := by field_simp
+    linarith
+  have hgpos : 0 < R - ‖z‖ := lt_of_lt_of_le (by positivity) hgap
+  have hzle : ‖z‖ ≤ 2 := by rw [hzn]; linarith
+  have hfz : ‖f z‖ ≤ 8 * l * M := by
+    refine hBC.trans ?_
+    rw [div_le_iff₀ hgpos]
+    have h1 : 4 * M ≤ 8 * M * (l * (R - ‖z‖)) := by nlinarith
+    have h2 : 2 * M * ‖z‖ ≤ 4 * M := by nlinarith [norm_nonneg z]
+    nlinarith
+  have hGs' : G s = f z + G w0 := by
+    simp only [hf, hz]; ring_nf
+  rw [hGs']
+  calc ‖f z + G w0‖ ≤ ‖f z‖ + ‖G w0‖ := norm_add_le _ _
+    _ ≤ 8 * l * M + K := add_le_add hfz hc
+    _ = K + 8 * l * M := by ring
+
+/-- P0093 page 159 before equation 5.1, the GRH bound for ln L used by Linnik, proved
+here by the Titchmarsh 14.2 Borel Caratheodory method without GRH: for N above 2, q at
+most N to the 1/7, chi nonprincipal and G the holomorphic logarithm of L fixed by the
+prime power series on re s greater than 1, the norm of G on 1/2 + 1/ln N at most re s
+at most 2 is at most B0 times the cube of ln of N times the absolute imaginary part
+plus 2. The GRH hypothesis is not used. -/
+theorem grh_strip_log_bound_proof_b1122 (hG : LeanLab.DERZ1997.GRH) :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
+      ∀ (q : ℕ) [NeZero q], 1 ≤ q → (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
+        ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 → ∀ G : ℂ → ℂ,
+          DifferentiableOn ℂ G {s : ℂ | 1 / 2 < s.re} →
+          (∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
+            (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1)) →
+          ∀ s : ℂ, 1 / 2 + 1 / Real.log N ≤ s.re → s.re ≤ 2 →
+            ‖G s‖ ≤ B0 * Real.log ((N : ℝ) * (|s.im| + 2)) ^ 3 := by
+  set K : ℝ := ∑' p : Nat.Primes, (3 / 2 : ℝ) * ((p : ℕ) : ℝ) ^ (-2 : ℝ) with hK
+  have hK0 : 0 ≤ K := tsum_nonneg fun p => by positivity
+  refine ⟨9 * K + 57, by positivity, 2, ?_⟩
+  intro N hN q _ hq1 hqN χ hχ G hGd hGs s hs1 hs2
+  have hN3 : (3 : ℝ) ≤ N := by exact_mod_cast hN
+  have hl1 : 1 ≤ Real.log N := by
+    rw [Real.le_log_iff_exp_le (by linarith)]
+    have := Real.exp_one_lt_d9
+    linarith
+  have hB := G_strip_bound_b1122x χ hχ G hGd hGs (Real.log N) hl1 s hs1 hs2
+  rw [← hK] at hB
+  set t : ℝ := s.im with ht
+  set X : ℝ := Real.log ((N : ℝ) * (|t| + 2)) with hX
+  have hta : 0 ≤ |t| := abs_nonneg t
+  have hlX : Real.log N ≤ X := by
+    apply Real.log_le_log (by linarith)
+    nlinarith
+  have hX1 : 1 ≤ X := hl1.trans hlX
+  have hqN' : (q : ℝ) ≤ N := by
+    calc (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) := hqN
+      _ ≤ (N : ℝ) ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num)
+      _ = N := Real.rpow_one _
+  have hq0 : (1 : ℝ) ≤ q := by exact_mod_cast hq1
+  have hlog : Real.log (2 * q * (|t| + 6)) ≤ 5 + X := by
+    have h6 : Real.log 6 ≤ 5 := by
+      have := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 6)
+      linarith
+    have hle : 2 * q * (|t| + 6) ≤ 6 * ((N : ℝ) * (|t| + 2)) := by nlinarith
+    calc Real.log (2 * q * (|t| + 6)) ≤ Real.log (6 * ((N : ℝ) * (|t| + 2))) :=
+          Real.log_le_log (by positivity) hle
+      _ = Real.log 6 + X := Real.log_mul (by norm_num) (by positivity)
+      _ ≤ 5 + X := by linarith
+  have hM : Real.log (2 * q * (|t| + 6)) + K + 1 ≤ (7 + K) * X := by nlinarith
+  have hM0 : 0 ≤ Real.log (2 * q * (|t| + 6)) + K + 1 := by
+    have : 0 ≤ Real.log (2 * q * (|t| + 6)) := Real.log_nonneg (by nlinarith)
+    linarith
+  have hX2 : X ≤ X ^ 2 := by nlinarith
+  have hX3 : X ^ 2 ≤ X ^ 3 := by nlinarith
+  have h1X3 : 1 ≤ X ^ 3 := by nlinarith
+  have hstep : 8 * Real.log N * (Real.log (2 * q * (|t| + 6)) + K + 1) ≤
+      8 * (7 + K) * X ^ 3 := by
+    have ha : Real.log N * (Real.log (2 * q * (|t| + 6)) + K + 1) ≤ X * ((7 + K) * X) :=
+      mul_le_mul hlX hM hM0 (by linarith)
+    have : X * ((7 + K) * X) = (7 + K) * X ^ 2 := by ring
+    nlinarith
+  have hKX : K ≤ K * X ^ 3 := by nlinarith
+  calc ‖G s‖ ≤ K + 8 * Real.log N * (Real.log (2 * q * (|t| + 6)) + K + 1) := hB
+    _ ≤ (9 * K + 57) * X ^ 3 := by nlinarith
+
+/-! ### Cahen Mellin (Burst1122CahenMellin) -/
+
+
+/-- Textbook Euler integral with complex rate, used at P0093 page 156: the Laplace
+integrand of the Gamma function is continuous on the positive half line. -/
+lemma laplace_continuousOn_b1122x (s z : ℂ) :
+    ContinuousOn (fun t : ℝ => (t : ℂ) ^ (s - 1) * Complex.exp (-z * t)) (Ioi 0) := by
+  apply ContinuousOn.mul
+  · exact Complex.continuous_ofReal.continuousOn.cpow_const
+      (fun t ht => Complex.ofReal_mem_slitPlane.mpr ht)
+  · fun_prop
+
+/-- Textbook Euler integral with complex rate, used at P0093 page 156: the Laplace
+integrand is integrable on the positive half line when re s and re z are positive. -/
+lemma laplace_integrable_b1122x {s z : ℂ} (hs : 0 < s.re) (hz : 0 < z.re) :
+    IntegrableOn (fun t : ℝ => (t : ℂ) ^ (s - 1) * Complex.exp (-z * t)) (Ioi 0) := by
+  have hb : IntegrableOn (fun t : ℝ => t ^ (s.re - 1) * Real.exp (-z.re * t)) (Ioi 0) := by
+    simpa only [Real.rpow_one] using integrableOn_rpow_mul_exp_neg_mul_rpow
+      (p := 1) (s := s.re - 1) (b := z.re) (by linarith) (by norm_num) hz
+  refine Integrable.mono' hb ((laplace_continuousOn_b1122x s z).aestronglyMeasurable
+    measurableSet_Ioi) ?_
+  filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with t ht
+  rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos ht, Complex.norm_exp]
+  simp
+
+/-- Textbook Euler integral with complex rate, used at P0093 page 156: the Laplace
+transform of t to the s minus 1 is complex differentiable in the rate z on re z > 0,
+by differentiation under the integral sign. -/
+lemma laplace_differentiable_b1122x {s z : ℂ} (hs : 0 < s.re) (hz : 0 < z.re) :
+    DifferentiableAt ℂ
+      (fun w : ℂ => ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (s - 1) * Complex.exp (-w * t)) z := by
+  let F : ℂ → ℝ → ℂ := fun w t => (t : ℂ) ^ (s - 1) * Complex.exp (-w * t)
+  let F' : ℂ → ℝ → ℂ := fun w t =>
+    (t : ℂ) ^ (s - 1) * (Complex.exp (-w * t) * (-t))
+  let r : ℝ := z.re / 2
+  have hr : 0 < r := by dsimp [r]; linarith
+  have hm : ∀ w : ℂ, AEStronglyMeasurable (F w) (volume.restrict (Ioi 0)) :=
+    fun w => (laplace_continuousOn_b1122x s w).aestronglyMeasurable measurableSet_Ioi
+  have hm' : AEStronglyMeasurable (F' z) (volume.restrict (Ioi 0)) := by
+    apply ContinuousOn.aestronglyMeasurable _ measurableSet_Ioi
+    dsimp [F']
+    simp only [← mul_assoc]
+    exact (laplace_continuousOn_b1122x s z).mul
+      (show ContinuousOn (fun t : ℝ => -(t : ℂ)) (Ioi 0) by fun_prop)
+  have hb : IntegrableOn (fun t : ℝ => t ^ s.re * Real.exp (-r * t)) (Ioi 0) := by
+    simpa only [Real.rpow_one] using integrableOn_rpow_mul_exp_neg_mul_rpow
+      (p := 1) (s := s.re) (b := r) (by linarith) (by norm_num) hr
+  have hd : ∀ᵐ t ∂volume.restrict (Ioi 0), ∀ w ∈ ball z r,
+      HasDerivAt (fun w => F w t) (F' w t) w := by
+    apply Eventually.of_forall
+    intro t w _
+    dsimp [F, F']
+    simpa using (((hasDerivAt_id w).neg.mul_const (t : ℂ)).cexp).const_mul
+      ((t : ℂ) ^ (s - 1))
+  have hbound : ∀ᵐ t ∂volume.restrict (Ioi 0), ∀ w ∈ ball z r,
+      ‖F' w t‖ ≤ t ^ s.re * Real.exp (-r * t) := by
+    filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with t ht
+    intro w hw
+    have hw' : r ≤ w.re := by
+      have hn : ‖w - z‖ < r := by simpa [dist_eq_norm] using hw
+      have hre := Complex.abs_re_le_norm (w - z)
+      have hre' := (abs_le.mp (le_trans hre hn.le)).1
+      simp only [sub_re] at hre'
+      dsimp [r] at *
+      linarith
+    dsimp [F']
+    rw [norm_mul, norm_mul, norm_neg, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_pos ht, Complex.norm_cpow_eq_rpow_re_of_pos ht, Complex.norm_exp]
+    have he : (-w * (t : ℂ)).re = -w.re * t := by simp
+    rw [he]
+    have hp : t ^ (s.re - 1) * t = t ^ s.re := by
+      conv_lhs => arg 2; rw [← Real.rpow_one t]
+      rw [← Real.rpow_add ht]
+      congr 1
+      ring
+    calc _ = (t ^ (s.re - 1) * t) * Real.exp (-w.re * t) := by simp; ring
+      _ = t ^ s.re * Real.exp (-w.re * t) := by rw [hp]
+      _ ≤ _ := mul_le_mul_of_nonneg_left
+        (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right (neg_le_neg hw') ht.le))
+        (Real.rpow_nonneg ht.le _)
+  have h := hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (F := F) (F' := F') (s := ball z r) (μ := volume.restrict (Ioi 0))
+    (ball_mem_nhds z hr) (Eventually.of_forall hm)
+    (laplace_integrable_b1122x hs hz) hm' hbound hb hd
+  exact h.2.differentiableAt
+
+/-- Textbook Euler integral with complex rate, Whittaker and Watson 12.2, used at
+P0093 page 156: for re s > 0 and re z > 0 the Laplace integral of t to the s minus 1
+equals z to the minus s times Gamma s. Proved by the identity theorem in z from
+the real rate case in Mathlib. -/
+theorem laplace_eq_b1122x {s z : ℂ} (hs : 0 < s.re) (hz : 0 < z.re) :
+    (∫ t : ℝ in Ioi 0, (t : ℂ) ^ (s - 1) * Complex.exp (-z * t)) =
+      z ^ (-s) * Complex.Gamma s := by
+  set L : ℂ → ℂ := fun w => ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (s - 1) * Complex.exp (-w * t)
+    with hLdef
+  change L z = _
+  have hReal : ∀ r : ℝ, 0 < r → L (r : ℂ) = (r : ℂ) ^ (-s) * Complex.Gamma s := by
+    intro r hr
+    have h := Complex.integral_cpow_mul_exp_neg_mul_Ioi hs hr
+    simpa only [hLdef, one_div, Complex.inv_cpow_ofReal_nonneg hr.le,
+      Complex.cpow_neg, Complex.ofReal_neg, Complex.ofReal_mul, neg_mul] using h
+  have hL : AnalyticOnNhd ℂ L {w : ℂ | 0 < w.re} :=
+    DifferentiableOn.analyticOnNhd
+      (fun w hw => (laplace_differentiable_b1122x hs hw).differentiableWithinAt)
+      (isOpen_lt continuous_const Complex.continuous_re)
+  have hR : AnalyticOnNhd ℂ (fun w : ℂ => w ^ (-s) * Complex.Gamma s)
+      {w : ℂ | 0 < w.re} := by
+    apply DifferentiableOn.analyticOnNhd _
+      (isOpen_lt continuous_const Complex.continuous_re)
+    intro w hw
+    have hp : DifferentiableAt ℂ (fun u : ℂ => u ^ (-s)) w :=
+      differentiableAt_id.cpow_const (Complex.mem_slitPlane_iff.mpr (Or.inl hw))
+    exact (hp.mul_const _).differentiableWithinAt
+  have hc : (1 : ℂ) ∈ closure
+      ({w : ℂ | L w = w ^ (-s) * Complex.Gamma s} \ {1}) := by
+    apply Metric.mem_closure_iff.mpr
+    intro ε hε
+    let d : ℝ := min (ε / 2) 1
+    have hd : 0 < d := lt_min (by linarith) (by norm_num)
+    refine ⟨((1 + d : ℝ) : ℂ), ?_, ?_⟩
+    · constructor
+      · exact hReal _ (by linarith)
+      · simp only [mem_singleton_iff]
+        intro h
+        have h' := congr_arg Complex.re h
+        simp only [Complex.ofReal_re, Complex.one_re] at h'
+        linarith
+    · rw [dist_eq_norm]
+      have he : ((1 + d : ℝ) : ℂ) - 1 = (d : ℂ) := by push_cast; ring
+      rw [norm_sub_rev, he, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hd]
+      exact lt_of_le_of_lt (min_le_left _ _) (by linarith)
+  have he := hL.eqOn_of_preconnected_of_mem_closure hR
+    (convex_halfSpace_re_gt 0).isPreconnected (z₀ := (1 : ℂ)) (by simp) hc
+  exact he hz
+
+/-- P0093 page 157 Gamma decay on the line re s = 2: by Gamma of s plus one equal to
+s Gamma s and the strip bound at re s = 1, Gamma of 2 + it is at most
+2 sqrt 2 pi times one plus |t| cubed times e to the minus pi |t| / 2. -/
+lemma gamma_two_line_bound_b1122x (t : ℝ) :
+    ‖Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I)‖ ≤
+      2 * Real.sqrt (2 * Real.pi) * ((1 + |t|) ^ 3 * Real.exp (-(Real.pi * |t| / 2))) := by
+  set s1 : ℂ := (1 : ℂ) + (t : ℂ) * Complex.I with hs1
+  have hs1ne : s1 ≠ 0 := by
+    intro h
+    have := congrArg Complex.re h
+    simp [hs1] at this
+  have he : (2 : ℂ) + (t : ℂ) * Complex.I = s1 + 1 := by rw [hs1]; ring
+  rw [he, Complex.Gamma_add_one s1 hs1ne, norm_mul]
+  have hre : s1.re = 1 := by simp [hs1]
+  have him : s1.im = t := by simp [hs1]
+  have hg := gamma_absolute_decay519 s1 (by rw [hre]; norm_num)
+    (by rw [hre]; norm_num)
+  rw [him] at hg
+  have hn1 : ‖s1‖ ≤ 1 + |t| := by
+    calc ‖s1‖ ≤ ‖(1 : ℂ)‖ + ‖(t : ℂ) * Complex.I‖ := norm_add_le _ _
+      _ = 1 + |t| := by
+        rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Real.norm_eq_abs,
+          norm_one]
+  have hn2 : ‖s1 + 1‖ ≤ 2 + |t| := by
+    have he2 : s1 + 1 = (2 : ℂ) + (t : ℂ) * Complex.I := by rw [hs1]; ring
+    rw [he2]
+    calc ‖(2 : ℂ) + (t : ℂ) * Complex.I‖ ≤ ‖(2 : ℂ)‖ + ‖(t : ℂ) * Complex.I‖ :=
+          norm_add_le _ _
+      _ = 2 + |t| := by
+        rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Real.norm_eq_abs]
+        norm_num
+  have hE : 0 ≤ Real.exp (-(Real.pi * |t| / 2)) := (Real.exp_pos _).le
+  have hS : 0 ≤ Real.sqrt (2 * Real.pi) := Real.sqrt_nonneg _
+  have ht : 0 ≤ |t| := abs_nonneg t
+  have hpoly : (1 + |t|) * (2 + |t|) ≤ 2 * (1 + |t|) ^ 3 := by
+    nlinarith [sq_nonneg |t|, pow_nonneg ht 3]
+  calc ‖s1‖ * ‖Complex.Gamma s1‖
+      ≤ (1 + |t|) * (Real.sqrt (2 * Real.pi) * (2 + |t|) *
+          Real.exp (-(Real.pi * |t| / 2))) := by
+        apply mul_le_mul hn1 (hg.trans ?_) (norm_nonneg _) (by positivity)
+        gcongr
+    _ = Real.sqrt (2 * Real.pi) * ((1 + |t|) * (2 + |t|)) *
+          Real.exp (-(Real.pi * |t| / 2)) := by ring
+    _ ≤ Real.sqrt (2 * Real.pi) * (2 * (1 + |t|) ^ 3) *
+          Real.exp (-(Real.pi * |t| / 2)) := by gcongr
+    _ = _ := by ring
+
+/-- P0093 page 156 kernel on the line re s = 2: for re z > 0 the function
+t to z to the minus 2 + it times Gamma of 2 + it is continuous. -/
+lemma kernel_two_continuous_b1122x {z : ℂ} (hz : 0 < z.re) :
+    Continuous (fun t : ℝ => z ^ (-((2 : ℂ) + (t : ℂ) * Complex.I)) *
+      Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I)) := by
+  have hz0 : z ≠ 0 := by intro h; simp [h] at hz
+  apply Continuous.mul
+  · exact Continuous.const_cpow (by fun_prop) (Or.inl hz0)
+  · apply continuous_iff_continuousAt.mpr
+    intro t
+    apply (Complex.continuousAt_Gamma _ ?_).comp
+    · fun_prop
+    intro n he
+    have hre := congrArg Complex.re he
+    simp at hre
+    have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+    linarith
+
+/-- P0093 page 156 kernel on the line re s = 2: for re z > 0, so that |arg z| is
+less than pi / 2, the Mellin kernel z to the minus s times Gamma s is integrable
+along re s = 2, by the Gamma decay e to the minus pi |t| / 2 against the growth
+e to the |arg z| |t| of z to the minus s. -/
+lemma kernel_two_integrable_b1122x {z : ℂ} (hz : 0 < z.re) :
+    Integrable (fun t : ℝ => z ^ (-((2 : ℂ) + (t : ℂ) * Complex.I)) *
+      Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I)) := by
+  have hz0 : z ≠ 0 := by intro h; simp [h] at hz
+  have harg : |Complex.arg z| < Real.pi / 2 :=
+    Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz)
+  set δ : ℝ := Real.pi / 2 - |Complex.arg z| with hδdef
+  have hδ : 0 < δ := by rw [hδdef]; linarith
+  set C : ℝ := ‖z‖ ^ (-2 : ℝ) * (2 * Real.sqrt (2 * Real.pi)) with hC
+  refine ((exp_decay_cubic_integrable519x δ hδ).const_mul C).mono'
+    (kernel_two_continuous_b1122x hz).aestronglyMeasurable (Eventually.of_forall fun t => ?_)
+  have hcp : ‖z ^ (-((2 : ℂ) + (t : ℂ) * Complex.I))‖ ≤
+      ‖z‖ ^ (-2 : ℝ) * Real.exp (|Complex.arg z| * |t|) := by
+    rw [Complex.norm_cpow_of_ne_zero hz0]
+    have hre : (-((2 : ℂ) + (t : ℂ) * Complex.I)).re = -2 := by simp
+    have him : (-((2 : ℂ) + (t : ℂ) * Complex.I)).im = -t := by simp
+    rw [hre, him, div_eq_mul_inv, ← Real.exp_neg]
+    gcongr
+    have h1 : -(Complex.arg z * -t) = Complex.arg z * t := by ring
+    rw [h1, ← abs_mul]
+    exact le_abs_self _
+  have hg := gamma_two_line_bound_b1122x t
+  rw [norm_mul]
+  calc ‖z ^ (-((2 : ℂ) + (t : ℂ) * Complex.I))‖ *
+        ‖Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I)‖
+      ≤ (‖z‖ ^ (-2 : ℝ) * Real.exp (|Complex.arg z| * |t|)) *
+        (2 * Real.sqrt (2 * Real.pi) *
+          ((1 + |t|) ^ 3 * Real.exp (-(Real.pi * |t| / 2)))) :=
+        mul_le_mul hcp hg (norm_nonneg _) (by positivity)
+    _ = C * (Real.exp (-(δ * |t|)) * (1 + |t|) ^ 3) := by
+        rw [hC, hδdef]
+        have hx : Real.exp (|Complex.arg z| * |t|) * Real.exp (-(Real.pi * |t| / 2)) =
+            Real.exp (-((Real.pi / 2 - |Complex.arg z|) * |t|)) := by
+          rw [← Real.exp_add]; congr 1; ring
+        calc _ = ‖z‖ ^ (-2 : ℝ) * (2 * Real.sqrt (2 * Real.pi)) *
+              ((Real.exp (|Complex.arg z| * |t|) * Real.exp (-(Real.pi * |t| / 2))) *
+                (1 + |t|) ^ 3) := by ring
+          _ = _ := by rw [hx]
+
+/-- P0093 page 159 equation 5.1, Cahen Mellin inversion for one frequency on the
+line re s = 2: for re z > 0 and x > 0, one over 2 pi times the integral of
+x to the minus s times z to the minus s times Gamma s is e to the minus z x. -/
+theorem cahen_single_b1122x {z : ℂ} (hz : 0 < z.re) {x : ℝ} (hx : 0 < x) :
+    ((1 / (2 * Real.pi) : ℝ) : ℂ) * ∫ t : ℝ,
+      (x : ℂ) ^ (-((2 : ℂ) + (t : ℂ) * Complex.I)) *
+        (z ^ (-((2 : ℂ) + (t : ℂ) * Complex.I)) *
+          Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I)) =
+      Complex.exp (-z * x) := by
+  let f : ℝ → ℂ := fun y => Complex.exp (-z * y)
+  have hm : ∀ s : ℂ, 0 < s.re → mellin f s = z ^ (-s) * Complex.Gamma s := by
+    intro s hs
+    simpa only [mellin, f, smul_eq_mul] using laplace_eq_b1122x hs hz
+  have h2 : ((2 : ℝ) : ℂ) = (2 : ℂ) := by norm_num
+  have hline : ∀ t : ℝ, mellin f (((2 : ℝ) : ℂ) + (t : ℂ) * Complex.I) =
+      z ^ (-((2 : ℂ) + (t : ℂ) * Complex.I)) *
+        Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I) := by
+    intro t
+    rw [h2]
+    exact hm _ (by simp)
+  have hc : MellinConvergent f ((2 : ℝ) : ℂ) := by
+    simpa only [MellinConvergent, f, smul_eq_mul] using
+      laplace_integrable_b1122x (s := ((2 : ℝ) : ℂ)) (by simp) hz
+  have hv : Complex.VerticalIntegrable (mellin f) 2 := by
+    unfold Complex.VerticalIntegrable
+    simp only [hline]
+    exact kernel_two_integrable_b1122x hz
+  have h := mellinInv_mellin_eq 2 f hx hc hv (by dsimp [f]; fun_prop)
+  unfold mellinInv at h
+  simp only [hline, smul_eq_mul, Complex.real_smul] at h
+  simpa only [h2, f] using h
+
+/-- P0093 page 159 before equation 5.1: the k + 1 st power term of the
+logarithmic Euler series is one over k + 1 times chi of p to the k + 1
+times the power p to the k + 1 raised to minus s. -/
+lemma euler_term_eq_b1122x {q : ℕ} (χ : DirichletCharacter ℂ q) (p k : ℕ) (s : ℂ) :
+    (χ p * (p : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1) =
+      ((k : ℂ) + 1)⁻¹ * χ (p ^ (k + 1)) * ((((p : ℝ) ^ (k + 1) : ℝ)) : ℂ) ^ (-s) := by
+  have h1 : ((p : ℂ) ^ (-s)) ^ (k + 1) = ((((p : ℝ) ^ (k + 1) : ℝ)) : ℂ) ^ (-s) := by
+    rw [← Complex.cpow_nat_mul, Complex.natCast_cpow_natCast_mul]
+    push_cast
+    rfl
+  rw [mul_pow, h1, map_pow, div_eq_mul_inv]
+  ring
+
+/-- P0093 page 159 before equation 5.1: on re s = 2 each Euler term has norm at most
+p to the minus 2 times 2 to the minus k. -/
+lemma euler_term_norm_b1122x {q : ℕ} (χ : DirichletCharacter ℂ q) (p : Nat.Primes) (k : ℕ)
+    (t : ℝ) :
+    ‖(χ (p : ℕ) * (((p : ℕ) : ℂ)) ^ (-((2 : ℂ) + (t : ℂ) * Complex.I))) ^ (k + 1) /
+        ((k : ℂ) + 1)‖ ≤ (((p : ℕ) : ℝ) ^ 2)⁻¹ * (1 / 2 : ℝ) ^ k := by
+  have hp2 : (2 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.two_le
+  have hp0 : 0 < (p : ℕ) := p.2.pos
+  set r : ℝ := (((p : ℕ) : ℝ) ^ 2)⁻¹ with hr
+  have hr0 : 0 ≤ r := by positivity
+  have hr1 : r ≤ 1 / 2 := by
+    rw [hr]
+    rw [inv_le_comm₀ (by positivity) (by norm_num)]
+    nlinarith
+  have hbase : ‖χ (p : ℕ) * (((p : ℕ) : ℂ)) ^ (-((2 : ℂ) + (t : ℂ) * Complex.I))‖ ≤ r := by
+    rw [norm_mul, Complex.norm_natCast_cpow_of_pos hp0]
+    have hre : (-((2 : ℂ) + (t : ℂ) * Complex.I)).re = -2 := by simp
+    rw [hre]
+    have hrp : ((p : ℕ) : ℝ) ^ (-2 : ℝ) = r := by
+      rw [hr, Real.rpow_neg (by positivity)]
+      norm_cast
+    rw [hrp]
+    calc ‖χ (p : ℕ)‖ * r ≤ 1 * r :=
+          mul_le_mul_of_nonneg_right (DirichletCharacter.norm_le_one χ _) hr0
+      _ = r := one_mul r
+  have hk : (1 : ℝ) ≤ ‖((k : ℂ) + 1)‖ := by
+    have : ((k : ℂ) + 1) = (((k + 1 : ℕ) : ℝ) : ℂ) := by push_cast; ring
+    rw [this, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    have : (1 : ℝ) ≤ ((k + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.succ_pos k
+    exact this
+  rw [norm_div, norm_pow]
+  calc ‖χ (p : ℕ) * (((p : ℕ) : ℂ)) ^ (-((2 : ℂ) + (t : ℂ) * Complex.I))‖ ^ (k + 1) /
+        ‖((k : ℂ) + 1)‖
+      ≤ ‖χ (p : ℕ) * (((p : ℕ) : ℂ)) ^ (-((2 : ℂ) + (t : ℂ) * Complex.I))‖ ^ (k + 1) :=
+        div_le_self (by positivity) hk
+    _ ≤ r ^ (k + 1) := pow_le_pow_left₀ (norm_nonneg _) hbase _
+    _ = r * r ^ k := by ring
+    _ ≤ r * (1 / 2 : ℝ) ^ k := by
+        gcongr
+
+/-- P0093 page 159 before equation 5.1: the sum over primes of p to the minus 2
+converges. -/
+lemma summable_prime_inv_sq_b1122x :
+    Summable (fun p : Nat.Primes => (((p : ℕ) : ℝ) ^ 2)⁻¹) := by
+  have h : Summable (fun n : ℕ => ((n : ℝ) ^ 2)⁻¹) := Real.summable_nat_pow_inv.mpr (by norm_num)
+  exact h.comp_injective Subtype.val_injective
+
+/-- P0093 page 156 display after equation 4.1 and page 159 before equation 5.1:
+on re s = 2 the Mellin integral of z to the minus s times Gamma s times G s, with G
+the logarithmic Euler series of L of s and chi, is the damped prime power series
+with exponential phases. -/
+theorem cahen_mellin_line_two_proof_b1122 (N : ℕ) (hN : 1 ≤ N) (q : ℕ)
+    (χ : DirichletCharacter ℂ q) (G : ℂ → ℂ)
+    (hGs : ∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
+      (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1)) (α : ℝ) :
+    ((1 / (2 * Real.pi) : ℝ) : ℂ) * ∫ t : ℝ,
+      (((1 / (N : ℝ) : ℝ) : ℂ) + ((2 * Real.pi * α : ℝ) : ℂ) * Complex.I) ^
+        (-((2 : ℂ) + (t : ℂ) * Complex.I)) * Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I) *
+          G ((2 : ℂ) + (t : ℂ) * Complex.I)
+      = ∑' p : Nat.Primes, ∑' k : ℕ,
+          (((k : ℂ) + 1)⁻¹ * χ ((p : ℕ) ^ (k + 1)) *
+            (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 1) / (N : ℝ))) : ℂ) *
+              Complex.exp
+                ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 1))) : ℝ) * Complex.I)) := by
+  set z : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + ((2 * Real.pi * α : ℝ) : ℂ) * Complex.I with hzdef
+  have hNpos : (0 : ℝ) < N := by exact_mod_cast hN
+  have hz : 0 < z.re := by
+    rw [hzdef]; simp only [add_re, ofReal_re, mul_re, ofReal_im, I_re, I_im]; simp [hNpos]
+  set K : ℝ → ℂ := fun t => z ^ (-((2 : ℂ) + (t : ℂ) * Complex.I)) *
+      Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I) with hKdef
+  have hK : Integrable K := kernel_two_integrable_b1122x hz
+  have hKc : Continuous K := kernel_two_continuous_b1122x hz
+  set T : Nat.Primes → ℕ → ℝ → ℂ := fun p k t =>
+    (χ (p : ℕ) * (((p : ℕ) : ℂ)) ^ (-((2 : ℂ) + (t : ℂ) * Complex.I))) ^ (k + 1) /
+      ((k : ℂ) + 1) with hTdef
+  set u : Nat.Primes → ℕ → ℝ := fun p k => (((p : ℕ) : ℝ) ^ 2)⁻¹ * (1 / 2 : ℝ) ^ k with hudef
+  have hTb : ∀ p k t, ‖T p k t‖ ≤ u p k := fun p k t => euler_term_norm_b1122x χ p k t
+  have hu : ∀ p, Summable (u p) := fun p => summable_geometric_two.mul_left _
+  have hu0 : ∀ p k, 0 ≤ u p k := fun p k => by rw [hudef]; positivity
+  have hus : ∀ p, ∑' k, u p k = 2 * (((p : ℕ) : ℝ) ^ 2)⁻¹ := by
+    intro p; rw [hudef]; simp only; rw [tsum_mul_left, tsum_geometric_two]; ring
+  have hTc : ∀ p k, Continuous (T p k) := by
+    intro p k
+    rw [hTdef]
+    have hp0 : ((p : ℕ) : ℂ) ≠ 0 := by exact_mod_cast p.2.ne_zero
+    apply Continuous.div_const
+    apply Continuous.pow
+    apply Continuous.mul continuous_const
+    exact Continuous.const_cpow (by fun_prop) (Or.inl hp0)
+  set H : Nat.Primes → ℝ → ℂ := fun p t => ∑' k, T p k t with hHdef
+  have hHc : ∀ p, Continuous (H p) := fun p => continuous_tsum (hTc p) (hu p) (hTb p)
+  have hHb : ∀ p t, ‖H p t‖ ≤ 2 * (((p : ℕ) : ℝ) ^ 2)⁻¹ := by
+    intro p t
+    rw [← hus p]
+    exact tsum_of_norm_bounded (hu p).hasSum (fun k => hTb p k t)
+  set IK : ℝ := ∫ t, ‖K t‖ with hIK
+  -- inner interchange for fixed p
+  have hFint : ∀ p k, Integrable (fun t => K t * T p k t) := by
+    intro p k
+    refine (hK.norm.mul_const (u p k)).mono' (hKc.mul (hTc p k)).aestronglyMeasurable
+      (Eventually.of_forall fun t => ?_)
+    rw [norm_mul]
+    exact mul_le_mul_of_nonneg_left (hTb p k t) (norm_nonneg _)
+  have hFnorm : ∀ p k, ∫ t, ‖K t * T p k t‖ ≤ IK * u p k := by
+    intro p k
+    rw [hIK, ← integral_mul_const]
+    apply integral_mono (hFint p k).norm (hK.norm.mul_const _)
+    intro t
+    simp only [norm_mul]
+    exact mul_le_mul_of_nonneg_left (hTb p k t) (norm_nonneg _)
+  have hIK0 : 0 ≤ IK := integral_nonneg fun t => norm_nonneg _
+  have hinner : ∀ p, ∑' k, (∫ t, K t * T p k t) = ∫ t, K t * H p t := by
+    intro p
+    have hs : Summable fun k => ∫ t, ‖K t * T p k t‖ :=
+      Summable.of_nonneg_of_le (fun k => integral_nonneg fun t => norm_nonneg _)
+        (hFnorm p) ((hu p).mul_left IK)
+    rw [integral_tsum_of_summable_integral_norm (hFint p) hs]
+    congr 1
+    funext t
+    rw [hHdef]
+    exact tsum_mul_left
+  -- outer interchange
+  have hGint : ∀ p, Integrable (fun t => K t * H p t) := by
+    intro p
+    refine (hK.norm.mul_const (2 * (((p : ℕ) : ℝ) ^ 2)⁻¹)).mono'
+      (hKc.mul (hHc p)).aestronglyMeasurable (Eventually.of_forall fun t => ?_)
+    rw [norm_mul]
+    exact mul_le_mul_of_nonneg_left (hHb p t) (norm_nonneg _)
+  have hGsum : Summable fun p => ∫ t, ‖K t * H p t‖ := by
+    refine Summable.of_nonneg_of_le (fun p => integral_nonneg fun t => norm_nonneg _)
+      (fun p => ?_) ((summable_prime_inv_sq_b1122x.mul_left 2).mul_left IK)
+    rw [hIK, ← integral_mul_const]
+    apply integral_mono (hGint p).norm (hK.norm.mul_const _)
+    intro t
+    simp only [norm_mul]
+    exact mul_le_mul_of_nonneg_left (hHb p t) (norm_nonneg _)
+  have houter : ∑' p, (∫ t, K t * H p t) = ∫ t, ∑' p, K t * H p t :=
+    integral_tsum_of_summable_integral_norm hGint hGsum
+  -- rewrite the left side
+  have hlhs : (fun t : ℝ => z ^ (-((2 : ℂ) + (t : ℂ) * Complex.I)) *
+      Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I) * G ((2 : ℂ) + (t : ℂ) * Complex.I)) =
+      fun t => ∑' p, K t * H p t := by
+    funext t
+    rw [hGs _ (by simp), tsum_mul_left]
+  rw [hlhs, ← houter, ← tsum_mul_left]
+  congr 1
+  funext p
+  rw [← hinner p, ← tsum_mul_left]
+  congr 1
+  funext k
+  -- one term
+  have hn : 0 < ((p : ℕ) : ℝ) ^ (k + 1) := by
+    have : (0 : ℝ) < ((p : ℕ) : ℝ) := by exact_mod_cast p.2.pos
+    positivity
+  have hterm : (fun t => K t * T p k t) = fun t : ℝ =>
+      (((k : ℂ) + 1)⁻¹ * χ ((p : ℕ) ^ (k + 1))) *
+        ((((((p : ℕ) : ℝ) ^ (k + 1) : ℝ)) : ℂ) ^ (-((2 : ℂ) + (t : ℂ) * Complex.I)) *
+          (z ^ (-((2 : ℂ) + (t : ℂ) * Complex.I)) *
+            Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I))) := by
+    funext t
+    rw [hTdef, hKdef]
+    simp only
+    rw [euler_term_eq_b1122x χ (p : ℕ) k]
+    ring
+  have hexp : Complex.exp (-z * ((((p : ℕ) : ℝ) ^ (k + 1) : ℝ) : ℂ)) =
+      (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 1) / (N : ℝ))) : ℂ) *
+        Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 1))) : ℝ) * Complex.I) := by
+    rw [Complex.ofReal_exp, ← Complex.exp_add]
+    congr 1
+    rw [hzdef]
+    push_cast
+    ring
+  rw [hterm, integral_const_mul, mul_left_comm, cahen_single_b1122x hz hn, hexp]
+  ring
+
+/-! ### Line shift (Burst1122LineShift) -/
+
+
+/-- Textbook step behind P0093 page 156: Cauchy's theorem on the rectangle with corners
+a minus T i and b plus T i, for a function differentiable at every point of the closed
+vertical strip a at most re s at most b. The difference of the two vertical integrals
+times i equals the difference of the two horizontal integrals. -/
+theorem rect_identity_b1122x (f : ℂ → ℂ) (a b : ℝ) (hab : a ≤ b)
+    (hd : ∀ s : ℂ, a ≤ s.re → s.re ≤ b → DifferentiableAt ℂ f s) (T : ℝ) :
+    Complex.I * ((∫ y : ℝ in -T..T, f ((b : ℂ) + (y : ℂ) * Complex.I)) -
+      ∫ y : ℝ in -T..T, f ((a : ℂ) + (y : ℂ) * Complex.I)) =
+    (∫ x : ℝ in a..b, f ((x : ℂ) + (T : ℂ) * Complex.I)) -
+      ∫ x : ℝ in a..b, f ((x : ℂ) + ((-T : ℝ) : ℂ) * Complex.I) := by
+  have H := Complex.integral_boundary_rect_eq_zero_of_differentiableOn f
+    (⟨a, -T⟩ : ℂ) (⟨b, T⟩ : ℂ) ?_
+  · dsimp only at H
+    simp only [smul_eq_mul] at H
+    linear_combination H
+  · intro s hs
+    rw [Complex.mem_reProdIm] at hs
+    obtain ⟨h1, -⟩ := hs
+    dsimp only at h1
+    rw [Set.uIcc_of_le hab] at h1
+    exact (hd s h1.1 h1.2).differentiableWithinAt
+
+/-- Textbook step behind P0093 page 156: a vertical line of integration may be moved across
+a strip where the integrand is holomorphic, integrable on both edges, and bounded by a
+function of the height that tends to zero. The horizontal sides of the rectangles vanish
+in the limit and the vertical sides tend to the two line integrals. -/
+theorem strip_shift_b1122x (f : ℂ → ℂ) (a b : ℝ) (hab : a ≤ b)
+    (hd : ∀ s : ℂ, a ≤ s.re → s.re ≤ b → DifferentiableAt ℂ f s)
+    (ha : Integrable (fun y : ℝ => f ((a : ℂ) + (y : ℂ) * Complex.I)))
+    (hb : Integrable (fun y : ℝ => f ((b : ℂ) + (y : ℂ) * Complex.I)))
+    (g : ℝ → ℝ) (hg : Tendsto g atTop (𝓝 0))
+    (hfg : ∀ s : ℂ, a ≤ s.re → s.re ≤ b → ‖f s‖ ≤ g |s.im|) :
+    ∫ y : ℝ, f ((a : ℂ) + (y : ℂ) * Complex.I) =
+      ∫ y : ℝ, f ((b : ℂ) + (y : ℂ) * Complex.I) := by
+  have hre : ∀ x y : ℝ, ((x : ℂ) + (y : ℂ) * Complex.I).re = x := by intro x y; simp
+  have him : ∀ x y : ℝ, ((x : ℂ) + (y : ℂ) * Complex.I).im = y := by intro x y; simp
+  set Hh : ℝ → ℂ := fun y => ∫ x : ℝ in a..b, f ((x : ℂ) + (y : ℂ) * Complex.I) with hHh
+  have hH : ∀ y : ℝ, ‖Hh y‖ ≤ g |y| * |b - a| := by
+    intro y
+    apply intervalIntegral.norm_integral_le_of_norm_le_const
+    intro x hx
+    rw [Set.uIoc_of_le hab] at hx
+    have := hfg ((x : ℂ) + (y : ℂ) * Complex.I) (by rw [hre]; exact hx.1.le)
+      (by rw [hre]; exact hx.2)
+    rwa [him] at this
+  have hlim0 : Tendsto (fun T : ℝ => Hh T - Hh (-T)) atTop (𝓝 0) := by
+    have hg2 : Tendsto (fun T : ℝ => 2 * |b - a| * g T) atTop (𝓝 0) := by
+      simpa using hg.const_mul (2 * |b - a|)
+    apply squeeze_zero_norm' _ hg2
+    filter_upwards [eventually_ge_atTop (0 : ℝ)] with T hT
+    have h1 := hH T
+    have h2 := hH (-T)
+    rw [abs_neg, abs_of_nonneg hT] at h2
+    rw [abs_of_nonneg hT] at h1
+    calc ‖Hh T - Hh (-T)‖ ≤ ‖Hh T‖ + ‖Hh (-T)‖ := norm_sub_le _ _
+      _ ≤ g T * |b - a| + g T * |b - a| := add_le_add h1 h2
+      _ = 2 * |b - a| * g T := by ring
+  have hva : Tendsto (fun T : ℝ => ∫ y : ℝ in -T..T, f ((a : ℂ) + (y : ℂ) * Complex.I))
+      atTop (𝓝 (∫ y : ℝ, f ((a : ℂ) + (y : ℂ) * Complex.I))) :=
+    intervalIntegral_tendsto_integral ha tendsto_neg_atTop_atBot tendsto_id
+  have hvb : Tendsto (fun T : ℝ => ∫ y : ℝ in -T..T, f ((b : ℂ) + (y : ℂ) * Complex.I))
+      atTop (𝓝 (∫ y : ℝ, f ((b : ℂ) + (y : ℂ) * Complex.I))) :=
+    intervalIntegral_tendsto_integral hb tendsto_neg_atTop_atBot tendsto_id
+  have hlim1 := (hvb.sub hva).const_mul Complex.I
+  have heq : (fun T : ℝ => Complex.I * ((∫ y : ℝ in -T..T, f ((b : ℂ) + (y : ℂ) * Complex.I)) -
+      ∫ y : ℝ in -T..T, f ((a : ℂ) + (y : ℂ) * Complex.I))) =
+      fun T : ℝ => Hh T - Hh (-T) := by
+    funext T
+    exact rect_identity_b1122x f a b hab hd T
+  rw [heq] at hlim1
+  have h0 := tendsto_nhds_unique hlim1 hlim0
+  have hI : Complex.I ≠ 0 := Complex.I_ne_zero
+  have := (mul_eq_zero.mp h0).resolve_left hI
+  exact (sub_eq_zero.mp this).symm
+
+/-- Textbook integrability step for P0093 page 157: every power of the absolute value
+times a two sided exponential decay is integrable on the real line. -/
+theorem abs_pow_exp_integrable_b1122x (δ : ℝ) (hδ : 0 < δ) (k : ℕ) :
+    Integrable (fun t : ℝ => |t| ^ k * Real.exp (-(δ * |t|))) := by
+  have hk : IntegrableOn (fun t : ℝ => t ^ k * Real.exp (-(δ * t))) (Set.Ioi 0) := by
+    simpa only [Real.rpow_natCast, Real.rpow_one, neg_mul] using
+      integrableOn_rpow_mul_exp_neg_mul_rpow
+        (s := (k : ℝ)) (p := 1) (b := δ) (by linarith [Nat.cast_nonneg (α := ℝ) k])
+        (by norm_num) hδ
+  have hp : IntegrableOn (fun t : ℝ => |t| ^ k * Real.exp (-(δ * |t|))) (Set.Ioi 0) := by
+    refine hk.congr_fun (fun t ht => ?_) measurableSet_Ioi
+    simp only [abs_of_pos (show (0 : ℝ) < t from ht)]
+  have hc : IntegrableOn (fun t : ℝ => |t| ^ k * Real.exp (-(δ * |t|))) (Set.Ici 0) :=
+    (integrableOn_Ici_iff_integrableOn_Ioi).mpr hp
+  have hn : IntegrableOn (fun t : ℝ => |t| ^ k * Real.exp (-(δ * |t|))) (Set.Iic 0) := by
+    have hn := (show IntegrableOn (fun t : ℝ => |t| ^ k * Real.exp (-(δ * |t|)))
+      (Set.Ici (-0)) from by simpa using hc).comp_neg_Iic
+    simpa only [abs_neg] using hn
+  simpa only [Set.Iic_union_Ioi, integrableOn_univ] using hn.union hp
+
+/-- Textbook integrability step for P0093 page 157: the weight one plus absolute t to the
+fifth times exp of minus delta absolute t is integrable for delta positive. -/
+theorem quintic_exp_integrable_b1122x (δ : ℝ) (hδ : 0 < δ) :
+    Integrable (fun t : ℝ => (1 + |t|) ^ 5 * Real.exp (-(δ * |t|))) := by
+  have h0 := abs_pow_exp_integrable_b1122x δ hδ 0
+  have h5 := abs_pow_exp_integrable_b1122x δ hδ 5
+  refine Integrable.mono' ((h0.add h5).const_mul 32) ?_ (ae_of_all _ fun t => ?_)
+  · exact (by fun_prop : Continuous fun t : ℝ =>
+      (1 + |t|) ^ 5 * Real.exp (-(δ * |t|))).aestronglyMeasurable
+  · have hx : 0 ≤ |t| := abs_nonneg t
+    have hpoly : (1 + |t|) ^ 5 ≤ 32 * (|t| ^ 0 + |t| ^ 5) := by
+      rcases le_total |t| 1 with h | h
+      · have h32 : (1 + |t|) ^ 5 ≤ 2 ^ 5 := pow_le_pow_left₀ (by linarith) (by linarith) 5
+        have h5 : 0 ≤ |t| ^ 5 := by positivity
+        rw [pow_zero]
+        linarith
+      · have h32 : (1 + |t|) ^ 5 ≤ (2 * |t|) ^ 5 :=
+          pow_le_pow_left₀ (by linarith) (by linarith) 5
+        rw [mul_pow] at h32
+        rw [pow_zero]
+        linarith
+    have he : 0 < Real.exp (-(δ * |t|)) := Real.exp_pos _
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    simp only [Pi.add_apply]
+    nlinarith
+
+/-- Textbook limit for P0093 page 156: A times one plus u to the fifth times exp of minus
+delta u tends to 0 as u tends to infinity, for delta positive. It kills the horizontal
+sides of the rectangles. -/
+theorem quintic_exp_tendsto_b1122x (A δ : ℝ) (hδ : 0 < δ) :
+    Tendsto (fun u : ℝ => A * ((1 + u) ^ 5 * Real.exp (-(δ * u)))) atTop (𝓝 0) := by
+  have hv : Tendsto (fun u : ℝ => δ * (1 + u)) atTop atTop :=
+    (tendsto_atTop_add_const_left atTop 1 tendsto_id).const_mul_atTop hδ
+  have h := ((Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero 5).comp hv).const_mul
+    (A * Real.exp δ / δ ^ 5)
+  rw [mul_zero] at h
+  refine h.congr (fun u => ?_)
+  simp only [Function.comp]
+  rw [show -(δ * (1 + u)) = -δ + -(δ * u) by ring, Real.exp_add, Real.exp_neg δ]
+  have he : Real.exp δ ≠ 0 := (Real.exp_pos δ).ne'
+  have hd : δ ^ 5 ≠ 0 := pow_ne_zero 5 hδ.ne'
+  field_simp
+
+/-- P0093 page 157 Gamma decay, extended by the functional equation Gamma of s equals
+s minus 1 times Gamma of s minus 1 to the strip from 1/2 to 2: the norm of Gamma s is at
+most square root of 2 pi times 9 times one plus absolute im s squared times exp of minus
+pi absolute im s over 2. -/
+theorem gamma_strip_two_b1122x (s : ℂ) (hlo : 1 / 2 ≤ s.re) (hhi : s.re ≤ 2) :
+    ‖Complex.Gamma s‖ ≤ Real.sqrt (2 * Real.pi) * (9 * (1 + |s.im|) ^ 2) *
+      Real.exp (-(Real.pi * |s.im| / 2)) := by
+  have ht := abs_nonneg s.im
+  rcases le_or_gt s.re (3 / 2) with h | h
+  · have hg := gamma_absolute_decay519 s hlo h
+    have hn : ‖s + 1‖ ≤ 9 * (1 + |s.im|) ^ 2 := by
+      have hh := Complex.norm_le_abs_re_add_abs_im (s + 1)
+      simp only [Complex.add_re, Complex.one_re, Complex.add_im, Complex.one_im,
+        add_zero] at hh
+      rw [abs_of_pos (by linarith : 0 < s.re + 1)] at hh
+      nlinarith
+    calc ‖Complex.Gamma s‖ ≤ _ := hg
+      _ ≤ _ := by gcongr
+  · have hs1 : s - 1 ≠ 0 := by
+      intro h0
+      have := congrArg Complex.re h0
+      simp at this
+      linarith
+    have hrec : Complex.Gamma s = (s - 1) * Complex.Gamma (s - 1) := by
+      have := Complex.Gamma_add_one (s - 1) hs1
+      rwa [sub_add_cancel] at this
+    have hre1 : (s - 1).re = s.re - 1 := by simp
+    have him1 : (s - 1).im = s.im := by simp
+    have hg := gamma_absolute_decay519 (s - 1) (by rw [hre1]; linarith)
+      (by rw [hre1]; linarith)
+    rw [sub_add_cancel, him1] at hg
+    have hn1 : ‖s - 1‖ ≤ 3 * (1 + |s.im|) := by
+      have hh := Complex.norm_le_abs_re_add_abs_im (s - 1)
+      rw [hre1, him1, abs_of_pos (by linarith : 0 < s.re - 1)] at hh
+      linarith
+    have hn2 : ‖s‖ ≤ 3 * (1 + |s.im|) := by
+      have hh := Complex.norm_le_abs_re_add_abs_im s
+      rw [abs_of_pos (by linarith : 0 < s.re)] at hh
+      linarith
+    have hg2 : ‖Complex.Gamma (s - 1)‖ ≤ Real.sqrt (2 * Real.pi) * (3 * (1 + |s.im|)) *
+        Real.exp (-(Real.pi * |s.im| / 2)) := hg.trans (by gcongr)
+    rw [hrec, norm_mul]
+    calc ‖s - 1‖ * ‖Complex.Gamma (s - 1)‖
+        ≤ (3 * (1 + |s.im|)) * (Real.sqrt (2 * Real.pi) * (3 * (1 + |s.im|)) *
+            Real.exp (-(Real.pi * |s.im| / 2))) := by gcongr
+      _ = _ := by ring
+
+/-- P0093 page 156 size of the kernel z to the power minus s: for z nonzero and
+0 at most re s at most 2, its norm is at most one plus norm z to the minus 2, times
+exp of absolute arg z times absolute im s. -/
+theorem cpow_neg_bound_b1122x (z : ℂ) (hz : z ≠ 0) (s : ℂ) (h0 : 0 ≤ s.re) (h2 : s.re ≤ 2) :
+    ‖z ^ (-s)‖ ≤ (1 + ‖z‖ ^ (-2 : ℝ)) * Real.exp (|Complex.arg z| * |s.im|) := by
+  rw [Complex.norm_cpow_of_ne_zero hz]
+  simp only [Complex.neg_re, Complex.neg_im]
+  have hx : 0 < ‖z‖ := norm_pos_iff.mpr hz
+  have hp : ‖z‖ ^ (-s.re) ≤ 1 + ‖z‖ ^ (-2 : ℝ) := by
+    rcases le_total 1 ‖z‖ with h | h
+    · have := Real.rpow_le_one_of_one_le_of_nonpos h (by linarith : -s.re ≤ 0)
+      have := Real.rpow_nonneg hx.le (-2 : ℝ)
+      linarith
+    · have := Real.rpow_le_rpow_of_exponent_ge hx h (by linarith : (-2 : ℝ) ≤ -s.re)
+      linarith
+  have he : 1 / Real.exp (Complex.arg z * -s.im) ≤ Real.exp (|Complex.arg z| * |s.im|) := by
+    rw [one_div, ← Real.exp_neg]
+    apply Real.exp_le_exp.mpr
+    rw [← abs_mul]
+    have h1 := le_abs_self (Complex.arg z * s.im)
+    have h2 : -(Complex.arg z * -s.im) = Complex.arg z * s.im := by ring
+    linarith
+  rw [div_eq_mul_one_div]
+  exact mul_le_mul hp he (by positivity) (by positivity)
+
+/-- P0093 page 159 bound for log L on the line, made polynomial: for N at least 2 the
+logarithm of N times absolute t plus 2 lies between 0 and log N plus 1 times one plus
+absolute t. -/
+theorem log_poly_b1122x (N : ℕ) (hN : 2 ≤ N) (t : ℝ) :
+    0 ≤ Real.log ((N : ℝ) * (|t| + 2)) ∧
+      Real.log ((N : ℝ) * (|t| + 2)) ≤ (Real.log N + 1) * (1 + |t|) := by
+  have hNR : (2 : ℝ) ≤ N := by exact_mod_cast hN
+  have ht := abs_nonneg t
+  have hlN : 0 ≤ Real.log N := Real.log_nonneg (by linarith)
+  refine ⟨Real.log_nonneg (by nlinarith), ?_⟩
+  rw [Real.log_mul (by positivity) (by positivity)]
+  have := Real.log_le_sub_one_of_pos (by positivity : (0 : ℝ) < |t| + 2)
+  nlinarith
+
+/-- P0093 page 156 decay of the Mellin integrand z to the minus s times Gamma s times G s
+on the closed strip from 1/2 plus 1/ln N to 2: a constant times one plus absolute im s to
+the fifth times exp of minus pi over 2 minus absolute arg z, times absolute im s. -/
+theorem integrand_bound_b1122x (N : ℕ) (hN : 2 ≤ N) (G : ℂ → ℂ) (B0 : ℝ)
+    (hGb : ∀ s : ℂ, 1 / 2 + 1 / Real.log N ≤ s.re → s.re ≤ 2 →
+      ‖G s‖ ≤ B0 * Real.log ((N : ℝ) * (|s.im| + 2)) ^ 3)
+    (z : ℂ) (hz : z ≠ 0) (s : ℂ) (h1 : 1 / 2 + 1 / Real.log N ≤ s.re) (h2 : s.re ≤ 2) :
+    ‖z ^ (-s) * Complex.Gamma s * G s‖ ≤
+      ((1 + ‖z‖ ^ (-2 : ℝ)) * Real.sqrt (2 * Real.pi) * 9 * |B0| * (Real.log N + 1) ^ 3) *
+        ((1 + |s.im|) ^ 5 * Real.exp (-((Real.pi / 2 - |Complex.arg z|) * |s.im|))) := by
+  have hNR : (2 : ℝ) ≤ N := by exact_mod_cast hN
+  have hlogpos : 0 < Real.log N := Real.log_pos (by linarith)
+  have hc : 1 / 2 ≤ s.re := by
+    have : 0 < 1 / Real.log N := by positivity
+    linarith
+  have hA := cpow_neg_bound_b1122x z hz s (by linarith) h2
+  have hB := gamma_strip_two_b1122x s hc h2
+  obtain ⟨hl0, hl1⟩ := log_poly_b1122x N hN s.im
+  have hC : ‖G s‖ ≤ |B0| * (Real.log N + 1) ^ 3 * (1 + |s.im|) ^ 3 := by
+    calc ‖G s‖ ≤ B0 * Real.log ((N : ℝ) * (|s.im| + 2)) ^ 3 := hGb s h1 h2
+      _ ≤ |B0| * Real.log ((N : ℝ) * (|s.im| + 2)) ^ 3 :=
+          mul_le_mul_of_nonneg_right (le_abs_self _) (by positivity)
+      _ ≤ |B0| * ((Real.log N + 1) * (1 + |s.im|)) ^ 3 := by gcongr
+      _ = _ := by ring
+  rw [norm_mul, norm_mul]
+  calc ‖z ^ (-s)‖ * ‖Complex.Gamma s‖ * ‖G s‖
+      ≤ ((1 + ‖z‖ ^ (-2 : ℝ)) * Real.exp (|Complex.arg z| * |s.im|)) *
+        (Real.sqrt (2 * Real.pi) * (9 * (1 + |s.im|) ^ 2) *
+          Real.exp (-(Real.pi * |s.im| / 2))) *
+        (|B0| * (Real.log N + 1) ^ 3 * (1 + |s.im|) ^ 3) := by gcongr
+    _ = _ := by
+      have : Real.exp (-((Real.pi / 2 - |Complex.arg z|) * |s.im|)) =
+          Real.exp (|Complex.arg z| * |s.im|) * Real.exp (-(Real.pi * |s.im| / 2)) := by
+        rw [← Real.exp_add]
+        congr 1
+        ring
+      rw [this]
+      ring
+
+/-- P0093 page 156 equation 4.1 and page 159 before equation 5.1: under the bound on G on
+the strip, the Mellin integral on the line re s equal to 1/2 plus 1/ln N equals the one on
+the line re s equal to 2, by Cauchy on rectangles and the decay of Gamma. -/
+theorem mellin_line_shift_proof_b1122 (N : ℕ) (hN : 2 ≤ N) (G : ℂ → ℂ)
+    (hGd : DifferentiableOn ℂ G {s : ℂ | 1 / 2 < s.re}) (B0 : ℝ)
+    (hGb : ∀ s : ℂ, 1 / 2 + 1 / Real.log N ≤ s.re → s.re ≤ 2 →
+      ‖G s‖ ≤ B0 * Real.log ((N : ℝ) * (|s.im| + 2)) ^ 3) (α : ℝ) :
+    mellinU519 N (fun t : ℝ => G (mellinLine519 N t)) α =
+      ((1 / (2 * Real.pi) : ℝ) : ℂ) * ∫ t : ℝ,
+        (((1 / (N : ℝ) : ℝ) : ℂ) + ((2 * Real.pi * α : ℝ) : ℂ) * Complex.I) ^
+          (-((2 : ℂ) + (t : ℂ) * Complex.I)) * Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I) *
+            G ((2 : ℂ) + (t : ℂ) * Complex.I) := by
+  have hNR : (2 : ℝ) ≤ N := by exact_mod_cast hN
+  have hlogpos : 0 < Real.log N := Real.log_pos (by linarith)
+  have hc12 : 1 / 2 < 1 / 2 + 1 / Real.log N := by
+    have : 0 < 1 / Real.log N := by positivity
+    linarith
+  have hc2 : 1 / 2 + 1 / Real.log N ≤ 2 := by
+    have hlog2 : Real.log 2 ≤ Real.log N := Real.log_le_log (by norm_num) hNR
+    have h23 : (2 : ℝ) / 3 ≤ Real.log N := by
+      have := Real.log_two_gt_d9; linarith
+    have : 1 / Real.log N ≤ 3 / 2 := by
+      rw [div_le_iff₀ hlogpos]; linarith
+    linarith
+  let z : ℂ := ((1 / (N : ℝ) : ℝ) : ℂ) + ((2 * Real.pi * α : ℝ) : ℂ) * Complex.I
+  have hzre : 0 < z.re := by
+    have h := one_div_pos.mpr (show (0 : ℝ) < N by linarith)
+    simp only [z, Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+      Complex.I_re, Complex.I_im, mul_zero, zero_mul, sub_zero, add_zero]
+    exact h
+  have hz : z ≠ 0 := by
+    intro h
+    rw [h] at hzre
+    simp at hzre
+  have hδ : 0 < Real.pi / 2 - |Complex.arg z| := by
+    have := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hzre)
+    linarith
+  let F : ℂ → ℂ := fun s => z ^ (-s) * Complex.Gamma s * G s
+  have hFd : ∀ s : ℂ, 1 / 2 < s.re → DifferentiableAt ℂ F s := by
+    intro s hs
+    have hnp : ∀ m : ℕ, s ≠ -(m : ℂ) := by
+      intro m h
+      have := congrArg Complex.re h
+      simp at this
+      linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]
+    have hG' : DifferentiableAt ℂ G s :=
+      hGd.differentiableAt ((isOpen_lt continuous_const Complex.continuous_re).mem_nhds hs)
+    exact ((differentiableAt_id.neg.const_cpow (Or.inl hz)).mul
+      (Complex.differentiableAt_Gamma s hnp)).mul hG'
+  let A : ℝ := (1 + ‖z‖ ^ (-2 : ℝ)) * Real.sqrt (2 * Real.pi) * 9 * |B0| *
+    (Real.log N + 1) ^ 3
+  let g : ℝ → ℝ := fun u => A * ((1 + u) ^ 5 * Real.exp (-((Real.pi / 2 - |Complex.arg z|) * u)))
+  have hFb : ∀ s : ℂ, 1 / 2 + 1 / Real.log N ≤ s.re → s.re ≤ 2 → ‖F s‖ ≤ g |s.im| :=
+    fun s h1 h2 => integrand_bound_b1122x N hN G B0 hGb z hz s h1 h2
+  have hgi : Integrable (fun t : ℝ => g |t|) :=
+    (quintic_exp_integrable_b1122x _ hδ).const_mul A
+  have hline : ∀ σ : ℝ, 1 / 2 + 1 / Real.log N ≤ σ → σ ≤ 2 →
+      Integrable (fun t : ℝ => F ((σ : ℂ) + (t : ℂ) * Complex.I)) := by
+    intro σ h1 h2
+    have hre : ∀ t : ℝ, ((σ : ℂ) + (t : ℂ) * Complex.I).re = σ := by intro t; simp
+    have him : ∀ t : ℝ, ((σ : ℂ) + (t : ℂ) * Complex.I).im = t := by intro t; simp
+    refine hgi.mono' ?_ (ae_of_all _ fun t => ?_)
+    · have hcont : Continuous (fun t : ℝ => F ((σ : ℂ) + (t : ℂ) * Complex.I)) := by
+        apply continuous_iff_continuousAt.mpr
+        intro t
+        exact (hFd _ (by rw [hre]; linarith)).continuousAt.comp (by fun_prop)
+      exact hcont.aestronglyMeasurable
+    · have := hFb ((σ : ℂ) + (t : ℂ) * Complex.I) (by rw [hre]; exact h1) (by rw [hre]; exact h2)
+      rwa [him] at this
+  have hg : Tendsto g atTop (𝓝 0) := quintic_exp_tendsto_b1122x A _ hδ
+  have key := strip_shift_b1122x F (1 / 2 + 1 / Real.log N) 2 hc2
+    (fun s h1 _ => hFd s (by linarith)) (hline _ le_rfl hc2) (hline 2 hc2 le_rfl) g hg hFb
+  rw [show ((2 : ℝ) : ℂ) = (2 : ℂ) by norm_num] at key
+  rw [mellinU519]
+  exact congrArg (fun w => ((1 / (2 * Real.pi) : ℝ) : ℂ) * w) key
+
+/-! ### Prime power tail (SPLIT_grh_mellin_transfer519) -/
+
+/-! ### Telescoping series with a shift -/
+
+private lemma pp519_tel_shift (M : ℕ) (hM : 1 ≤ M) (K : ℕ) :
+    ∑ k ∈ Finset.range K, ((1 : ℝ) / ((k : ℝ) + M) - 1 / ((k : ℝ) + M + 1))
+      = 1 / (M : ℝ) - 1 / ((K : ℝ) + M) := by
+  induction K with
+  | zero => simp
+  | succ K ih =>
+      rw [Finset.sum_range_succ, ih]
+      have h1 : ((K : ℝ) + M) ≠ 0 := by
+        have hM' : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM
+        have : (0 : ℝ) ≤ (K : ℝ) := Nat.cast_nonneg K
+        positivity
+      have h2 : ((K : ℝ) + M + 1) ≠ 0 := by
+        have hM' : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM
+        have : (0 : ℝ) ≤ (K : ℝ) := Nat.cast_nonneg K
+        positivity
+      push_cast
+      field_simp
+      try ring
+
+private lemma pp519_tel_nonneg (M : ℕ) (hM : 1 ≤ M) (k : ℕ) :
+    0 ≤ (1 : ℝ) / ((k : ℝ) + M) - 1 / ((k : ℝ) + M + 1) := by
+  have h1 : (0 : ℝ) < (k : ℝ) + M := by
+    have hM' : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM
+    have : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg k
+    linarith
+  have hle : (1 : ℝ) / ((k : ℝ) + M + 1) ≤ 1 / ((k : ℝ) + M) :=
+    one_div_le_one_div_of_le h1 (by linarith)
+  linarith
+
+private lemma pp519_shift_tendsto (M : ℕ) :
+    Tendsto (fun K : ℕ => (K : ℝ) + M) atTop atTop := by
+  refine tendsto_atTop_mono (fun K => ?_) tendsto_natCast_atTop_atTop
+  have h : (0 : ℝ) ≤ (M : ℝ) := Nat.cast_nonneg M
+  linarith
+
+private lemma pp519_tel_hasSum (M : ℕ) (hM : 1 ≤ M) :
+    HasSum (fun k : ℕ => (1 : ℝ) / ((k : ℝ) + M) - 1 / ((k : ℝ) + M + 1))
+      (1 / (M : ℝ)) := by
+  rw [hasSum_iff_tendsto_nat_of_nonneg (pp519_tel_nonneg M hM) (1 / (M : ℝ))]
+  have hlim : Tendsto (fun K : ℕ => ((K : ℝ) + M)⁻¹) atTop (nhds 0) :=
+    (pp519_shift_tendsto M).inv_tendsto_atTop
+  have hlim2 : Tendsto (fun K : ℕ => (1 : ℝ) / ((K : ℝ) + M)) atTop (nhds 0) := by
+    simpa only [one_div] using hlim
+  have h0 : Tendsto (fun K : ℕ => (1 : ℝ) / (M : ℝ) - 1 / ((K : ℝ) + M)) atTop
+      (nhds (1 / (M : ℝ) - 0)) := tendsto_const_nhds.sub hlim2
+  simp only [sub_zero] at h0
+  refine h0.congr' ?_
+  filter_upwards with K
+  exact (pp519_tel_shift M hM K).symm
+
+/-! ### The tail of `1/n^2` -/
+
+private lemma pp519_sq_term_le (k M : ℕ) (hM : 1 ≤ M) :
+    (1 : ℝ) / ((k : ℝ) + M + 1) ^ 2
+      ≤ (1 : ℝ) / ((k : ℝ) + M) - 1 / ((k : ℝ) + M + 1) := by
+  set n : ℝ := (k : ℝ) + M + 1 with hn
+  set m : ℝ := (k : ℝ) + M with hm
+  have hm1 : n = m + 1 := by rw [hn, hm]
+  have hm1' : (1 : ℝ) ≤ m := by
+    rw [hm]
+    have hM' : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM
+    have : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg k
+    linarith
+  have hmp : (0 : ℝ) < m := by linarith
+  have hnp : (0 : ℝ) < n := by rw [hm1]; linarith
+  have hkey : (1 : ℝ) / (m * n) = 1 / m - 1 / n := by
+    field_simp
+    try rw [hm1]
+    try ring
+  rw [← hkey]
+  apply one_div_le_one_div_of_le (by positivity)
+  nlinarith
+
+private lemma pp519_tail_sq (M : ℕ) (hM : 1 ≤ M) :
+    ∑' k : ℕ, (1 : ℝ) / ((k : ℝ) + M + 1) ^ 2 ≤ 1 / (M : ℝ) := by
+  have hsum1 : Summable (fun k : ℕ => (1 : ℝ) / ((k : ℝ) + M + 1) ^ 2) :=
+    Summable.of_nonneg_of_le (fun k => by positivity) (fun k => pp519_sq_term_le k M hM)
+      (pp519_tel_hasSum M hM).summable
+  calc ∑' k : ℕ, (1 : ℝ) / ((k : ℝ) + M + 1) ^ 2
+      ≤ ∑' k : ℕ, ((1 : ℝ) / ((k : ℝ) + M) - 1 / ((k : ℝ) + M + 1)) :=
+        hsum1.tsum_le_tsum (fun k => pp519_sq_term_le k M hM) (pp519_tel_hasSum M hM).summable
+    _ = 1 / (M : ℝ) := (pp519_tel_hasSum M hM).tsum_eq
+
+/-! ### The telescoping square-root series -/
+
+private lemma pp519_sqrt_tel_shift (M : ℕ) (hM : 1 ≤ M) (K : ℕ) :
+    ∑ k ∈ Finset.range K,
+        ((1 : ℝ) / Real.sqrt ((k : ℝ) + M) - 1 / Real.sqrt ((k : ℝ) + M + 1))
+      = 1 / Real.sqrt (M : ℝ) - 1 / Real.sqrt ((K : ℝ) + M) := by
+  induction K with
+  | zero => simp
+  | succ K ih =>
+      rw [Finset.sum_range_succ, ih]
+      push_cast
+      ring
+
+private lemma pp519_sqrt_tel_nonneg (M : ℕ) (hM : 1 ≤ M) (k : ℕ) :
+    0 ≤ (1 : ℝ) / Real.sqrt ((k : ℝ) + M) - 1 / Real.sqrt ((k : ℝ) + M + 1) := by
+  have hM' : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM
+  have hk : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg k
+  have h1 : (0 : ℝ) < Real.sqrt ((k : ℝ) + M) := by
+    apply Real.sqrt_pos.mpr; linarith
+  have hlt : Real.sqrt ((k : ℝ) + M) < Real.sqrt ((k : ℝ) + M + 1) := by
+    exact Real.sqrt_lt_sqrt (by linarith) (by linarith)
+  have hle : (1 : ℝ) / Real.sqrt ((k : ℝ) + M + 1) ≤ 1 / Real.sqrt ((k : ℝ) + M) :=
+    one_div_le_one_div_of_le h1 hlt.le
+  linarith
+
+private lemma pp519_sqrt_tel_hasSum (M : ℕ) (hM : 1 ≤ M) :
+    HasSum (fun k : ℕ => (1 : ℝ) / Real.sqrt ((k : ℝ) + M)
+        - 1 / Real.sqrt ((k : ℝ) + M + 1)) (1 / Real.sqrt (M : ℝ)) := by
+  rw [hasSum_iff_tendsto_nat_of_nonneg (pp519_sqrt_tel_nonneg M hM) (1 / Real.sqrt (M : ℝ))]
+  have hlim : Tendsto (fun K : ℕ => (Real.sqrt ((K : ℝ) + M))⁻¹) atTop (nhds 0) :=
+    ((Real.tendsto_sqrt_atTop).comp (pp519_shift_tendsto M)).inv_tendsto_atTop
+  have hlim2 : Tendsto (fun K : ℕ => (1 : ℝ) / Real.sqrt ((K : ℝ) + M)) atTop (nhds 0) := by
+    simpa only [one_div] using hlim
+  have h0 : Tendsto (fun K : ℕ => (1 : ℝ) / Real.sqrt (M : ℝ)
+      - 1 / Real.sqrt ((K : ℝ) + M)) atTop (nhds (1 / Real.sqrt (M : ℝ) - 0)) :=
+    tendsto_const_nhds.sub hlim2
+  simp only [sub_zero] at h0
+  refine h0.congr' ?_
+  filter_upwards with K
+  exact (pp519_sqrt_tel_shift M hM K).symm
+
+
+/-! ### The termwise bound `1/(n √n) ≤ 2 (1/√(n-1) - 1/√n)` -/
+
+private lemma pp519_cube_term_le (k M : ℕ) (hM : 1 ≤ M) :
+    (1 : ℝ) / (((k : ℝ) + M + 1) * Real.sqrt ((k : ℝ) + M + 1))
+      ≤ 2 * ((1 : ℝ) / Real.sqrt ((k : ℝ) + M)
+        - 1 / Real.sqrt ((k : ℝ) + M + 1)) := by
+  set n : ℝ := (k : ℝ) + M + 1 with hn
+  set a : ℝ := Real.sqrt (n - 1) with ha_def
+  set b : ℝ := Real.sqrt n with hb_def
+  have hn2 : (2 : ℝ) ≤ n := by
+    rw [hn]
+    have hM' : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM
+    have : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg k
+    linarith
+  have hn0 : (0 : ℝ) ≤ n := by linarith
+  have hn1 : (0 : ℝ) ≤ n - 1 := by linarith
+  have ha2 : a ^ 2 = n - 1 := by rw [ha_def]; exact Real.sq_sqrt hn1
+  have hb2 : b ^ 2 = n := by rw [hb_def]; exact Real.sq_sqrt hn0
+  have ha : 0 < a := by rw [ha_def]; exact Real.sqrt_pos.mpr (by linarith)
+  have hb : 0 < b := by rw [hb_def]; exact Real.sqrt_pos.mpr (by linarith)
+  have hna : Real.sqrt ((k : ℝ) + M) = a := by rw [ha_def, hn]; ring_nf
+  have hnb : Real.sqrt ((k : ℝ) + M + 1) = b := by rw [hb_def, hn]
+  have hnk : ((k : ℝ) + M + 1) = n := by rw [hn]
+  -- main inequality on a, b
+  have key : a * (1 + 2 * b ^ 2) ≤ 2 * b ^ 3 := by
+    have hsq : (a * (1 + 2 * b ^ 2)) ^ 2 ≤ (2 * b ^ 3) ^ 2 := by
+      have expand : (a * (1 + 2 * b ^ 2)) ^ 2 = (n - 1) * (1 + 2 * n) ^ 2 := by
+        rw [mul_pow, ha2, hb2]
+      have expand2 : (2 * b ^ 3) ^ 2 = 4 * n ^ 3 := by
+        have h3 : b ^ 3 = n * b := by rw [show b ^ 3 = b ^ 2 * b by ring, hb2]
+        rw [h3]
+        nlinarith [hb2]
+      rw [expand, expand2]
+      nlinarith
+    have h1 : (0 : ℝ) ≤ a * (1 + 2 * b ^ 2) := by positivity
+    by_contra hcon
+    push_neg at hcon
+    have hb3pos : (0 : ℝ) ≤ 2 * b ^ 3 := by linarith [pow_pos hb 3]
+    have := pow_lt_pow_left₀ hcon hb3pos (by norm_num : (2 : ℕ) ≠ 0)
+    linarith
+  have hkey : (1 : ℝ) / a - 1 / b = (b - a) / (a * b) := by
+    field_simp
+  have hgoal : (1 : ℝ) / b ^ 3 ≤ 2 * ((b - a) / (a * b)) := by
+    rw [div_le_iff₀ (by positivity : (0 : ℝ) < b ^ 3)]
+    have e : 2 * ((b - a) / (a * b)) * b ^ 3 = 2 * b ^ 2 * (b - a) / a := by
+      field_simp
+    rw [e, le_div_iff₀ ha]
+    nlinarith [key]
+  have hb3 : (n : ℝ) * b = b ^ 3 := by
+    have : b ^ 3 = b ^ 2 * b := by ring
+    rw [this, hb2]
+  have hmain : (1 : ℝ) / (n * b) ≤ 2 * ((b - a) / (a * b)) := by
+    rw [hb3]
+    exact hgoal
+  calc (1 : ℝ) / (((k : ℝ) + M + 1) * Real.sqrt ((k : ℝ) + M + 1))
+      = 1 / (n * b) := by rw [hnk, hnb]
+    _ ≤ 2 * ((b - a) / (a * b)) := hmain
+    _ = 2 * ((1 : ℝ) / Real.sqrt ((k : ℝ) + M)
+        - 1 / Real.sqrt ((k : ℝ) + M + 1)) := by rw [hna, hnb, hkey]
+
+private lemma pp519_tail_cube (M : ℕ) (hM : 1 ≤ M) :
+    ∑' k : ℕ, (1 : ℝ) / (((k : ℝ) + M + 1) * Real.sqrt ((k : ℝ) + M + 1))
+      ≤ 2 / Real.sqrt (M : ℝ) := by
+  have hbig : HasSum (fun k : ℕ => 2 * ((1 : ℝ) / Real.sqrt ((k : ℝ) + M)
+      - 1 / Real.sqrt ((k : ℝ) + M + 1))) (2 * (1 / Real.sqrt (M : ℝ))) :=
+    (pp519_sqrt_tel_hasSum M hM).mul_left 2
+  have hsum1 : Summable (fun k : ℕ =>
+      (1 : ℝ) / (((k : ℝ) + M + 1) * Real.sqrt ((k : ℝ) + M + 1))) :=
+    Summable.of_nonneg_of_le (fun k => by positivity) (fun k => pp519_cube_term_le k M hM)
+      hbig.summable
+  calc ∑' k : ℕ, (1 : ℝ) / (((k : ℝ) + M + 1) * Real.sqrt ((k : ℝ) + M + 1))
+      ≤ ∑' k : ℕ, 2 * ((1 : ℝ) / Real.sqrt ((k : ℝ) + M)
+          - 1 / Real.sqrt ((k : ℝ) + M + 1)) :=
+        hsum1.tsum_le_tsum (fun k => pp519_cube_term_le k M hM) hbig.summable
+    _ = 2 / Real.sqrt (M : ℝ) := by
+        rw [hbig.tsum_eq]; ring
+
+
+/-! ### The exponential is at most the minimum of one and the inverse -/
+
+private lemma pp519_exp_le_min {x : ℝ} (hx : 0 < x) : Real.exp (-x) ≤ min 1 x⁻¹ := by
+  refine le_min ?_ ?_
+  · rw [Real.exp_le_one_iff]; linarith
+  · rw [Real.exp_neg, ← one_div]
+    have h1 : x ≤ Real.exp x := by linarith [Real.add_one_le_exp x]
+    simpa [one_div] using one_div_le_one_div_of_le hx h1
+
+private lemma pp519_sqrt_pow_two (j : ℕ) :
+    Real.sqrt ((2 : ℝ) ^ j) = (Real.sqrt 2) ^ j := by
+  induction j with
+  | zero => simp
+  | succ j ih => rw [pow_succ, Real.sqrt_mul (by positivity), ih, pow_succ]
+
+private lemma pp519_sqrt_geo (ξ : ℝ) (hξ : 0 < ξ) (j : ℕ) :
+    Real.sqrt ((ξ * (2 : ℝ) ^ j)⁻¹) = (Real.sqrt ξ)⁻¹ * ((Real.sqrt 2)⁻¹) ^ j := by
+  have hx : (0 : ℝ) ≤ ξ⁻¹ := le_of_lt (inv_pos.mpr hξ)
+  rw [show (ξ * (2 : ℝ) ^ j)⁻¹ = ξ⁻¹ * ((2 : ℝ) ^ j)⁻¹ by rw [mul_inv],
+    Real.sqrt_mul hx, Real.sqrt_inv, Real.sqrt_inv, pp519_sqrt_pow_two j, inv_pow]
+
+private lemma pp519_min_one_le_sqrt {y : ℝ} (hy : 0 < y) : min 1 y ≤ Real.sqrt y := by
+  rcases le_or_gt 1 y with h | h
+  · rw [min_eq_left h]
+    exact Real.one_le_sqrt.mpr h
+  · rw [min_eq_right h.le]
+    refine (Real.le_sqrt hy.le hy.le).mpr ?_
+    nlinarith
+
+private lemma pp519_geom (ξ : ℝ) (hξ : 0 < ξ) :
+    ∑' j : ℕ, min 1 ((ξ * (2 : ℝ) ^ j)⁻¹) ≤ 7 / 2 / Real.sqrt ξ := by
+  have hr0 : (0 : ℝ) ≤ (Real.sqrt 2)⁻¹ := by positivity
+  have hr1 : (Real.sqrt 2)⁻¹ < 1 := inv_lt_one_of_one_lt₀ Real.one_lt_sqrt_two
+  have hterm : ∀ j : ℕ, min 1 ((ξ * (2 : ℝ) ^ j)⁻¹)
+      ≤ (Real.sqrt ξ)⁻¹ * ((Real.sqrt 2)⁻¹) ^ j := by
+    intro j
+    have hy : (0 : ℝ) < (ξ * (2 : ℝ) ^ j)⁻¹ := by
+      have h2 : (0 : ℝ) < (2 : ℝ) ^ j := pow_pos (by norm_num) _
+      exact inv_pos.mpr (mul_pos hξ h2)
+    exact (pp519_min_one_le_sqrt hy).trans (le_of_eq (pp519_sqrt_geo ξ hξ j))
+  have hsum : Summable (fun j : ℕ => (Real.sqrt ξ)⁻¹ * ((Real.sqrt 2)⁻¹) ^ j) :=
+    (summable_geometric_of_lt_one hr0 hr1).mul_left _
+  have hsumL : Summable (fun j : ℕ => min 1 ((ξ * (2 : ℝ) ^ j)⁻¹)) :=
+    Summable.of_nonneg_of_le (fun j => by positivity) hterm hsum
+  have h70 : (7 : ℝ) / 5 ≤ Real.sqrt 2 := by
+    refine (Real.le_sqrt (by norm_num) (by norm_num)).mpr ?_
+    norm_num
+  have hinv : (Real.sqrt 2)⁻¹ ≤ 5 / 7 := by
+    have h := one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 7 / 5) h70
+    simpa [one_div] using h
+  have hpos : (0 : ℝ) < 1 - (Real.sqrt 2)⁻¹ := by linarith
+  have hle : (1 - (Real.sqrt 2)⁻¹)⁻¹ ≤ 7 / 2 := by
+    have h2 : (0 : ℝ) < 2 / 7 := by norm_num
+    have := (inv_le_inv₀ hpos h2).mpr (by linarith : (2 : ℝ) / 7 ≤ 1 - (Real.sqrt 2)⁻¹)
+    simpa using this
+  calc ∑' j : ℕ, min 1 ((ξ * (2 : ℝ) ^ j)⁻¹)
+      ≤ ∑' j : ℕ, (Real.sqrt ξ)⁻¹ * ((Real.sqrt 2)⁻¹) ^ j := hsumL.tsum_le_tsum hterm hsum
+    _ = (Real.sqrt ξ)⁻¹ * (1 - (Real.sqrt 2)⁻¹)⁻¹ := by
+        rw [tsum_mul_left, tsum_geometric_of_lt_one hr0 hr1]
+    _ ≤ 7 / 2 / Real.sqrt ξ := by
+        have h0 : (0 : ℝ) ≤ (Real.sqrt ξ)⁻¹ := by positivity
+        calc (Real.sqrt ξ)⁻¹ * (1 - (Real.sqrt 2)⁻¹)⁻¹
+            ≤ (Real.sqrt ξ)⁻¹ * (7 / 2) := mul_le_mul_of_nonneg_left hle h0
+          _ = 7 / 2 / Real.sqrt ξ := by
+              rw [div_eq_mul_inv]
+              ring
+
+/-! ### Summability corollaries -/
+
+private lemma pp519_summable_sq_shift :
+    Summable (fun k : ℕ => (1 : ℝ) / (((k : ℝ) + 2) ^ 2)) :=
+  Summable.of_nonneg_of_le (fun k => by positivity) (fun k => by
+    simpa [Nat.cast_one, add_assoc, one_add_one_eq_two] using pp519_sq_term_le k 1 (by norm_num))
+    (pp519_tel_hasSum 1 (by norm_num)).summable
+
+private lemma pp519_summable_sq_tail (M : ℕ) (hM : 1 ≤ M) :
+    Summable (fun k : ℕ => (1 : ℝ) / (((k : ℝ) + M + 1) ^ 2)) :=
+  Summable.of_nonneg_of_le (fun k => by positivity) (fun k => pp519_sq_term_le k M hM)
+    (pp519_tel_hasSum M hM).summable
+
+private lemma pp519_summable_cube_shift :
+    Summable (fun k : ℕ => (1 : ℝ) / (((k : ℝ) + 2) * Real.sqrt ((k : ℝ) + 2))) :=
+  Summable.of_nonneg_of_le (fun k => by positivity) (fun k => by
+    simpa [Nat.cast_one, add_assoc, one_add_one_eq_two] using pp519_cube_term_le k 1 (by norm_num))
+    ((pp519_sqrt_tel_hasSum 1 (by norm_num)).mul_left 2).summable
+
+/-! ### The two scalar sums over `ℕ` -/
+
+set_option maxHeartbeats 1000000 in
+private lemma pp519_sum_one_aux (N M : ℕ) (hN : 1 ≤ N) (hM : 1 ≤ M)
+    (hMn : (N : ℝ) ≤ ((M : ℝ)) ^ 2) (hMle : (M : ℝ) ≤ 2 * Real.sqrt (N : ℝ)) :
+    ∑' m : ℕ, min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2)) ≤ 4 * Real.sqrt N := by
+  have hMpos : (0 : ℝ) < (M : ℝ) := by
+    have : 0 < M := by omega
+    exact_mod_cast this
+  have hNpos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
+  have hsum : Summable (fun m : ℕ => min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2))) := by
+    refine Summable.of_nonneg_of_le (fun m => le_min zero_le_one (by positivity))
+      (fun m => min_le_right _ _) ?_
+    refine Summable.of_nonneg_of_le (fun m => by positivity) (fun m => ?_)
+      (pp519_summable_sq_shift.mul_left (N : ℝ))
+    rw [show (N : ℝ) * (1 / (((m : ℝ) + 2) ^ 2)) = (N : ℝ) / (((m : ℝ) + 2) ^ 2) by ring]
+  have hsplit := (hsum.sum_add_tsum_nat_add M).symm
+  have hhead : ∑ m ∈ Finset.range M, min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2)) ≤ (M : ℝ) := by
+    have hle : ∀ m ∈ Finset.range M, min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2)) ≤ 1 :=
+      fun m _ => min_le_left _ _
+    calc ∑ m ∈ Finset.range M, min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2))
+        ≤ ∑ _m ∈ Finset.range M, (1 : ℝ) := Finset.sum_le_sum hle
+      _ = (M : ℝ) := by simp
+  have hshift : ∀ k : ℕ, (((k + M : ℕ) : ℝ) + 2) = ((k : ℝ) + ((M + 1 : ℕ) : ℝ) + 1) := by
+    intro k; push_cast; ring
+  have htail : ∑' k : ℕ, min 1 ((N : ℝ) / ((((k + M : ℕ) : ℝ) + 2) ^ 2))
+      ≤ (N : ℝ) * (1 / ((M : ℝ) + 1)) := by
+    have hmaj : ∀ k : ℕ, min 1 ((N : ℝ) / ((((k + M : ℕ) : ℝ) + 2) ^ 2))
+        ≤ (N : ℝ) * (1 / (((k : ℝ) + ((M + 1 : ℕ) : ℝ) + 1) ^ 2)) := by
+      intro k
+      rw [hshift k]
+      calc min 1 ((N : ℝ) / (((k : ℝ) + ((M + 1 : ℕ) : ℝ) + 1) ^ 2))
+          ≤ (N : ℝ) / (((k : ℝ) + ((M + 1 : ℕ) : ℝ) + 1) ^ 2) := min_le_right _ _
+        _ = (N : ℝ) * (1 / (((k : ℝ) + ((M + 1 : ℕ) : ℝ) + 1) ^ 2)) := by ring
+    have hs : Summable (fun k : ℕ => (N : ℝ) * (1 / (((k : ℝ) + ((M + 1 : ℕ) : ℝ) + 1) ^ 2))) :=
+      (pp519_summable_sq_tail (M + 1) (by omega)).mul_left (N : ℝ)
+    have hs' : Summable (fun k : ℕ => min 1 ((N : ℝ) / ((((k + M : ℕ) : ℝ) + 2) ^ 2))) :=
+      Summable.of_nonneg_of_le (fun k => le_min zero_le_one (by positivity)) hmaj hs
+    calc ∑' k : ℕ, min 1 ((N : ℝ) / ((((k + M : ℕ) : ℝ) + 2) ^ 2))
+        ≤ ∑' k : ℕ, (N : ℝ) * (1 / (((k : ℝ) + ((M + 1 : ℕ) : ℝ) + 1) ^ 2)) :=
+          hs'.tsum_le_tsum hmaj hs
+      _ = (N : ℝ) * (∑' k : ℕ, (1 : ℝ) / (((k : ℝ) + ((M + 1 : ℕ) : ℝ) + 1) ^ 2)) := by
+          rw [tsum_mul_left]
+      _ ≤ (N : ℝ) * (1 / ((M : ℝ) + 1)) := by
+          refine mul_le_mul_of_nonneg_left ?_ (le_of_lt hNpos)
+          have h := pp519_tail_sq (M + 1) (by omega)
+          have hcast : (((M + 1 : ℕ)) : ℝ) = (M : ℝ) + 1 := by push_cast; ring
+          rw [hcast] at h
+          simpa [Nat.cast_add, Nat.cast_one] using h
+  have hNM : (N : ℝ) * (1 / ((M : ℝ) + 1)) ≤ (M : ℝ) := by
+    rw [mul_one_div, div_le_iff₀ (by positivity)]
+    nlinarith [hMn, hMpos]
+  calc ∑' m : ℕ, min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2))
+      = ∑ m ∈ Finset.range M, min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2))
+        + ∑' k : ℕ, min 1 ((N : ℝ) / ((((k + M : ℕ) : ℝ) + 2) ^ 2)) := hsplit
+    _ ≤ (M : ℝ) + (M : ℝ) := by linarith
+    _ ≤ 4 * Real.sqrt (N : ℝ) := by linarith
+
+private lemma pp519_sum_one (N : ℕ) (hN : 1 ≤ N) :
+    ∑' m : ℕ, min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2)) ≤ 4 * Real.sqrt N := by
+  have hM1 : 1 ≤ Nat.sqrt N + 1 := Nat.succ_le_succ (Nat.zero_le _)
+  have hMn : (N : ℝ) ≤ (((Nat.sqrt N + 1 : ℕ)) : ℝ) ^ 2 := by
+    have h2 : ((N : ℕ) : ℝ) ≤ (((Nat.sqrt N + 1) ^ 2 : ℕ) : ℝ) :=
+      by exact_mod_cast Nat.le_of_lt (Nat.lt_succ_sqrt' N)
+    simpa using h2
+  have hsqr : ((Nat.sqrt N : ℕ) : ℝ) ≤ Real.sqrt (N : ℝ) := by
+    have h : (((Nat.sqrt N : ℕ) : ℝ)) ^ 2 ≤ (N : ℝ) := by exact_mod_cast Nat.sqrt_le' N
+    have h' := Real.sqrt_le_sqrt h
+    rwa [Real.sqrt_sq (by positivity)] at h'
+  have hMle : (((Nat.sqrt N + 1 : ℕ)) : ℝ) ≤ 2 * Real.sqrt (N : ℝ) := by
+    have h1 : (1 : ℝ) ≤ Real.sqrt (N : ℝ) := Real.one_le_sqrt.mpr (by exact_mod_cast hN)
+    have h2 : (((Nat.sqrt N + 1 : ℕ)) : ℝ) = ((Nat.sqrt N : ℕ) : ℝ) + 1 := by push_cast; ring
+    rw [h2]; linarith
+  exact pp519_sum_one_aux N (Nat.sqrt N + 1) hN hM1 hMn hMle
+
+set_option maxHeartbeats 1000000 in
+private lemma pp519_sum_two (N : ℕ) (hN : 1 ≤ N) :
+    ∑' m : ℕ, Real.sqrt ((N : ℝ) / (((m : ℝ) + 2) ^ 3)) ≤ 2 * Real.sqrt N := by
+  have hcongr : (∑' m : ℕ, Real.sqrt ((N : ℝ) / (((m : ℝ) + 2) ^ 3)))
+      = Real.sqrt (N : ℝ) *
+        ∑' m : ℕ, (1 : ℝ) / (((m : ℝ) + 2) * Real.sqrt ((m : ℝ) + 2)) := by
+    rw [← tsum_mul_left]
+    refine tsum_congr (fun m => ?_)
+    have hx : (0 : ℝ) < (m : ℝ) + 2 := by positivity
+    have h3 : ((m : ℝ) + 2) ^ 3 = ((m : ℝ) + 2) ^ 2 * ((m : ℝ) + 2) := by ring
+    rw [Real.sqrt_div (by positivity), h3, Real.sqrt_mul (by positivity),
+      Real.sqrt_sq hx.le]
+    field_simp
+  have h2 : (∑' m : ℕ, (1 : ℝ) / (((m : ℝ) + 2) * Real.sqrt ((m : ℝ) + 2))) ≤ 2 := by
+    have h := pp519_tail_cube 1 (by norm_num)
+    simpa [Nat.cast_one, add_assoc, one_add_one_eq_two] using h
+  rw [hcongr]
+  calc Real.sqrt (N : ℝ) * (∑' m : ℕ, (1 : ℝ) / (((m : ℝ) + 2) * Real.sqrt ((m : ℝ) + 2)))
+      ≤ Real.sqrt (N : ℝ) * 2 := mul_le_mul_of_nonneg_left h2 (Real.sqrt_nonneg _)
+    _ = 2 * Real.sqrt N := by ring
+
+/-! ### The norm of a single prime power term -/
+
+private lemma pp519_inv_cast_norm (k : ℕ) : ‖((k : ℂ) + 2)⁻¹‖ = ((k : ℝ) + 2)⁻¹ := by
+  have hk : ((k : ℂ) + 2) = ((k + 2 : ℕ) : ℂ) := by push_cast; ring
+  have hn : ‖(k : ℂ) + 2‖ = (k : ℝ) + 2 := by
+    rw [hk, Complex.norm_natCast]
+    push_cast
+    ring
+  rw [norm_inv, hn]
+
+private lemma pp519_term_norm (N : ℕ) (hN : 1 ≤ N) (q : ℕ) (χ : DirichletCharacter ℂ q)
+    (α : ℝ) (p : Nat.Primes) (k : ℕ) :
+    ‖((k : ℂ) + 2)⁻¹ * χ ((p : ℕ) ^ (k + 2)) *
+        (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ) *
+          Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I)‖
+      ≤ ((k : ℝ) + 2)⁻¹ * Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) := by
+  have hexp : ‖Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I)‖
+      = 1 := Complex.norm_exp_ofReal_mul_I _
+  have hchi : ‖χ ((p : ℕ) ^ (k + 2))‖ ≤ 1 := χ.norm_le_one _
+  have hreal : ‖(Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ)‖
+      = Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) := by
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+  have hpos : (0 : ℝ) < Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) := Real.exp_pos _
+  have hchip : ((k : ℝ) + 2)⁻¹ * ‖χ ((p : ℕ) ^ (k + 2))‖ ≤ ((k : ℝ) + 2)⁻¹ := by
+    have h0 : (0 : ℝ) ≤ ((k : ℝ) + 2)⁻¹ := by positivity
+    calc ((k : ℝ) + 2)⁻¹ * ‖χ ((p : ℕ) ^ (k + 2))‖ ≤ ((k : ℝ) + 2)⁻¹ * 1 :=
+          mul_le_mul_of_nonneg_left hchi h0
+      _ = ((k : ℝ) + 2)⁻¹ := mul_one _
+  calc ‖((k : ℂ) + 2)⁻¹ * χ ((p : ℕ) ^ (k + 2)) *
+        (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ) *
+          Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I)‖
+      = ‖((k : ℂ) + 2)⁻¹‖ * ‖χ ((p : ℕ) ^ (k + 2))‖ *
+          ‖(Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ)‖ *
+            ‖Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I)‖ := by
+        rw [norm_mul, norm_mul, norm_mul]
+    _ = ((k : ℝ) + 2)⁻¹ * ‖χ ((p : ℕ) ^ (k + 2))‖ *
+          Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) * 1 := by
+        rw [pp519_inv_cast_norm, hreal, hexp]
+    _ = ((k : ℝ) + 2)⁻¹ * ‖χ ((p : ℕ) ^ (k + 2))‖ *
+          Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) := by rw [mul_one]
+    _ ≤ ((k : ℝ) + 2)⁻¹ * Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) :=
+        mul_le_mul_of_nonneg_right hchip (le_of_lt hpos)
+
+/-! ### The bound for one prime -/
+
+set_option maxHeartbeats 1000000 in
+private lemma pp519_inner (N : ℕ) (hN : 1 ≤ N) (q : ℕ) (χ : DirichletCharacter ℂ q)
+    (α : ℝ) (p : Nat.Primes) :
+    ‖∑' k : ℕ, (((k : ℂ) + 2)⁻¹ * χ ((p : ℕ) ^ (k + 2)) *
+        (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ) *
+          Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I))‖
+      ≤ 1 / 2 * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2))
+        + 7 / 2 * Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3)) := by
+  let g : ℕ → ℂ := fun k => ((k : ℂ) + 2)⁻¹ * χ ((p : ℕ) ^ (k + 2)) *
+        (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ) *
+          Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I)
+  change ‖∑' k : ℕ, g k‖ ≤ 1 / 2 * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2))
+        + 7 / 2 * Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3))
+  have hp2 : (2 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.prop.two_le
+  have hP0 : (0 : ℝ) < ((p : ℕ) : ℝ) := by linarith
+  have hN0 : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN
+  have hkey : ∀ k : ℕ, ‖g k‖ ≤ ((k : ℝ) + 2)⁻¹ * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2))) := by
+    intro k
+    have h := pp519_term_norm N hN q χ α p k
+    have hPk : (0 : ℝ) < ((p : ℕ) : ℝ) ^ (k + 2) := pow_pos hP0 _
+    have hpos : (0 : ℝ) < (((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ)) := div_pos hPk hN0
+    have h2 := pp519_exp_le_min hpos
+    have heq : ((((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ)))⁻¹
+        = (N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2)) := by rw [inv_div]
+    rw [heq] at h2
+    exact h.trans (mul_le_mul_of_nonneg_left h2 (by positivity))
+  have hgeo : Summable (fun k : ℕ => ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2)) *
+      ((((p : ℕ) : ℝ)⁻¹)) ^ k) := by
+    have hr0 : (0 : ℝ) ≤ ((p : ℕ) : ℝ)⁻¹ := by positivity
+    have hr1 : ((p : ℕ) : ℝ)⁻¹ < 1 := by
+      rw [inv_lt_one_iff₀]
+      right
+      linarith
+    exact (summable_geometric_of_lt_one hr0 hr1).mul_left _
+  have hmaj : ∀ k : ℕ, ((k : ℝ) + 2)⁻¹ * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2)))
+      ≤ ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2)) * ((((p : ℕ) : ℝ)⁻¹)) ^ k := by
+    intro k
+    have hk0 : (0 : ℝ) ≤ (k : ℝ) := Nat.cast_nonneg k
+    have hk2 : (0 : ℝ) < (k : ℝ) + 2 := by linarith
+    have hPk : (0 : ℝ) < ((p : ℕ) : ℝ) ^ (k + 2) := pow_pos hP0 _
+    have hX : (0 : ℝ) < (N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2)) := div_pos hN0 hPk
+    have h1 : ((k : ℝ) + 2)⁻¹ ≤ 1 := by
+      have hge : (1 : ℝ) ≤ (k : ℝ) + 2 := by linarith
+      calc ((k : ℝ) + 2)⁻¹ ≤ (1 : ℝ)⁻¹ :=
+            (inv_le_inv₀ hk2 (by norm_num : (0 : ℝ) < 1)).mpr hge
+        _ = 1 := inv_one
+    have h2 : min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2)))
+        ≤ (N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2)) := min_le_right _ _
+    have h3 : (N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2))
+        = ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2)) * ((((p : ℕ) : ℝ)⁻¹)) ^ k := by
+      rw [inv_pow]
+      field_simp
+      ring
+    have hstep1 : ((k : ℝ) + 2)⁻¹ * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2)))
+        ≤ ((k : ℝ) + 2)⁻¹ * ((N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2))) :=
+      mul_le_mul_of_nonneg_left h2 (by positivity)
+    have hstep2 : ((k : ℝ) + 2)⁻¹ * ((N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2)))
+        ≤ 1 * ((N : ℝ) / (((p : ℕ) : ℝ) ^ (k + 2))) := by
+      rw [one_mul]
+      exact mul_le_of_le_one_left (le_of_lt hX) h1
+    exact hstep1.trans (hstep2.trans (le_of_eq (by rw [one_mul, h3])))
+  have hsum : Summable (fun k : ℕ => ‖g k‖) :=
+    Summable.of_nonneg_of_le (fun k => norm_nonneg _) (fun k => (hkey k).trans (hmaj k)) hgeo
+  have hsplit := (hsum.sum_add_tsum_nat_add 1).symm
+  rw [Finset.sum_range_one] at hsplit
+  have hk0 : ‖g 0‖ ≤ 1 / 2 * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2)) := by
+    have h := hkey 0
+    simpa using h
+  have hcube : Summable (fun i : ℕ => min 1 ((((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) * (2 : ℝ) ^ i)⁻¹) := by
+    have hxi : (0 : ℝ) < (((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) := by
+      have h3 : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 3 := pow_pos hP0 _
+      exact div_pos h3 hN0
+    have hr0 : (0 : ℝ) ≤ (Real.sqrt 2)⁻¹ := by positivity
+    have hr1 : (Real.sqrt 2)⁻¹ < 1 := inv_lt_one_of_one_lt₀ Real.one_lt_sqrt_two
+    have hsumgeo : Summable (fun i : ℕ => (Real.sqrt ((((p : ℕ) : ℝ) ^ 3 / (N : ℝ))))⁻¹
+        * ((Real.sqrt 2)⁻¹) ^ i) :=
+      (summable_geometric_of_lt_one hr0 hr1).mul_left _
+    refine Summable.of_nonneg_of_le (fun i => by positivity) (fun i => ?_) hsumgeo
+    have hy : (0 : ℝ) < ((((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) * (2 : ℝ) ^ i)⁻¹ := by
+      have h2i : (0 : ℝ) < (2 : ℝ) ^ i := pow_pos (by norm_num) _
+      exact inv_pos.mpr (mul_pos hxi h2i)
+    exact (pp519_min_one_le_sqrt hy).trans (le_of_eq (pp519_sqrt_geo _ hxi i))
+  have htail : ∑' i : ℕ, ‖g (i + 1)‖ ≤ 7 / 2 * Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3)) := by
+    have hmaj2 : ∀ i : ℕ, ‖g (i + 1)‖ ≤ min 1 ((((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) * (2 : ℝ) ^ i)⁻¹ := by
+      intro i
+      refine (hkey (i + 1)).trans ?_
+      have h1 : (((i + 1 : ℕ)) : ℝ) + 2 = (i : ℝ) + 3 := by push_cast; ring
+      have hexp : (i + 1) + 2 = i + 3 := by omega
+      rw [h1, hexp]
+      have hfac : ((i : ℝ) + 3)⁻¹ ≤ 1 := by
+        have hi0 : (0 : ℝ) ≤ (i : ℝ) := Nat.cast_nonneg i
+        have hi3 : (0 : ℝ) < (i : ℝ) + 3 := by linarith
+        have hge : (1 : ℝ) ≤ (i : ℝ) + 3 := by linarith
+        calc ((i : ℝ) + 3)⁻¹ ≤ (1 : ℝ)⁻¹ :=
+              (inv_le_inv₀ hi3 (by norm_num : (0 : ℝ) < 1)).mpr hge
+          _ = 1 := inv_one
+      have hP3 : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 3 := pow_pos hP0 _
+      have h2i : (0 : ℝ) < (2 : ℝ) ^ i := pow_pos (by norm_num) _
+      have hPi : (2 : ℝ) ^ i ≤ ((p : ℕ) : ℝ) ^ i :=
+        pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 2) hp2 i
+      have hden : ((p : ℕ) : ℝ) ^ 3 * (2 : ℝ) ^ i ≤ ((p : ℕ) : ℝ) ^ 3 * ((p : ℕ) : ℝ) ^ i :=
+        mul_le_mul_of_nonneg_left hPi (le_of_lt hP3)
+      have hstep : (N : ℝ) / (((p : ℕ) : ℝ) ^ (i + 3))
+          ≤ ((((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) * (2 : ℝ) ^ i)⁻¹ := by
+        have hpos1 : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 3 * (2 : ℝ) ^ i := mul_pos hP3 h2i
+        have hpos2 : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 3 * ((p : ℕ) : ℝ) ^ i :=
+          mul_pos hP3 (pow_pos hP0 i)
+        have hinv : (((p : ℕ) : ℝ) ^ 3 * ((p : ℕ) : ℝ) ^ i)⁻¹
+            ≤ (((p : ℕ) : ℝ) ^ 3 * (2 : ℝ) ^ i)⁻¹ :=
+          (inv_le_inv₀ hpos2 hpos1).mpr hden
+        have hle : (N : ℝ) / (((p : ℕ) : ℝ) ^ 3 * ((p : ℕ) : ℝ) ^ i)
+            ≤ (N : ℝ) / (((p : ℕ) : ℝ) ^ 3 * (2 : ℝ) ^ i) := by
+          calc (N : ℝ) / (((p : ℕ) : ℝ) ^ 3 * ((p : ℕ) : ℝ) ^ i)
+              = (N : ℝ) * ((((p : ℕ) : ℝ) ^ 3 * ((p : ℕ) : ℝ) ^ i))⁻¹ := by
+                rw [div_eq_mul_inv]
+            _ ≤ (N : ℝ) * ((((p : ℕ) : ℝ) ^ 3 * (2 : ℝ) ^ i))⁻¹ :=
+                mul_le_mul_of_nonneg_left hinv (le_of_lt hN0)
+            _ = (N : ℝ) / (((p : ℕ) : ℝ) ^ 3 * (2 : ℝ) ^ i) := by
+                rw [div_eq_mul_inv]
+        have e1 : ((p : ℕ) : ℝ) ^ (i + 3) = ((p : ℕ) : ℝ) ^ 3 * ((p : ℕ) : ℝ) ^ i := by
+          rw [pow_add, mul_comm]
+        have e2 : ((((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) * (2 : ℝ) ^ i)⁻¹
+            = (N : ℝ) / (((p : ℕ) : ℝ) ^ 3 * (2 : ℝ) ^ i) := by
+          rw [mul_inv]
+          field_simp
+        rw [e1, e2]
+        exact hle
+      have hmin : min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ ((i + 1) + 2)))
+          ≤ min 1 ((((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) * (2 : ℝ) ^ i)⁻¹ := by
+        rw [show (i + 1) + 2 = i + 3 by omega]
+        exact min_le_min_left 1 hstep
+      have hstep1 : ((i : ℝ) + 3)⁻¹ * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ ((i + 1) + 2)))
+          ≤ 1 * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ ((i + 1) + 2))) := by
+        rw [one_mul]
+        have hNk : (0 : ℝ) ≤ (N : ℝ) / (((p : ℕ) : ℝ) ^ ((i + 1) + 2)) := by
+          have h3 : (0 : ℝ) < ((p : ℕ) : ℝ) ^ ((i + 1) + 2) := pow_pos hP0 _
+          exact le_of_lt (div_pos hN0 h3)
+        exact mul_le_of_le_one_left (le_min (by norm_num : (0 : ℝ) ≤ 1) hNk) hfac
+      have hstep2 : 1 * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ ((i + 1) + 2)))
+          ≤ min 1 ((((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) * (2 : ℝ) ^ i)⁻¹ := by
+        rw [one_mul]
+        exact hmin
+      exact hstep1.trans hstep2
+    have hs1 : Summable (fun i : ℕ => ‖g (i + 1)‖) :=
+      Summable.of_nonneg_of_le (fun i => norm_nonneg _) hmaj2 hcube
+    calc ∑' i : ℕ, ‖g (i + 1)‖
+        ≤ ∑' i : ℕ, min 1 ((((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) * (2 : ℝ) ^ i)⁻¹ :=
+          hs1.tsum_le_tsum hmaj2 hcube
+      _ ≤ 7 / 2 / Real.sqrt (((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) := by
+          have hxi : (0 : ℝ) < (((p : ℕ) : ℝ) ^ 3 / (N : ℝ)) := by
+            have h3 : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 3 := pow_pos hP0 _
+            exact div_pos h3 hN0
+          exact pp519_geom _ hxi
+      _ = 7 / 2 * Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3)) := by
+          rw [div_eq_mul_inv]
+          congr 1
+          rw [Real.sqrt_div (by positivity), Real.sqrt_div (by positivity), inv_div]
+  have hnn : ‖∑' k : ℕ, g k‖ ≤ ∑' k : ℕ, ‖g k‖ := norm_tsum_le_tsum_norm hsum
+  have hfin : ∑' k : ℕ, ‖g k‖ = ‖g 0‖ + ∑' i : ℕ, ‖g (i + 1)‖ := hsplit
+  linarith [hnn, hk0, htail]
+
+/-! ### Square root of a quotient cube -/
+
+private lemma pp519_sqrt_div_eq (N : ℕ) (m : ℕ) :
+    Real.sqrt ((N : ℝ) / (((m : ℝ) + 2) ^ 3))
+      = Real.sqrt (N : ℝ) * ((1 : ℝ) / (((m : ℝ) + 2) * Real.sqrt ((m : ℝ) + 2))) := by
+  have hx : (0 : ℝ) < (m : ℝ) + 2 := by positivity
+  have h3 : ((m : ℝ) + 2) ^ 3 = ((m : ℝ) + 2) ^ 2 * ((m : ℝ) + 2) := by ring
+  rw [Real.sqrt_div (by positivity), h3, Real.sqrt_mul (by positivity), Real.sqrt_sq hx.le]
+  field_simp
+
+/-! ### Summability of the two scalar families -/
+
+private lemma pp519_summable_min (N : ℕ) (hN : 1 ≤ N) :
+    Summable (fun m : ℕ => min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2))) := by
+  refine Summable.of_nonneg_of_le (fun m => by positivity) (fun m => min_le_right _ _) ?_
+  refine Summable.of_nonneg_of_le (fun m => by positivity) (fun m => ?_)
+    (pp519_summable_sq_shift.mul_left (N : ℝ))
+  rw [show (N : ℝ) * (1 / (((m : ℝ) + 2) ^ 2)) = (N : ℝ) / (((m : ℝ) + 2) ^ 2) by ring]
+
+private lemma pp519_summable_sqrtN (N : ℕ) :
+    Summable (fun m : ℕ => Real.sqrt ((N : ℝ) / (((m : ℝ) + 2) ^ 3))) := by
+  refine Summable.of_nonneg_of_le (fun m => Real.sqrt_nonneg _) (fun m => ?_)
+    (pp519_summable_cube_shift.mul_left (Real.sqrt (N : ℝ)))
+  rw [pp519_sqrt_div_eq N m]
+
+/-! ### From primes to natural numbers -/
+
+private lemma pp519_prime_shift_inj :
+    Function.Injective (fun p : Nat.Primes => (p : ℕ) - 2) := by
+  intro p q h
+  have hp : ((p : ℕ) - 2) + 2 = (p : ℕ) := Nat.sub_add_cancel p.prop.two_le
+  have hq : ((q : ℕ) - 2) + 2 = (q : ℕ) := Nat.sub_add_cancel q.prop.two_le
+  have h' : ((p : ℕ) - 2) = ((q : ℕ) - 2) := h
+  have h2 : (p : ℕ) = (q : ℕ) := by
+    calc (p : ℕ) = ((p : ℕ) - 2) + 2 := hp.symm
+      _ = ((q : ℕ) - 2) + 2 := by rw [h']
+      _ = (q : ℕ) := hq
+  exact Nat.Primes.coe_nat_injective h2
+
+private lemma pp519_shift_cast (p : Nat.Primes) :
+    (((p : ℕ) - 2 : ℕ) : ℝ) + 2 = ((p : ℕ) : ℝ) := by
+  have hp : 2 ≤ (p : ℕ) := p.prop.two_le
+  have h : ((p : ℕ) - 2 : ℕ) + 2 = (p : ℕ) := Nat.sub_add_cancel hp
+  calc (((p : ℕ) - 2 : ℕ) : ℝ) + 2 = (((((p : ℕ) - 2 : ℕ)) + 2 : ℕ) : ℝ) := by push_cast; ring
+    _ = ((p : ℕ) : ℝ) := by rw [h]
+
+private lemma pp519_prime_le_one (N : ℕ) (hN : 1 ≤ N) :
+    ∑' p : Nat.Primes, min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2))
+      ≤ ∑' m : ℕ, min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2)) := by
+  have hcongr : (∑' p : Nat.Primes, min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2)))
+      = ∑' p : Nat.Primes, (fun m : ℕ => min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2)))
+          ((p : ℕ) - 2) := by
+    refine tsum_congr (fun p : Nat.Primes => ?_)
+    show min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2))
+      = min 1 ((N : ℝ) / (((((p : ℕ) - 2 : ℕ) : ℝ)) + 2) ^ 2)
+    rw [pp519_shift_cast p]
+  rw [hcongr]
+  exact tsum_comp_le_tsum_of_inj (pp519_summable_min N hN) (fun m => by positivity)
+    pp519_prime_shift_inj
+
+private lemma pp519_prime_le_two (N : ℕ) :
+    ∑' p : Nat.Primes, Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3))
+      ≤ ∑' m : ℕ, Real.sqrt ((N : ℝ) / (((m : ℝ) + 2) ^ 3)) := by
+  have hcongr : (∑' p : Nat.Primes, Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3)))
+      = ∑' p : Nat.Primes, (fun m : ℕ => Real.sqrt ((N : ℝ) / (((m : ℝ) + 2) ^ 3)))
+          ((p : ℕ) - 2) := by
+    refine tsum_congr (fun p : Nat.Primes => ?_)
+    show Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3))
+      = Real.sqrt ((N : ℝ) / (((((p : ℕ) - 2 : ℕ) : ℝ)) + 2) ^ 3)
+    rw [pp519_shift_cast p]
+  rw [hcongr]
+  exact tsum_comp_le_tsum_of_inj (pp519_summable_sqrtN N) (fun m => Real.sqrt_nonneg _)
+    pp519_prime_shift_inj
+
+private lemma pp519_summable_prime_one (N : ℕ) (hN : 1 ≤ N) :
+    Summable (fun p : Nat.Primes => min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2))) := by
+  have h0 : Summable ((fun m : ℕ => min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2)))
+      ∘ (fun p : Nat.Primes => (p : ℕ) - 2)) :=
+    (pp519_summable_min N hN).comp_injective pp519_prime_shift_inj
+  exact h0.congr (fun p => by
+    show min 1 ((N : ℝ) / (((((p : ℕ) - 2 : ℕ) : ℝ)) + 2) ^ 2)
+      = min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2))
+    rw [pp519_shift_cast p])
+
+private lemma pp519_summable_prime_two (N : ℕ) :
+    Summable (fun p : Nat.Primes => Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3))) := by
+  have h0 : Summable ((fun m : ℕ => Real.sqrt ((N : ℝ) / (((m : ℝ) + 2) ^ 3)))
+      ∘ (fun p : Nat.Primes => (p : ℕ) - 2)) :=
+    (pp519_summable_sqrtN N).comp_injective pp519_prime_shift_inj
+  exact h0.congr (fun p => by
+    show Real.sqrt ((N : ℝ) / (((((p : ℕ) - 2 : ℕ) : ℝ)) + 2) ^ 3)
+      = Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3))
+    rw [pp519_shift_cast p])
+
+/-- LEAF. Prime power tail step. The part of the prime power double sum with
+exponents at least two, summed over all primes and all such exponents, is at
+most a constant independent of N, of the character and of alpha, times the
+square root of N. The exponential damping at the prime powers is what makes the
+double sum absolutely convergent. No zero hypothesis, no Mellin integral and no
+estimate on the character occur here. -/
+theorem prime_power_tail519 :
+    ∃ B : ℝ, 0 < B ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
+      ∀ q : ℕ, 1 ≤ q → ∀ χ : DirichletCharacter ℂ q, ∀ α : ℝ,
+        ‖∑' p : Nat.Primes, ∑' k : ℕ,
+            (((k : ℂ) + 2)⁻¹ * χ ((p : ℕ) ^ (k + 2)) *
+              (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ) *
+                Complex.exp
+                  ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I))‖
+          ≤ B * Real.sqrt N := by
+  refine ⟨11, by norm_num, 0, ?_⟩
+  intro N hN q hq χ α
+  have hmin : Summable (fun m : ℕ => min 1 ((N : ℝ) / (((m : ℝ) + 2) ^ 2))) :=
+    pp519_summable_min N hN
+  have hsq : Summable (fun m : ℕ => Real.sqrt ((N : ℝ) / (((m : ℝ) + 2) ^ 3))) :=
+    pp519_summable_sqrtN N
+  have hp1 : Summable (fun p : Nat.Primes => min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2))) :=
+    pp519_summable_prime_one N hN
+  have hp2 : Summable (fun p : Nat.Primes => Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3))) :=
+    pp519_summable_prime_two N
+  have hmaj : Summable (fun p : Nat.Primes =>
+      1 / 2 * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2))
+        + 7 / 2 * Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3))) :=
+    (hp1.mul_left (1 / 2)).add (hp2.mul_left (7 / 2))
+  have hinner : Summable (fun p : Nat.Primes =>
+      ‖∑' k : ℕ, (((k : ℂ) + 2)⁻¹ * χ ((p : ℕ) ^ (k + 2)) *
+              (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ) *
+                Complex.exp
+                  ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I))‖) :=
+    Summable.of_nonneg_of_le (fun p => norm_nonneg _) (fun p => pp519_inner N hN q χ α p) hmaj
+  have h1 := pp519_prime_le_one N hN
+  have h2 := pp519_prime_le_two N
+  have hb1 := pp519_sum_one N hN
+  have hb2 := pp519_sum_two N hN
+  calc ‖∑' p : Nat.Primes, ∑' k : ℕ,
+        (((k : ℂ) + 2)⁻¹ * χ ((p : ℕ) ^ (k + 2)) *
+          (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ) *
+            Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I))‖
+      ≤ ∑' p : Nat.Primes, ‖∑' k : ℕ, (((k : ℂ) + 2)⁻¹ * χ ((p : ℕ) ^ (k + 2)) *
+          (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ) *
+            Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I))‖ :=
+        norm_tsum_le_tsum_norm hinner
+    _ ≤ ∑' p : Nat.Primes, (1 / 2 * min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2))
+          + 7 / 2 * Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3))) :=
+        hinner.tsum_le_tsum (fun p => pp519_inner N hN q χ α p) hmaj
+    _ = 1 / 2 * (∑' p : Nat.Primes, min 1 ((N : ℝ) / (((p : ℕ) : ℝ) ^ 2)))
+          + 7 / 2 * (∑' p : Nat.Primes, Real.sqrt ((N : ℝ) / (((p : ℕ) : ℝ) ^ 3))) := by
+        rw [Summable.tsum_add (hp1.mul_left (1 / 2)) (hp2.mul_left (7 / 2)),
+          tsum_mul_left, tsum_mul_left]
+    _ ≤ 1 / 2 * (4 * Real.sqrt (N : ℝ)) + 7 / 2 * (2 * Real.sqrt (N : ℝ)) := by
+        have h3 : (0 : ℝ) ≤ Real.sqrt (N : ℝ) := Real.sqrt_nonneg _
+        nlinarith [h1, h2, hb1, hb2]
+    _ ≤ 11 * Real.sqrt (N : ℝ) := by
+        have h3 : (0 : ℝ) ≤ Real.sqrt (N : ℝ) := Real.sqrt_nonneg _
+        linarith
+
+/-! ### GRH nonvanishing, holomorphic log, and the assembly (Burst1122GrhTransfer519) -/
+
+
+open MeasureTheory Filter Finset Topology
+
+/-! ### Step 1. Nonvanishing on the half plane under GRH -/
+
+/-- P0093 page 159 before equation 5.1. Under GRH, the L-function of a nonprincipal
+character has no zero with real part greater than 1/2: in the strip below 1 by GRH,
+and on re s at least 1 by the nonvanishing theorem of Mathlib. -/
+theorem lfunction_ne_zero_half_b1122 (hG : LeanLab.DERZ1997.GRH) (q : ℕ) [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) (s : ℂ) (hs : 1 / 2 < s.re) :
+    DirichletCharacter.LFunction χ s ≠ 0 := by
+  intro h0
+  rcases lt_or_ge s.re 1 with h1 | h1
+  · have := hG q χ s h0 (by linarith) h1
+    linarith
+  · exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inl hχ) h1 h0
+
+/-! ### Step 2. The holomorphic logarithm of L on the half plane -/
+
+/-- Two logarithms of the same function near a point. If d is continuous at s0 and
+exp of d is eventually the constant exp of d s0, then d is eventually the constant d s0,
+because two logarithms differ by an integer multiple of 2 pi i. -/
+theorem eventually_eq_of_exp_eventually_eq_b1122 (d : ℂ → ℂ) (s0 : ℂ)
+    (hd : ContinuousAt d s0) (he : ∀ᶠ s in 𝓝 s0, Complex.exp (d s) = Complex.exp (d s0)) :
+    ∀ᶠ s in 𝓝 s0, d s = d s0 := by
+  have hsmall : ∀ᶠ s in 𝓝 s0, ‖d s - d s0‖ < 2 * Real.pi := by
+    have h : ContinuousAt (fun s => ‖d s - d s0‖) s0 := (hd.sub continuousAt_const).norm
+    have h0 : ‖d s0 - d s0‖ < 2 * Real.pi := by
+      rw [sub_self, norm_zero]; positivity
+    exact h.eventually (Iio_mem_nhds h0)
+  filter_upwards [hsmall, he] with s hs he'
+  have h1 : Complex.exp (d s - d s0) = 1 := by
+    rw [Complex.exp_sub, he', div_self (Complex.exp_ne_zero _)]
+  obtain ⟨n, hn⟩ := Complex.exp_eq_one_iff.mp h1
+  have hn0 : n = 0 := by
+    by_contra hne
+    have hn1 : (1 : ℝ) ≤ |(n : ℝ)| := by
+      rw [← Int.cast_abs]; exact_mod_cast Int.one_le_abs hne
+    have hnorm : ‖d s - d s0‖ = |(n : ℝ)| * (2 * Real.pi) := by
+      rw [hn, norm_mul, Complex.norm_intCast, norm_mul, norm_mul, Complex.norm_I,
+        Complex.norm_ofNat, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_pos Real.pi_pos]
+      ring
+    rw [hnorm] at hs
+    nlinarith [Real.pi_pos]
+  rw [hn0] at hn
+  simpa [sub_eq_zero] using hn
+
+/-- The open half plane re s greater than 1/2 is simply connected, being convex. -/
+theorem halfplane_isSimplyConnected_b1122 (c : ℝ) :
+    IsSimplyConnected {s : ℂ | c < s.re} := by
+  have hne : ({s : ℂ | c < s.re}).Nonempty := ⟨(c + 1 : ℝ), by simp⟩
+  have := (convex_halfSpace_re_gt (r := c)).contractibleSpace hne
+  exact SimplyConnectedSpace.ofContractible _
+
+/-- A continuous logarithm of a holomorphic nonvanishing function on an open set is
+holomorphic there: near each point it is a constant plus the principal logarithm of a
+quotient close to one. -/
+theorem differentiableOn_of_continuous_log_b1122 {U : Set ℂ} (hU : IsOpen U)
+    {f G : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) (hf0 : ∀ s ∈ U, f s ≠ 0)
+    (hGc : ContinuousOn G U) (hGe : ∀ s ∈ U, Complex.exp (G s) = f s) :
+    DifferentiableOn ℂ G U := by
+  intro s0 hs0
+  have hfa : DifferentiableAt ℂ f s0 := hf.differentiableAt (hU.mem_nhds hs0)
+  have hf00 := hf0 s0 hs0
+  set h : ℂ → ℂ := fun s => G s0 + Complex.log (f s / f s0) with hh
+  have hslit : f s0 / f s0 ∈ Complex.slitPlane := by
+    rw [div_self hf00]; exact Complex.one_mem_slitPlane
+  have hhd : DifferentiableAt ℂ h s0 :=
+    (differentiableAt_const _).add ((hfa.div_const _).clog hslit)
+  have hd : ContinuousAt (fun s => G s - h s) s0 :=
+    (hGc.continuousAt (hU.mem_nhds hs0)).sub hhd.continuousAt
+  have hev : ∀ᶠ s in 𝓝 s0, Complex.exp (G s - h s) = Complex.exp (G s0 - h s0) := by
+    have hnz : ∀ᶠ s in 𝓝 s0, f s ≠ 0 :=
+      hfa.continuousAt.eventually_ne hf00
+    filter_upwards [hU.mem_nhds hs0, hnz] with s hs hfs
+    have hq : f s / f s0 ≠ 0 := div_ne_zero hfs hf00
+    simp only [hh, Complex.exp_sub, Complex.exp_add, Complex.exp_log hq,
+      Complex.exp_log (div_ne_zero hf00 hf00), hGe s hs, hGe s0 hs0]
+    field_simp
+  have hloc := eventually_eq_of_exp_eventually_eq_b1122 _ s0 hd hev
+  have hzero : G s0 - h s0 = 0 := by
+    simp [hh, div_self hf00]
+  have hEq : G =ᶠ[𝓝 s0] h := by
+    filter_upwards [hloc] with s hs
+    rw [hzero] at hs
+    exact sub_eq_zero.mp hs
+  exact (hhd.congr_of_eventuallyEq hEq).differentiableWithinAt
+
+/-- P0093 page 159 before equation 5.1 and page 155. A holomorphic nonvanishing
+function on an open simply connected set has a holomorphic logarithm there. -/
+theorem exists_holomorphic_log_b1122 {U : Set ℂ} (hUc : IsSimplyConnected U)
+    (hUo : IsOpen U) {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) (hf0 : ∀ s ∈ U, f s ≠ 0) :
+    ∃ G : ℂ → ℂ, DifferentiableOn ℂ G U ∧ ∀ s ∈ U, Complex.exp (G s) = f s := by
+  obtain ⟨G, hGc, hGe⟩ := Complex.exists_continuousOn_eqOn_exp_comp hUc hUo hf.continuousOn
+    (by rintro ⟨s, hs, h0⟩; exact hf0 s hs h0)
+  exact ⟨G, differentiableOn_of_continuous_log_b1122 hUo hf hf0 hGc (fun s hs => hGe hs),
+    fun s hs => hGe hs⟩
+
+/-- P0093 page 155. The Euler logarithm series: the sum over primes p and exponents
+k at least 1 of chi of p to the k times p to the minus k s over k. -/
+theorem euler_log_term_b1122 {q : ℕ} (χ : DirichletCharacter ℂ q) (s : ℂ)
+    (hs : 1 < s.re) (p : Nat.Primes) :
+    ∑' k : ℕ, (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1) =
+      -Complex.log (1 - χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) := by
+  apply HasSum.tsum_eq
+  apply Complex.hasSum_taylorSeries_neg_log'
+  have hp : 0 < (p : ℕ) := p.2.pos
+  have hp2 : (2 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.two_le
+  rw [norm_mul, Complex.norm_natCast_cpow_of_pos hp, Complex.neg_re]
+  have hχ : ‖χ (p : ℕ)‖ ≤ 1 := χ.norm_le_one _
+  have hlt : ((p : ℕ) : ℝ) ^ (-s.re) < 1 :=
+    Real.rpow_lt_one_of_one_lt_of_neg (by linarith) (by linarith)
+  calc ‖χ (p : ℕ)‖ * ((p : ℕ) : ℝ) ^ (-s.re) ≤ 1 * ((p : ℕ) : ℝ) ^ (-s.re) :=
+        mul_le_mul_of_nonneg_right hχ (by positivity)
+    _ < 1 := by rw [one_mul]; exact hlt
+
+/-- The norm of the Euler factor variable is at most p to the minus sigma. -/
+theorem euler_var_norm_b1122 {q : ℕ} (χ : DirichletCharacter ℂ q) (s : ℂ)
+    (p : Nat.Primes) :
+    ‖χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)‖ ≤ ((p : ℕ) : ℝ) ^ (-s.re) := by
+  rw [norm_mul, Complex.norm_natCast_cpow_of_pos p.2.pos, Complex.neg_re]
+  calc ‖χ (p : ℕ)‖ * ((p : ℕ) : ℝ) ^ (-s.re) ≤ 1 * ((p : ℕ) : ℝ) ^ (-s.re) :=
+        mul_le_mul_of_nonneg_right (χ.norm_le_one _) (by positivity)
+    _ = _ := one_mul _
+
+/-- P0093 page 155. The Euler logarithm sum over primes is continuous on re s
+greater than 1, by local uniform convergence. -/
+theorem continuousOn_euler_log_b1122 {q : ℕ} (χ : DirichletCharacter ℂ q) :
+    ContinuousOn (fun s : ℂ => ∑' p : Nat.Primes,
+      -Complex.log (1 - χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s))) {s : ℂ | 1 < s.re} := by
+  intro s0 hs0
+  simp only [Set.mem_ofPred_eq] at hs0
+  set σ : ℝ := (1 + s0.re) / 2 with hσ
+  have hσ1 : 1 < σ := by rw [hσ]; linarith
+  have hW : IsOpen {s : ℂ | σ < s.re} := isOpen_lt continuous_const Complex.continuous_re
+  have hs0W : s0 ∈ {s : ℂ | σ < s.re} := by simp only [Set.mem_ofPred_eq, hσ]; linarith
+  have hsum : Summable (fun p : Nat.Primes => (3 / 2 : ℝ) * ((p : ℕ) : ℝ) ^ (-σ)) := by
+    apply Summable.mul_left
+    have h := (Real.summable_nat_rpow.mpr (by linarith : -σ < -1))
+    exact h.comp_injective Nat.Primes.coe_nat_injective
+  have hcont : ContinuousOn (fun s : ℂ => ∑' p : Nat.Primes,
+      -Complex.log (1 - χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s))) {s : ℂ | σ < s.re} := by
+    have hvar : ∀ p : Nat.Primes, ∀ s : ℂ, σ < s.re →
+        ‖χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)‖ ≤ ((p : ℕ) : ℝ) ^ (-σ) := by
+      intro p s hs
+      have hp1 : (1 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.one_lt.le
+      exact (euler_var_norm_b1122 χ s p).trans
+        (Real.rpow_le_rpow_of_exponent_le hp1 (by linarith))
+    have hhalf : ∀ p : Nat.Primes, ((p : ℕ) : ℝ) ^ (-σ) ≤ 1 / 2 := by
+      intro p
+      have hp2 : (2 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.two_le
+      calc ((p : ℕ) : ℝ) ^ (-σ) ≤ ((p : ℕ) : ℝ) ^ (-1 : ℝ) :=
+            Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+        _ = ((p : ℕ) : ℝ)⁻¹ := Real.rpow_neg_one _
+        _ ≤ 1 / 2 := by rw [one_div]; exact inv_anti₀ (by norm_num) hp2
+    refine continuousOn_tsum (fun p => ?_) hsum (fun p s hs => ?_)
+    · have hp0 : ((p : ℕ) : ℂ) ≠ 0 := by exact_mod_cast p.2.ne_zero
+      intro s hs
+      apply ContinuousAt.continuousWithinAt
+      apply ContinuousAt.neg
+      apply ContinuousAt.clog
+      · exact continuousAt_const.sub (continuousAt_const.mul
+          (continuousAt_neg.const_cpow (Or.inl hp0)))
+      · rw [sub_eq_add_neg]
+        apply Complex.mem_slitPlane_of_norm_lt_one
+        rw [norm_neg]
+        exact ((hvar p s hs).trans (hhalf p)).trans_lt (by norm_num)
+    · have hw := hvar p s hs
+      have hw2 : ‖-(χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s))‖ ≤ 1 / 2 := by
+        rw [norm_neg]; exact hw.trans (hhalf p)
+      have hl := Complex.norm_log_one_add_half_le_self hw2
+      rw [← sub_eq_add_neg, norm_neg] at hl
+      rw [norm_neg]
+      exact hl.trans (mul_le_mul_of_nonneg_left hw (by norm_num))
+  exact (hcont.continuousAt (hW.mem_nhds hs0W)).continuousWithinAt
+
+
+/-- Two continuous logarithms of the same function on an open preconnected set differ
+by a constant: a continuous function with exp equal to one there is constant. -/
+theorem const_of_exp_eq_one_b1122 {V : Set ℂ} (hVo : IsOpen V) (hVp : IsPreconnected V)
+    {d : ℂ → ℂ} (hdc : ContinuousOn d V) (he : ∀ s ∈ V, Complex.exp (d s) = 1)
+    {x y : ℂ} (hx : x ∈ V) (hy : y ∈ V) : d x = d y := by
+  set n : ℂ → ℤ := fun s => round ((d s / (2 * Real.pi * Complex.I)).re) with hn
+  have h2pi : (2 * Real.pi * Complex.I : ℂ) ≠ 0 := by
+    simp [Real.pi_ne_zero, Complex.I_ne_zero]
+  have hrep : ∀ s ∈ V, d s = (n s : ℂ) * (2 * Real.pi * Complex.I) := by
+    intro s hs
+    obtain ⟨m, hm⟩ := Complex.exp_eq_one_iff.mp (he s hs)
+    have hq : d s / (2 * Real.pi * Complex.I) = (m : ℂ) := by
+      rw [hm, mul_div_assoc, div_self h2pi, mul_one]
+    have : n s = m := by
+      simp only [hn, hq, Complex.intCast_re, round_intCast]
+    rw [this, hm]
+  have hnc : ContinuousOn n V := by
+    intro s0 hs0
+    apply ContinuousAt.continuousWithinAt
+    have hev : ∀ᶠ s in 𝓝 s0, Complex.exp (d s) = Complex.exp (d s0) := by
+      filter_upwards [hVo.mem_nhds hs0] with s hs
+      rw [he s hs, he s0 hs0]
+    have hloc := eventually_eq_of_exp_eventually_eq_b1122 d s0
+      (hdc.continuousAt (hVo.mem_nhds hs0)) hev
+    have hne : n =ᶠ[𝓝 s0] fun _ => n s0 := by
+      filter_upwards [hloc] with s hs
+      simp only [hn, hs]
+    exact continuousAt_const.congr hne.symm
+  rw [hrep x hx, hrep y hy, hVp.constant hnc hx hy]
+
+/-- P0093 page 159 before equation 5.1 and page 155. Under GRH, for a nonprincipal
+character there is a holomorphic logarithm G of the L-function on the open half plane
+re s greater than 1/2 which on re s greater than 1 equals the prime power series, the
+sum over primes p and k at least 1 of chi of p to the k times p to the minus k s over k. -/
+theorem holomorphic_log_L_b1122 (hG : LeanLab.DERZ1997.GRH) (q : ℕ) [NeZero q]
+    (χ : DirichletCharacter ℂ q) (hχ : χ ≠ 1) :
+    ∃ G : ℂ → ℂ, DifferentiableOn ℂ G {s : ℂ | 1 / 2 < s.re} ∧
+      ∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
+        (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1) := by
+  have hHo : IsOpen {s : ℂ | 1 / 2 < s.re} := isOpen_lt continuous_const Complex.continuous_re
+  obtain ⟨G0, hG0d, hG0e⟩ := exists_holomorphic_log_b1122 (halfplane_isSimplyConnected_b1122 _)
+    hHo (f := DirichletCharacter.LFunction χ)
+    (DirichletCharacter.differentiable_LFunction hχ).differentiableOn
+    (fun s hs => lfunction_ne_zero_half_b1122 hG q χ hχ s hs)
+  set E : ℂ → ℂ := fun s => ∑' p : Nat.Primes,
+    -Complex.log (1 - χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) with hE
+  have hVo : IsOpen {s : ℂ | 1 < s.re} := isOpen_lt continuous_const Complex.continuous_re
+  have hVp : IsPreconnected {s : ℂ | 1 < s.re} := (convex_halfSpace_re_gt (r := 1)).isPreconnected
+  have hsub : {s : ℂ | 1 < s.re} ⊆ {s : ℂ | 1 / 2 < s.re} := by
+    intro s hs; simp only [Set.mem_ofPred_eq] at hs ⊢; linarith
+  have hEexp : ∀ s : ℂ, 1 < s.re → Complex.exp (E s) = DirichletCharacter.LFunction χ s := by
+    intro s hs
+    rw [DirichletCharacter.LFunction_eq_LSeries χ hs,
+      ← DirichletCharacter.LSeries_eulerProduct_exp_log χ hs]
+  have hdc : ContinuousOn (fun s => G0 s - E s) {s : ℂ | 1 < s.re} :=
+    (hG0d.continuousOn.mono hsub).sub (continuousOn_euler_log_b1122 χ)
+  have hde : ∀ s ∈ {s : ℂ | 1 < s.re}, Complex.exp (G0 s - E s) = 1 := by
+    intro s hs
+    rw [Complex.exp_sub, hG0e s (hsub hs), hEexp s hs,
+      div_self (lfunction_ne_zero_half_b1122 hG q χ hχ s (hsub hs))]
+  have h2 : (2 : ℂ) ∈ {s : ℂ | 1 < s.re} := by simp
+  refine ⟨fun s => G0 s - (G0 2 - E 2), hG0d.sub_const _, fun s hs => ?_⟩
+  have hc := const_of_exp_eq_one_b1122 hVo hVp hdc hde hs h2
+  have : G0 s - (G0 2 - E 2) = E s := by
+    have hc' : G0 s - E s = G0 2 - E 2 := hc
+    rw [← hc']; ring
+  show G0 s - (G0 2 - E 2) = _
+  rw [this, hE]
+  exact tsum_congr fun p => (euler_log_term_b1122 χ s hs p).symm
+
+/-! ### Step 3. The cited GRH bound for the logarithm of L -/
+
+/-- P0093 page 159 before equation 5.1, the ERH bound for ln L. Formerly a HARD LEAF,
+PROVED in burst session S57 by grh_strip_log_bound_proof_b1122 of Burst1122LogBound via
+Borel Caratheodory, with no zero sum. Former citation wall: the classical bound for log L under the generalized Riemann
+hypothesis, Titchmarsh, The Theory of the Riemann Zeta-Function, section 14.2 and
+Montgomery and Vaughan, Multiplicative Number Theory I, chapter 13. Under GRH, for
+N large, q at most N to the 1/7, a nonprincipal character chi and the holomorphic
+logarithm G of its L-function normalised by the prime power series on re s greater
+than 1, the norm of G at every s with 1/2 + 1/ln N at most re s at most 2 is at most
+B0 times the cube of ln of N times the absolute imaginary part plus 2. The constant
+B0 does not depend on N, q or chi. -/
+theorem grh_strip_log_bound_b1122 (hG : LeanLab.DERZ1997.GRH) :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
+      ∀ (q : ℕ) [NeZero q], 1 ≤ q → (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
+        ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 → ∀ G : ℂ → ℂ,
+          DifferentiableOn ℂ G {s : ℂ | 1 / 2 < s.re} →
+          (∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
+            (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1)) →
+          ∀ s : ℂ, 1 / 2 + 1 / Real.log N ≤ s.re → s.re ≤ 2 →
+            ‖G s‖ ≤ B0 * Real.log ((N : ℝ) * (|s.im| + 2)) ^ 3 :=
+  grh_strip_log_bound_proof_b1122 hG
+
+/-! ### Step 4. Mellin inversion on re s equal to 2 and the shift of the line -/
+
+/-- P0093 page 156 display after equation 4.1 and page 159 before equation 5.1,
+the Cahen Mellin formula on the line re s equal to 2. Formerly a MEDIUM LEAF, PROVED in
+burst session S57 by cahen_mellin_line_two_proof_b1122 of Burst1122CahenMellin.
+For z equal to 1/N + 2 pi i alpha, e to the minus n z is 1/(2 pi i) times the integral
+of Gamma of s times n z to the minus s over re s equal to 2. Inserting the prime power
+series of G, absolutely convergent on that line, and integrating term by term gives
+the damped prime power series with weight 1/k. No zero hypothesis is used. -/
+theorem cahen_mellin_line_two_b1122 (N : ℕ) (hN : 1 ≤ N) (q : ℕ)
+    (χ : DirichletCharacter ℂ q) (G : ℂ → ℂ)
+    (hGs : ∀ s : ℂ, 1 < s.re → G s = ∑' p : Nat.Primes, ∑' k : ℕ,
+      (χ (p : ℕ) * ((p : ℕ) : ℂ) ^ (-s)) ^ (k + 1) / ((k : ℂ) + 1)) (α : ℝ) :
+    ((1 / (2 * Real.pi) : ℝ) : ℂ) * ∫ t : ℝ,
+      (((1 / (N : ℝ) : ℝ) : ℂ) + ((2 * Real.pi * α : ℝ) : ℂ) * Complex.I) ^
+        (-((2 : ℂ) + (t : ℂ) * Complex.I)) * Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I) *
+          G ((2 : ℂ) + (t : ℂ) * Complex.I)
+      = ∑' p : Nat.Primes, ∑' k : ℕ,
+          (((k : ℂ) + 1)⁻¹ * χ ((p : ℕ) ^ (k + 1)) *
+            (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 1) / (N : ℝ))) : ℂ) *
+              Complex.exp
+                ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 1))) : ℝ) * Complex.I)) :=
+  cahen_mellin_line_two_proof_b1122 N hN q χ G hGs α
+
+/-- P0093 page 156 display after equation 4.1 and page 159 before equation 5.1,
+the shift of the Mellin line from re s equal to 2 to re s equal to 1/2 + 1/ln N. Formerly a
+MEDIUM LEAF, PROVED in burst session S57 by mellin_line_shift_proof_b1122 of Burst1122LineShift.
+Cauchy's theorem on the rectangle with vertical sides on the two lines: G is
+holomorphic on re s greater than 1/2, Gamma decays like e to the minus pi |t| / 2 while
+z to the minus s grows at most like e to the |t| |arg z| with |arg z| less than pi / 2,
+and G grows at most like a power of ln |t| in the strip, so the horizontal sides tend
+to zero. No zero hypothesis is used beyond the holomorphy of G. -/
+theorem mellin_line_shift_b1122 (N : ℕ) (hN : 2 ≤ N) (G : ℂ → ℂ)
+    (hGd : DifferentiableOn ℂ G {s : ℂ | 1 / 2 < s.re}) (B0 : ℝ)
+    (hGb : ∀ s : ℂ, 1 / 2 + 1 / Real.log N ≤ s.re → s.re ≤ 2 →
+      ‖G s‖ ≤ B0 * Real.log ((N : ℝ) * (|s.im| + 2)) ^ 3) (α : ℝ) :
+    mellinU519 N (fun t : ℝ => G (mellinLine519 N t)) α =
+      ((1 / (2 * Real.pi) : ℝ) : ℂ) * ∫ t : ℝ,
+        (((1 / (N : ℝ) : ℝ) : ℂ) + ((2 * Real.pi * α : ℝ) : ℂ) * Complex.I) ^
+          (-((2 : ℂ) + (t : ℂ) * Complex.I)) * Complex.Gamma ((2 : ℂ) + (t : ℂ) * Complex.I) *
+            G ((2 : ℂ) + (t : ℂ) * Complex.I) :=
+  mellin_line_shift_proof_b1122 N hN G hGd B0 hGb α
+
+
+/-! ### Separation of the exponent one terms -/
+
+/-- For a prime p and k at least 0, p + k is at most p to the k + 1. -/
+theorem prime_add_le_pow_b1122 (p : Nat.Primes) (k : ℕ) :
+    (p : ℕ) + k ≤ (p : ℕ) ^ (k + 1) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have h2 : 2 ≤ (p : ℕ) := p.2.two_le
+    have hpos : 1 ≤ (p : ℕ) ^ (k + 1) := Nat.one_le_pow _ _ p.2.pos
+    rw [pow_succ]
+    nlinarith
+
+/-- The damping at a prime power is at most the damping at p times a geometric factor. -/
+theorem damp_pow_le_b1122 (N : ℕ) (hN : 1 ≤ N) (p : Nat.Primes) (k : ℕ) :
+    Real.exp (-(((p : ℕ) : ℝ) ^ (k + 1) / (N : ℝ))) ≤
+      Real.exp (-((p : ℕ) : ℝ) / N) * Real.exp (-1 / (N : ℝ)) ^ k := by
+  have hNp : (0 : ℝ) < N := by exact_mod_cast hN
+  rw [← Real.exp_nat_mul, ← Real.exp_add]
+  apply Real.exp_le_exp.mpr
+  have h := prime_add_le_pow_b1122 p k
+  have hR : ((p : ℕ) : ℝ) + k ≤ ((p : ℕ) : ℝ) ^ (k + 1) := by exact_mod_cast h
+  have hdiv : (((p : ℕ) : ℝ) + k) / N ≤ ((p : ℕ) : ℝ) ^ (k + 1) / N :=
+    div_le_div_of_nonneg_right hR hNp.le
+  have heq : -((p : ℕ) : ℝ) / N + (k : ℝ) * (-1 / (N : ℝ)) = -((((p : ℕ) : ℝ) + k) / N) := by
+    ring
+  rw [heq]
+  linarith
+
+/-- P0093 page 159 before equation 5.1. Separating the exponent one terms of the
+damped prime power series with weight 1/k leaves the damped character prime series
+plus the prime power double sum with exponents at least two. -/
+theorem exponent_one_split_b1122 (N : ℕ) (hN : 1 ≤ N) {q : ℕ}
+    (χ : DirichletCharacter ℂ q) (α : ℝ) :
+    ∑' p : Nat.Primes, ∑' k : ℕ,
+        (((k : ℂ) + 1)⁻¹ * χ ((p : ℕ) ^ (k + 1)) *
+          (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 1) / (N : ℝ))) : ℂ) *
+            Complex.exp
+              ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 1))) : ℝ) * Complex.I))
+      = characterPrime519 χ N α + ∑' p : Nat.Primes, ∑' k : ℕ,
+          (((k : ℂ) + 2)⁻¹ * χ ((p : ℕ) ^ (k + 2)) *
+            (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 2) / (N : ℝ))) : ℂ) *
+              Complex.exp
+                ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 2))) : ℝ) * Complex.I)) := by
+  set f : Nat.Primes → ℕ → ℂ := fun p k =>
+    ((k : ℂ) + 1)⁻¹ * χ ((p : ℕ) ^ (k + 1)) *
+      (Real.exp (-(((p : ℕ) : ℝ) ^ (k + 1) / (N : ℝ))) : ℂ) *
+        Complex.exp ((-(2 * Real.pi * α * (((p : ℕ) : ℝ) ^ (k + 1))) : ℝ) * Complex.I)
+    with hf
+  set r : ℝ := Real.exp (-1 / (N : ℝ)) with hr
+  have hNp : (0 : ℝ) < N := by exact_mod_cast hN
+  have hr0 : 0 ≤ r := (Real.exp_pos _).le
+  have hr1 : r < 1 := by
+    rw [hr, Real.exp_lt_one_iff]; exact div_neg_of_neg_of_pos (by norm_num) hNp
+  have hgeo : Summable (fun k : ℕ => r ^ k) := summable_geometric_of_lt_one hr0 hr1
+  have hnorm : ∀ p k, ‖f p k‖ ≤ Real.exp (-((p : ℕ) : ℝ) / N) * r ^ k := by
+    intro p k
+    refine le_trans ?_ (damp_pow_le_b1122 N hN p k)
+    simp only [hf, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+    have h1 : ‖((k : ℂ) + 1)⁻¹‖ ≤ 1 := by
+      rw [norm_inv]
+      apply inv_le_one_of_one_le₀
+      have : ((k : ℂ) + 1) = ((k + 1 : ℕ) : ℂ) := by push_cast; ring
+      rw [this, Complex.norm_natCast]
+      exact_mod_cast Nat.succ_pos k
+    have h2 : ‖χ ((p : ℕ) ^ (k + 1))‖ ≤ 1 := χ.norm_le_one _
+    calc ‖((k : ℂ) + 1)⁻¹‖ * ‖χ ((p : ℕ) ^ (k + 1))‖ *
+          Real.exp (-(((p : ℕ) : ℝ) ^ (k + 1) / (N : ℝ)))
+        ≤ 1 * 1 * Real.exp (-(((p : ℕ) : ℝ) ^ (k + 1) / (N : ℝ))) := by
+          gcongr
+      _ = _ := by ring
+  have hsumk : ∀ p, Summable (f p) := fun p =>
+    Summable.of_norm_bounded (hgeo.mul_left _) (hnorm p)
+  have hdamp : Summable (fun p : Nat.Primes => Real.exp (-((p : ℕ) : ℝ) / N)) :=
+    (damping_summable111_up111 N hN).comp_injective Nat.Primes.coe_nat_injective
+  have ha : Summable (fun p => f p 0) :=
+    Summable.of_norm_bounded hdamp (fun p => by simpa using hnorm p 0)
+  have hb : Summable (fun p => ∑' k : ℕ, f p (k + 1)) := by
+    refine Summable.of_norm_bounded (hdamp.mul_right (∑' k : ℕ, r ^ (k + 1))) (fun p => ?_)
+    have hs1 : Summable (fun k : ℕ => ‖f p (k + 1)‖) :=
+      Summable.of_nonneg_of_le (fun k => norm_nonneg _) (fun k => hnorm p (k + 1))
+        ((summable_nat_add_iff 1).mpr hgeo |>.mul_left _)
+    calc ‖∑' k : ℕ, f p (k + 1)‖ ≤ ∑' k : ℕ, ‖f p (k + 1)‖ := norm_tsum_le_tsum_norm hs1
+      _ ≤ ∑' k : ℕ, Real.exp (-((p : ℕ) : ℝ) / N) * r ^ (k + 1) :=
+          hs1.tsum_le_tsum (fun k => hnorm p (k + 1))
+            ((summable_nat_add_iff 1).mpr hgeo |>.mul_left _)
+      _ = _ := tsum_mul_left
+  have hinner : ∀ p, ∑' k : ℕ, f p k = f p 0 + ∑' k : ℕ, f p (k + 1) := fun p =>
+    (hsumk p).tsum_eq_zero_add
+  rw [tsum_congr hinner, ha.tsum_add hb]
+  congr 1
+  · unfold characterPrime519
+    refine tsum_congr fun p => ?_
+    simp only [hf, Nat.cast_zero, zero_add, inv_one, one_mul, pow_one, neg_div]
+  · refine tsum_congr fun p => tsum_congr fun k => ?_
+    simp only [hf]
+    push_cast
+    ring_nf
+
+/-! ### Assembly -/
+
+/-- P0093 page 159 before equation 5.1, with page 156 equation 4.1. The statement of
+grh_mellin_transfer519, with M equal to G composed with mellinLine519 N for the
+holomorphic logarithm G of the L-function. CONDITIONAL ON grh_strip_log_bound_b1122,
+cahen_mellin_line_two_b1122 and mellin_line_shift_b1122. -/
+theorem grh_mellin_transfer519_b1122 (hG : LeanLab.DERZ1997.GRH) :
+    ∃ B0 : ℝ, 0 < B0 ∧ ∃ B : ℝ, 0 < B ∧ ∃ N0 : ℕ, ∀ N : ℕ, N0 < N →
+      ∀ q : ℕ, 1 ≤ q → (q : ℝ) ≤ (N : ℝ) ^ (1 / 7 : ℝ) →
+        ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 →
+          ∃ M : ℝ → ℂ, (Continuous M ∧ ∀ t : ℝ,
+            ‖M t‖ ≤ B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3) ∧ ∀ α : ℝ,
+              ‖characterPrime519 χ N α - mellinU519 N M α‖ ≤ B * Real.sqrt N := by
+  obtain ⟨B0, hB0, N1, h3⟩ := grh_strip_log_bound_b1122 hG
+  obtain ⟨B, hB, N2, htail⟩ := prime_power_tail519
+  refine ⟨B0, hB0, B, hB, max N1 (max N2 2), ?_⟩
+  intro N hN q hq hqt χ hχ
+  have : NeZero q := ⟨by omega⟩
+  obtain ⟨G, hGd, hGs⟩ := holomorphic_log_L_b1122 hG q χ hχ
+  have hN2 : 2 ≤ N := by omega
+  have hN2R : (2 : ℝ) ≤ N := by exact_mod_cast hN2
+  have hlog2 : Real.log 2 ≤ Real.log N := Real.log_le_log (by norm_num) hN2R
+  have hlogpos : 0 < Real.log N := lt_of_lt_of_le (Real.log_pos (by norm_num)) hlog2
+  have hbound := h3 N (by omega) q hq hqt χ hχ G hGd hGs
+  have hre : ∀ t : ℝ, (mellinLine519 N t).re = 1 / 2 + 1 / Real.log N := by
+    intro t
+    simp only [mellinLine519, Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+      Complex.ofReal_im, Complex.I_re, Complex.I_im]
+    ring
+  have him : ∀ t : ℝ, (mellinLine519 N t).im = t := by
+    intro t
+    simp only [mellinLine519, Complex.add_im, Complex.ofReal_re, Complex.mul_im,
+      Complex.ofReal_im, Complex.I_re, Complex.I_im]
+    ring
+  have hle2 : 1 / 2 + 1 / Real.log N ≤ 2 := by
+    have h23 : (2 : ℝ) / 3 ≤ Real.log N := by
+      have := Real.log_two_gt_d9; linarith
+    have : 1 / Real.log N ≤ 3 / 2 := by
+      rw [div_le_iff₀ hlogpos]; linarith
+    linarith
+  refine ⟨fun t => G (mellinLine519 N t), ⟨?_, fun t => ?_⟩, fun α => ?_⟩
+  · apply hGd.continuousOn.comp_continuous
+    · unfold mellinLine519; fun_prop
+    · intro t
+      show 1 / 2 < (mellinLine519 N t).re
+      rw [hre]; linarith [one_div_pos.mpr hlogpos]
+  · have := hbound (mellinLine519 N t) (hre t).ge (by rw [hre]; exact hle2)
+    rwa [him] at this
+  · rw [mellin_line_shift_b1122 N hN2 G hGd B0 hbound α,
+      cahen_mellin_line_two_b1122 N (by omega) q χ G hGs α,
+      exponent_one_split_b1122 N (by omega) χ α, sub_add_cancel_left, norm_neg]
+    exact htail N (by omega) q hq χ α
+
+end PortB1122
+
 /-- LEAF. P0093 page 159 before equation 5.1. GRH supplies the logarithm
 of L on the vertical line with its uniform cubic logarithmic bound. The
 Mellin identity retains the prime power correction bounded by square root N.
@@ -2688,8 +5038,8 @@ theorem grh_mellin_transfer519 (hG : LeanLab.DERZ1997.GRH) :
         ∀ χ : DirichletCharacter ℂ q, χ ≠ 1 →
           ∃ M : ℝ → ℂ, (Continuous M ∧ ∀ t : ℝ,
             ‖M t‖ ≤ B0 * Real.log ((N : ℝ) * (|t| + 2)) ^ 3) ∧ ∀ α : ℝ,
-              ‖characterPrime519 χ N α - mellinU519 N M α‖ ≤ B * Real.sqrt N := by
-  sorry
+              ‖characterPrime519 χ N α - mellinU519 N M α‖ ≤ B * Real.sqrt N :=
+  grh_mellin_transfer519_b1122 hG
 
 /-- P0093 pages 156 through 158 Lemma 2 equations 4.1 through 4.8.
 The diagonal square estimate is assembled from the clean central interval,
