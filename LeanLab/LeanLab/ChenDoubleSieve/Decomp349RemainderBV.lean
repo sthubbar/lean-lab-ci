@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp349aSplitBasic
+import LeanLab.ChenDoubleSieve.Feed1122_S148_bv_weighted
 
 /-!
 Remainder terms of Wu 2004 pages 38 to 41, arXiv 0705.1652.
@@ -30,8 +31,8 @@ theorem leaf_bv_weighted_pi :
         (q.divisors.card : ℝ) *
           |(((primeSequence N).filter (fun a => q ∣ a)).card : ℝ) -
             (((Finset.range (N + 1)).filter Nat.Prime).card : ℝ) / (q.totient : ℝ)| ≤
-        K * N / (log N) ^ 3 := by
-  sorry
+        K * N / (log N) ^ 3 :=
+  LeanLab.ChenDoubleSieve.Feed1122.S148.leaf_bv_weighted_pi_proved
 
 /-- The weighted remainder is at most eta times Theta N for large N, from
 `leaf_bv_weighted_pi` and C_N at least the twin prime constant, Wu 2004 page 39. -/

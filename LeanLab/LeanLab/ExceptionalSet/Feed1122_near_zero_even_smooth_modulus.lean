@@ -35,6 +35,49 @@ open LeanLab.ExceptionalSet.U1539 (R1 nu calE)
 open LeanLab.ExceptionalSet.UpJ200.DecompJ200 (window)
 open LeanLab.ExceptionalSet.UpJ200.Decomp527a (divisorError)
 
+/-- Proved helper: an integer `U ≡ 1 mod 8` is a square modulo every power of two,
+by the usual lifting step `x ↦ x + m 2^(k+2)`. -/
+theorem feed1122_sq_root_two_pow (U : ℤ) (hU : (8 : ℤ) ∣ U - 1) :
+    ∀ k : ℕ, ∃ x : ℤ, Odd x ∧ (2 : ℤ) ^ (k + 3) ∣ x ^ 2 - U := by
+  intro k
+  induction k with
+  | zero =>
+    refine ⟨1, odd_one, ?_⟩
+    have : (1 : ℤ) ^ 2 - U = -(U - 1) := by ring
+    rw [this, dvd_neg]; norm_num; exact hU
+  | succ k ih =>
+    obtain ⟨x, ⟨t, rfl⟩, m, hm⟩ := ih
+    refine ⟨2 * t + 1 + m * 2 ^ (k + 2), ⟨t + m * 2 ^ (k + 1), by ring⟩,
+      m * (t + 1) + m ^ 2 * 2 ^ k, ?_⟩
+    linear_combination hm
+
+/-- Proved helper: an integer `U ≡ 1 mod 3` is a square modulo `3^(c+1)`, since
+`U^(3^c) ≡ 1` there and `3^c + 1` is even. -/
+theorem feed1122_sq_root_three_pow (U : ℤ) (hU : (3 : ℤ) ∣ U - 1) (c : ℕ) :
+    ∃ x : ℤ, (3 : ℤ) ^ (c + 1) ∣ x ^ 2 - U := by
+  have h := dvd_sub_pow_of_dvd_sub (p := 3) (a := U) (b := 1) (by exact_mod_cast hU) c
+  simp only [one_pow, Nat.cast_ofNat] at h
+  obtain ⟨k, hk⟩ : Odd (3 ^ c) := Odd.pow (by decide)
+  refine ⟨U ^ (k + 1), ?_⟩
+  have : (U ^ (k + 1)) ^ 2 - U = U * (U ^ 3 ^ c - 1) := by
+    rw [hk]; ring
+  rw [this]
+  exact Dvd.dvd.mul_left h U
+
+/-- Proved helper: a nonzero natural number whose prime factors are at most three is
+`2^a 3^b` with its own exponents. -/
+theorem feed1122_smooth_eq (r : ℕ) (hr : r ≠ 0) (hsmooth : ∀ p : ℕ, p.Prime → p ∣ r → p ≤ 3) :
+    r = 2 ^ r.factorization 2 * 3 ^ r.factorization 3 := by
+  conv_lhs => rw [← Nat.prod_factorization_pow_eq_self hr]
+  rw [Finsupp.prod_of_support_subset (s := {2, 3})]
+  · rw [Finset.prod_pair (by decide)]
+  · intro p hp
+    rw [Nat.support_factorization, Nat.mem_primeFactors] at hp
+    have h3 := hsmooth p hp.1 hp.2.1
+    have h2 := hp.1.two_le
+    interval_cases p <;> simp
+  · intro i _; simp
+
 /-- LEAF: P0082 page 358 display 10, the exceptional modulus is the conductor of a primitive
 real character, and a primitive real character whose conductor has no prime factor above
 three has conductor dividing `24`: the odd part of a real primitive conductor is squarefree
@@ -43,7 +86,83 @@ characters at the primes two and three. -/
 theorem leaf_quadratic_primitive_smooth_conductor_dvd_24 (r : ℕ) (_ : NeZero r)
     (χ : DirichletCharacter ℂ r) (hprim : χ.IsPrimitive) (hsq : χ ^ 2 = 1)
     (hsmooth : ∀ p : ℕ, p.Prime → p ∣ r → p ≤ 3) : r ∣ 24 := by
-  sorry
+  set a := r.factorization 2
+  set b := r.factorization 3
+  have hr : r = 2 ^ a * 3 ^ b := feed1122_smooth_eq r (NeZero.ne r) hsmooth
+  set d := 2 ^ min a 3 * 3 ^ min b 1 with hd_def
+  have hdr : d ∣ r := by
+    rw [hr]; exact mul_dvd_mul (pow_dvd_pow _ (min_le_left _ _)) (pow_dvd_pow _ (min_le_left _ _))
+  have hd24 : d ∣ 24 := by
+    have : (24 : ℕ) = 2 ^ 3 * 3 ^ 1 := by norm_num
+    rw [this]; exact mul_dvd_mul (pow_dvd_pow _ (min_le_right _ _)) (pow_dvd_pow _ (min_le_right _ _))
+  have hfac : χ.FactorsThrough d := by
+    rw [DirichletCharacter.factorsThrough_iff_ker_unitsMap hdr]
+    intro u hu
+    rw [MonoidHom.mem_ker] at hu ⊢
+    set U : ℤ := ((u : ZMod r).val : ℤ) with hU_def
+    have hUr : ((U : ℤ) : ZMod r) = (u : ZMod r) := by simp [hU_def]
+    have hUd : (d : ℤ) ∣ U - 1 := by
+      have h1 : ((u : ZMod r).cast : ZMod d) = 1 := by
+        have := congrArg (fun v : (ZMod d)ˣ => (v : ZMod d)) hu
+        simpa [ZMod.unitsMap] using this
+      rw [← ZMod.intCast_zmod_eq_zero_iff_dvd, Int.cast_sub, Int.cast_one, hU_def,
+        Int.cast_natCast, ZMod.natCast_val, h1, sub_self]
+    have hUd' : (2 : ℤ) ^ min a 3 * 3 ^ min b 1 ∣ U - 1 := by
+      have := hUd; rw [hd_def] at this; push_cast at this; exact this
+    have h2a : (2 : ℤ) ^ min a 3 ∣ U - 1 := (Dvd.intro _ rfl).trans hUd'
+    have h3b : (3 : ℤ) ^ min b 1 ∣ U - 1 := (Dvd.intro_left _ rfl).trans hUd'
+    obtain ⟨x2, hx2⟩ : ∃ x : ℤ, (2 : ℤ) ^ a ∣ x ^ 2 - U := by
+      by_cases ha : a ≤ 3
+      · refine ⟨1, ?_⟩
+        rw [min_eq_left ha] at h2a
+        have : (1 : ℤ) ^ 2 - U = -(U - 1) := by ring
+        rw [this, dvd_neg]; exact h2a
+      · push Not at ha
+        rw [min_eq_right ha.le] at h2a
+        obtain ⟨x, -, hx⟩ := feed1122_sq_root_two_pow U (by simpa using h2a) (a - 3)
+        refine ⟨x, ?_⟩
+        rwa [show a - 3 + 3 = a by omega] at hx
+    obtain ⟨x3, hx3⟩ : ∃ x : ℤ, (3 : ℤ) ^ b ∣ x ^ 2 - U := by
+      by_cases hb : b = 0
+      · exact ⟨0, by rw [hb, pow_zero]; exact one_dvd _⟩
+      · rw [min_eq_right (Nat.one_le_iff_ne_zero.mpr hb), pow_one] at h3b
+        obtain ⟨x, hx⟩ := feed1122_sq_root_three_pow U h3b (b - 1)
+        refine ⟨x, ?_⟩
+        rwa [show b - 1 + 1 = b by omega] at hx
+    have hcop : IsCoprime ((2 : ℤ) ^ a) ((3 : ℤ) ^ b) :=
+      IsCoprime.pow (Int.isCoprime_iff_gcd_eq_one.mpr rfl)
+    obtain ⟨s, t, hst⟩ := hcop
+    set x : ℤ := x2 * (t * 3 ^ b) + x3 * (s * 2 ^ a) with hx_def
+    have hxa : (2 : ℤ) ^ a ∣ x ^ 2 - U := by
+      have : x ^ 2 - U = (x2 ^ 2 - U) + (x - x2) * (x + x2) := by ring
+      rw [this]
+      refine dvd_add hx2 (Dvd.dvd.mul_right ?_ _)
+      refine ⟨(x3 - x2) * s, ?_⟩
+      rw [hx_def]; linear_combination x2 * hst
+    have hxb : (3 : ℤ) ^ b ∣ x ^ 2 - U := by
+      have : x ^ 2 - U = (x3 ^ 2 - U) + (x - x3) * (x + x3) := by ring
+      rw [this]
+      refine dvd_add hx3 (Dvd.dvd.mul_right ?_ _)
+      refine ⟨(x2 - x3) * t, ?_⟩
+      rw [hx_def]; linear_combination x3 * hst
+    have hxr : (r : ℤ) ∣ x ^ 2 - U := by
+      rw [hr]; push_cast
+      exact IsCoprime.mul_dvd ⟨s, t, hst⟩ hxa hxb
+    have hsqr : ((x : ZMod r)) ^ 2 = (u : ZMod r) := by
+      rw [← hUr, ← sub_eq_zero]
+      have := (ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mpr hxr
+      push_cast at this; exact this
+    have hxunit : IsUnit (x : ZMod r) := by
+      have : IsUnit ((x : ZMod r) * (x : ZMod r)) := by rw [← sq, hsqr]; exact u.isUnit
+      exact isUnit_of_mul_isUnit_left this
+    obtain ⟨w, hw⟩ := hxunit
+    have hchi : χ (u : ZMod r) = 1 := by
+      rw [← hsqr, ← hw, map_pow, ← MulChar.pow_apply_coe, hsq, MulChar.one_apply_coe]
+    ext
+    simpa [MulChar.coe_toUnitHom] using hchi
+  have := DirichletCharacter.conductor_dvd_of_mem_conductorSet χ hfac
+  rw [hprim] at this
+  exact this.trans hd24
 
 /-- Proved helper: one primitive or not, a nontrivial character `χ` modulo `k + 1` has no
 real zero in `[1 - ε, 1)` for all small `ε > 0`, from `L(1, χ) ≠ 0` and continuity. -/
@@ -162,3 +281,10 @@ theorem leaf_near_zero_even_smooth_modulus_feed (γ : ℝ) (h1 : 1 < γ) (h2 : �
   simp at hgcd
 
 end LeanLab.ExceptionalSet.UpJ200.Decomp559b
+
+#print axioms LeanLab.ExceptionalSet.UpJ200.Decomp559b.leaf_quadratic_primitive_smooth_conductor_dvd_24
+#print axioms LeanLab.ExceptionalSet.UpJ200.Decomp559b.feed1122_smooth_selected_trivial
+#print axioms LeanLab.ExceptionalSet.UpJ200.Decomp559b.leaf_near_zero_even_smooth_modulus_feed
+#print axioms LeanLab.ExceptionalSet.UpJ200.Decomp559b.feed1122_sq_root_two_pow
+#print axioms LeanLab.ExceptionalSet.UpJ200.Decomp559b.feed1122_sq_root_three_pow
+#print axioms LeanLab.ExceptionalSet.UpJ200.Decomp559b.feed1122_smooth_eq
