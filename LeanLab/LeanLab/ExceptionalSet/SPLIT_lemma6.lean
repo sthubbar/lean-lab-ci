@@ -11,7 +11,6 @@ and is strictly weaker than the split's main statement.
 AI wrote this Lean code, checked only by the Lean kernel. Binary Goldbach is open.
 -/
 import LeanLab.ExceptionalSet.State1539
-import LeanLab.ExceptionalSet.Feed1122LeafOddMoment
 
 namespace LeanLab.ExceptionalSet.U1539
 
@@ -46,6 +45,65 @@ theorem leaf_moment_parity (γ δ : ℝ) (N : ℕ) :
     have hodd : Odd (nu γ n) := Int.not_even_iff_odd.mp hne
     simp only [nuOdd, hodd, ite_true]
 
+/-- HELPER, proved. Each parity branch of the second moment is a nonnegative
+sub-sum of the total window moment: with `leaf_moment_parity` the total is the
+even branch plus the odd branch, and both branches are sums of squares. -/
+theorem branch_le_total (γ δ : ℝ) (N : ℕ) (S : ℝ)
+    (h : (∑ n ∈ Finset.Icc ((N + 1) / 2) N,
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nuOdd γ n)‖ ^ 2) ≤ S) :
+    (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤ S := by
+  rw [leaf_moment_parity γ δ N]
+  exact le_trans (le_add_of_nonneg_right (Finset.sum_nonneg fun n _ => sq_nonneg _)) h
+
+/-- HELPER, proved. The odd twin of `branch_le_total`: the odd branch is the
+other nonnegative sub-sum of the total window moment. -/
+theorem odd_branch_le_total (γ δ : ℝ) (N : ℕ) (S : ℝ)
+    (h : (∑ n ∈ Finset.Icc ((N + 1) / 2) N,
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nuOdd γ n)‖ ^ 2) ≤ S) :
+    (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
+        ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤ S := by
+  rw [leaf_moment_parity γ δ N]
+  exact le_trans (le_add_of_nonneg_left (Finset.sum_nonneg fun n _ => sq_nonneg _)) h
+
+/-- HELPER, proved. Both moment leaves reduce to one statement, the total
+second moment of `R₁(ν°_n)` over the window, with the same witnesses `δ₀, κ₀, B,
+N₀`. This is the exact elementary content of displays 28 to 30 of P0082 section 6:
+once the total moment is bounded, each branch follows by sub-sum monotonicity
+and the parity identity. -/
+theorem leaves_of_total_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
+    (htot : ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
+      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+          (∑ n ∈ Finset.Icc ((N + 1) / 2) N,
+            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nuOdd γ n)‖ ^ 2) ≤
+              B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) :
+    (∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
+      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+          (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),
+            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤
+              B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) ∧
+    (∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
+      ∃ κ₀ : ℝ, 0 < κ₀ ∧ ∀ κ : ℝ, 0 < κ → κ ≤ κ₀ →
+        ∃ B : ℝ, 0 < B ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+          (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
+            ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
+              B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ))) := by
+  refine ⟨?_, ?_⟩
+  · obtain ⟨δ₀, hδ₀, h⟩ := htot
+    exact ⟨δ₀, hδ₀, fun δ hδ hδsmall => by
+      obtain ⟨κ₀, hκ₀, h⟩ := h δ hδ hδsmall
+      exact ⟨κ₀, hκ₀, fun κ hκ hκle => by
+        obtain ⟨B, hB, N₀, h⟩ := h κ hκ hκle
+        exact ⟨B, hB, N₀, fun N hN => branch_le_total γ δ N _ (h N hN)⟩⟩⟩
+  · obtain ⟨δ₀, hδ₀, h⟩ := htot
+    exact ⟨δ₀, hδ₀, fun δ hδ hδsmall => by
+      obtain ⟨κ₀, hκ₀, h⟩ := h δ hδ hδsmall
+      exact ⟨κ₀, hκ₀, fun κ hκ hκle => by
+        obtain ⟨B, hB, N₀, h⟩ := h κ hκ hκle
+        exact ⟨B, hB, N₀, fun N hN => odd_branch_le_total γ δ N _ (h N hN)⟩⟩⟩
+
 /-- LEAF. Step of the proof, the even branch: display 29. For `1 < γ < 3/2` the
 second moment of the adjacent coefficient `R₁(ν_n + 1)` over the even `ν_n` of the
 window is eventually at most `B N F(γ,N)² ℰ(γ,κ,N)^(-1/3)`, for every small enough
@@ -59,7 +117,17 @@ theorem leaf_even_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => Even (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  exact leaf_even_moment_of_leaves γ h1 h2
+  -- Attempt, task2785 2026-11-23. By the proved `leaves_of_total_moment` both
+  -- branches reduce to one estimate: the total second moment of `R₁(ν°_n)` over
+  -- the window is at most `B N F(γ,N)² ℰ^(-1/3)` for large `N`. That estimate is
+  -- displays 28 to 30 of P0082 section 6, proved in the paper by the dispersion
+  -- method; its input, Lemma 5 of the paper, is not among the lab's admitted
+  -- statements. The elementary pointwise bound gives instead
+  -- `(N+1) * X⁴ (log X)⁴` for the window sum, and
+  -- `(log N)^(4γ) * ℰ^(1/3) → ∞`, so no constant `B` can absorb it. See
+  -- PROGRESS.md for the searches and the reduction chain. BLOCKED OUT OF REACH.
+  apply leaves_of_total_moment γ h1 h2
+  sorry
 
 /-- LEAF. Step of the proof, the odd branch: display 30 with the reflected kernel.
 For `1 < γ < 3/2` the second moment of `R₁(ν_n)` over the odd `ν_n` of the window,
@@ -74,7 +142,9 @@ theorem leaf_odd_moment (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2) :
           (∑ n ∈ (Finset.Icc ((N + 1) / 2) N).filter (fun n : ℕ => ¬ Even (nu γ n)),
             ‖R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)‖ ^ 2) ≤
               B * N * F γ N ^ 2 * calE γ κ N ^ (-(1 / 3 : ℝ)) := by
-  exact leaf_odd_moment_of_leaves γ h1 h2
+  -- Odd branch: the same reduction, the same missing total moment estimate.
+  apply leaves_of_total_moment γ h1 h2
+  sorry
 
 /-- LEAF. Step of the proof, the finite Chebyshev step after display 30, with no
 analysis in it. A nonnegative sequence whose squares sum to at most `A` exceeds
