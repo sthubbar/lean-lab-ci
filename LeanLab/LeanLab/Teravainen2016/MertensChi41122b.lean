@@ -211,6 +211,189 @@ theorem leaf_chi4_log_convolution1122b (χ : ℕ → ℝ)
   rw [← hcast, ← hchi]
   field_simp
 
+/-! ### Private helpers for `leaf_vonMangoldt_nonprime_bounded1122b` -/
+
+/-- Partial sums of a geometric series of ratio at most `1 / 2` are at most `2`. -/
+private lemma geom_series_le_two1122b {r : ℝ} (h0 : 0 ≤ r) (h1 : 2 * r ≤ 1) :
+    ∀ K : ℕ, ∑ j ∈ Finset.range K, r ^ j ≤ 2 := by
+  have key : ∀ K : ℕ, ∑ j ∈ Finset.range K, r ^ j ≤ 2 - 2 * r ^ K := by
+    intro K
+    induction K with
+    | zero => simp
+    | succ K ih =>
+      rw [Finset.sum_range_succ, pow_succ]
+      have hK : (0 : ℝ) ≤ r ^ K := pow_nonneg h0 K
+      nlinarith
+  intro K
+  have h2 := key K
+  have h3 : (0 : ℝ) ≤ 2 * r ^ K := by positivity
+  linarith
+
+/-- `∑ k ∈ Icc 2 K, f k` as a range sum of `f (j + 2)`. -/
+private lemma sum_Icc_two_eq_sum_range1122b (K : ℕ) (f : ℕ → ℝ) :
+    ∑ k ∈ Finset.Icc 2 K, f k = ∑ j ∈ Finset.range (K - 1), f (j + 2) := by
+  rcases lt_or_ge K 2 with hK | hK
+  · have h1 : K = 0 ∨ K = 1 := by omega
+    rcases h1 with rfl | rfl
+    · rw [Finset.Icc_eq_empty (by omega)]
+      simp
+    · rw [Finset.Icc_eq_empty (by omega)]
+      simp
+  · have himg : Finset.Icc 2 K =
+        (Finset.range (K - 1)).map ⟨fun j => j + 2, fun a b h => Nat.add_right_cancel h⟩ := by
+      ext k
+      constructor
+      · intro hk
+        rw [Finset.mem_Icc] at hk
+        refine Finset.mem_map.2 ⟨k - 2, Finset.mem_range.2 (by omega), ?_⟩
+        show k - 2 + 2 = k
+        omega
+      · intro hk
+        rw [Finset.mem_map] at hk
+        obtain ⟨j, hj, rfl⟩ := hk
+        rw [Finset.mem_range] at hj
+        rw [Finset.mem_Icc]
+        show 2 ≤ j + 2 ∧ j + 2 ≤ K
+        omega
+    rw [himg, Finset.sum_map]
+    rfl
+
+/-- The tail `∑ k ∈ Icc 2 K, log p / p ^ k` is at most `2 log p / p ^ 2` for `p ≥ 2`. -/
+private lemma log_div_pow_tail_le1122b {p : ℝ} (hp : 2 ≤ p) (K : ℕ) :
+    ∑ k ∈ Finset.Icc 2 K, Real.log p / p ^ k ≤ 2 * (Real.log p / p ^ 2) := by
+  have hp0 : (0 : ℝ) < p := by linarith
+  have hr0 : (0 : ℝ) ≤ 1 / p := by positivity
+  have hr1 : 2 * (1 / p) ≤ 1 := by
+    have h2 : 2 / p ≤ 1 := by
+      rw [div_le_one hp0]
+      linarith
+    calc 2 * (1 / p) = 2 / p := by ring
+      _ ≤ 1 := h2
+  have hstep : ∀ j : ℕ, Real.log p / p ^ (j + 2) = (Real.log p / p ^ 2) * (1 / p) ^ j := by
+    intro j
+    have hpw : p ^ (j + 2) = p ^ 2 * p ^ j := by ring
+    have hinv : (1 / p) ^ j = (p ^ j)⁻¹ := by rw [one_div, inv_pow]
+    rw [hpw, hinv]
+    field_simp
+  have hlog : (0 : ℝ) ≤ Real.log p / p ^ 2 :=
+    div_nonneg (Real.log_nonneg (by linarith)) (by positivity)
+  rw [sum_Icc_two_eq_sum_range1122b]
+  rw [Finset.sum_congr rfl (fun j (_ : j ∈ Finset.range (K - 1)) => hstep j)]
+  rw [← Finset.mul_sum]
+  have hg := geom_series_le_two1122b hr0 hr1 (K - 1)
+  calc (Real.log p / p ^ 2) * ∑ j ∈ Finset.range (K - 1), (1 / p) ^ j
+      ≤ (Real.log p / p ^ 2) * 2 := by gcongr
+    _ = 2 * (Real.log p / p ^ 2) := by ring
+
+/-- On a prime power `Λ d / d = log p / p ^ k`, `p = minFac d`, `k` the exponent. -/
+private lemma vonMangoldt_div_eq1122b {d : ℕ} (hd : IsPrimePow d) :
+    Λ d / (d : ℝ) =
+      Real.log (d.minFac : ℝ) / (d.minFac : ℝ) ^ (d.factorization d.minFac) := by
+  have hΛ : Λ d = Real.log (d.minFac : ℝ) := by
+    rw [ArithmeticFunction.vonMangoldt_apply, if_pos hd]
+  have hd_pow : (d : ℝ) = (d.minFac : ℝ) ^ (d.factorization d.minFac) := by
+    rw [← Nat.cast_pow, hd.minFac_pow_factorization_eq]
+  rw [hΛ, hd_pow]
+
+/-- The non-prime part of the von Mangoldt sum is bounded by the box sum over primes `p` and
+exponents `k` with `2 ≤ k ≤ log 2 N`. -/
+private lemma nonprime_vonMangoldt_sum_le1122b (N : ℕ) :
+    ∑ d ∈ (Finset.Ioc 0 N).filter (fun d => ¬ d.Prime), Λ d / (d : ℝ)
+      ≤ ∑ p ∈ Nat.primesLE N,
+          ∑ k ∈ Finset.Icc 2 (Nat.log 2 N), Real.log (p : ℝ) / (p : ℝ) ^ k := by
+  set S : Finset ℕ := (Finset.Ioc 0 N).filter (fun d => ¬ d.Prime) with hS
+  set Spp : Finset ℕ := S.filter IsPrimePow with hSpp
+  have hzero : ∑ d ∈ S.filter (fun d => ¬ IsPrimePow d), Λ d / (d : ℝ) = 0 := by
+    refine Finset.sum_eq_zero fun d hd => ?_
+    rw [Finset.mem_filter] at hd
+    rw [ArithmeticFunction.vonMangoldt_eq_zero_iff.mpr hd.2, zero_div]
+  have ha : ∑ d ∈ S, Λ d / (d : ℝ) = ∑ d ∈ Spp, Λ d / (d : ℝ) := by
+    have h := Finset.sum_filter_add_sum_filter_not S IsPrimePow (fun d => Λ d / (d : ℝ))
+    rw [hzero, add_zero] at h
+    exact h.symm
+  have hinj : ∀ a ∈ Spp, ∀ b ∈ Spp,
+      ((a.minFac, a.factorization a.minFac) : ℕ × ℕ)
+        = ((b.minFac, b.factorization b.minFac) : ℕ × ℕ) → a = b := by
+    intro a ha' b hb' hab
+    have haP : IsPrimePow a := (Finset.mem_filter.1 ha').2
+    have hbP : IsPrimePow b := (Finset.mem_filter.1 hb').2
+    have h1 : a.minFac = b.minFac := congrArg Prod.fst hab
+    have h2 : a.factorization a.minFac = b.factorization b.minFac := congrArg Prod.snd hab
+    rw [← haP.minFac_pow_factorization_eq, ← hbP.minFac_pow_factorization_eq, h2, h1]
+  have hstep : ∑ d ∈ Spp, Λ d / (d : ℝ)
+      = ∑ q ∈ Spp.image (fun d => ((d.minFac, d.factorization d.minFac) : ℕ × ℕ)),
+          Real.log (q.1 : ℝ) / (q.1 : ℝ) ^ q.2 := by
+    rw [Finset.sum_image hinj]
+    exact Finset.sum_congr rfl fun d hd => vonMangoldt_div_eq1122b (Finset.mem_filter.1 hd).2
+  have hsub : Spp.image (fun d => ((d.minFac, d.factorization d.minFac) : ℕ × ℕ))
+      ⊆ Nat.primesLE N ×ˢ Finset.Icc 2 (Nat.log 2 N) := by
+    intro q hq
+    obtain ⟨d, hd, rfl⟩ := Finset.mem_image.1 hq
+    obtain ⟨hdS, hdP⟩ := Finset.mem_filter.1 hd
+    obtain ⟨hdI, hdnp⟩ := Finset.mem_filter.1 hdS
+    obtain ⟨hd0, hdN⟩ := Finset.mem_Ioc.1 hdI
+    have hprime : (d.minFac).Prime := Nat.minFac_prime hdP.ne_one
+    have hk0 : d.factorization d.minFac ≠ 0 := Nat.factorization_minFac_ne_zero hdP.one_lt
+    have hk2 : 2 ≤ d.factorization d.minFac := by
+      rcases Nat.lt_or_ge (d.factorization d.minFac) 2 with h | h
+      · have hk1 : d.factorization d.minFac = 1 := by omega
+        exact absurd (by
+          rw [← hdP.minFac_pow_factorization_eq, hk1, pow_one]
+          exact hprime) hdnp
+      · exact h
+    have hpow : 2 ^ d.factorization d.minFac ≤ N := by
+      calc 2 ^ d.factorization d.minFac ≤ d.minFac ^ d.factorization d.minFac :=
+            Nat.pow_le_pow_left hprime.two_le _
+        _ = d := hdP.minFac_pow_factorization_eq
+        _ ≤ N := hdN
+    rw [Finset.mem_product, Nat.mem_primesLE, Finset.mem_Icc]
+    exact ⟨⟨le_trans (Nat.minFac_le hd0) hdN, hprime⟩, hk2,
+      Nat.le_log_of_pow_le (by norm_num) hpow⟩
+  have hnn : ∀ q ∈ Nat.primesLE N ×ˢ Finset.Icc 2 (Nat.log 2 N),
+      (0 : ℝ) ≤ Real.log (q.1 : ℝ) / (q.1 : ℝ) ^ q.2 := by
+    intro q hq
+    obtain ⟨hq1, _⟩ := Finset.mem_product.1 hq
+    have hqp : (q.1).Prime := (Nat.mem_primesLE.1 hq1).2
+    exact div_nonneg (Real.log_nonneg (by exact_mod_cast hqp.one_le)) (by positivity)
+  calc ∑ d ∈ S, Λ d / (d : ℝ)
+      = ∑ d ∈ Spp, Λ d / (d : ℝ) := ha
+    _ = ∑ q ∈ Spp.image (fun d => ((d.minFac, d.factorization d.minFac) : ℕ × ℕ)),
+          Real.log (q.1 : ℝ) / (q.1 : ℝ) ^ q.2 := hstep
+    _ ≤ ∑ q ∈ Nat.primesLE N ×ˢ Finset.Icc 2 (Nat.log 2 N),
+          Real.log (q.1 : ℝ) / (q.1 : ℝ) ^ q.2 :=
+        Finset.sum_le_sum_of_subset_of_nonneg hsub fun q hq _ => hnn q hq
+    _ = ∑ p ∈ Nat.primesLE N,
+          ∑ k ∈ Finset.Icc 2 (Nat.log 2 N), Real.log (p : ℝ) / (p : ℝ) ^ k :=
+        Finset.sum_product _ _ _
+
+/-- The majorant `∑ n, log n / n ^ 2` is summable. -/
+private lemma summable_log_div_sq1122b :
+    Summable (fun n : ℕ => Real.log (n : ℝ) / (n : ℝ) ^ 2) := by
+  have hmaj : ∀ n : ℕ, Real.log (n : ℝ) / (n : ℝ) ^ 2 ≤ 2 / (n : ℝ) ^ ((3 : ℝ) / 2) := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with h | h
+    · subst h
+      norm_num
+    have hn : (0 : ℝ) < (n : ℝ) := by exact_mod_cast h
+    have hl : Real.log (n : ℝ) ≤ 2 * (n : ℝ) ^ ((1 : ℝ) / 2) := by
+      have h1 := Real.log_le_rpow_div hn.le (show (0 : ℝ) < 1 / 2 by norm_num)
+      calc Real.log (n : ℝ) ≤ (n : ℝ) ^ ((1 : ℝ) / 2) / (1 / 2) := h1
+        _ = 2 * (n : ℝ) ^ ((1 : ℝ) / 2) := by ring
+    have hkey : (n : ℝ) ^ ((3 : ℝ) / 2) * (n : ℝ) ^ ((1 : ℝ) / 2) = (n : ℝ) ^ 2 := by
+      rw [← Real.rpow_add hn]
+      rw [show (3 : ℝ) / 2 + 1 / 2 = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+    have hs : (0 : ℝ) < (n : ℝ) ^ ((1 : ℝ) / 2) := Real.rpow_pos_of_pos hn _
+    have ht : (0 : ℝ) < (n : ℝ) ^ ((3 : ℝ) / 2) := Real.rpow_pos_of_pos hn _
+    rw [← hkey]
+    rw [div_le_div_iff₀ (by positivity) ht]
+    have h2 : (0 : ℝ) ≤ (n : ℝ) ^ ((1 : ℝ) / 2) := hs.le
+    nlinarith [hl, h2, hs, ht]
+  have hbase : Summable (fun n : ℕ => 2 / (n : ℝ) ^ ((3 : ℝ) / 2)) := by
+    have h := (Real.summable_one_div_nat_rpow (p := (3 : ℝ) / 2)).mpr (by norm_num)
+    simpa [div_eq_mul_inv] using h.mul_left 2
+  exact Summable.of_nonneg_of_le
+    (fun n => div_nonneg (Real.log_natCast_nonneg n) (by positivity)) hmaj hbase
+
 /-- LEAF: Davenport Chapter 4, the passage from Lambda to primes, the character free part: the
 prime powers p ^ k with k at least 2 contribute a bounded amount to the sums of Lambda d / d,
 since Lambda p ^ k = log p and the sum over p and k at least 2 of log p / p ^ k is at most the
@@ -218,7 +401,32 @@ sum of log p / p p - 1, which converges. The d with Lambda d = 0 contribute noth
 Class MEDIUM. -/
 theorem leaf_vonMangoldt_nonprime_bounded1122b :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ N : ℕ, ∑ d ∈ (Ioc 0 N).filter (fun d => ¬ d.Prime), Λ d / d ≤ B := by
-  sorry
+  have hsumm := summable_log_div_sq1122b
+  refine ⟨2 * ∑' n : ℕ, Real.log (n : ℝ) / (n : ℝ) ^ 2, ?_, fun N => ?_⟩
+  · have hnn : (0 : ℝ) ≤ ∑' n : ℕ, Real.log (n : ℝ) / (n : ℝ) ^ 2 :=
+      tsum_nonneg fun n => div_nonneg (Real.log_natCast_nonneg n) (by positivity)
+    linarith
+  · have h1 := nonprime_vonMangoldt_sum_le1122b N
+    have h2 : ∑ p ∈ Nat.primesLE N,
+          ∑ k ∈ Finset.Icc 2 (Nat.log 2 N), Real.log (p : ℝ) / (p : ℝ) ^ k
+        ≤ ∑ p ∈ Nat.primesLE N, 2 * (Real.log (p : ℝ) / (p : ℝ) ^ 2) := by
+      refine Finset.sum_le_sum fun p hp => ?_
+      exact log_div_pow_tail_le1122b (by exact_mod_cast (Nat.mem_primesLE.1 hp).2.two_le) _
+    have hsub2 : Nat.primesLE N ⊆ Finset.Icc 2 N := by
+      intro p hp
+      rw [Nat.mem_primesLE] at hp
+      exact Finset.mem_Icc.2 ⟨hp.2.two_le, hp.1⟩
+    have h3 : ∑ p ∈ Nat.primesLE N, 2 * (Real.log (p : ℝ) / (p : ℝ) ^ 2)
+        ≤ 2 * ∑' n : ℕ, Real.log (n : ℝ) / (n : ℝ) ^ 2 := by
+      rw [← Finset.mul_sum]
+      refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+      calc ∑ p ∈ Nat.primesLE N, Real.log (p : ℝ) / (p : ℝ) ^ 2
+          ≤ ∑ p ∈ Finset.Icc 2 N, Real.log (p : ℝ) / (p : ℝ) ^ 2 :=
+            Finset.sum_le_sum_of_subset_of_nonneg hsub2
+              (fun x _ _ => div_nonneg (Real.log_natCast_nonneg x) (by positivity))
+        _ ≤ ∑' n : ℕ, Real.log (n : ℝ) / (n : ℝ) ^ 2 :=
+            hsumm.sum_le_tsum _ (fun i _ => div_nonneg (Real.log_natCast_nonneg i) (by positivity))
+    exact le_trans h1 (le_trans h2 h3)
 
 /-- Proved from leaf_vonMangoldt_nonprime_bounded1122b, formerly a LEAF: Davenport Chapter 4, the
 passage from Lambda to primes: the primes d give exactly the prime sum since Lambda p = log p,
