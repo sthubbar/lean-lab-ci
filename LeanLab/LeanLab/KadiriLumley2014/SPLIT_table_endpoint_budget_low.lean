@@ -47,6 +47,17 @@ critical line by Platt 2011. Partial summation of the size of G of display 2.17 
 plus i gamma against the Riemann von Mangoldt count with Rosser's error, input d of
 Theorem 3.2 on page 11. Uncertified mpmath value row 57 0.0160007, log 4e18 0.586181,
 error bar at most 6.4e-9. Class HARD. -/
+theorem lowZeroBudget_nonneg (n : ℕ) : 0 ≤ lowZeroBudget n := by
+  fin_cases n <;> norm_num
+
+theorem highZeroBudget_nonneg (n : ℕ) : 0 ≤ highZeroBudget n := by
+  fin_cases n <;> norm_num
+
+theorem budget_sum_lt_one {n : ℕ} (hn : n = 0 ∨ n = 43 ∨ n = 44 ∨ n = 45 ∨ n = 46 ∨ n = 47 ∨ n = 48 ∨ n = 49 ∨ n = 50 ∨ n = 51 ∨ n = 52 ∨ n = 53 ∨ n = 54 ∨ n = 55 ∨ n = 56 ∨ n = 57) :
+    lowZeroBudget n + highZeroBudget n < 1 := by
+  rcases hn with (rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;>
+    norm_num
+
 theorem endpoint_low_height_zero_sum {r : PrintedRow} (hr : r ∈ tableTwo)
     (hlow : r.logIndex ≤ 57)
     (s : Finset {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1}) :
