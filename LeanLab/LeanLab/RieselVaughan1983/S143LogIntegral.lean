@@ -67,6 +67,8 @@ alternating Basel value pi^2/12, the integral of log u / (z+u) from 1 to z equal
 log 2 log z - pi^2/12 + T z / 2. HARD -/
 theorem integral_log_div_add (z : ℝ) (hz : 1 ≤ z) :
     (∫ u in Set.Ioc 1 z, log u / (z + u)) = log 2 * log z - π ^ 2 / 12 + T z / 2 := by
+  have hz0 : 0 < z := by linarith
+  rw [← intervalIntegral.integral_of_le hz]
   sorry
 
 /-- Assembly of `log_integral_series` from the three leaves above. CONDITIONAL ON them. -/
