@@ -11,9 +11,10 @@ import LeanLab.BHP1997.TotientTailS72
 namespace LeanLab.BHP1997.Section2MS
 open Classical
 
-/-! ### Copied private helpers for the Ramanujan evaluation `c_q` -/
+section V323Helpers
+open Complex
 
-private lemma e512_add (x y : ℝ) :
+private lemma v323_e512_add (x y : ℝ) :
     Complex.exp (2 * Real.pi * Complex.I * ((x + y : ℝ) : ℂ)) =
       Complex.exp (2 * Real.pi * Complex.I * (x : ℂ)) *
         Complex.exp (2 * Real.pi * Complex.I * (y : ℂ)) := by
@@ -22,35 +23,35 @@ private lemma e512_add (x y : ℝ) :
   push_cast
   ring
 
-private lemma e512_nat_mul (k : ℕ) (x : ℝ) :
+private lemma v323_e512_nat_mul (k : ℕ) (x : ℝ) :
     Complex.exp (2 * Real.pi * Complex.I * (((k : ℝ) * x : ℝ) : ℂ)) =
       (Complex.exp (2 * Real.pi * Complex.I * (x : ℂ))) ^ k := by
   induction k with
   | zero => simp
-  | succ k ih => rw [Nat.cast_succ, add_mul, one_mul, e512_add, ih, pow_succ]
+  | succ k ih => rw [Nat.cast_succ, add_mul, one_mul, v323_e512_add, ih, pow_succ]
 
-private lemma e512_int_mul (k : ℤ) (x : ℝ) :
+private lemma v323_e512_int_mul (k : ℤ) (x : ℝ) :
     Complex.exp (2 * Real.pi * Complex.I * (((k : ℝ) * x : ℝ) : ℂ)) =
       (Complex.exp (2 * Real.pi * Complex.I * (x : ℂ))) ^ k := by
   have harg : (2 * (Real.pi : ℂ) * Complex.I * (((k : ℝ) * x : ℝ) : ℂ))
       = (k : ℂ) * (2 * (Real.pi : ℂ) * Complex.I * (x : ℂ)) := by push_cast; ring
   rw [harg, Complex.exp_int_mul]
 
-private lemma e512_int_cast (k : ℤ) :
+private lemma v323_e512_int_cast (k : ℤ) :
     Complex.exp (2 * Real.pi * Complex.I * ((k : ℝ) : ℂ)) = 1 := by
   have h2 : Complex.exp (2 * Real.pi * Complex.I * ((1 : ℝ) : ℂ)) = 1 := by
     rw [Complex.exp_eq_one_iff]
     exact ⟨1, by push_cast; ring⟩
-  have h := e512_int_mul k 1
+  have h := v323_e512_int_mul k 1
   rw [mul_one] at h
   rw [h, h2, one_zpow]
 
-private lemma two_pi_I_ne_zero512 : (2 * (Real.pi : ℂ) * Complex.I) ≠ 0 := by
+private lemma v323_two_pi_I_ne_zero512 : (2 * (Real.pi : ℂ) * Complex.I) ≠ 0 := by
   have h1 : (2 * (Real.pi : ℂ)) ≠ 0 :=
     mul_ne_zero two_ne_zero (by exact_mod_cast Real.pi_ne_zero)
   exact mul_ne_zero h1 Complex.I_ne_zero
 
-private lemma e512_eq_one_iff {x : ℝ} :
+private lemma v323_e512_eq_one_iff {x : ℝ} :
     Complex.exp (2 * Real.pi * Complex.I * (x : ℂ)) = 1 ↔ ∃ k : ℤ, x = (k : ℝ) := by
   constructor
   · intro h
@@ -58,12 +59,12 @@ private lemma e512_eq_one_iff {x : ℝ} :
     refine ⟨n, ?_⟩
     have hx : (2 * (Real.pi : ℂ) * Complex.I) * (x : ℂ)
         = (2 * (Real.pi : ℂ) * Complex.I) * ((n : ℝ) : ℂ) := by rw [hn]; push_cast; ring
-    exact Complex.ofReal_injective (mul_left_cancel₀ two_pi_I_ne_zero512 hx)
+    exact Complex.ofReal_injective (mul_left_cancel₀ v323_two_pi_I_ne_zero512 hx)
   · rintro ⟨k, rfl⟩
-    exact e512_int_cast k
+    exact v323_e512_int_cast k
 
 /-- The orthogonality relation `Σ_{b<m} e(bk/m) = m` if `m ∣ k`, else `0`. -/
-private lemma e512_sum_orth {m : ℕ} (hm : 0 < m) (k : ℤ) :
+private lemma v323_e512_sum_orth {m : ℕ} (hm : 0 < m) (k : ℤ) :
     ∑ b ∈ Finset.range m, Complex.exp (2 * Real.pi * Complex.I * (((b : ℝ) * (k : ℝ)) / m : ℝ))
       = if (m : ℤ) ∣ k then (m : ℂ) else 0 := by
   have hmR : ((m : ℝ)) ≠ 0 := by positivity
@@ -72,14 +73,14 @@ private lemma e512_sum_orth {m : ℕ} (hm : 0 < m) (k : ℤ) :
       Complex.exp (2 * Real.pi * Complex.I * (((b : ℝ) * (k : ℝ)) / m : ℝ)) = c ^ b := by
     intro b _
     have harg : ((b : ℝ) * (k : ℝ)) / m = (b : ℝ) * ((k : ℝ) / m) := by field_simp
-    rw [harg, e512_nat_mul]
+    rw [harg, v323_e512_nat_mul]
   rw [Finset.sum_congr rfl hterm]
   have hcm : c ^ m = 1 := by
     have h1 : c ^ m = Complex.exp (2 * Real.pi * Complex.I * (((m : ℝ) * ((k : ℝ) / m) : ℝ) : ℂ)) := by
-      rw [hc]; exact (e512_nat_mul m ((k : ℝ) / m)).symm
-    rw [h1, mul_div_cancel₀ (k : ℝ) hmR, e512_int_cast]
+      rw [hc]; exact (v323_e512_nat_mul m ((k : ℝ) / m)).symm
+    rw [h1, mul_div_cancel₀ (k : ℝ) hmR, v323_e512_int_cast]
   have hiff : c = 1 ↔ (m : ℤ) ∣ k := by
-    rw [hc, e512_eq_one_iff]
+    rw [hc, v323_e512_eq_one_iff]
     constructor
     · rintro ⟨j, hj⟩
       have h2 : (k : ℝ) = (j : ℝ) * (m : ℝ) := by
@@ -98,7 +99,7 @@ private lemma e512_sum_orth {m : ℕ} (hm : 0 < m) (k : ℤ) :
     rw [geom_sum_eq h1 m, hcm]
     simp
 
-private lemma filter_Icc_eq_range512 {q : ℕ} (hq : 2 ≤ q) :
+private lemma v323_filter_Icc_eq_range512 {q : ℕ} (hq : 2 ≤ q) :
     (Finset.Icc 1 q).filter (fun r => Nat.Coprime r q) =
       (Finset.range q).filter (fun r => Nat.Coprime r q) := by
   ext r
@@ -121,7 +122,7 @@ private lemma filter_Icc_eq_range512 {q : ℕ} (hq : 2 ≤ q) :
       omega
     · exact h
 
-private lemma ramanujan512_one (N : ℕ) : ramanujan512 1 N = 1 := by
+private lemma v323_ramanujan512_one (N : ℕ) : ramanujan512 1 N = 1 := by
   unfold ramanujan512
   have h : (Finset.Icc 1 1).filter (fun r => Nat.Coprime r 1) = {1} := by
     ext r
@@ -135,26 +136,26 @@ private lemma ramanujan512_one (N : ℕ) : ramanujan512 1 N = 1 := by
   rw [fourier_coe_apply, Complex.exp_eq_one_iff]
   exact ⟨-(N : ℤ), by push_cast; ring⟩
 
-private lemma ramanujan512_exp_range (q N : ℕ) (hq : 2 ≤ q) :
+private lemma v323_ramanujan512_exp_range (q N : ℕ) (hq : 2 ≤ q) :
     ramanujan512 q N =
       ∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
         Complex.exp (2 * Real.pi * Complex.I * (((a : ℝ) * ((-(N : ℤ) : ℤ) : ℝ)) / q : ℝ)) := by
   unfold ramanujan512
-  rw [filter_Icc_eq_range512 hq]
+  rw [v323_filter_Icc_eq_range512 hq]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [fourier_coe_apply]
   congr 1
   push_cast
   ring
 
-private lemma sum_moebius_divisors512 (n : ℕ) :
+private lemma v323_sum_moebius_divisors512 (n : ℕ) :
     ∑ d ∈ n.divisors, (ArithmeticFunction.moebius d : ℤ) = if n = 1 then 1 else 0 := by
   have h := ArithmeticFunction.coe_mul_zeta_apply (f := ArithmeticFunction.moebius) (x := n)
   rw [ArithmeticFunction.moebius_mul_coe_zeta] at h
   rw [← h]
   exact ArithmeticFunction.one_apply
 
-private lemma divisors_filter_dvd_eq_gcd512 {q a : ℕ} (hq : q ≠ 0) :
+private lemma v323_divisors_filter_dvd_eq_gcd512 {q a : ℕ} (hq : q ≠ 0) :
     q.divisors.filter (fun d => d ∣ a) = (a.gcd q).divisors := by
   have hg : a.gcd q ∣ q := Nat.gcd_dvd_right a q
   have hg0 : a.gcd q ≠ 0 := by
@@ -166,15 +167,15 @@ private lemma divisors_filter_dvd_eq_gcd512 {q a : ℕ} (hq : q ≠ 0) :
   simp only [Nat.mem_divisors] at hd
   exact ⟨fun h => Nat.dvd_gcd h hd.1, fun h => Nat.dvd_trans h (Nat.gcd_dvd_left a q)⟩
 
-private lemma indicator_coprime512 {q : ℕ} (hq : q ≠ 0) (a : ℕ) :
+private lemma v323_indicator_coprime512 {q : ℕ} (hq : q ≠ 0) (a : ℕ) :
     (if a.gcd q = 1 then (1:ℂ) else 0)
       = ∑ d ∈ q.divisors, (if d ∣ a then (ArithmeticFunction.moebius d : ℂ) else 0) := by
-  rw [← Finset.sum_filter, divisors_filter_dvd_eq_gcd512 hq]
-  have h := congrArg (fun z : ℤ => (z : ℂ)) (sum_moebius_divisors512 (a.gcd q))
+  rw [← Finset.sum_filter, v323_divisors_filter_dvd_eq_gcd512 hq]
+  have h := congrArg (fun z : ℤ => (z : ℂ)) (v323_sum_moebius_divisors512 (a.gcd q))
   push_cast at h
   exact h.symm
 
-private lemma sum_range_filter_dvd512 {q d : ℕ} (hd : 0 < d) (hdq : d ∣ q) (g : ℕ → ℂ) :
+private lemma v323_sum_range_filter_dvd512 {q d : ℕ} (hd : 0 < d) (hdq : d ∣ q) (g : ℕ → ℂ) :
     ∑ a ∈ (Finset.range q).filter (fun a => d ∣ a), g a
       = ∑ b ∈ Finset.range (q / d), g (d * b) := by
   have hdq' : d * (q / d) = q := Nat.mul_div_cancel' hdq
@@ -196,7 +197,7 @@ private lemma sum_range_filter_dvd512 {q d : ℕ} (hd : 0 < d) (hdq : d ∣ q) (
   exact Nat.eq_of_mul_eq_mul_left hd hxy
 
 /-- The general exponential sum as a divisor sum. -/
-private lemma ramanujan_exp_dvd (q : ℕ) (k : ℤ) (hq : 2 ≤ q) :
+private lemma v323_ramanujan_exp_dvd (q : ℕ) (k : ℤ) (hq : 2 ≤ q) :
     (∑ a ∈ (Finset.range q).filter (fun a => Nat.Coprime a q),
         Complex.exp (2 * Real.pi * Complex.I * (((a : ℝ) * (k : ℝ)) / q : ℝ)))
       = ∑ d ∈ q.divisors, (ArithmeticFunction.moebius d : ℂ) *
@@ -218,7 +219,7 @@ private lemma ramanujan_exp_dvd (q : ℕ) (k : ℤ) (hq : 2 ≤ q) :
         = (if a.gcd q = 1 then
             Complex.exp (2 * Real.pi * Complex.I * (((a : ℝ) * (k : ℝ)) / q : ℝ)) else 0) := by
       by_cases h : a.gcd q = 1 <;> simp [h]
-    rw [← h1, indicator_coprime512 hq0 a]
+    rw [← h1, v323_indicator_coprime512 hq0 a]
   rw [hstep1]
   have hstep2 : ∀ a ∈ Finset.range q,
       (∑ d ∈ q.divisors, (if d ∣ a then (ArithmeticFunction.moebius d : ℂ) else 0))
@@ -241,7 +242,7 @@ private lemma ramanujan_exp_dvd (q : ℕ) (k : ℤ) (hq : 2 ≤ q) :
             * Complex.exp (2 * Real.pi * Complex.I * (((a : ℝ) * (k : ℝ)) / q : ℝ)) else 0) := by
     refine Finset.sum_congr rfl (fun a _ => ?_)
     by_cases h : d ∣ a <;> simp [h]
-  rw [hfac, ← Finset.sum_filter, sum_range_filter_dvd512 hd0 hdvd, ← Finset.mul_sum]
+  rw [hfac, ← Finset.sum_filter, v323_sum_range_filter_dvd512 hd0 hdvd, ← Finset.mul_sum]
   congr 1
   have hqd : d * (q / d) = q := Nat.mul_div_cancel' hdvd
   have harg : ∀ b : ℕ,
@@ -255,13 +256,13 @@ private lemma ramanujan_exp_dvd (q : ℕ) (k : ℤ) (hq : 2 ≤ q) :
     have hdR : ((d : ℕ) : ℝ) ≠ 0 := by positivity
     have hmR : (((q / d : ℕ)) : ℝ) ≠ 0 := by positivity
     field_simp
-  rw [Finset.sum_congr rfl (fun b _ => harg b), e512_sum_orth hm0 k]
+  rw [Finset.sum_congr rfl (fun b _ => harg b), v323_e512_sum_orth hm0 k]
 
 /-- The Ramanujan sum `c_q(N)` as an exact divisor sum. -/
-private lemma ramanujan512_dvd (q N : ℕ) (hq : 2 ≤ q) :
+private lemma v323_ramanujan512_dvd (q N : ℕ) (hq : 2 ≤ q) :
     ramanujan512 q N = ∑ d ∈ q.divisors, (ArithmeticFunction.moebius d : ℂ) *
       (if ((q / d : ℕ) : ℤ) ∣ (N : ℤ) then ((q / d : ℕ) : ℂ) else 0) := by
-  rw [ramanujan512_exp_range q N hq, ramanujan_exp_dvd q (-(N : ℤ)) hq]
+  rw [v323_ramanujan512_exp_range q N hq, v323_ramanujan_exp_dvd q (-(N : ℤ)) hq]
   refine Finset.sum_congr rfl (fun d _ => ?_)
   have hd : (((q / d : ℕ)) : ℤ) ∣ -(N : ℤ) ↔ (((q / d : ℕ)) : ℤ) ∣ (N : ℤ) := Int.dvd_neg
   by_cases h : (((q / d : ℕ)) : ℤ) ∣ (N : ℤ)
@@ -271,13 +272,13 @@ private lemma ramanujan512_dvd (q N : ℕ) (hq : 2 ≤ q) :
 open scoped ArithmeticFunction.Moebius
 
 /-- The real divisor form of `c_q(N)`: `Σ_{d ∣ q} (q/d)·μ(d)` restricted to `(q/d) ∣ N`. -/
-private lemma c512_real_form (q N : ℕ) (hq : 1 ≤ q) :
+private lemma v323_c512_real_form (q N : ℕ) (hq : 1 ≤ q) :
     ramanujan512 q N =
       ((∑ d ∈ q.divisors, (if (q / d : ℕ) ∣ N then ((q / d : ℕ) : ℝ) else 0) *
         ((ArithmeticFunction.moebius d : ℤ) : ℝ) : ℝ) : ℂ) := by
   rcases eq_or_lt_of_le hq with h | h
   · subst h
-    rw [ramanujan512_one]
+    rw [v323_ramanujan512_one]
     have h1 : (∑ d ∈ (1 : ℕ).divisors, (if (1 / d : ℕ) ∣ N then ((1 / d : ℕ) : ℝ) else 0) *
         ((ArithmeticFunction.moebius d : ℤ) : ℝ)) = 1 := by
       rw [Nat.divisors_one, Finset.sum_singleton]
@@ -285,7 +286,7 @@ private lemma c512_real_form (q N : ℕ) (hq : 1 ≤ q) :
     rw [h1]
     norm_num
   · have h2 : 2 ≤ q := h
-    rw [ramanujan512_dvd q N h2, Complex.ofReal_sum]
+    rw [v323_ramanujan512_dvd q N h2, Complex.ofReal_sum]
     refine Finset.sum_congr rfl (fun d _ => ?_)
     by_cases hd : ((q / d : ℕ) : ℤ) ∣ (N : ℤ)
     · rw [if_pos hd, if_pos (Int.natCast_dvd_natCast.mp hd)]
@@ -296,7 +297,7 @@ private lemma c512_real_form (q N : ℕ) (hq : 1 ≤ q) :
       ring
 
 /-- Reindex the divisor sum: the Möbius index can be put on `q / d`. -/
-private lemma c512_conv_form (q N : ℕ) (hq : 0 < q) :
+private lemma v323_c512_conv_form (q N : ℕ) (hq : 0 < q) :
     (∑ d ∈ q.divisors, (if (q / d : ℕ) ∣ N then ((q / d : ℕ) : ℝ) else 0) *
         ((ArithmeticFunction.moebius d : ℤ) : ℝ))
       = ∑ e ∈ q.divisors, (if e ∣ N then (e : ℝ) else 0) *
@@ -314,45 +315,115 @@ private lemma c512_conv_form (q N : ℕ) (hq : 0 < q) :
   · intro d hd
     rw [Nat.div_div_self (Nat.dvd_of_mem_divisors hd) hq0]
 
+/-- The weight `d ↦ d · 1_{d ∣ N}` is multiplicative. -/
+private lemma v323_gDiv512_mult (N : ℕ) (g : ArithmeticFunction ℝ)
+    (hg : ∀ d, g d = if d ∣ N then (d : ℝ) else 0) : g.IsMultiplicative := by
+  refine ⟨?_, fun {a b} hab => ?_⟩
+  · rw [hg]; simp
+  · rw [hg, hg, hg]
+    by_cases ha : a ∣ N
+    · by_cases hb : b ∣ N
+      · rw [if_pos (hab.mul_dvd_of_dvd_of_dvd ha hb), if_pos ha, if_pos hb]
+        push_cast
+        ring
+      · rw [if_neg (fun h => hb (dvd_trans (dvd_mul_left b a) h)), if_neg hb, mul_zero]
+    · rw [if_neg (fun h => ha (dvd_trans (dvd_mul_right a b) h)), if_neg ha, zero_mul]
 
-/-- `Σ_{e ∣ g} e · μ(g/e) = φ(g)`, the Dirichlet convolution `id * μ = φ`. -/
-private lemma totient_conv323 (g : ℕ) (hg : 0 < g) :
-    (∑ e ∈ g.divisors, (e : ℝ) * ((ArithmeticFunction.moebius (g / e) : ℤ) : ℝ))
-      = (Nat.totient g : ℝ) := by
-  have hrev : (∑ e ∈ g.divisors, (e : ℝ) * ((ArithmeticFunction.moebius (g / e) : ℤ) : ℝ))
-      = ∑ e ∈ g.divisors,
-          ((g / e : ℕ) : ℝ) * ((ArithmeticFunction.moebius e : ℤ) : ℝ) := by
-    refine Finset.sum_nbij' (fun e => g / e) (fun e => g / e) ?_ ?_ ?_ ?_ ?_
-    · intro a ha
-      exact Nat.mem_divisors.mpr ⟨Nat.div_dvd_of_dvd (Nat.dvd_of_mem_divisors ha), hg.ne'⟩
-    · intro b hb
-      exact Nat.mem_divisors.mpr ⟨Nat.div_dvd_of_dvd (Nat.dvd_of_mem_divisors hb), hg.ne'⟩
-    · intro a ha
-      exact Nat.div_div_self (Nat.dvd_of_mem_divisors ha) hg.ne'
-    · intro b hb
-      exact Nat.div_div_self (Nat.dvd_of_mem_divisors hb) hg.ne'
-    · intro a ha
-      rw [Nat.div_div_self (Nat.dvd_of_mem_divisors ha) hg.ne']
-  have hinv : ∀ n : ℕ, 0 < n →
-      (∑ x ∈ n.divisorsAntidiagonal,
-          ((ArithmeticFunction.moebius x.1 : ℤ) : ℝ) * (x.2 : ℝ))
-        = (Nat.totient n : ℝ) := by
-    have hmain := (ArithmeticFunction.sum_eq_iff_sum_mul_moebius_eq
-      (f := fun n : ℕ => (Nat.totient n : ℝ)) (g := fun n : ℕ => (n : ℝ))).mp (by
-        intro n hn
-        have h := congrArg (fun k : ℕ => (k : ℝ)) (Nat.sum_totient n)
-        simpa [Nat.cast_sum] using h)
-    intro n hn
-    exact hmain n hn
-  rw [hrev, ← Nat.sum_divisorsAntidiagonal (f := fun a b =>
-    ((b : ℕ) : ℝ) * ((ArithmeticFunction.moebius a : ℤ) : ℝ))]
-  have hcongr : (∑ i ∈ g.divisorsAntidiagonal,
-      ((i.2 : ℕ) : ℝ) * ((ArithmeticFunction.moebius i.1 : ℤ) : ℝ))
-      = ∑ i ∈ g.divisorsAntidiagonal,
-          ((ArithmeticFunction.moebius i.1 : ℤ) : ℝ) * (i.2 : ℝ) :=
-    Finset.sum_congr rfl (fun i _ => by ring)
-  rw [hcongr, hinv g hg]
+/-- The Ramanujan divisor sum as the Dirichlet convolution `(d ↦ d·1_{d ∣ N}) * μ`. -/
+private lemma v323_conv512 (N : ℕ) (g : ArithmeticFunction ℝ)
+    (hg : ∀ d, g d = if d ∣ N then (d : ℝ) else 0) (q : ℕ) :
+    (g * (ArithmeticFunction.moebius : ArithmeticFunction ℝ)) q
+      = ∑ e ∈ q.divisors, (if e ∣ N then ((e : ℕ) : ℝ) else 0) *
+          ((ArithmeticFunction.moebius (q / e) : ℤ) : ℝ) := by
+  rw [ArithmeticFunction.mul_apply,
+    Nat.sum_divisorsAntidiagonal
+      (fun a b => g a * (ArithmeticFunction.moebius : ArithmeticFunction ℝ) b)]
+  refine Finset.sum_congr rfl (fun e _ => ?_)
+  rw [hg, ArithmeticFunction.intCoe_apply]
 
+/-- The real Ramanujan divisor sum is multiplicative in the modulus. -/
+private lemma v323_c512_real_mul {m n : ℕ} (hmn : Nat.Coprime m n) (hm : 0 < m) (hn : 0 < n) (N : ℕ) :
+    (∑ d ∈ (m * n).divisors,
+        (if (m * n / d : ℕ) ∣ N then ((m * n / d : ℕ) : ℝ) else 0) *
+          ((ArithmeticFunction.moebius d : ℤ) : ℝ))
+      = (∑ d ∈ m.divisors,
+          (if (m / d : ℕ) ∣ N then ((m / d : ℕ) : ℝ) else 0) *
+            ((ArithmeticFunction.moebius d : ℤ) : ℝ)) *
+        (∑ d ∈ n.divisors,
+          (if (n / d : ℕ) ∣ N then ((n / d : ℕ) : ℝ) else 0) *
+            ((ArithmeticFunction.moebius d : ℤ) : ℝ)) := by
+  set g : ArithmeticFunction ℝ := ⟨fun d => if d ∣ N then (d : ℝ) else 0, by simp⟩ with hgdef
+  have hg : ∀ d, g d = if d ∣ N then (d : ℝ) else 0 := fun d => rfl
+  have hmul : (g * (ArithmeticFunction.moebius : ArithmeticFunction ℝ)).IsMultiplicative :=
+    (v323_gDiv512_mult N g hg).mul ArithmeticFunction.isMultiplicative_moebius.intCast
+  rw [v323_c512_conv_form (m * n) N (Nat.mul_pos hm hn), v323_c512_conv_form m N hm,
+    v323_c512_conv_form n N hn, ← v323_conv512 N g hg (m * n), ← v323_conv512 N g hg m,
+    ← v323_conv512 N g hg n]
+  exact hmul.map_mul_of_coprime hmn
+
+/-- The Ramanujan sum at a prime. -/
+private lemma v323_c512_prime {p : ℕ} (hp : p.Prime) (N : ℕ) :
+    (∑ d ∈ p.divisors, (if (p / d : ℕ) ∣ N then ((p / d : ℕ) : ℝ) else 0) *
+        ((ArithmeticFunction.moebius d : ℤ) : ℝ))
+      = if p ∣ N then ((p : ℝ) - 1) else -1 := by
+  rw [hp.divisors, Finset.sum_insert (by simp [hp.ne_one.symm]), Finset.sum_singleton]
+  have hμ1 : ((ArithmeticFunction.moebius 1 : ℤ) : ℝ) = 1 := by
+    rw [ArithmeticFunction.moebius_apply_one]; norm_num
+  have hμp : ((ArithmeticFunction.moebius p : ℤ) : ℝ) = -1 := by
+    rw [ArithmeticFunction.moebius_apply_prime hp]; norm_num
+  rw [hμ1, hμp, Nat.div_one, Nat.div_self hp.pos, if_pos (one_dvd N)]
+  by_cases h : p ∣ N
+  · rw [if_pos h, if_pos h]
+    push_cast
+    ring
+  · rw [if_neg h, if_neg h]
+    ring
+
+/-- The real Ramanujan divisor sum `Σ_{d ∣ q} [q/d ∣ N] (q/d) μ(d)` has absolute value
+`φ((q,N))` at every squarefree `q`: Vaughan 1981 chapter 3, display 3.14 evaluation
+`c_q = μ(q/(q,N)) φ((q,N))`, by multiplicativity in `q` and the prime case. -/
+private lemma v323_abs_c512_sqfree (N : ℕ) : ∀ q : ℕ, Squarefree q →
+    |∑ d ∈ q.divisors, (if (q / d : ℕ) ∣ N then ((q / d : ℕ) : ℝ) else 0) *
+        ((ArithmeticFunction.moebius d : ℤ) : ℝ)| = (Nat.totient (Nat.gcd q N) : ℝ) := by
+  intro q
+  induction q using Nat.recOnPosPrimePosCoprime with
+  | prime_pow p n hp hn =>
+    intro hsq
+    have hn1 : n = 1 := by
+      by_contra hne
+      have h2 : 2 ≤ n := by omega
+      have hdvd : p * p ∣ p ^ n := by
+        rw [← pow_two]; exact pow_dvd_pow p h2
+      exact hp.one_lt.ne' (Nat.isUnit_iff.mp (hsq p hdvd))
+    subst hn1
+    rw [pow_one, v323_c512_prime hp N]
+    by_cases h : p ∣ N
+    · rw [if_pos h, Nat.gcd_eq_left h, Nat.totient_prime hp,
+        Nat.cast_sub hp.one_le, Nat.cast_one]
+      have : (1 : ℝ) ≤ p := by exact_mod_cast hp.one_le
+      exact abs_of_nonneg (by linarith)
+    · rw [if_neg h, ((Nat.Prime.coprime_iff_not_dvd hp).mpr h).gcd_eq_one]
+      simp
+  | zero => intro hsq; exact absurd hsq not_squarefree_zero
+  | one =>
+    intro _
+    rw [Nat.divisors_one, Finset.sum_singleton]
+    simp
+  | coprime a b ha hb hab iha ihb =>
+    intro hsq
+    have hsa : Squarefree a := Squarefree.of_mul_left hsq
+    have hsb : Squarefree b := Squarefree.of_mul_right hsq
+    rw [v323_c512_real_mul hab (by omega) (by omega) N, abs_mul, iha hsa, ihb hsb]
+    have hg : Nat.gcd (a * b) N = Nat.gcd a N * Nat.gcd b N := by
+      rw [Nat.gcd_comm, Nat.Coprime.gcd_mul N hab, Nat.gcd_comm N a, Nat.gcd_comm N b]
+    have hcop : Nat.Coprime (Nat.gcd a N) (Nat.gcd b N) :=
+      Nat.Coprime.coprime_dvd_left (Nat.gcd_dvd_left a N)
+        (Nat.Coprime.coprime_dvd_right (Nat.gcd_dvd_left b N) hab)
+    rw [hg, Nat.totient_mul hcop]
+    push_cast
+    ring
+
+end V323Helpers
 
 /-- LEAF: Vaughan 1981 chapter 3, display 3.14 and the evaluation of the Ramanujan sum used
 in the proof of display 3.23 on book page 34: for squarefree q the Ramanujan sum
@@ -362,87 +433,9 @@ c_q(-m) = Σ_{(a,q)=1} e(-am/q) equals μ(q/(q,m)) φ((q,m)), so its absolute va
 μ(r) Σ_{e|g} e μ(g/e) = μ(r) φ(g). -/
 theorem leaf_ramanujan_sqfree_norm512 (q N : ℕ) (hq : Squarefree q) :
     ‖ramanujan512 q N‖ ≤ (Nat.totient (Nat.gcd q N) : ℝ) := by
-  have hq0 : q ≠ 0 := hq.ne_zero
-  have hq1 : 1 ≤ q := Nat.one_le_iff_ne_zero.mpr hq0
-  have hqpos : 0 < q := Nat.pos_of_ne_zero hq0
-  set g : ℕ := Nat.gcd q N with hgdef
-  have hgq : g ∣ q := by rw [hgdef]; exact Nat.gcd_dvd_left q N
-  have hgne : g ≠ 0 := by
-    rintro h0
-    rw [h0] at hgq
-    exact hq0 (Nat.eq_zero_of_zero_dvd hgq)
-  have hgpos : 0 < g := Nat.pos_of_ne_zero hgne
-  set r : ℕ := q / g with hrdef
-  have hqr : g * r = q := by
-    rw [hrdef]; exact Nat.mul_div_cancel' hgq
-  have hcop : Nat.Coprime r g := by
-    set d : ℕ := Nat.gcd r g with hddef
-    have hd1 : d ∣ g := Nat.gcd_dvd_right r g
-    have hd2 : d ∣ r := Nat.gcd_dvd_left r g
-    obtain ⟨g', hg'⟩ := hd1
-    obtain ⟨r', hr'⟩ := hd2
-    have hdvd : d * d ∣ q := by
-      refine ⟨g' * r', ?_⟩
-      rw [← hqr, hg', hr']
-      ring
-    have hunit : IsUnit d := (Squarefree.eq_1 q).mp hq d hdvd
-    have hone : d = 1 := Nat.isUnit_iff.mp hunit
-    exact Nat.coprime_iff_gcd_eq_one.mpr hone
-  have hform : ramanujan512 q N = ((∑ e ∈ q.divisors,
-      (if e ∣ N then ((e : ℕ) : ℝ) else 0) *
-        ((ArithmeticFunction.moebius (q / e) : ℤ) : ℝ) : ℝ) : ℂ) := by
-    rw [c512_real_form q N hq1, c512_conv_form q N hqpos]
-  have hsupp : (∑ e ∈ q.divisors, (if e ∣ N then ((e : ℕ) : ℝ) else 0) *
-        ((ArithmeticFunction.moebius (q / e) : ℤ) : ℝ))
-      = ∑ e ∈ g.divisors,
-          ((e : ℕ) : ℝ) * ((ArithmeticFunction.moebius (q / e) : ℤ) : ℝ) := by
-    have hstep : (∑ e ∈ q.divisors, (if e ∣ N then ((e : ℕ) : ℝ) else 0) *
-        ((ArithmeticFunction.moebius (q / e) : ℤ) : ℝ))
-        = ∑ e ∈ q.divisors,
-            (if e ∣ N then
-              ((e : ℕ) : ℝ) * ((ArithmeticFunction.moebius (q / e) : ℤ) : ℝ) else 0) := by
-      refine Finset.sum_congr rfl (fun e _ => ?_)
-      by_cases h : e ∣ N <;> simp [h]
-    rw [hstep, ← Finset.sum_filter]
-    have hf : q.divisors.filter (fun e => e ∣ N) = g.divisors := by
-      rw [hgdef, Nat.gcd_comm]
-      exact divisors_filter_dvd_eq_gcd512 (q := q) (a := N) hq0
-    rw [hf]
-  have hsplit : ∀ e ∈ g.divisors, ((ArithmeticFunction.moebius (q / e) : ℤ) : ℝ)
-      = ((ArithmeticFunction.moebius r : ℤ) : ℝ) *
-        ((ArithmeticFunction.moebius (g / e) : ℤ) : ℝ) := by
-    intro e he
-    have hepos : 0 < e := Nat.pos_of_mem_divisors he
-    have hge : g = e * (g / e) := (Nat.mul_div_cancel' (Nat.dvd_of_mem_divisors he)).symm
-    have h1 : q / e = (g / e) * r := by
-      have hq' : q = e * ((g / e) * r) := by
-        rw [← Nat.mul_assoc, hge.symm, hqr]
-      rw [hq', Nat.mul_div_cancel_left _ hepos]
-    have hcopge : Nat.Coprime r (g / e) :=
-      hcop.coprime_dvd_right (Nat.div_dvd_of_dvd (Nat.dvd_of_mem_divisors he))
-    rw [h1, Nat.mul_comm (g / e) r,
-      ArithmeticFunction.isMultiplicative_moebius.map_mul_of_coprime hcopge.gcd_eq_one]
-    push_cast
-    ring
-  have hfac : (∑ e ∈ g.divisors, ((e : ℕ) : ℝ) *
-        ((ArithmeticFunction.moebius (q / e) : ℤ) : ℝ))
-      = ((ArithmeticFunction.moebius r : ℤ) : ℝ) * (Nat.totient g : ℝ) := by
-    have hterm : ∀ e ∈ g.divisors, ((e : ℕ) : ℝ) *
-        ((ArithmeticFunction.moebius (q / e) : ℤ) : ℝ)
-        = ((ArithmeticFunction.moebius r : ℤ) : ℝ) *
-          (((e : ℕ) : ℝ) * ((ArithmeticFunction.moebius (g / e) : ℤ) : ℝ)) := by
-      intro e he
-      rw [hsplit e he]; ring
-    rw [Finset.sum_congr rfl hterm, ← totient_conv323 g hgpos, Finset.mul_sum]
-  rw [hform, hsupp, hfac, Complex.norm_real, Real.norm_eq_abs, abs_mul,
-    abs_of_nonneg (by positivity : (0 : ℝ) ≤ (Nat.totient g : ℝ))]
-  have hmu : |((ArithmeticFunction.moebius r : ℤ) : ℝ)| ≤ 1 := by
-    rw [← Int.cast_abs]
-    exact_mod_cast ArithmeticFunction.abs_moebius_le_one (n := r)
-  calc |((ArithmeticFunction.moebius r : ℤ) : ℝ)| * (Nat.totient g : ℝ)
-      ≤ 1 * (Nat.totient g : ℝ) :=
-        mul_le_mul_of_nonneg_right hmu (by positivity)
-    _ = (Nat.totient g : ℝ) := by rw [one_mul]
+  have hq0 : 1 ≤ q := Nat.pos_of_ne_zero (fun h => not_squarefree_zero (h ▸ hq))
+  rw [v323_c512_real_form q N hq0, Complex.norm_real, Real.norm_eq_abs,
+    v323_abs_c512_sqfree N q hq]
 
 /-- LEAF: Vaughan 1981 chapter 3, book page 34, the elementary fact printed under display
 3.23: Σ_{q>Z} φ(q)^{-2} ≪ Z^{-1}, together with the convergence of Σ_q φ(q)^{-2}, which
