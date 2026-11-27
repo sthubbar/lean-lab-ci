@@ -44,7 +44,59 @@ theorem weight_integrable_leaf_ib {q : ℕ} (N : ℕ) (A lam T : ℝ) (χ : Diri
     (Nv : Fin 20 → ℝ) (hT : 1 ≤ T) :
     IntervalIntegrable (fun t => wt38 N A lam t * ‖Fprod Nv χ (1 / 2 + t * Complex.I)‖)
       MeasureTheory.volume (-T) T := by
-  sorry
+  have hF : Continuous (fun t : ℝ => Fprod Nv χ (1 / 2 + t * Complex.I)) := by
+    unfold Fprod fj
+    refine continuous_finsetProd _ (fun j _ => continuous_finsetSum _ (fun n hn => ?_))
+    have hn1 : 1 ≤ n := (Finset.mem_Icc.mp (Finset.mem_filter.mp hn).1).1
+    have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast (show n ≠ 0 by omega)
+    refine continuous_const.mul ?_
+    exact (continuous_const.add (Complex.continuous_ofReal.mul continuous_const)).neg.const_cpow
+      (Or.inl hn0)
+  set m : ℝ → ℝ := fun t => sInf ((fun u => |t + 2 * π * lam * u|) '' Set.Icc ((N : ℝ) - A) N)
+    with hm_def
+  have hm_nonneg : ∀ t, 0 ≤ m t := fun t =>
+    Real.sInf_nonneg (by rintro _ ⟨u, -, rfl⟩; exact abs_nonneg _)
+  have hm_cont : Continuous m := by
+    by_cases hne : (Set.Icc ((N : ℝ) - A) N).Nonempty
+    · refine (LipschitzWith.of_le_add (fun x y => ?_)).continuous
+      have hbdd : BddBelow ((fun u => |y + 2 * π * lam * u|) '' Set.Icc ((N : ℝ) - A) N) :=
+        ⟨0, by rintro _ ⟨u, -, rfl⟩; exact abs_nonneg _⟩
+      have : m x - dist x y ≤ m y := by
+        refine le_csInf (hne.image _) ?_
+        rintro _ ⟨u, hu, rfl⟩
+        have hbx : BddBelow ((fun u => |x + 2 * π * lam * u|) '' Set.Icc ((N : ℝ) - A) N) :=
+          ⟨0, by rintro _ ⟨u, -, rfl⟩; exact abs_nonneg _⟩
+        have h1 : m x ≤ |x + 2 * π * lam * u| := csInf_le hbx ⟨u, hu, rfl⟩
+        have h2 : |x + 2 * π * lam * u| ≤ |y + 2 * π * lam * u| + dist x y := by
+          rw [Real.dist_eq]
+          calc |x + 2 * π * lam * u| = |(y + 2 * π * lam * u) + (x - y)| := by ring_nf
+            _ ≤ _ := abs_add_le _ _
+        linarith
+      linarith
+    · rw [Set.not_nonempty_iff_eq_empty] at hne
+      have : m = fun _ => 0 := by
+        funext t; simp only [hm_def, hne, Set.image_empty, Real.sInf_empty]
+      rw [this]; exact continuous_const
+  have hw : (fun t => wt38 N A lam t) = fun t => if m t = 0 then A else min A (N / m t) := by
+    funext t; simp only [wt38, hm_def]
+  have hmeas : Measurable (fun t => wt38 N A lam t) := by
+    rw [hw]
+    exact Measurable.ite (measurableSet_eq_fun hm_cont.measurable measurable_const)
+      measurable_const (measurable_const.min (measurable_const.div hm_cont.measurable))
+  have hbdd : ∀ t, ‖wt38 N A lam t‖ ≤ |A| := by
+    intro t
+    rw [show wt38 N A lam t = if m t = 0 then A else min A (N / m t) from congrFun hw t,
+      Real.norm_eq_abs]
+    split_ifs with h0
+    · exact le_rfl
+    · have hx : 0 ≤ (N : ℝ) / m t := div_nonneg (Nat.cast_nonneg _) (hm_nonneg t)
+      rw [abs_le]
+      constructor
+      · exact le_min (neg_abs_le A) (le_trans (neg_nonpos.mpr (abs_nonneg A)) hx)
+      · exact le_trans (min_le_left _ _) (le_abs_self A)
+  have hg := hF.norm.intervalIntegrable (μ := MeasureTheory.volume) (-T) T
+  exact ⟨hg.1.bdd_mul hmeas.aestronglyMeasurable (MeasureTheory.ae_of_all _ hbdd),
+    hg.2.bdd_mul hmeas.aestronglyMeasurable (MeasureTheory.ae_of_all _ hbdd)⟩
 
 /-- PROVED from the three LEAFs: `InnerBound_ps`, page 265 first display. -/
 theorem innerBound_of_leaves_ib (h1 : Lemma1) : InnerBound_ps := by
