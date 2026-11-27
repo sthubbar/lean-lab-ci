@@ -115,6 +115,8 @@ theorem s145g_psiChi_grh_uniform (hG : LeanLab.DERZ1997.GRH) {k : ℕ} [NeZero k
     (χ : DirichletCharacter ℂ k) (hχ : χ.IsPrimitive) {u : ℝ} (hu : 10 ^ 9 ≤ u)
     (hku : (k : ℝ) ≤ Real.sqrt u) :
     ‖psiChi χ u‖ ≤ 0.83 * Real.sqrt u * Real.log u ^ 2 := by
+  -- Attempted `exact lemma13 hG hk χ hχ hu hku`. Lean reported an application type mismatch:
+  -- `hku` has type `↑k ≤ √u` but `lemma13` expects `↑k ≤ u ^ 0.37`.
   sorry
 
 /-- The imprimitive error of p. 340 in the wide range `q ≤ √u`: `ω(q) ln u ≤ 2 ln² u`.
