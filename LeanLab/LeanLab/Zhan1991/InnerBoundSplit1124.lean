@@ -27,7 +27,18 @@ theorem fubini_leaf_ib : ∃ N₀ : ℝ, ∀ (N : ℕ) (A lam T : ℝ) (q : ℕ)
     ∫ u in ((N : ℝ) - A)..N, deriv (fun v => Vline_ps Nv χ N A (1 / 2) T v) u * ee (lam * u)
       = (1 / (2 * π) : ℂ) * ∫ t in (-T)..T,
           Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) * innerJ_ib N A lam t := by
-  sorry
+  have hDeriv : HasDerivAt (fun v => Vline_ps Nv χ N A (1 / 2) T v)
+      ((1 / (2 * π) : ℂ) * ∫ t in (-T)..T,
+        Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) *
+          ((u : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1))) u := by
+    apply LeanLab.Zhan1991.PartialSum1122d.vline_ps_hasDerivAt Nv χ N A T
+  have hFubini : ∫ u in ((N : ℝ) - A)..N, ∫ t in (-T)..T, Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) *
+      ((u : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)) * ee (lam * u) dt du
+    = ∫ t in (-T)..T, ∫ u in ((N : ℝ) - A)..N, Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) *
+        ((u : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)) * ee (lam * u) du dt := by
+    Fubini.two_door (by exact_nhds_of_mem_Icc _) (by exact_nhds_of_mem_Icc _)
+  rw [hDeriv]
+  exact (1 / (2 * π)) * ∫ t in (-T)..T, Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) * innerJ_ib N A lam t dt
 
 /-- LEAF: page 264 to page 265 first display, Lemma 1 applied to
 `∫_{N-A}^N u^{-1/2} e(t log u / 2π + λu) du` with `G = u^{-1/2} ≤ 2 N^{-1/2}` and
@@ -36,7 +47,20 @@ theorem fubini_leaf_ib : ∃ N₀ : ℝ, ∀ (N : ℕ) (A lam T : ℝ) (q : ℕ)
 theorem inner_lemma1_leaf_ib (h1 : Lemma1) : ∃ K N₀ : ℝ, 0 < K ∧ ∀ (N : ℕ) (A lam T : ℝ),
     N₀ ≤ N → 1 ≤ A → A ≤ (N : ℝ) ^ (2 / 3 : ℝ) → 1 ≤ T → ∀ t : ℝ, -T ≤ t → t ≤ T →
     ‖innerJ_ib N A lam t‖ ≤ K * (N : ℝ) ^ (-(1 / 2) : ℝ) * wt38 N A lam t := by
-  sorry
+  have hmono : MonotoneOn (fun u => (u ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I - 1)) / (lam)) (Set.Icc ((N : ℝ) - A) N) := by
+    rcases h1 with ⟨_K, hLemma1⟩
+  have hm : 0 < |lam| := by
+    exact le_of_lt_of_nonneg _ 
+  have hG : ∀ u ∈ Set.Icc ((N : ℝ) - A) N, |u ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I - 1)| ≤ (N : ℝ) ^ (-(1 / 2) : ℝ) := by
+    intro u hu
+    exact abs_cpow (abs_of_pos (Nat.cast_nonneg _)) (by norm_num)
+  have hF' : ContinuousOn (fun u => lam * u) (Set.Icc ((N : ℝ) - A) N) := by
+    continuous_on_const
+  refine lemma1_mono _ _ _ _ _ _ hLemma1
+  · exact hmono
+  · exact hG
+  · exact hm
+  exact hF'
 
 /-- LEAF: page 265 first display, the `t` integral on the right is finite: the weight `wt38`
 is bounded by `A` and measurable in `t`, and `F(1/2+it)` is continuous. Class EASY. -/
