@@ -1,4 +1,6 @@
 import LeanLab.OpenProblems.SPLIT_route_euler_positive_density
+import LeanLab.Romanov.Theorem
+import LeanLab.SchnirelmannExplicit.Constants
 
 /-!
 # Feed1122 split of `route_euler_positive_density` (OpenProblems, State1612), repaired
@@ -28,6 +30,10 @@ namespace LeanLab.OpenProblems.State1612
 
 open LeanLab
 open scoped Classical
+
+open Finset Real
+open LeanLab.SchnirelmannGoldbach (singProd)
+open LeanLab.BrunGap (gapCount C₀ gapUpper_uniform)
 
 /-- The triangular count is at most `sqrt (2n) + 1`: a prime difference forces `2k(k+1) < 4n`. -/
 private lemma tri_count_le (n : ℕ) :
@@ -122,6 +128,153 @@ private lemma diag_bound (R : ℕ → ℕ)
     _ = (X : ℝ) * (Real.log (X : ℝ) ^ 2 * (Real.sqrt (2 * (X : ℝ)) + 1)) := by ring
     _ ≤ (X : ℝ) * (X : ℝ) := mul_le_mul_of_nonneg_left hX hx0
     _ = (X : ℝ) ^ 2 := by ring
+
+/-- The average of the singular products attached to triangular differences is bounded.
+The two factors `(k - l)` and `(k + l + 1)` are separated, and the mean square estimates for
+`singProd` are applied to both factors. -/
+private lemma tri_singProd_sum_le (K : ℕ) :
+    (∑ k ∈ Finset.Icc 1 K, ∑ l ∈ Finset.Icc 1 K,
+      (if l < k then singProd ((k - l) * (k + l + 1)) else 0)) ≤ 13 * (K : ℝ) ^ 2 := by
+  classical
+  rcases Nat.eq_zero_or_pos K with rfl | hK
+  · simp
+  set S : Finset (ℕ × ℕ) :=
+    (Finset.Icc 1 K).product (Finset.Icc 1 K) |>.filter (fun p => p.2 < p.1) with hSdef
+  set f : ℕ × ℕ → ℝ := fun p => singProd (p.1 - p.2) with hf
+  set g : ℕ × ℕ → ℝ := fun p => singProd (p.1 + p.2 + 1) with hg
+  have hf2 : ∑ p ∈ S, f p ^ 2 ≤ 9 * (K : ℝ) ^ 2 := by
+    have hinner : ∀ k ∈ Finset.Icc 1 K,
+        (∑ l ∈ Finset.Icc 1 K,
+          (if l < k then singProd (k - l) ^ 2 else 0)) ≤ 9 * (K : ℝ) := by
+      intro k hk
+      set A : Finset ℕ := (Finset.Icc 1 K).filter (fun l => l < k) with hA
+      have hAeq : (∑ l ∈ Finset.Icc 1 K,
+          (if l < k then singProd (k - l) ^ 2 else 0)) =
+          ∑ l ∈ A, singProd (k - l) ^ 2 := by
+        rw [← Finset.sum_filter]
+        apply Finset.sum_congr rfl
+        intro l hl
+        by_cases hlt : l < k <;> simp [hA, hlt]
+      rw [hAeq]
+      have hinj : Set.InjOn (fun l : ℕ => k - l) A := by
+        intro l₁ hl₁ l₂ hl₂ heq
+        simp only [hA, mem_filter, mem_Icc] at hl₁ hl₂
+        omega
+      have himage : Finset.image (fun l : ℕ => k - l) A ⊆ Finset.Icc 1 K := by
+        intro d hd
+        obtain ⟨l, hl, rfl⟩ := Finset.mem_image.mp hd
+        simp only [hA, mem_filter, mem_Icc] at hl
+        omega
+      have hmap : ∑ l ∈ A, singProd (k - l) ^ 2 ≤
+          ∑ d ∈ Finset.Icc 1 K, singProd d ^ 2 :=
+        Finset.sum_le_sum_of_injOn (fun l : ℕ => k - l) hinj himage
+          (fun l _ => le_rfl) (fun d _ _ => by positivity)
+      rw [hmap]
+      have hs2 := LeanLab.SchnirelmannExplicit.S2_explicit K (by omega)
+      simpa using hs2
+    calc
+      (∑ p ∈ S, f p ^ 2) = ∑ k ∈ Finset.Icc 1 K, ∑ l ∈ Finset.Icc 1 K,
+          (if l < k then f (k, l) ^ 2 else 0) := by
+            rw [hSdef, Finset.sum_filter, Finset.sum_product]
+            apply Finset.sum_congr rfl
+            intro p hp
+            by_cases hlt : p.2 < p.1 <;> simp [f, hlt]
+      _ ≤ ∑ _k ∈ Finset.Icc 1 K, 9 * (K : ℝ) := by
+            apply Finset.sum_le_sum
+            intro k hk
+            simpa [f] using hinner k hk
+      _ = 9 * (K : ℝ) * (Finset.Icc 1 K).card := by
+            rw [Finset.sum_const, nsmul_eq_mul]
+      _ = 9 * (K : ℝ) ^ 2 := by
+            rw [Nat.card_Icc]
+            congr 1
+            omega
+  have hg2 : ∑ p ∈ S, g p ^ 2 ≤ 18 * (K : ℝ) ^ 2 := by
+    have hinner : ∀ k ∈ Finset.Icc 1 K,
+        (∑ l ∈ Finset.Icc 1 K,
+          (if l < k then singProd (k + l + 1) ^ 2 else 0)) ≤ 18 * (K : ℝ) := by
+      intro k hk
+      set A : Finset ℕ := (Finset.Icc 1 K).filter (fun l => l < k) with hA
+      have hAeq : (∑ l ∈ Finset.Icc 1 K,
+          (if l < k then singProd (k + l + 1) ^ 2 else 0)) =
+          ∑ l ∈ A, singProd (k + l + 1) ^ 2 := by
+        rw [← Finset.sum_filter]
+        apply Finset.sum_congr rfl
+        intro l hl
+        by_cases hlt : l < k <;> simp [hA, hlt]
+      rw [hAeq]
+      have hinj : Set.InjOn (fun l : ℕ => k + l + 1) A := by
+        intro l₁ hl₁ l₂ hl₂ heq
+        simp only [hA, mem_filter, mem_Icc] at hl₁ hl₂
+        omega
+      have himage : Finset.image (fun l : ℕ => k + l + 1) A ⊆ Finset.Icc 1 (2 * K + 1) := by
+        intro d hd
+        obtain ⟨l, hl, rfl⟩ := Finset.mem_image.mp hd
+        simp only [hA, mem_filter, mem_Icc] at hl
+        omega
+      have hmap : ∑ l ∈ A, singProd (k + l + 1) ^ 2 ≤
+          ∑ d ∈ Finset.Icc 1 (2 * K + 1), singProd d ^ 2 :=
+        Finset.sum_le_sum_of_injOn (fun l : ℕ => k + l + 1) hinj himage
+          (fun l _ => le_rfl) (fun d _ _ => by positivity)
+      rw [hmap]
+      have hs2 := LeanLab.SchnirelmannExplicit.S2_explicit (2 * K + 1) (by omega)
+      calc
+        (∑ d ∈ Finset.Icc 1 (2 * K + 1), singProd d ^ 2) ≤ 9 * (2 * K + 1 : ℕ) := by
+          exact_mod_cast hs2
+        _ ≤ 18 * (K : ℝ) := by
+          push_cast
+          omega
+    calc
+      (∑ p ∈ S, g p ^ 2) = ∑ k ∈ Finset.Icc 1 K, ∑ l ∈ Finset.Icc 1 K,
+          (if l < k then g (k, l) ^ 2 else 0) := by
+            rw [hSdef, Finset.sum_filter, Finset.sum_product]
+            apply Finset.sum_congr rfl
+            intro p hp
+            by_cases hlt : p.2 < p.1 <;> simp [g, hlt]
+      _ ≤ ∑ _k ∈ Finset.Icc 1 K, 18 * (K : ℝ) := by
+            apply Finset.sum_le_sum
+            intro k hk
+            simpa [g] using hinner k hk
+      _ = 18 * (K : ℝ) * (Finset.Icc 1 K).card := by
+            rw [Finset.sum_const, nsmul_eq_mul]
+      _ = 18 * (K : ℝ) ^ 2 := by
+            rw [Nat.card_Icc]
+            congr 1
+            omega
+  have hcauchy : (∑ p ∈ S, f p * g p) ≤
+      Real.sqrt (∑ p ∈ S, f p ^ 2) * Real.sqrt (∑ p ∈ S, g p ^ 2) := by
+    simpa using Real.sum_mul_le_sqrt_mul_sqrt S f g
+  have hfg : (∑ p ∈ S, f p * g p) ≤ 13 * (K : ℝ) ^ 2 := by
+    calc
+      (∑ p ∈ S, f p * g p) ≤ Real.sqrt (∑ p ∈ S, f p ^ 2) *
+          Real.sqrt (∑ p ∈ S, g p ^ 2) := hcauchy
+      _ ≤ Real.sqrt (9 * (K : ℝ) ^ 2) * Real.sqrt (18 * (K : ℝ) ^ 2) := by
+        gcongr
+        · exact hf2
+        · exact hg2
+      _ ≤ 13 * (K : ℝ) ^ 2 := by
+        have hK0 : 0 ≤ (K : ℝ) := Nat.cast_nonneg _
+        rw [Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity),
+          Real.sqrt_sq hK0, Real.sqrt_sq (by positivity)]
+        have h162 : (162 : ℝ) ≤ 169 := by norm_num
+        nlinarith [sq_nonneg (Real.sqrt 162 - 13)]
+  calc
+    (∑ k ∈ Finset.Icc 1 K, ∑ l ∈ Finset.Icc 1 K,
+      (if l < k then singProd ((k - l) * (k + l + 1)) else 0))
+        = ∑ p ∈ S, (if p.2 < p.1 then singProd ((p.1 - p.2) * (p.1 + p.2 + 1)) else 0) := by
+      rw [hSdef, Finset.sum_filter, Finset.sum_product]
+      apply Finset.sum_congr rfl
+      intro p hp
+      by_cases hlt : p.2 < p.1 <;> simp [hlt]
+    _ ≤ ∑ p ∈ S, f p * g p := by
+      apply Finset.sum_le_sum
+      intro p hp
+      simp only [hSdef, mem_filter] at hp
+      rw [if_pos hp.2]
+      have hmul := LeanLab.Romanov.singProd_mul_le (a := p.1 - p.2) (b := p.1 + p.2 + 1)
+        (by omega) (by omega)
+      simpa [f, g] using hmul
+    _ ≤ 13 * (K : ℝ) ^ 2 := hfg
 
 /-- The second moment from the off diagonal leaf: `R ^ 2 = R (R - 1) + R`, and the diagonal sum
 of `R` is at most `X ^ 2 / (log X) ^ 2` because `R n ≤ sqrt (2n) + 1`. -/
