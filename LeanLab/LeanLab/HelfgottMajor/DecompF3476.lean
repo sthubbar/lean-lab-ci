@@ -1,4 +1,4 @@
-import LeanLab.HelfgottMajor.BookZeroSplit1122
+import LeanLab.HelfgottMajor.BookZeroHonest1123
 import Mathlib
 
 /-!
@@ -21,6 +21,8 @@ AI wrote this Lean code.  Binary Goldbach is open.
 
 namespace LeanLab.HelfgottMajor.BookZeroSplit1122
 open LeanLab.HelfgottMajor.ZeroCount1623
+open LeanLab.HelfgottMajor.BookZeroHonest1123
+open Complex Set Filter Topology
 
 variable {q : ℕ} [NeZero q]
 
@@ -33,7 +35,50 @@ theorem book_395_pair_F3476 (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitiv
     (hq : 1 < q) {T : ℝ} (hT : 5 / 7 ≤ T) :
     |bookCount χ T + bookCount χ⁻¹ T - 2 * bookMain q T| ≤
       0.298 * Real.log ((q : ℝ) * T) + 4.358 := by
-  sorry
+  have hT0 : 0 < T := by linarith
+  have hq0 : (q : ℝ) ≠ 0 := by exact_mod_cast NeZero.ne q
+  rw [pair_weight_sum χ hT0, two_bookMain]
+  set F := (stripZeros_finite χ T).toFinset with hF
+  set S := ∑ ρ ∈ F, (if |ρ.im| = T then (1 / 2 : ℝ) else 1) * (mult χ ρ : ℝ) with hS
+  set N := ∑ ρ ∈ F, (mult χ ρ : ℝ) with hN
+  set M := ∑ ρ ∈ F.filter (fun ρ => |ρ.im| < T), (mult χ ρ : ℝ) with hM
+  have hSN : S ≤ N := by
+    apply Finset.sum_le_sum
+    intro ρ _
+    have hm : (0 : ℝ) ≤ mult χ ρ := Nat.cast_nonneg _
+    split_ifs <;> linarith
+  have hMS : M ≤ S := by
+    rw [hM, Finset.sum_filter]
+    apply Finset.sum_le_sum
+    intro ρ _
+    have hm : (0 : ℝ) ≤ mult χ ρ := Nat.cast_nonneg _
+    split_ifs with h1 h2
+    · linarith
+    · linarith
+    · linarith
+    · linarith
+  have hup := (abs_le.mp (bmor_two_sided χ hχ hq hT)).2
+  obtain ⟨ε, hε, hgap⟩ := left_gap χ T
+  set g : ℝ → ℝ := fun t ↦ t / Real.pi * Real.log ((q : ℝ) * t / (2 * Real.pi * Real.exp 1)) -
+    (0.298 * Real.log ((q : ℝ) * t) + 4.358) with hg
+  have hev : ∀ᶠ t in 𝓝[<] T, g t ≤ M := by
+    have hlt : max (T - ε) (5 / 7) < T := max_lt (by linarith) (by linarith)
+    filter_upwards [Ioo_mem_nhdsLT hlt] with t ht
+    have h57 : (5 / 7 : ℝ) ≤ t := (lt_of_le_of_lt (le_max_right _ _) ht.1).le
+    have hTe : T - ε < t := lt_of_le_of_lt (le_max_left _ _) ht.1
+    have he := hgap t hTe ht.2
+    have hb := (abs_le.mp (bmor_two_sided χ hχ hq h57)).1
+    rw [he] at hb
+    simp only [hg]
+    linarith
+  have hcont : ContinuousAt g T :=
+    (continuousAt_main2 hq0 hT0).sub
+      ((continuousAt_const.mul (continuousAt_logqT hq0 hT0)).add continuousAt_const)
+  have hlim : Tendsto g (𝓝[<] T) (𝓝 (g T)) := hcont.tendsto.mono_left nhdsWithin_le_nhds
+  have hlow : g T ≤ M := le_of_tendsto hlim hev
+  simp only [hg] at hlow
+  rw [abs_le]
+  constructor <;> linarith
 
 /-- LEAF: Non-real character step.  For a primitive character whose inverse differs
 from the character, the one-sided book count differs from the book main term by at most
