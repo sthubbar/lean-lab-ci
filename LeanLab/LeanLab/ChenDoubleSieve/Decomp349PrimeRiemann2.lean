@@ -13,6 +13,52 @@ open Real Finset Filter Set
 open scoped Classical Topology
 namespace LeanLab.ChenDoubleSieve.PrimeRiemannCore
 
+/-! Helper lemmas for prc_closed_riemann: lower bound on lo, uniform band mass, outer Riemann sum, G continuity, and iterated sum factorization. -/
+
+/-- Helper: continuous positive function on [a,b] has a positive uniform lower bound δ. -/
+theorem prc_exists_delta {a b : ℝ} {lo : ℝ → ℝ} (ha : 0 < a) (hab : a ≤ b)
+    (hlo : ContinuousOn lo (Icc a b)) (hlo0 : ∀ t ∈ Icc a b, 0 < lo t) :
+    ∃ δ, 0 < δ ∧ ∀ t ∈ Icc a b, δ ≤ lo t := by
+  sorry
+
+/-- Helper: outer 1-D Riemann sum. For H continuous on [a,b], the sum over primes p of
+H(t_p)/p tends to ∫_a^b H(t)/t dt. -/
+theorem prc_outer_riemann {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) (hb1 : b ≤ 1)
+    (H : ℝ → ℝ) (hH : ContinuousOn H (Icc a b))
+    (hM : ∀ a' b' : ℝ, 0 < a' → a' ≤ b' → b' ≤ 1 →
+      Tendsto (fun N : ℕ => prcMertens a' b' N) atTop (𝓝 (log b' - log a'))) :
+    Tendsto (fun N : ℕ => ∑ p ∈ (Finset.range (N + 1)).filter (fun p => p.Prime ∧
+        log (p : ℝ) / log N ∈ Icc a b), H (log (p : ℝ) / log N) / (p : ℝ)) atTop
+      (𝓝 (∫ t in a..b, H t / t)) := by
+  sorry
+
+/-- Helper: G(t) = ∫_{lo t}^{hi t} g(t,u)/u du is continuous on [a,b]. -/
+theorem prc_G_continuous {a b : ℝ} {lo hi : ℝ → ℝ} {g : ℝ × ℝ → ℝ}
+    (ha : 0 < a) (hab : a ≤ b) (hb1 : b ≤ 1)
+    (hlo : ContinuousOn lo (Icc a b)) (hhi : ContinuousOn hi (Icc a b))
+    (hlo0 : ∀ t ∈ Icc a b, 0 < lo t) (hlohi : ∀ t ∈ Icc a b, lo t ≤ hi t)
+    (hhi1 : ∀ t ∈ Icc a b, hi t ≤ 1)
+    (hg : ContinuousOn g {x : ℝ × ℝ | x.1 ∈ Icc a b ∧ x.2 ∈ Icc (lo x.1) (hi x.1)}) :
+    ContinuousOn (fun t : ℝ => ∫ u in lo t..hi t, g (t, u) / (t * u)) (Icc a b) := by
+  sorry
+
+/-- Helper: factor the double sum over prcClosed into iterated sums over p then q. -/
+theorem prc_sum_iter {a b : ℝ} {lo hi : ℝ → ℝ} {g : ℝ × ℝ → ℝ}
+    (ha : 0 < a) (hab : a ≤ b) (hb1 : b ≤ 1)
+    (hlo : ContinuousOn lo (Icc a b)) (hhi : ContinuousOn hi (Icc a b))
+    (hlo0 : ∀ t ∈ Icc a b, 0 < lo t) (hlohi : ∀ t ∈ Icc a b, lo t ≤ hi t)
+    (hhi1 : ∀ t ∈ Icc a b, hi t ≤ 1)
+    (hg : ContinuousOn g {x : ℝ × ℝ | x.1 ∈ Icc a b ∧ x.2 ∈ Icc (lo x.1) (hi x.1)})
+    (N : ℕ) (hN : 2 ≤ N) :
+    ∑ q ∈ prcClosed a b lo hi N, g (log (q.1 : ℝ) / log N, log (q.2 : ℝ) / log N) /
+      ((q.1 : ℝ) * q.2)
+    = ∑ p ∈ (Finset.range (N + 1)).filter
+      (fun p => p.Prime ∧ log (p : ℝ) / log N ∈ Icc a b),
+      (1 / (p : ℝ)) * (∑ q ∈ (Finset.range (N + 1)).filter
+        (fun q => q.Prime ∧ log (q : ℝ) / log N ∈ Icc (lo (log (p : ℝ) / log N)) (hi (log (p : ℝ) / log N))),
+        g (log (p : ℝ) / log N, log (q : ℝ) / log N) / (q : ℝ)) := by
+  sorry
+
 /-- Wu 2004 page 39 equation 10.5, the closed summation region: prime pairs p, q at most N
 with t equal log p / log N in the closed interval a to b and u equal log q / log N in the
 closed interval lo t to hi t. -/
