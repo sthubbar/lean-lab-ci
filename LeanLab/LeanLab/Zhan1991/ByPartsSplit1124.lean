@@ -32,7 +32,26 @@ theorem vline_deriv_continuous_leaf_bp {q : ℕ} (Nv : Fin 20 → ℝ) (χ : Dir
     ContinuousOn (fun u : ℝ => (1 / (2 * π) : ℂ) * ∫ t in (-T)..T,
         Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) *
           (u : ℂ) ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I - 1)) (Set.Ioi 0) := by
-  sorry
+  have hF : Continuous (fun t : ℝ => Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I)) := by
+    unfold Fprod fj
+    refine continuous_finsetProd _ (fun j _ => continuous_finsetSum _ (fun n hn => ?_))
+    have hn1 : 1 ≤ n := (Finset.mem_Icc.mp (Finset.mem_filter.mp hn).1).1
+    have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast (show n ≠ 0 by omega)
+    refine continuous_const.mul ?_
+    exact (continuous_const.add (Complex.continuous_ofReal.mul continuous_const)).neg.const_cpow
+      (Or.inl hn0)
+  rw [continuousOn_iff_continuous_domRestrict]
+  have hc : Continuous (fun p : Set.Ioi (0 : ℝ) × ℝ =>
+      Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + p.2 * Complex.I) *
+        (((p.1 : ℝ)) : ℂ) ^ (((1 / 2 : ℝ) : ℂ) + p.2 * Complex.I - 1)) := by
+    refine (hF.comp continuous_snd).mul ?_
+    refine Continuous.cpow (Complex.continuous_ofReal.comp (continuous_subtype_val.comp continuous_fst))
+      ((continuous_const.add ((Complex.continuous_ofReal.comp continuous_snd).mul continuous_const)).sub
+        continuous_const) (fun p => Complex.ofReal_mem_slitPlane.mpr p.1.2)
+  exact continuous_const.mul
+    (intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' (μ := MeasureTheory.volume)
+      (f := fun (u : Set.Ioi (0 : ℝ)) (t : ℝ) => Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) *
+        (((u : ℝ)) : ℂ) ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I - 1)) hc (-T) T)
 
 theorem hasDerivAt_ee_lin_bp (lam t : ℝ) :
     HasDerivAt (fun u : ℝ => ee (lam * u)) (2 * π * Complex.I * lam * ee (lam * t)) t := by
