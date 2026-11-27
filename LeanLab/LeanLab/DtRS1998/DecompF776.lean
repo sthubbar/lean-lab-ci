@@ -19,7 +19,9 @@ sub-range; the certificate is open. -/
 theorem finite_goldbach_2e13_to_25e12 (N : ℕ) (hlo : 2 * 10 ^ 13 ≤ N)
     (hhi : N ≤ 25 * 10 ^ 12) (he : Even N) :
     ∃ p : ℕ, p.Prime ∧ p ≤ N ∧ (N - p).Prime := by
-  sorry
+  rcases Theorem1.theorem1_upTo_of_P0005 (N := N) he (by omega) (by omega) with
+    ⟨p, q, hp, hq, hsum⟩
+  exact ⟨p, hp, by omega, by omega⟩
 
 /-- LEAF. Second window: every even N in [25*10^12, 3*10^13] is a sum of two
 primes. Finite instance of binary Goldbach for this sub-range; open. -/
