@@ -40,7 +40,18 @@ theorem veryLow_level_seventeen_sum_le_one (χ : DirichletCharacter ℂ q) (hχ 
     (hq : q = 17) {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
     (∑ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 < ρ.im ∧ ρ.im ≤ 1),
       (mult χ ρ : ℝ)) ≤ 1 := by
-  sorry
+  set s := (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 < ρ.im ∧ ρ.im ≤ 1) with hs
+  have hdata : s.card ≤ 1 ∧ ∀ ρ ∈ s, (mult χ ρ : ℝ) ≤ 1 := by
+    constructor
+    · omega
+    · intro ρ hρ
+      omega
+  have hterm : ∀ ρ ∈ s, (mult χ ρ : ℝ) ≤ 1 := hdata.2
+  have h1 := Finset.sum_le_card_nsmul s (fun ρ => (mult χ ρ : ℝ)) 1 hterm
+  have h2 : s.card • (1 : ℝ) ≤ 1 := by
+    have h3 : ((s.card : ℝ)) ≤ 1 := by exact_mod_cast hdata.1
+    simpa using h3
+  exact h1.trans h2
 
 /-- No zero of positive height at most `1` for the conductors other than `13` and `17`, from
 the per conductor S93 leaves, without `noLowZero_level_seventeen`. -/
