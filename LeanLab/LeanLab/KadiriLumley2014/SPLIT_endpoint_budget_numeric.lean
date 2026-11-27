@@ -275,6 +275,14 @@ low budget 0.01602, high budget 0.05926, remaining margin 0.01069 in units of th
 /-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 57 on page 13, with the
 zero sum replaced by the low budget 0.01602 plus the high budget 0.05926; weight integrals and nu
 of page 9 evaluated for m of this row. Uncertified margin 0.01069. Class MEDIUM. -/
+/-
+Row log index 57: uncertified mpmath falsifier, notes/burst-20261115/scripts/actualzeros_rows,
+low budget 0.01602, high budget 0.05926, remaining margin 0.01069 in units of the factor
+(e^u - 1) X of the right side.
+-/
+/-- LEAF: page 9 display 2.64 at the endpoint of the Table 2 row log index 57 on page 13, with the
+zero sum replaced by the low budget 0.01602 plus the high budget 0.05926; weight integrals and nu
+of page 9 evaluated for m of this row. Uncertified margin 0.01069. Class MEDIUM. -/
 theorem endpoint_budget_numeric_row57 (r : PrintedRow) (hr : r = ⟨57, 59, 4506, 20219045843, 93, 4496, 1886389443⟩) :
     (2.05022 * 10 ^ (-3 : ℤ)) * Real.sqrt (rowEndpointX r) +
       tailCoefficient r.deltaQ r.uQ (rowEndpointX r) * tailMass r.m ((r.aQ : ℝ) + 1 / 10000) /
@@ -282,6 +290,69 @@ theorem endpoint_budget_numeric_row57 (r : PrintedRow) (hr : r = ⟨57, 59, 4506
       (Real.exp r.uQ - 1) * rowEndpointX r *
         (1 + (r.deltaQ : ℝ) / 2 -
           (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
+  rw [hr]
+  have h₁ : Real.exp (57 : ℝ) > 0 := Real.exp_pos 57
+  have h₂ : Real.exp (4506 / (59 * 10 ^ 12 : ℝ)) > 0 := Real.exp_pos _
+  have h₃ : Real.log (Real.exp (57 : ℝ)) = (57 : ℝ) := by rw [Real.log_exp]
+  have h₄ : Real.log (Real.exp (4506 / (59 * 10 ^ 12 : ℝ))) = (4506 / (59 * 10 ^ 12 : ℝ)) := by rw [Real.log_exp]
+  -- Use the exact weight_mass formula
+  have h₅ : (∫ t in (0 : ℝ)..1, (weight (59 : ℕ) t : ℝ)) = (2 : ℝ) ^ (2 * (59 : ℕ)) * ((59 : ℕ).factorial : ℝ) ^ 2 / ((2 * (59 : ℕ) + 1 : ℕ).factorial : ℝ) := by
+    rw [weight_mass]
+    <;> norm_num
+  -- Use the tailMass bound
+  have h₆ : tailMass (59 : ℕ) ((4496 : ℝ) / 10000 + 1 / 10000) ≤ 2 * ((4497 : ℝ) / 10000) * (4 * ((4497 : ℝ) / 10000) * (1 - (4497 : ℝ) / 10000)) ^ (59 : ℕ) := by
+    have h₆₁ : tailMass (59 : ℕ) ((4496 : ℝ) / 10000 + 1 / 10000) ≤ 2 * ((4497 : ℝ) / 10000) * (4 * ((4497 : ℝ) / 10000) * (1 - (4497 : ℝ) / 10000)) ^ (59 : ℕ) := by
+      have h₆₂ : 0 ≤ ((4497 : ℝ) / 10000 : ℝ) := by norm_num
+      have h₆₃ : ((4497 : ℝ) / 10000 : ℝ) ≤ 1 / 2 := by norm_num
+      have h₆₄ : tailMass (59 : ℕ) ((4497 : ℝ) / 10000) ≤ 2 * ((4497 : ℝ) / 10000) * (4 * ((4497 : ℝ) / 10000) * (1 - (4497 : ℝ) / 10000)) ^ (59 : ℕ) := by
+        apply tailMass_le_endpoint
+        <;> norm_num at h₆₂ h₆₃ ⊢ <;> linarith
+      have h₆₅ : tailMass (59 : ℕ) ((4496 : ℝ) / 10000 + 1 / 10000) = tailMass (59 : ℕ) ((4497 : ℝ) / 10000) := by norm_num
+      rw [h₆₅]
+      exact h₆₄
+    exact h₆₁
+  -- Use norm_num with bounds for exp, log, sqrt
+  have h₇ : Real.exp (57 : ℝ) < (2.7182818286 : ℝ) ^ 57 := by
+    have := Real.exp_one_lt_d9
+    calc
+      Real.exp (57 : ℝ) = (Real.exp 1) ^ 57 := by rw [← Real.exp_nat_mul]; norm_num
+      _ < (2.7182818286 : ℝ) ^ 57 := by gcongr <;> norm_num
+  have h₈ : Real.exp (57 : ℝ) > (2.7182818283 : ℝ) ^ 57 := by
+    have := Real.exp_one_gt_d9
+    calc
+      (2.7182818283 : ℝ) ^ 57 < (Real.exp 1) ^ 57 := by gcongr <;> norm_num
+      _ = Real.exp (57 : ℝ) := by rw [← Real.exp_nat_mul]; norm_num
+  have h₉ : Real.exp (4506 / (59 * 10 ^ 12 : ℝ)) < 1 + (4506 / (59 * 10 ^ 12 : ℝ)) + (4506 / (59 * 10 ^ 12 : ℝ)) ^ 2 := by
+    have h₉₁ : Real.exp (4506 / (59 * 10 ^ 12 : ℝ)) ≤ 1 / (1 - (4506 / (59 * 10 ^ 12 : ℝ))) := by
+      have h₉₂ : (4506 / (59 * 10 ^ 12 : ℝ) : ℝ) < 1 := by norm_num
+      have h₉₃ : 0 ≤ (4506 / (59 * 10 ^ 12 : ℝ) : ℝ) := by positivity
+      have h₉₄ : Real.exp (4506 / (59 * 10 ^ 12 : ℝ)) ≤ 1 / (1 - (4506 / (59 * 10 ^ 12 : ℝ))) := by
+        have h₉₅ := Real.exp_bound_div_one_sub_of_interval (by positivity) (by norm_num)
+        exact h₉₅
+      exact h₉₄
+    have h₉₆ : (1 : ℝ) / (1 - (4506 / (59 * 10 ^ 12 : ℝ))) < 1 + (4506 / (59 * 10 ^ 12 : ℝ)) + (4506 / (59 * 10 ^ 12 : ℝ)) ^ 2 := by
+      norm_num [div_lt_iff]
+      <;>
+      (try norm_num) <;>
+      (try linarith)
+    linarith
+  have h₁₀ : Real.exp (4506 / (59 * 10 ^ 12 : ℝ)) > 1 + (4506 / (59 * 10 ^ 12 : ℝ)) := by
+    have h₁₀₁ : Real.exp (4506 / (59 * 10 ^ 12 : ℝ)) > 1 + (4506 / (59 * 10 ^ 12 : ℝ)) := by
+      have h₁₀₂ : Real.add_one_le_exp (4506 / (59 * 10 ^ 12 : ℝ)) := by exact Real.add_one_le_exp _
+      have h₁₀₃ : (1 : ℝ) + (4506 / (59 * 10 ^ 12 : ℝ)) < Real.exp (4506 / (59 * 10 ^ 12 : ℝ)) := by
+        linarith [Real.add_one_lt_exp (by positivity : (0 : ℝ) < (4506 / (59 * 10 ^ 12 : ℝ)))]
+      linarith
+    exact h₁₀₁
+  -- Simplify the goal using the bounds
+  dsimp [PrintedRow.deltaQ, PrintedRow.aQ, PrintedRow.uQ, PrintedRow.threshold, rowEndpointX,
+    lowZeroBudget, highZeroBudget, tailCoefficient, tailMass, weight] at *
+  <;> norm_num [div_eq_mul_inv, Real.exp_neg, Real.exp_log, Real.log_mul, Real.log_div,
+    Real.log_rpow, Real.log_pow, Real.sqrt_eq_iff_sq_eq, h₃, h₄, h₅, h₆, h₇, h₈, h₉, h₁₀] at *
+  <;>
+  (try norm_num) <;>
+  (try linarith [Real.add_one_le_exp (0 : ℝ), Real.exp_pos (0 : ℝ)]) <;>
+  (try nlinarith [Real.add_one_le_exp (0 : ℝ), Real.exp_pos (0 : ℝ)])
+  <;>
   sorry
 
 theorem endpoint_budget_numeric_split {r : PrintedRow} (hr : r ∈ tableTwo)

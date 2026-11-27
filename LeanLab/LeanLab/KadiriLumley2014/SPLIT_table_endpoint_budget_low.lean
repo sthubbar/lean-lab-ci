@@ -77,6 +77,98 @@ theorem endpoint_budget_numeric {r : PrintedRow} (hr : r ∈ tableTwo)
       (Real.exp r.uQ - 1) * rowEndpointX r *
         (1 + (r.deltaQ : ℝ) / 2 -
           (lowZeroBudget r.logIndex + highZeroBudget r.logIndex)) := by
+  simp only [tableTwo, List.mem_cons, List.not_mem_nil, or_false] at hr
+  rcases hr with (rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl) <;>
+  (try contradiction) <;>
+  (try norm_num [PrintedRow.deltaQ, PrintedRow.aQ, PrintedRow.uQ, PrintedRow.threshold, rowEndpointX,
+    lowZeroBudget, highZeroBudget, tailCoefficient, tailMass, weight, weight_mass,
+    intervalFraction, Real.exp_neg, Real.exp_log, Real.log_mul, Real.log_div,
+    Real.log_rpow, Real.log_pow, Real.sqrt_eq_iff_sq_eq, Real.exp_one_lt_d9, Real.exp_one_gt_d9,
+    Real.add_one_le_exp, Real.exp_pos, Real.log_lt_log_iff, Real.log_le_log_iff] at hlow ⊢) <;>
+  (try
+    {
+      -- Use exact weight_mass formula
+      have h₁ : (∫ t in (0 : ℝ)..1, (weight (5 : ℕ) t : ℝ)) = (2 : ℝ) ^ (2 * (5 : ℕ)) * ((5 : ℕ).factorial : ℝ) ^ 2 / ((2 * (5 : ℕ) + 1 : ℕ).factorial : ℝ) := by
+        rw [weight_mass]
+        <;> norm_num
+      -- Use tailMass bound
+      have h₂ : tailMass (5 : ℕ) ((2129 : ℝ) / 10000 + 1 / 10000) ≤ 2 * ((2130 : ℝ) / 10000) * (4 * ((2130 : ℝ) / 10000) * (1 - (2130 : ℝ) / 10000)) ^ (5 : ℕ) := by
+        have h₃ : 0 ≤ ((2130 : ℝ) / 10000 : ℝ) := by norm_num
+        have h₄ : ((2130 : ℝ) / 10000 : ℝ) ≤ 1 / 2 := by norm_num
+        have h₅ : tailMass (5 : ℕ) ((2130 : ℝ) / 10000) ≤ 2 * ((2130 : ℝ) / 10000) * (4 * ((2130 : ℝ) / 10000) * (1 - (2130 : ℝ) / 10000)) ^ (5 : ℕ) := by
+          apply tailMass_le_endpoint
+          <;> norm_num at h₃ h₄ ⊢ <;> linarith
+        have h₆ : tailMass (5 : ℕ) ((2129 : ℝ) / 10000 + 1 / 10000) = tailMass (5 : ℕ) ((2130 : ℝ) / 10000) := by norm_num
+        rw [h₆]
+        exact h₅
+      -- Bound exp(38) for logIndex 0
+      have h₇ : Real.exp (38 : ℝ) < (2.7182818286 : ℝ) ^ 38 := by
+        have := Real.exp_one_lt_d9
+        calc
+          Real.exp (38 : ℝ) = (Real.exp 1) ^ 38 := by rw [← Real.exp_nat_mul]; norm_num
+          _ < (2.7182818286 : ℝ) ^ 38 := by gcongr <;> norm_num
+      have h₈ : Real.exp (38 : ℝ) > (2.7182818283 : ℝ) ^ 38 := by
+        have := Real.exp_one_gt_d9
+        calc
+          (2.7182818283 : ℝ) ^ 38 < (Real.exp 1) ^ 38 := by gcongr <;> norm_num
+          _ = Real.exp (38 : ℝ) := by rw [← Real.exp_nat_mul]; norm_num
+      -- Bound exp(uQ) for small uQ
+      have h₉ : Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) < 1 + (35800 / (5 * 10 ^ 12 : ℝ)) + (35800 / (5 * 10 ^ 12 : ℝ)) ^ 2 := by
+        have h₉₁ : Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) ≤ 1 / (1 - (35800 / (5 * 10 ^ 12 : ℝ))) := by
+          have h₉₂ : (35800 / (5 * 10 ^ 12 : ℝ) : ℝ) < 1 := by norm_num
+          have h₉₃ : 0 ≤ (35800 / (5 * 10 ^ 12 : ℝ) : ℝ) := by positivity
+          have h₉₄ : Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) ≤ 1 / (1 - (35800 / (5 * 10 ^ 12 : ℝ))) := by
+            have h₉₅ := Real.exp_bound_div_one_sub_of_interval (by positivity) (by norm_num)
+            exact h₉₅
+          exact h₉₄
+        have h₉₆ : (1 : ℝ) / (1 - (35800 / (5 * 10 ^ 12 : ℝ))) < 1 + (35800 / (5 * 10 ^ 12 : ℝ)) + (35800 / (5 * 10 ^ 12 : ℝ)) ^ 2 := by
+          norm_num [div_lt_iff]
+          <;> norm_num
+          <;> linarith
+        linarith
+      have h₁₀ : Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) > 1 + (35800 / (5 * 10 ^ 12 : ℝ)) := by
+        have h₁₀₁ : Real.add_one_le_exp (35800 / (5 * 10 ^ 12 : ℝ)) := by exact Real.add_one_le_exp _
+        have h₁₀₂ : (1 : ℝ) + (35800 / (5 * 10 ^ 12 : ℝ)) < Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) := by
+          linarith [Real.add_one_lt_exp (by positivity : (0 : ℝ) < (35800 / (5 * 10 ^ 12 : ℝ)))]
+        linarith
+      -- Bound log and sqrt
+      norm_num [h₁, h₂, h₇, h₈, h₉, h₁₀] at hlow ⊢
+      <;>
+      (try linarith [Real.add_one_le_exp (0 : ℝ), Real.exp_pos (0 : ℝ)]) <;>
+      (try nlinarith [Real.add_one_le_exp (0 : ℝ), Real.exp_pos (0 : ℝ)])
+      <;>
+      (try
+        {
+          -- For log bounds, use the fact that log is increasing
+          have h₁₁ : Real.log ((4 * 10 ^ 18 : ℝ) / (Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) * (1 + (35800 : ℝ) / 10 ^ 12))) > 0 := by
+            apply Real.log_pos
+            have h₁₂ : (1 : ℝ) < (4 * 10 ^ 18 : ℝ) / (Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) * (1 + (35800 : ℝ) / 10 ^ 12)) := by
+              have h₁₃ : Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) < 2 := by
+                have h₁₄ : Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) < 1 + (35800 / (5 * 10 ^ 12 : ℝ)) + (35800 / (5 * 10 ^ 12 : ℝ)) ^ 2 := h₉
+                norm_num at h₁₄ ⊢
+                <;> linarith
+              have h₁₅ : (Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) * (1 + (35800 : ℝ) / 10 ^ 12) : ℝ) < 4 := by
+                norm_num at h₁₄ ⊢
+                <;> nlinarith
+              have h₁₆ : (4 * 10 ^ 18 : ℝ) / (Real.exp (35800 / (5 * 10 ^ 12 : ℝ)) * (1 + (35800 : ℝ) / 10 ^ 12)) > 1 := by
+                apply (lt_div_iff₀ (by positivity)).mpr
+                norm_num at h₁₅ ⊢
+                <;> nlinarith
+              linarith
+            linarith
+          norm_num at h₁₁ ⊢
+          <;> linarith
+        })
+    }) <;>
+  (try
+    {
+      -- Similar bounds for other rows
+      norm_num at hlow ⊢
+      <;>
+      (try linarith [Real.add_one_le_exp (0 : ℝ), Real.exp_pos (0 : ℝ)]) <;>
+      (try nlinarith [Real.add_one_le_exp (0 : ℝ), Real.exp_pos (0 : ℝ)])
+    })
+  <;>
   sorry
 
 theorem table_endpoint_budget_low_split {r : PrintedRow} (hr : r ∈ tableTwo)
