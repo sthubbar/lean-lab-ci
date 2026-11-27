@@ -1,0 +1,973 @@
+{
+ "run_id": "46049441268",
+ "shard": 4,
+ "shards": 8,
+ "mirror_sha": "d0623605a3fb4299795e1c32087d3d02cf3d6c1e",
+ "items": [],
+ "files": [
+  {
+   "file": "LeanLab/LeanLab/AlmostPrimeSums/Decomp1527b.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 34
+  },
+  {
+   "file": "LeanLab/LeanLab/AlmostPrimeSums/Decomp243aFeed1122LowerP3.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 113
+  },
+  {
+   "file": "LeanLab/LeanLab/AlmostPrimeSums/SPLIT_rosser_upper_defect_moment_exp.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 49
+  },
+  {
+   "file": "LeanLab/LeanLab/AlmostPrimes/Campbell2026.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/AlmostPrimes/SPLIT_bjs_chen_3273Feed1122Count.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 19
+  },
+  {
+   "file": "LeanLab/LeanLab/AlmostPrimes/SPLIT_campbell.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 27
+  },
+  {
+   "file": "LeanLab/LeanLab/AlmostPrimes/SPLIT_dudek_dunn.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 280
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/DQLeaf518SplitFeed1122Lemma29.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 2 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHea",
+   "seconds": 2524
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Decomp437e.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/DecompC165a.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Prep1122KeptGroupings.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `isDefEq`, maximum number of heartbeats (200000) has been reached Note: Use `set_option max",
+   "seconds": 51
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Prep1122KeptLemma33Pieces52.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Prep1122Lemma34Leaves51.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 2 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHea",
+   "seconds": 64
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/Refute1122SlackDistribution.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_mean_square_low_z.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 42
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_narrow_small_modulus_moderate_shift.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 1880
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_section4Block_mean_value_negative_large.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 46
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_section4Block_mean_value_negative_large_upper_t.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `simp`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHea",
+   "seconds": 48
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_section4Block_mean_value_positive_small_high.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `simp`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHea",
+   "seconds": 50
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_section4Block_mean_value_positive_small_low.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `isDefEq`, maximum number of heartbeats (200000) has been reached Note: Use `set_option max",
+   "seconds": 43
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_section4Block_upper_block_mean_value.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 1 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `simp`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHea",
+   "seconds": 51
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_leaf_upper_mean_square_of_distribution.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 28
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_lower_mean_value_supply.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 18
+  },
+  {
+   "file": "LeanLab/LeanLab/BHP1997/SPLIT_sieve_data.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BS2022GRH/ChenThresholdGRH.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 27
+  },
+  {
+   "file": "LeanLab/LeanLab/BS2022GRH/Decomp138.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 22
+  },
+  {
+   "file": "LeanLab/LeanLab/BS2022GRH/Decomp148f.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 18
+  },
+  {
+   "file": "LeanLab/LeanLab/BS2022GRH/Decomp543a.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 3172
+  },
+  {
+   "file": "LeanLab/LeanLab/BS2022GRH/PublishedInputs232.lean",
+   "result": "0 closed of 5 declarations, 0 of 5 sites named a tactic, 0 errors",
+   "seconds": 548
+  },
+  {
+   "file": "LeanLab/LeanLab/BS2022GRH/SPLIT_delay_bound18.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 23
+  },
+  {
+   "file": "LeanLab/LeanLab/BS2022GRH/SPLIT_delay_odd_tsum_le.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 19
+  },
+  {
+   "file": "LeanLab/LeanLab/BS2022GRH/SPLIT_delay_partial_sums.lean",
+   "result": "0 closed of 4 declarations, 0 of 4 sites named a tactic, 0 errors",
+   "seconds": 17
+  },
+  {
+   "file": "LeanLab/LeanLab/BS2022GRH/SPLIT_lifted_bound_of_allLevels.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 2 errors, first: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHeartbeats <num>` to set the limit. Hint: Add",
+   "seconds": 46
+  },
+  {
+   "file": "LeanLab/LeanLab/BakerHarmanPintz1997/SPLIT_Decomp409b.lean",
+   "result": "0 closed of 4 declarations, 0 of 4 sites named a tactic, 0 errors",
+   "seconds": 88
+  },
+  {
+   "file": "LeanLab/LeanLab/BakerHarmanPintz1997/SPLIT_leaf_err_rearrange.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 2 errors, first: Tactic `simp` failed with a nested error: (deterministic) timeout at `isDefEq`, maximum number of heartbeats (200000) has been reached Note: Use `set_option max",
+   "seconds": 50
+  },
+  {
+   "file": "LeanLab/LeanLab/BakerHarmanPintz1997/SPLIT_lemma10_large_L.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 2 errors, first: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached Note: Use `set_option maxHeartbeats <num>` to set the limit. Hint: Add",
+   "seconds": 209
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/Decomp150b.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 24
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/Decomp432a.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 91
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/Decomp525a.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 36
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/DecompF1255.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 34
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/Discharged.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/SPLIT_hardy_critical_line_zero150.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/SPLIT_minor_bare_multi_denominator451.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 58
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/SPLIT_minor_weighted_multi_denominator451.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/BhowmikGrimmelt2026/SPLIT_mv_siegel150.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 27
+  },
+  {
+   "file": "LeanLab/LeanLab/Cai2002/Decomp118.lean",
+   "result": "SKIP over 3000 lines",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Cai2002/DecompJ1118.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 21
+  },
+  {
+   "file": "LeanLab/LeanLab/Cai2002/Split1122bSeries8.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/Cai2002/Split1122cTwinT.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 58
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenDoubleSieve/Burst9Top.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenDoubleSieve/Decomp349cQuadTendsto.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 1384
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenDoubleSieve/Decomp367a.lean",
+   "result": "0 closed of 1 declarations, 0 of 1 sites named a tactic, 0 errors",
+   "seconds": 38
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenDoubleSieve/Decomp587kSplitR0J9.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 275
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenDoubleSieve/Feed1122_Burst9Matrix_entry_0_0.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 32
+  },
+  {
+   "file": "LeanLab/LeanLab/ChenExplicit/NoSiegel78.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/ChirreHagen2025/Decomp429eSplitTransfer.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 33
+  },
+  {
+   "file": "LeanLab/LeanLab/ChirreHagen2025/Decomp429eSplitTransferP2.lean",
+   "result": "0 closed of 2 declarations, 0 of 2 sites named a tactic, 0 errors",
+   "seconds": 22
+  },
+  {
+   "file": "LeanLab/LeanLab/DERZ1997/Statements.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 18
+  },
+  {
+   "file": "LeanLab/LeanLab/DensityGoldbach/AlsetriClassTwo.lean",
+   "result": "no candidate sites",
+   "seconds": 0
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/Decomp270a.lean",
+   "result": "0 closed of 3 declarations, 0 of 3 sites named a tactic, 0 errors",
+   "seconds": 711
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/Decomp270c.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/Decomp445b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/DecompF731.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/DecompF761.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/DecompF762.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/DecompF767.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/DecompF947.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/DecompF967.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_certificate210.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_certificate290.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_cray_high_blocks_k_lt_2500.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_leaf_cover_low.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_leaf_cover_mid.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/DtRS1998/SPLIT_leaf_quarter_two_block_four.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/DQLemma4Decisions.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/Decomp522a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/Decomp553d.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/DecompF1256.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/DecompF2975.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/Feed1122_window_energy_four_not_dvd.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/Feed1122p2_S133_hj0.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/Feed1122p4_S133_completion_w3.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_feed1122_leaf_coprime_odd_high_small_conductor.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_feed1122_leaf_shift_minor_dq5.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_arc_energy_offwindow.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_high_j1_large_phase_localizes.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_karLemma1_mvt.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_log_regime.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_low_j1_large_phase_localizes.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_majorant_small_width524.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_near_zero_odd_index.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_pointwise.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_pointwise_large_conductor.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_leaf_square_wave_trig_approx.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/SPLIT_lemma10.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/Statements.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/UpJ200/DQCaseIIdSplit.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/UpJ200/DQLeafCoprimeSelectedDecisions.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/UpJ200/Display10Effective.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/UpJ200/Lemma3MV617Integral.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/ExceptionalSet/UpJ200/Lemma2MV/Singular616.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/GoldbachAverage/BSPDecomp82.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/GoldbachAverage/BSPOmega.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/GoldbachAverage/Decomp287a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/GoldbachAverage/DecompJ202.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Halupczok2012/Split398aMajor.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Halupczok2012/Split398aMinor.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HardyLittlewood1923/Decomp105.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HardyLittlewood1923/U1482ZeroCount.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Hathi2021/C4Lower.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HeathBrown1985/Bridge.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HeathBrown1985/MainTerm.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/DecompF1602.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/DecompF1606.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/EndpointPositiveImPairs.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/FALSE_log_q_le_point_one_t_sq.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/Feed1122ZetaEM4.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/Lemma41Leaf123.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/PVCases1122.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/Prep1121VIPointwise.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/S2G4BoxFalseOfCount.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/S2G5SaddlePieceRefute.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_bennett_lemma_6_1_b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_bennett_two_sided_zero_count.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_book_count_band_above_one_mult_le_one.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_book_zero_count_large_height_upper_short.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_book_zero_count_large_height_upper_short_level_one.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_book_zero_count_large_height_upper_tall_level_one_middle_scale_low.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_border_norm_logDeriv_le.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_leaf_lower_contour_estimate_paper.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_negative_bottom_gaussian_lower_window_mid_high_lipschitz.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_negative_bottom_gaussian_main_term_compare.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_negative_sampling_raw.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_positive_mass_norm_sum_integral.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_positive_mass_window_one_window_split.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_positive_mass_window_two_low_window_le.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/SPLIT_residue_log_derivative_bound.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/HelfgottMajor/Sampling457.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KadiriLumley2014/BrunTitchmarshMV.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KadiriLumley2014/SPLIT_endpoint_budget_numeric.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KadiriLumley2014/ZeroBounds259.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Kaniecki1995/Statements.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/BlockInputs628.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/Decomp1534a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/Decomp271a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/Lemma33Perron1122.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/Lemma34Case3Split.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/Prep1122KLLemma34Cases.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/Prep1122S2starL1.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/KumchevLiu2007/Split1122A12Corr.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LPZ2007/Decomp106.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LPZ2007/Statements.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LZPowersOfTwo/Burst8MinorBad.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LZPowersOfTwo/Decomp353c.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LZPowersOfTwo/Decomp375b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Decomp413b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Decomp548b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Feed564cPrime.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Feed565bD.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Feed568aModel4.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Feed568aTransfer4.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Languasco2004/Feed578bPair.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPerelli1996/B/Links.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/Decomp481a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/DecompF728.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/SPLIT_cor42_window_extension131.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/SPLIT_leaf_exceptional_absolute131.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/SPLIT_pintz_explicit_formula481.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LanguascoPintzZaccagnini2007/Statements.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/Decomp1536b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/Decomp486c.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/Decomp498a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/SPLIT_display5_plain_expansion.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/SPLIT_large_shift_filter_iff.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik/SPLIT_split_small_shift_bound.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/Decomp357c.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT_linnik_low_bits.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT_local_arc_core_unit_main1622.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT_logConv_excess1622.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT_mellin_transfer1622.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Linnik1951/SPLIT_mixed_shifted_bound520.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/LiuWang2002/Decomp460b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Martin2018/Conj15.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Martin2018/Conj17Equiv.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/MissingDigit/Burst4Split.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/OeSHP2014/Tables.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/OpenProblems/Feed1122Novelty1615Split.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/OpenProblems/SPLIT_leaf_min_card.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Perelli1996/Char1122.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Perelli1996/Feed1122DecompJ228Split.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Perelli1996/Good1122.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Perelli1996/Merge.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Pintz2018/Certificates117.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ramare1995/Decomp1526a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ramare1995/DecompJ1133.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ramare1995/Section9.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/RamareSaouter2003/CountConvergence359.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/RamareSaouter2003/Decomp290a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/RamareSaouter2003/Decomp290b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/RamareSaouter2003/Decomp378c.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/RieselVaughan1983/Decomp426b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/RieselVaughan1983/S143LogIntegralSub.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Routes/U1541Route.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Sinisalo1993/Tables.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Song2020/Decomp139b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Song2020/SPLIT_lambda_sum_per_h.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Stein1965/Decomp114.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Teravainen2016/DenseModularSplit.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Teravainen2016/MainInputs.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/AlmostEqual.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp361b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Decomp379a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Feed1122Decomp581b.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary/Feed1122Decomp581bS145a.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Ternary78/Bennett/NTChi.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Tolev2009/Major83.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Gaps1.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/RecordsSummary.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Rows1.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Verifications/Top50/Rows5.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/Zinoviev1997/Feed1122State1546.lean",
+   "result": "UNFINISHED deadline"
+  },
+  {
+   "file": "LeanLab/LeanLab/task507/Task507Leaves.lean",
+   "result": "UNFINISHED deadline"
+  }
+ ],
+ "summary": {
+  "files": 222,
+  "declarations_closed": 0,
+  "sites": 0,
+  "skipped": 163,
+  "seconds": 12499
+ },
+ "selftest": {
+  "ok": true,
+  "why": "3 closed",
+  "closed": [
+   "sweep_selftest_a by norm_num",
+   "sweep_selftest_b by nlinarith",
+   "sweep_selftest_c by norm_num"
+  ]
+ }
+}
