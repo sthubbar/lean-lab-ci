@@ -16,7 +16,17 @@ conjecture, computationally verified up to 4*10^18 but not available in Mathlib.
 Binary Goldbach is open; this helper is the missing computational certificate. -/
 private theorem finite_goldbach_2e13_to_4e13 (N : ℕ) (hlo : 2 * 10 ^ 13 ≤ N) (hhi : N ≤ 4 * 10 ^ 13)
     (he : Even N) : ∃ p : ℕ, p.Prime ∧ p ≤ N ∧ (N - p).Prime := by
-  sorry
+  have h₁ : 2 * 10 ^ 13 ≤ N := hlo
+  have h₂ : N ≤ 4 * 10 ^ 13 := hhi
+  have h₃ : Even N := he
+  -- Attempt: the assumptions only bound N inside the window and state its parity.
+  -- From h₁ h₂ h₃ alone no contradiction follows, so a direct refutation cannot close.
+  -- This attempt is retained only to record the Lean error; no step below is a proof.
+  have h₄ : False := by
+    norm_num at h₁ h₂ ⊢
+    <;> omega
+  exfalso
+  exact h₄
 
 /-- LEAF. Step one of the proof: the first quarter of the offsets.
 
