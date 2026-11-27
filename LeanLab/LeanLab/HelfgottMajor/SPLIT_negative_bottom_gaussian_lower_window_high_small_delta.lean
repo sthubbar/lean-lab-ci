@@ -113,13 +113,187 @@ theorem negative_bottom_gaussian_lower_window_high_small_delta_gamma_zero {s : �
   push_cast
   ring
 
+section PSPowerSeries
+
+open MeasureTheory
+
+private lemma ps_cpow_shift {t : ℝ} (ht : 0 < t) (s : ℂ) (n : ℕ) :
+    (t : ℂ) ^ (s - 1) * (t : ℂ) ^ n = (t : ℂ) ^ (s + n - 1) := by
+  have ht0 : (t : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr ht.ne'
+  have e1 : s + (n : ℂ) - 1 = (s - 1) + (n : ℂ) := by ring
+  rw [e1, Complex.cpow_add _ _ ht0, Complex.cpow_natCast]
+
+private lemma ps_norm_cpow {t : ℝ} (ht : 0 < t) (s : ℂ) :
+    ‖(t : ℂ) ^ (s - 1)‖ = t ^ (s.re - 1) := by
+  rw [Complex.norm_cpow_eq_rpow_re_of_pos ht]
+  norm_num [Complex.sub_re]
+
+private lemma ps_exp_series_real (x : ℝ) :
+    HasSum (fun n : ℕ => x ^ n / (n.factorial : ℝ)) (Real.exp x) := by
+  have h := NormedSpace.expSeries_div_hasSum_exp (𝔸 := ℝ) x
+  rwa [← Real.exp_eq_exp_ℝ] at h
+
+private lemma ps_exp_series_complex (z : ℂ) :
+    HasSum (fun n : ℕ => z ^ n / (n.factorial : ℂ)) (Complex.exp z) := by
+  have h := NormedSpace.expSeries_div_hasSum_exp (𝔸 := ℂ) z
+  rwa [← Complex.exp_eq_exp_ℂ] at h
+
+private lemma ps_norm_exp_neg (t : ℝ) :
+    ‖((Real.exp (-t ^ 2 / 2) : ℝ) : ℂ)‖ = Real.exp (-t ^ 2 / 2) := by
+  rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+
 /-- LEAF: the power series in the twist parameter, from `e(δ x) = Σ (2 π i δ x)^n / n!` and
 dominated convergence, the coefficients being the untwisted transforms at `s + n`; the small
 parameter expansion of the twisted Gaussian in Helfgott P0014 and the book. MEDIUM. -/
 theorem negative_bottom_gaussian_lower_window_high_small_delta_power_series (δ : ℝ) {s : ℂ} (hs : 0 < s.re) :
     HasSum (fun n : ℕ => (2 * (π : ℂ) * (δ : ℂ) * Complex.I) ^ n / (n.factorial : ℂ) *
         gaussianMellin 0 (s + n)) (gaussianMellin δ s) := by
-  sorry
+  classical
+  set w : ℂ := 2 * (π : ℂ) * (δ : ℂ) * Complex.I with hw
+  let F : ℕ → ℝ → ℂ := fun n t => (t : ℂ) ^ (s - 1) * (w ^ n / (n.factorial : ℂ) * (t : ℂ) ^ n *
+    ((Real.exp (-t ^ 2 / 2) : ℝ) : ℂ))
+  let ff : ℝ → ℂ := fun t => (t : ℂ) ^ (s - 1) * (((Real.exp (-t ^ 2 / 2) : ℝ) : ℂ) * e (δ * t))
+  let bd : ℕ → ℝ → ℝ := fun n t => ‖w‖ ^ n / (n.factorial : ℝ) *
+    (t ^ (s.re - 1) * (t ^ (n : ℝ) * Real.exp (-t ^ 2 / 2)))
+  have hFmeas : ∀ n : ℕ, AEStronglyMeasurable (F n) (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    intro n
+    refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+    have h1 : ContinuousOn (fun t : ℝ => (t : ℂ) ^ (s - 1)) (Set.Ioi (0 : ℝ)) := by
+      intro x hx
+      exact (Complex.continuousAt_ofReal_cpow_const x (s - 1) (Or.inr (ne_of_gt hx))).continuousWithinAt
+    have h2 : ContinuousOn (fun t : ℝ => ((Real.exp (-t ^ 2 / 2) : ℝ) : ℂ)) (Set.Ioi (0 : ℝ)) :=
+      (Complex.continuous_ofReal.comp (Real.continuous_exp.comp (by fun_prop))).continuousOn
+    exact h1.mul ((continuousOn_const.mul ((Complex.continuous_ofReal.pow n).continuousOn)).mul h2)
+  have hbound : ∀ n : ℕ, ∀ᵐ t ∂(volume.restrict (Set.Ioi (0 : ℝ))), ‖F n t‖ ≤ bd n t := by
+    intro n
+    filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with t ht
+    have ht0 : (0 : ℝ) < t := ht
+    have hnorm : ‖F n t‖ = ‖w‖ ^ n / (n.factorial : ℝ) *
+        (t ^ (s.re - 1) * (t ^ (n : ℝ) * Real.exp (-t ^ 2 / 2))) := by
+      simp only [F]
+      rw [norm_mul, norm_mul, norm_mul, ps_norm_cpow ht0, norm_div, norm_pow, Complex.norm_natCast,
+        norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht0, ps_norm_exp_neg,
+        Real.rpow_natCast]
+      ring
+    rw [hnorm]
+  have hbsumm : ∀ᵐ t ∂(volume.restrict (Set.Ioi (0 : ℝ))), Summable (fun n : ℕ => bd n t) := by
+    filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with t ht
+    have ht0 : (0 : ℝ) < t := ht
+    have hfac : ∀ n : ℕ, bd n t = (t ^ (s.re - 1) * Real.exp (-t ^ 2 / 2)) *
+        ((‖w‖ * t) ^ n / (n.factorial : ℝ)) := by
+      intro n
+      simp only [bd]
+      rw [mul_pow, Real.rpow_natCast]
+      ring
+    simp only [hfac]
+    exact Summable.mul_left _ (Real.summable_pow_div_factorial (‖w‖ * t))
+  have hGint : Integrable (fun t : ℝ => t ^ (s.re - 1) *
+      (Real.exp (-t ^ 2 / 2) * Real.exp (‖w‖ * t))) (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    have hdom : Integrable (fun t : ℝ => Real.exp (‖w‖ ^ 2) *
+        (t ^ (s.re - 1) * Real.exp (-t ^ 2 / 4))) (volume.restrict (Set.Ioi (0 : ℝ))) := by
+      have hbase := (integrableOn_rpow_mul_exp_neg_mul_sq (b := (1 / 4 : ℝ)) (by norm_num)
+        (s := s.re - 1) (by linarith)).const_mul (Real.exp (‖w‖ ^ 2))
+      have hshape : (fun t : ℝ => Real.exp (‖w‖ ^ 2) *
+          (t ^ (s.re - 1) * Real.exp (-(1 / 4 : ℝ) * t ^ 2))) =
+          fun t : ℝ => Real.exp (‖w‖ ^ 2) * (t ^ (s.re - 1) * Real.exp (-t ^ 2 / 4)) := by
+        funext t; ring_nf
+      rw [hshape] at hbase
+      exact hbase
+    refine Integrable.mono' hdom ?_ ?_
+    · refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
+      have h1 : ContinuousOn (fun t : ℝ => t ^ (s.re - 1)) (Set.Ioi (0 : ℝ)) := by
+        intro x hx
+        exact (Real.continuousAt_rpow_const x (s.re - 1) (Or.inl (ne_of_gt hx))).continuousWithinAt
+      have h2 : ContinuousOn (fun t : ℝ => Real.exp (-t ^ 2 / 2)) (Set.Ioi (0 : ℝ)) :=
+        (Real.continuous_exp.comp (by fun_prop)).continuousOn
+      have h3 : ContinuousOn (fun t : ℝ => Real.exp (‖w‖ * t)) (Set.Ioi (0 : ℝ)) :=
+        (Real.continuous_exp.comp (by fun_prop)).continuousOn
+      exact h1.mul (h2.mul h3)
+    · filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with t ht
+      have ht0 : (0 : ℝ) < t := ht
+      have hA : (0 : ℝ) ≤ t ^ (s.re - 1) := Real.rpow_nonneg ht0.le _
+      have hB : (0 : ℝ) ≤ Real.exp (-t ^ 2 / 2) := (Real.exp_pos _).le
+      have hC : (0 : ℝ) ≤ Real.exp (‖w‖ * t) := (Real.exp_pos _).le
+      have hkey : Real.exp (-t ^ 2 / 2) * Real.exp (‖w‖ * t) ≤
+          Real.exp (‖w‖ ^ 2) * Real.exp (-t ^ 2 / 4) := by
+        rw [← Real.exp_add, ← Real.exp_add]
+        apply Real.exp_le_exp.mpr
+        nlinarith [sq_nonneg (‖w‖ - t / 2), sq_nonneg ‖w‖]
+      have hnn : (0 : ℝ) ≤ t ^ (s.re - 1) * (Real.exp (-t ^ 2 / 2) * Real.exp (‖w‖ * t)) :=
+        mul_nonneg hA (mul_nonneg hB hC)
+      rw [Real.norm_of_nonneg hnn]
+      calc t ^ (s.re - 1) * (Real.exp (-t ^ 2 / 2) * Real.exp (‖w‖ * t))
+          ≤ t ^ (s.re - 1) * (Real.exp (‖w‖ ^ 2) * Real.exp (-t ^ 2 / 4)) :=
+            mul_le_mul_of_nonneg_left hkey hA
+        _ = Real.exp (‖w‖ ^ 2) * (t ^ (s.re - 1) * Real.exp (-t ^ 2 / 4)) := by ring
+  have hbdint : Integrable (fun t : ℝ => ∑' n : ℕ, bd n t) (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    have heq : (fun t : ℝ => ∑' n : ℕ, bd n t) =ᵐ[volume.restrict (Set.Ioi (0 : ℝ))]
+        fun t : ℝ => t ^ (s.re - 1) * (Real.exp (-t ^ 2 / 2) * Real.exp (‖w‖ * t)) := by
+      filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with t ht
+      have ht0 : (0 : ℝ) < t := ht
+      have hfac : ∀ n : ℕ, bd n t = (t ^ (s.re - 1) * Real.exp (-t ^ 2 / 2)) *
+          ((‖w‖ * t) ^ n / (n.factorial : ℝ)) := by
+        intro n
+        simp only [bd]
+        rw [mul_pow, Real.rpow_natCast]
+        ring
+      simp only [hfac, tsum_mul_left, (ps_exp_series_real (‖w‖ * t)).tsum_eq]
+      ring
+    exact hGint.congr heq.symm
+  have hlim : ∀ᵐ t ∂(volume.restrict (Set.Ioi (0 : ℝ))), HasSum (fun n : ℕ => F n t) (ff t) := by
+    filter_upwards [self_mem_ae_restrict measurableSet_Ioi] with t ht
+    have ht0 : (0 : ℝ) < t := ht
+    have hA : HasSum (fun n : ℕ => (w * (t : ℂ)) ^ n / (n.factorial : ℂ)) (e (δ * t)) := by
+      have h := ps_exp_series_complex (w * (t : ℂ))
+      have h1 : w * (t : ℂ) = 2 * (π : ℂ) * Complex.I * ((δ * t : ℝ) : ℂ) := by
+        rw [hw]; push_cast; ring
+      have h2 : e (δ * t) = Complex.exp (2 * (π : ℂ) * Complex.I * ((δ * t : ℝ) : ℂ)) := by
+        rfl
+      simpa only [h1, h2] using h
+    have h2 : ∀ n : ℕ, ((t : ℂ) ^ (s - 1) * ((Real.exp (-t ^ 2 / 2) : ℝ) : ℂ)) *
+        ((w * (t : ℂ)) ^ n / (n.factorial : ℂ)) = F n t := by
+      intro n
+      simp only [F]
+      rw [mul_pow]
+      ring
+    have h3 : ((t : ℂ) ^ (s - 1) * ((Real.exp (-t ^ 2 / 2) : ℝ) : ℂ)) * e (δ * t) = ff t := by
+      simp only [ff]
+      ring
+    have h4 := hA.mul_left ((t : ℂ) ^ (s - 1) * ((Real.exp (-t ^ 2 / 2) : ℝ) : ℂ))
+    rw [funext h2, h3] at h4
+    exact h4
+  have key := MeasureTheory.hasSum_integral_of_dominated_convergence
+    (μ := volume.restrict (Set.Ioi (0 : ℝ))) (F := F) (f := ff) bd hFmeas hbound hbsumm hbdint hlim
+  have hInt : ∀ n : ℕ, (∫ t : ℝ, F n t ∂(volume.restrict (Set.Ioi (0 : ℝ)))) =
+      w ^ n / (n.factorial : ℂ) * gaussianMellin 0 (s + n) := by
+    intro n
+    have hgm : gaussianMellin 0 (s + n) =
+        ∫ t : ℝ, (t : ℂ) ^ (s + n - 1) * ((Real.exp (-t ^ 2 / 2) : ℝ) : ℂ)
+          ∂(volume.restrict (Set.Ioi (0 : ℝ))) := by
+      rw [gaussianMellin, mellin]
+      refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun t ht => ?_)
+      simp [e, smul_eq_mul]
+    rw [hgm]
+    have hstep : (∫ t : ℝ, F n t ∂(volume.restrict (Set.Ioi (0 : ℝ)))) =
+        ∫ t : ℝ, (w ^ n / (n.factorial : ℂ)) *
+          ((t : ℂ) ^ (s - 1) * ((t : ℂ) ^ n * ((Real.exp (-t ^ 2 / 2) : ℝ) : ℂ)))
+          ∂(volume.restrict (Set.Ioi (0 : ℝ))) := by
+      refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun t ht => ?_)
+      simp only [F]
+      ring
+    rw [hstep, MeasureTheory.integral_const_mul]
+    congr 1
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun t ht => ?_)
+    rw [← mul_assoc, ps_cpow_shift ht s n]
+  have hval : (∫ t : ℝ, ff t ∂(volume.restrict (Set.Ioi (0 : ℝ)))) = gaussianMellin δ s := by
+    rw [gaussianMellin, mellin]
+    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun t ht => ?_)
+    simp only [ff, smul_eq_mul]
+  rw [hval, funext hInt] at key
+  simpa only [hw] using key
+
+end PSPowerSeries
+
 
 /-- LEAF: certified evaluation of the power series of the previous leaves for `|δ| ≤ 1/2` on the
 window from minus eleven eighths to minus five quarters: the series at `1/2 + i t` has norm at
