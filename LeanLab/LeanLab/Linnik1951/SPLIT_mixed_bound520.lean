@@ -154,7 +154,7 @@ theorem mixed_shifted_bound520 (hG : LeanLab.DERZ1997.GRH) :
             Complex.exp (((2 * Real.pi * (n : ℝ) * ((a : ℝ) / q + z) : ℝ) : ℂ) * Complex.I)‖ ≤
         C * (N : ℝ) * Real.log N ^ 6 /
           Real.sqrt ((q : ℝ) * (N : ℝ) ^ (1 / 7 : ℝ)) := by
-  sorry
+  exact mixed_shifted_prime_part520 hG
 
 /-- LEAF. Diagonal step. In the diagonal term the residues have already been
 summed, so what remains is the signed Ramanujan sum of the residual frequency
