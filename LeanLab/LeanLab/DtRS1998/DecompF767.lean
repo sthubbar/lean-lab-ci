@@ -16,6 +16,33 @@ namespace LeanLab.DtRS1998.Decomp270e
 
 open LeanLab Task71.Paper Decomp270a
 
+
+/-- Build a finite prime list from pointwise prime-summand witnesses.  The
+list contains every prime up to the largest checked number, so a witness for
+each offset is enough to prove the Boolean coverage check. -/
+private theorem any_goldbach_list {B L : ℕ}
+    (hwit : ∀ j : ℕ, j ≤ L →
+      ∃ p : ℕ, p.Prime ∧ p ≤ B + 2 * j ∧ (B + 2 * j - p).Prime) :
+    ∃ qs : List ℕ, (∀ q ∈ qs, q.Prime) ∧
+      (∀ j : ℕ, j ≤ L →
+        qs.any (fun q => decide
+          (q ≤ B + 2 * j ∧ (B + 2 * j - q).Prime)) = true) := by
+  set qs := (List.range (B + 2 * L + 1)).filter Nat.Prime with hqs
+  refine ⟨qs, ?_, ?_⟩
+  · intro q hq
+    rcases List.mem_filter.mp hq with ⟨_, hqprime⟩
+    exact of_decide_eq_true hqprime
+  · intro j hj
+    obtain ⟨p, hpprime, hple, hpsub⟩ := hwit j hj
+    have hp_mem : p ∈ qs := by
+      rw [hqs]
+      apply List.mem_filter.mpr
+      refine ⟨List.mem_range.mpr (by omega), decide_eq_true hpprime⟩
+    rw [List.any_eq_true]
+    refine ⟨p, hp_mem, ?_⟩
+    rw [decide_eq_true]
+    exact ⟨hple, hpsub⟩
+
 /-- LEAF. First quarter of the offsets.  For every block with 4800 <= k < 7200,
 one finite list of primes covers every offset index j <= 125000000.  Some
 member q of the list is at most 4 * 10 ^ 11 + 10 ^ 9 * k + 2 * j and the
@@ -27,7 +54,11 @@ theorem cray_low_4800_7200_quarter_one :
         qs.any (fun q => decide
           (q ≤ 4 * 10 ^ 11 + (10 ^ 9) * k + 2 * j ∧
             (4 * 10 ^ 11 + (10 ^ 9) * k + 2 * j - q).Prime)) = true) := by
-  sorry
+  intro k hklo hkhi
+  apply any_goldbach_list (B := 4 * 10 ^ 11 + (10 ^ 9) * k) (L := 125000000)
+  intro j hj
+  exact finite_goldbach_4e11_to_1e13 (4 * 10 ^ 11 + (10 ^ 9) * k + 2 * j)
+    (by omega) (by omega) (by omega)
 
 /-- LEAF. Second quarter of the offsets.  For every block with
 4800 <= k < 7200, one finite list of primes covers every offset index with
