@@ -42,7 +42,16 @@ theorem arc_average_lower1622 :
       (∀ n ∈ s, n ≤ (N : ℤ) ∧ 0 ≤ h n) ∧ 0 < ∑ n ∈ s, h n ∧
         κ * (∑ n ∈ s, h n) * (N : ℝ) / Real.log N ^ 4 ≤
           ‖∑ n ∈ s, ((h n : ℝ) : ℂ) * localArc1622 N 1 n‖ := by
-  sorry
+  classical
+  refine ⟨1, by norm_num, ?_⟩
+  filter_upwards [eventually_ge_atTop 1] with N hN
+  refine ⟨{0}, fun _ => 1, ?_, ?_, ?_⟩
+  · intro n hn
+    simp only [Finset.mem_singleton] at hn
+    subst n
+    norm_num
+  · simp
+  · sorry
 
 /-- Eventual size facts at the exponent one fourteenth with log to the 17. -/
 theorem eventual_facts17 (K : ℝ) (hK : 0 < K) :
