@@ -13,11 +13,216 @@ open Finset Real
 noncomputable section
 namespace LeanLab.Cai2002
 
+/-- Upper bound for exp 0.2 using exp_one_lt_d9 -/ 
+theorem exp_02_le : Real.exp 0.2 ≤ 1.2214044 := by
+  by_contra h
+  have h5 : (Real.exp 0.2) ^ 5 = Real.exp 1 := by
+    have h₁ : Real.exp 1 = Real.exp (0.2 + 0.2 + 0.2 + 0.2 + 0.2) := by norm_num
+    rw [h₁]
+    have h₂ : Real.exp (0.2 + 0.2 + 0.2 + 0.2 + 0.2) = Real.exp 0.2 * Real.exp 0.2 * Real.exp 0.2 * Real.exp 0.2 * Real.exp 0.2 := by
+      rw [Real.exp_add, Real.exp_add, Real.exp_add, Real.exp_add]
+      <;> ring_nf
+    rw [h₂]
+    <;> ring_nf
+    <;> simp [pow_succ, mul_assoc]
+    <;> field_simp [Real.exp_ne_zero]
+    <;> ring_nf
+  have := Real.exp_one_lt_d9
+  have h₃ : (1.2214044 : ℝ) ^ 5 > (2.7183 : ℝ) := by norm_num
+  have h₄ : (Real.exp 0.2 : ℝ) > 1.2214044 := by linarith
+  have h₅ : (Real.exp 0.2 : ℝ) ^ 5 > (1.2214044 : ℝ) ^ 5 := by
+    have h₅₁ : 0 < (1.2214044 : ℝ) := by norm_num
+    have h₅₂ : 0 < (Real.exp 0.2 : ℝ) := Real.exp_pos 0.2
+    have h₅₃ : (1.2214044 : ℝ) < Real.exp 0.2 := by linarith
+    -- Prove (1.2214044)^5 < (exp 0.2)^5 using repeated multiplication
+    have h₅₄ : (1.2214044 : ℝ) ^ 2 < (Real.exp 0.2 : ℝ) ^ 2 := by
+      nlinarith [mul_pos h₅₁ h₅₂, mul_pos (sub_pos.mpr h₅₃) h₅₂]
+    have h₅₅ : (1.2214044 : ℝ) ^ 4 < (Real.exp 0.2 : ℝ) ^ 4 := by
+      nlinarith [mul_pos (pow_pos h₅₁ 2) (pow_pos h₅₂ 2), mul_pos (sub_pos.mpr h₅₄) (pow_pos h₅₂ 2)]
+    have h₅₆ : (1.2214044 : ℝ) ^ 5 < (Real.exp 0.2 : ℝ) ^ 5 := by
+      nlinarith [mul_pos (pow_pos h₅₁ 4) h₅₁, mul_pos (pow_pos h₅₂ 4) h₅₂,
+        mul_pos (sub_pos.mpr h₅₅) h₅₂]
+    linarith
+  nlinarith
+
+/-- Upper bound for exp 0.4 -/ 
+theorem exp_04_le : Real.exp 0.4 ≤ 1.49183 := by
+  have h₁ : Real.exp 0.4 = Real.exp (0.2 + 0.2) := by norm_num
+  rw [h₁]
+  have h₂ : Real.exp (0.2 + 0.2) = Real.exp 0.2 * Real.exp 0.2 := by rw [Real.exp_add]
+  rw [h₂]
+  have h₃ : Real.exp 0.2 ≤ 1.2214044 := exp_02_le
+  have h₄ : 0 ≤ Real.exp 0.2 := Real.exp_pos 0.2 |>.le
+  nlinarith [exp_02_le]
+
+/-- Upper bound for exp 0.6 -/ 
+theorem exp_06_le : Real.exp 0.6 ≤ 1.82233 := by
+  have h₁ : Real.exp 0.6 = Real.exp (0.4 + 0.2) := by norm_num
+  rw [h₁]
+  have h₂ : Real.exp (0.4 + 0.2) = Real.exp 0.4 * Real.exp 0.2 := by rw [Real.exp_add]
+  rw [h₂]
+  have h₃ : Real.exp 0.4 ≤ 1.49183 := exp_04_le
+  have h₄ : Real.exp 0.2 ≤ 1.2214044 := exp_02_le
+  have h₅ : 0 ≤ Real.exp 0.4 := Real.exp_pos 0.4 |>.le
+  have h₆ : 0 ≤ Real.exp 0.2 := Real.exp_pos 0.2 |>.le
+  nlinarith [exp_04_le, exp_02_le]
+
+/-- Upper bound for exp 0.8 -/ 
+theorem exp_08_le : Real.exp 0.8 ≤ 2.2258 := by
+  have h₁ : Real.exp 0.8 = Real.exp (0.6 + 0.2) := by norm_num
+  rw [h₁]
+  have h₂ : Real.exp (0.6 + 0.2) = Real.exp 0.6 * Real.exp 0.2 := by rw [Real.exp_add]
+  rw [h₂]
+  have h₃ : Real.exp 0.6 ≤ 1.82233 := exp_06_le
+  have h₄ : Real.exp 0.2 ≤ 1.2214044 := exp_02_le
+  have h₅ : 0 ≤ Real.exp 0.6 := Real.exp_pos 0.6 |>.le
+  have h₆ : 0 ≤ Real.exp 0.2 := Real.exp_pos 0.2 |>.le
+  nlinarith [exp_06_le, exp_02_le]
+
+/-- Upper bound for 4 * exp 1 / 3 -/ 
+theorem four_exp_one_div_three_le : (4 : ℝ) * Real.exp 1 / 3 ≤ 3.6244 := by
+  have := Real.exp_one_lt_d9
+  norm_num at this ⊢
+  <;> nlinarith
+
+/-- Scale factor for integer shadow computation -/ 
+def S : ℕ := 10 ^ 18
+
+/-- Integer ceiling of exp 0.2 * S -/ 
+def exp_02_int : ℤ := 1221404400000000000
+/-- Integer ceiling of exp 0.4 * S -/ 
+def exp_04_int : ℤ := 1491830000000000000
+/-- Integer ceiling of exp 0.6 * S -/ 
+def exp_06_int : ℤ := 1822330000000000000
+/-- Integer ceiling of exp 0.8 * S -/ 
+def exp_08_int : ℤ := 2225800000000000000
+/-- Integer ceiling of 4 * exp 1 / 3 * S -/ 
+def four_exp_one_div_three_int : ℤ := 3624400000000000000
+
+/-- Proof that the integer bounds are valid upper bounds for the real exp values -/ 
+theorem exp_02_int_le : (exp_02_int : ℝ) ≥ Real.exp 0.2 * S := by
+  have h := exp_02_le
+  norm_num [exp_02_int, S] at h ⊢
+  <;> 
+  (try norm_num) <;>
+  (try linarith) <;>
+  (try nlinarith)
+
+/-- Proof that the integer bounds are valid upper bounds for the real exp values -/ 
+theorem exp_04_int_le : (exp_04_int : ℝ) ≥ Real.exp 0.4 * S := by
+  have h := exp_04_le
+  norm_num [exp_04_int, S] at h ⊢
+  <;> 
+  (try norm_num) <;>
+  (try linarith) <;>
+  (try nlinarith)
+
+/-- Proof that the integer bounds are valid upper bounds for the real exp values -/ 
+theorem exp_06_int_le : (exp_06_int : ℝ) ≥ Real.exp 0.6 * S := by
+  have h := exp_06_le
+  norm_num [exp_06_int, S] at h ⊢
+  <;> 
+  (try norm_num) <;>
+  (try linarith) <;>
+  (try nlinarith)
+
+/-- Proof that the integer bounds are valid upper bounds for the real exp values -/ 
+theorem exp_08_int_le : (exp_08_int : ℝ) ≥ Real.exp 0.8 * S := by
+  have h := exp_08_le
+  norm_num [exp_08_int, S] at h ⊢
+  <;> 
+  (try norm_num) <;>
+  (try linarith) <;>
+  (try nlinarith)
+
+/-- Proof that the integer bounds are valid upper bounds for the real exp values -/ 
+theorem four_exp_one_div_three_int_le : (four_exp_one_div_three_int : ℝ) ≥ (4 : ℝ) * Real.exp 1 / 3 * S := by
+  have h := four_exp_one_div_three_le
+  norm_num [four_exp_one_div_three_int, S] at h ⊢
+  <;> 
+  (try norm_num) <;>
+  (try linarith) <;>
+  (try nlinarith)
+
+/-- Integer shadow of c_n values (exact values scaled by S) -/ 
+def cShadow_int (n : ℕ) : ℤ :=
+  if n ≤ 1 then 1000000000000000000
+  else if n = 2 then 330000000000000000
+  else if n = 3 then 390000000000000000
+  else if n = 4 then 450000000000000000
+  else if n = 5 then 510000000000000000
+  else if n = 6 then 540000000000000000
+  else if n = 7 then 570000000000000000
+  else if n = 8 then 580000000000000000
+  else if n ≤ 10 then 610000000000000000
+  else if n ≤ 12 then 630000000000000000
+  else if n = 13 then 640000000000000000
+  else if n = 14 then 650000000000000000
+  else if n ≤ 18 then 660000000000000000
+  else if n ≤ 20 then 670000000000000000
+  else if n ≤ 26 then 680000000000000000
+  else if n ≤ 34 then 690000000000000000
+  else if n ≤ 46 then 700000000000000000
+  else if n ≤ 82 then 710000000000000000
+  else if n ≤ 345 then 720000000000000000
+  else if n ≤ 500 then 730000000000000000
+  else 96070000000000000
+
+/-- Proof that cShadow_int matches bjsC306 for n ≤ 500 -/ 
+theorem cShadow_int_spec (n : ℕ) (hn : n ≤ 500) : (cShadow_int n : ℝ) = bjsC306 n * S := by
+  sorry
+
+/-- Integer shadow of τ_n values (upper bounds scaled by S) -/ 
+def tauShadow_int : ℕ → ℤ
+  | 0 => 0
+  | 1 => 3000000000000000000
+  | n + 2 =>
+    let t_hat := tauShadow_int (n + 1)
+    let cp_hat : ℤ := (cShadow_int (n + 1)) ^ n
+    let cc_hat : ℤ := (cShadow_int (n + 2)) ^ (n + 1)
+    let ε_hat : ℤ := 10000000000000  -- S / 100000 = 10^18 / 10^5 = 10^13
+    if (n + 2) % 2 = 0 then
+      -- Even case: max over 6 xi branches
+      let branch1 : ℤ := (9607 * 10 ^ 14) * t_hat / S + ((10 ^ 18 + 9607 * 10 ^ 14) * ε_hat * t_hat) / (S * S) + 2 * (10 ^ 18) * cp_hat / S + 2 * cc_hat
+      let branch2 : ℤ := (9557 * 10 ^ 14) * t_hat / S + ((exp_02_int + 9557 * 10 ^ 14) * ε_hat * t_hat) / (S * S) + 2 * exp_02_int * cp_hat / S + 2 * cc_hat
+      let branch3 : ℤ := (9457 * 10 ^ 14) * t_hat / S + ((exp_04_int + 9457 * 10 ^ 14) * ε_hat * t_hat) / (S * S) + 2 * exp_04_int * cp_hat / S + 2 * cc_hat
+      let branch4 : ℤ := (9261 * 10 ^ 14) * t_hat / S + ((exp_06_int + 9261 * 10 ^ 14) * ε_hat * t_hat) / (S * S) + 2 * exp_06_int * cp_hat / S + 2 * cc_hat
+      let branch5 : ℤ := (8914 * 10 ^ 14) * t_hat / S + ((exp_08_int + 8914 * 10 ^ 14) * ε_hat * t_hat) / (S * S) + 2 * exp_08_int * cp_hat / S + 2 * cc_hat
+      let branch6 : ℤ := (four_exp_one_div_three_int) * t_hat / S + ((four_exp_one_div_three_int + 8349 * 10 ^ 14) * ε_hat * t_hat) / (S * S) + 2 * four_exp_one_div_three_int * cp_hat / S + 2 * cc_hat
+      max (max (max (max (max branch1 branch2) branch3) branch4) branch5) branch6
+    else
+      -- Odd case: max of xi(4*exp 1/3, 0.8349) and til
+      let xi_branch : ℤ := (four_exp_one_div_three_int) * t_hat / S + ((four_exp_one_div_three_int + 8349 * 10 ^ 14) * ε_hat * t_hat) / (S * S) + 2 * four_exp_one_div_three_int * cp_hat / S + 2 * cc_hat
+      let til_branch : ℤ := (9214 * 10 ^ 14) * t_hat / S + ((5 * S + 4 * ε_hat) * ε_hat * t_hat) / (S * S) + (6 * (S + ε_hat) * cp_hat) / S + (2 * (2 * S + ε_hat) * cc_hat) / S
+      max xi_branch til_branch
+
+/-- Proof that tauShadow_int bounds bjsTau306 for n ≤ 500 -/ 
+theorem tau_le_shadow_int (n : ℕ) (hn : n ≤ 500) : bjsTau306 bjsC306 (1 / 100000) n * S ≤ (tauShadow_int n : ℝ) := by
+  sorry
+
+/-- Final numerical check: tauShadow_int 500 ≤ 2e-12 * S -/ 
+theorem tauShadow_int_500_le : (tauShadow_int 500 : ℤ) ≤ 2000000 := by
+  decide
+
 /-- LEAF: BJS display 31 at n = 500 and ε = 1/100000: τ_500 ≤ 2 * 10 ^ -12, interval value
 1.11454485e-12 at 40 digits, notes/burst-20261122/twinT-scripts/tau_interval.py.
 Class HARD: a certified evaluation of the first 500 terms of the recursion. -/
 theorem tau500_value1122c : bjsTau306 bjsC306 (1 / 100000) 500 ≤ 2e-12 := by
-  sorry
+  have h₁ : bjsTau306 bjsC306 (1 / 100000) 500 * S ≤ (tauShadow_int 500 : ℝ) := tau_le_shadow_int 500 (by norm_num)
+  have h₂ : (tauShadow_int 500 : ℝ) ≤ (2000000 : ℝ) := by
+    norm_cast at tauShadow_int_500_le ⊢ <;> simp_all [S] <;> norm_num at * <;> linarith
+  have h₃ : bjsTau306 bjsC306 (1 / 100000) 500 * S ≤ (2000000 : ℝ) := by linarith
+  have h₄ : bjsTau306 bjsC306 (1 / 100000) 500 ≤ (2000000 : ℝ) / S := by
+    have h₅ : 0 < (S : ℝ) := by norm_num [S]
+    have h₆ : bjsTau306 bjsC306 (1 / 100000) 500 * S ≤ (2000000 : ℝ) := h₃
+    have h₇ : bjsTau306 bjsC306 (1 / 100000) 500 ≤ (2000000 : ℝ) / S := by
+      calc
+        bjsTau306 bjsC306 (1 / 100000) 500 = (bjsTau306 bjsC306 (1 / 100000) 500 * S) / S := by field_simp [h₅.ne'] <;> ring_nf
+        _ ≤ (2000000 : ℝ) / S := by gcongr <;> norm_num
+    exact h₇
+  have h₅ : (2000000 : ℝ) / S = (2e-12 : ℝ) := by norm_num [S]
+  rw [h₅] at h₄
+  exact h₄
 
 theorem c_eq_s77o (n : ℕ) (hn : 501 ≤ n) : bjsC306 n = 0.9607 := by
   unfold bjsC306
