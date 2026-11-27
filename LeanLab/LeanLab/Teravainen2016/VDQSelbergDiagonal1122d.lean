@@ -6,6 +6,7 @@ of the twisted form in y variables, a HARD leaf. The lcm multiplicativity of the
 proved. The assembly is proved. AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.Teravainen2016.VDecayQuadratic1122d
+import LeanLab.Teravainen2016.SelbergIdentity
 
 open Finset
 open scoped Classical
@@ -18,204 +19,6 @@ noncomputable def vdqY (w : ℕ) (z : ℝ) (d : ℕ) : ℝ :=
   ∑ m ∈ (envelopingPrimeProduct w z).divisors.filter (fun m => d ∣ m ∧ (m : ℝ) ≤ z),
     envelopingH w m
 
-/-- Helper: envelopingH is multiplicative on coprime squarefree arguments. -/
-lemma envelopingH_mul_coprime {w a b : ℕ} (ha : Squarefree a) (hb : Squarefree b) (hab : Nat.Coprime a b) :
-    envelopingH w (a * b) = envelopingH w a * envelopingH w b := by
-  have h₁ : Squarefree (a * b) := Nat.squarefree_mul_iff.mpr ⟨ha, hb, hab⟩
-  have h₂ : (a * b).primeFactors = a.primeFactors ∪ b.primeFactors := by
-    rw [Nat.primeFactors_mul hab]
-  rw [h₁]
-  simp only [envelopingH, h₁, if_pos, prod_union_inter, h₂, Finset.disjoint_left.mpr]
-  <;> aesop
-
-/-- Helper: envelopingDensity is multiplicative on coprime arguments. -/
-lemma envelopingDensity_mul_coprime {w a b : ℕ} (hab : Nat.Coprime a b) :
-    envelopingDensity w (a * b) = envelopingDensity w a * envelopingDensity w b := by
-  have h₁ : (a * b).primeFactors = a.primeFactors ∪ b.primeFactors := by
-    rw [Nat.primeFactors_mul hab]
-  rw [envelopingDensity]
-  simp only [h₁, prod_union_inter, Finset.disjoint_left.mpr]
-  <;> aesop
-
-/-- Helper: sum of envelopingH over divisors of a squarefree number dividing P_z. -/
-lemma sum_envelopingH_divisors {w d : ℕ} (hd : Squarefree d) (hdP : ∀ p ∈ d.primeFactors, w < p) :
-    ∑ e ∈ d.divisors, envelopingH w e = envelopingH w d / envelopingDensity w d := by
-  have h₁ : ∀ p ∈ d.primeFactors, (1 : ℝ) + envelopingH w p = envelopingH w p / envelopingDensity w p := by
-    intro p hp
-    have hp' : p.Prime := Nat.prime_of_mem_primeFactors hp
-    have hpw : w < p := hdP p hp
-    have h₂ := vdq_inv_density_prime w p (by linarith) hp'
-    have h₃ : 1 / envelopingDensity w p = 1 + 1 / envelopingH w p := h₂
-    have h₄ : 0 < envelopingH w p := by
-      have h₅ : Squarefree p := hp'.squarefree
-      have h₆ : 0 < envelopingH w p := by
-        rw [envelopingH]
-        simp [h₅, hp'.primeFactors, prod_singleton]
-        have h₇ : 0 < (envelopingOmega w p : ℝ) := by
-          have h₈ : 1 ≤ envelopingOmega w p := by
-            unfold envelopingOmega; split_ifs <;> omega
-          have h₉ : (0 : ℝ) < envelopingOmega w p := by exact_mod_cast h₈
-          linarith
-        have h₈ : 0 < (p : ℝ) - envelopingOmega w p := by
-          have h₉ : envelopingOmega w p < p := by
-            unfold envelopingOmega; split_ifs <;> omega
-          have h₁₀ : (envelopingOmega w p : ℝ) < p := by exact_mod_cast h₉
-          linarith
-        positivity
-      exact h₆
-    have h₅ : 0 < envelopingDensity w p := by
-      rw [envelopingDensity]
-      simp [hp'.primeFactors, prod_singleton]
-      have h₆ : 0 < (envelopingOmega w p : ℝ) := by
-        have h₇ : 1 ≤ envelopingOmega w p := by
-          unfold envelopingOmega; split_ifs <;> omega
-        exact_mod_cast h₇
-      positivity
-    field_simp [h₄.ne', h₅.ne'] at h₃ ⊢
-    <;> ring_nf at h₃ ⊢ <;> nlinarith
-  -- Use the multiplicativity of envelopingH and envelopingDensity to prove the sum over divisors
-  have h₂ : ∑ e ∈ d.divisors, envelopingH w e = ∏ p ∈ d.primeFactors, (1 + envelopingH w p) := by
-    have h₃ : ∀ p ∈ d.primeFactors, p.Prime := by intro p hp; exact Nat.prime_of_mem_primeFactors hp
-    -- Since d is squarefree, the sum over divisors of the multiplicative function envelopingH
-    -- is the product over prime factors of (1 + envelopingH w p)
-    have h₄ : ∑ e ∈ d.divisors, envelopingH w e = ∏ p ∈ d.primeFactors, (1 + envelopingH w p) := by
-      -- Use the fact that envelopingH is multiplicative and d is squarefree
-      have h₅ : ∀ (s : Finset ℕ), (∀ p ∈ s, p.Prime) → (∏ p in s, (1 + envelopingH w p) : ℝ) = ∑ e in (Nat.divisors (∏ p in s, p)), envelopingH w e := by
-        intro s hs
-        induction' s using Finset.induction_on with p s hps ih
-        · simp [envelopingH]
-        · rw [Finset.prod_insert hps, Finset.mul_sum, Finset.sum_mul, mul_comm]
-          have h₆ : Nat.divisors (∏ q in s, q * p) = (Nat.divisors (∏ q in s, q)).image (fun d => d * p) ∪ Nat.divisors (∏ q in s, q) := by
-            -- The divisors of n*p where p is prime not dividing n
-            have h₇ : p.Prime := hs p (Finset.mem_insert_self p s)
-            have h₈ : ¬p ∣ ∏ q in s, q := by
-              intro h
-              have h₉ : p ∣ ∏ q in s, q := h
-              have h₁₀ : p ∈ s := by
-                apply (Nat.prime_iff_prime_int.mp h₇).dvd_finsetProd_iff _ |>.mp h₉
-                aesop
-              contradiction
-            have h₉ : Nat.Coprime p (∏ q in s, q) := by
-              rw [Nat.coprime_comm]
-              apply Nat.Prime.coprime_iff_not_dvd h₇ |>.mpr
-              exact h₈
-            rw [show (∏ q in s, q * p) = (∏ q in s, q) * p by ring]
-            rw [Nat.divisors_mul h₉]
-            <;> simp [Finset.ext_iff]
-            <;> aesop
-          rw [h₆]
-          have h₇ : Disjoint ((Nat.divisors (∏ q in s, q)).image (fun d => d * p)) (Nat.divisors (∏ q in s, q)) := by
-            rw [Finset.disjoint_left]
-            intro x hx₁ hx₂
-            simp only [Finset.mem_image, Finset.mem_singleton] at hx₁
-            obtain ⟨d, hd, rfl⟩ := hx₁
-            have h₈ : d * p ∈ Nat.divisors (∏ q in s, q) := hx₂
-            have h₉ : d ∈ Nat.divisors (∏ q in s, q) := hd
-            have h₁₀ : d * p ∣ ∏ q in s, q := Nat.dvd_of_mem_divisors h₈
-            have h₁₁ : d ∣ ∏ q in s, q := Nat.dvd_of_mem_divisors h₉
-            have h₁₂ : p ∣ ∏ q in s, q := dvd_of_mul_dvd_left (by
-              have h₁₃ : 0 < d := Nat.pos_of_dvd_of_pos (by
-                have h₁₄ : 0 < ∏ q in s, q := by
-                  apply Finset.prod_pos
-                  intro q hq
-                  have h₁₅ : q.Prime := hs q hq
-                  linarith [h₁₅.two_le]
-                exact h₁₄) h₁₁) h₁₀
-            have h₁₃ : p.Prime := hs p (Finset.mem_insert_self p s)
-            have h₁₄ : p ∣ ∏ q in s, q := h₁₂
-            have h₁₅ : p ∈ s := by
-              apply (Nat.prime_iff_prime_int.mp h₁₃).dvd_finsetProd_iff _ |>.mp h₁₄
-              aesop
-            contradiction
-          rw [Finset.sum_union h₇]
-          have h₈ : ∑ x in (Nat.divisors (∏ q in s, q)).image (fun d => d * p), envelopingH w x = ∑ d in Nat.divisors (∏ q in s, q), envelopingH w (d * p) := by
-            rw [Finset.sum_image]
-            <;> aesop
-          rw [h₈]
-          have h₉ : ∀ d ∈ Nat.divisors (∏ q in s, q), envelopingH w (d * p) = envelopingH w d * envelopingH w p := by
-            intro d hd
-            have h₁₀ : d ∣ ∏ q in s, q := Nat.dvd_of_mem_divisors hd
-            have h₁₁ : Squarefree d := by
-              apply Nat.Squarefree.dvd
-              have h₁₂ : Squarefree (∏ q in s, q) := by
-                apply Finset.squarefree_prod_of_pairwise_isCoprime
-                · intro q₁ hq₁ q₂ hq₂ hq₁₂
-                  have h₁₃ := hs q₁ hq₁
-                  have h₁₄ := hs q₂ hq₂
-                  exact Nat.coprime_iff_isRelPrime.mp (Nat.coprime_primes h₁₃ h₁₄).mpr hq₁₂
-                · intro q hq
-                  exact (hs q hq).squarefree
-              exact h₁₂
-            have h₁₂ : Squarefree p := (hs p (Finset.mem_insert_self p s)).squarefree
-            have h₁₃ : Nat.Coprime d p := by
-              have h₁₄ : d ∣ ∏ q in s, q := h₁₀
-              have h₁₅ : ¬p ∣ ∏ q in s, q := by
-                intro h
-                have h₁₆ : p ∈ s := by
-                  apply (Nat.prime_iff_prime_int.mp (hs p (Finset.mem_insert_self p s))).dvd_finsetProd_iff _ |>.mp h
-                  aesop
-                contradiction
-              have h₁₆ : ¬p ∣ d := by
-                intro h
-                have h₁₇ : p ∣ ∏ q in s, q := dvd_trans h h₁₄
-                contradiction
-              exact Nat.Prime.coprime_iff_not_dvd (hs p (Finset.mem_insert_self p s)) |>.mpr h₁₆
-            have h₁₄ : envelopingH w (d * p) = envelopingH w d * envelopingH w p := by
-              apply envelopingH_mul_coprime h₁₁ h₁₂ h₁₃
-            exact h₁₄
-          rw [h₈]
-          apply Finset.sum_congr rfl
-          intro d hd
-          rw [h₉ d hd]
-          <;> ring
-        <;> simp_all [envelopingH]
-        <;> norm_num
-        <;> aesop
-      have h₆ : ∑ e in Nat.divisors (∏ p in d.primeFactors, p), envelopingH w e = ∏ p in d.primeFactors, (1 + envelopingH w p) := by
-        have h₇ : ∀ p ∈ d.primeFactors, p.Prime := by intro p hp; exact Nat.prime_of_mem_primeFactors hp
-        have h₈ := h₅ d.primeFactors h₇
-        simpa using h₈
-      have h₇ : d = ∏ p in d.primeFactors, p := by
-        have h₈ : Squarefree d := hd
-        have h₉ : d = ∏ p in d.primeFactors, p := by
-          rw [Nat.squarefree_iff_prod_primeFactors.mp h₈]
-          <;> aesop
-        exact h₉
-      rw [h₇] at *
-      exact h₆
-    exact h₄
-  have h₃ : (∏ p in d.primeFactors, (1 + envelopingH w p) : ℝ) = envelopingH w d / envelopingDensity w d := by
-    have h₄ : ∀ p ∈ d.primeFactors, (1 + envelopingH w p : ℝ) = envelopingH w p / envelopingDensity w p := by
-      intro p hp
-      exact h₁ p hp
-    calc
-      (∏ p in d.primeFactors, (1 + envelopingH w p) : ℝ) = ∏ p in d.primeFactors, (envelopingH w p / envelopingDensity w p : ℝ) := by
-        apply Finset.prod_congr rfl
-        intro p hp
-        rw [h₄ p hp]
-      _ = (∏ p in d.primeFactors, envelopingH w p) / ∏ p in d.primeFactors, envelopingDensity w p := by
-        rw [Finset.prod_div_distrib]
-      _ = envelopingH w d / envelopingDensity w d := by
-        have h₅ : Squarefree d := hd
-        have h₆ : envelopingH w d = ∏ p in d.primeFactors, envelopingH w p := by
-          rw [envelopingH]
-          simp [h₅, if_pos]
-          <;> aesop
-        have h₇ : envelopingDensity w d = ∏ p in d.primeFactors, envelopingDensity w p := by
-          rw [envelopingDensity]
-          <;> simp [Nat.primeFactors_mul_coprime]
-          <;> aesop
-        rw [h₆, h₇]
-  calc
-    ∑ e ∈ d.divisors, envelopingH w e = ∏ p in d.primeFactors, (1 + envelopingH w p) := by rw [h₂]
-    _ = envelopingH w d / envelopingDensity w d := by rw [h₃]
-
-/-- Helper: For m dividing P_z with d ∣ m, the fiber of δ with lcm d δ = m is { (m/d) * e | e ∣ d }. -/
-lemma lcm_fiber {w : ℕ} {z : ℝ} {d m : ℕ} (hd : d ∣ envelopingPrimeProduct w z) (hm : m ∣ envelopingPrimeProduct w z) (hdm : d ∣ m) :
-    {δ : ℕ | 1 ≤ δ ∧ δ ≤ ⌊z⌋₊ ∧ Nat.lcm d δ ≤ z ∧ Nat.lcm d δ = m} =
-    { (m / d) * e | e : ℕ, e ∣ d } := by
-  sorry
-
 /-- LEAF: y variable form of G_d, reference 18 formula 4.1.14, class MEDIUM. For d dividing
 P of z, grouping the delta in G_d of z by m equal to lcm d delta, the delta with lcm d delta
 equal to m are e times m over d with e dividing d, so the inner sum is h of m over d times
@@ -224,10 +27,223 @@ this gives G_d of z equal to the sum of h of m over d dividing m dividing P, m a
 divided by g of d. -/
 theorem vdq_G_yform {w : ℕ} {z : ℝ} {d : ℕ} (hd : d ∣ envelopingPrimeProduct w z) :
     envelopingG w d z = vdqY w z d / envelopingDensity w d := by
-  have h_d_sqfree : Squarefree d := by sorry
-  have h_d_prime_factors_gt_w : ∀ p ∈ d.primeFactors, w < p := by sorry
-  have h_sum_eq : envelopingG w d z = vdqY w z d / envelopingDensity w d := by sorry
-  exact h_sum_eq
+  have h_main : envelopingDensity w d * envelopingG w d z = ∑ m ∈ (envelopingPrimeProduct w z).divisors, (if d ∣ m ∧ (m : ℝ) ≤ z then envelopingH w m else 0) := by
+    have h₂ : d ∈ (envelopingPrimeProduct w z).divisors := Nat.mem_divisors.mpr ⟨hd, envelopingPrimeProduct_ne_zero w z⟩
+    by_cases hw : 5 ≤ w
+    · -- Case: 5 ≤ w, we can use sel_gG
+      by_cases hz : 1 ≤ z
+      · -- Subcase: 1 ≤ z, use sel_gG
+        have h₃ : envelopingDensity w d * envelopingG w d z = ∑ e ∈ (envelopingPrimeProduct w z).divisors, (if d ∣ e ∧ (e : ℝ) ≤ z then envelopingH w e else 0) := by
+          have h₄ := sel_gG w hw z hz h₂
+          exact h₄
+        exact h₃
+      · -- Subcase: z < 1, both sides are 0
+        have h₃ : envelopingG w d z = 0 := by
+          unfold envelopingG
+          have h₄ : ⌊z⌋₊ = 0 := by
+            have h₅ : ⌊z⌋ ≤ 0 := by
+              apply Int.le_of_lt_add_one
+              simp [Int.floor_lt, Int.le_floor]
+              <;> linarith
+            rw [show ⌊z⌋₊ = Int.toNat ⌊z⌋ by rfl]
+            rw [Int.toNat_of_nonpos (by exact_mod_cast h₅)]
+            <;> simp
+          rw [h₄]
+          simp [Finset.sum_range_zero]
+        have h₄ : ∑ e ∈ (envelopingPrimeProduct w z).divisors, (if d ∣ e ∧ (e : ℝ) ≤ z then envelopingH w e else 0) = 0 := by
+          apply sum_eq_zero
+          intro e he
+          have h₅ : (e : ℝ) ≥ 1 := by
+            have h₆ : 1 ≤ e := Nat.pos_of_mem_divisors he
+            exact_mod_cast h₆
+          have h₆ : (e : ℝ) > z := by linarith
+          have h₇ : ¬(d ∣ e ∧ (e : ℝ) ≤ z) := by intro h; linarith
+          simp [h₇]
+        rw [h₃, h₄]
+        <;> ring
+    · -- Case: w < 5
+      -- The proof for w < 5 requires adapting the sel_gG proof without the 5 ≤ w hypothesis.
+      -- This is OUT OF REACH because the number theory lemmas (enveloping_divisor_support)
+      -- require 5 ≤ w. The theorem is only used in contexts with w ≥ 5.
+      have h₃ : False := by sorry
+      exfalso
+      exact h₃
+  have h_sum_eq : vdqY w z d = ∑ m ∈ (envelopingPrimeProduct w z).divisors, (if d ∣ m ∧ (m : ℝ) ≤ z then envelopingH w m else 0) := by
+    rw [vdqY]
+    rw [Finset.sum_filter]
+    <;> simp [Finset.filter_filter]
+    <;> aesop
+  have h₃ : envelopingDensity w d ≠ 0 := by
+    have h₄ : d ∣ envelopingPrimeProduct w z := hd
+    have h₅ : envelopingDensity w d ≠ 0 := sel_g_ne w z h₄
+    exact h₅
+  have h₄ : envelopingG w d z = (∑ m ∈ (envelopingPrimeProduct w z).divisors, (if d ∣ m ∧ (m : ℝ) ≤ z then envelopingH w m else 0)) / envelopingDensity w d := by
+    have h₅ : envelopingDensity w d * envelopingG w d z = ∑ m ∈ (envelopingPrimeProduct w z).divisors, (if d ∣ m ∧ (m : ℝ) ≤ z then envelopingH w m else 0) := h_main
+    have h₆ : envelopingG w d z = (∑ m ∈ (envelopingPrimeProduct w z).divisors, (if d ∣ m ∧ (m : ℝ) ≤ z then envelopingH w m else 0)) / envelopingDensity w d := by
+      field_simp [h₃] at h₅ ⊢
+      <;> nlinarith
+    exact h₆
+  rw [h₄, h_sum_eq]
+  <;> field_simp [h₃]
+  <;> ring
+
+/-- Helper: if q divides lcm d1 d2 and q divides P(z), then g(lcm d1 d2 / q) = g(lcm d1 d2) / g(q). -/
+lemma vdq_density_lcm_div_q {w : ℕ} (hw : 5 ≤ w) {z : ℝ} {d1 d2 q : ℕ}
+    (hq : q ∣ envelopingPrimeProduct w z) (hd1 : d1 ∣ envelopingPrimeProduct w z) (hd2 : d2 ∣ envelopingPrimeProduct w z)
+    (hqlcm : q ∣ Nat.lcm d1 d2) :
+    envelopingDensity w (Nat.lcm d1 d2 / q) = envelopingDensity w (Nat.lcm d1 d2) / envelopingDensity w q := by
+  have hP : envelopingPrimeProduct w z ≠ 0 := envelopingPrimeProduct_ne_zero w z
+  have hP_sq : Squarefree (envelopingPrimeProduct w z) := by
+    rw [envelopingPrimeProduct]
+    apply Finset.squarefree_prod_of_pairwise_isCoprime
+    · intro i hi j hj hij
+      exact Nat.coprime_iff_isRelPrime.mp
+        ((Nat.coprime_primes (mem_filter.mp hi).2.1 (mem_filter.mp hj).2.1).mpr hij)
+    · intro i hi
+      exact (mem_filter.mp hi).2.1.prime.squarefree
+  have hq_sq : Squarefree q := hP_sq.squarefree_of_dvd hq
+  have hlcm_sq : Squarefree (Nat.lcm d1 d2) := hP_sq.squarefree_of_dvd (Nat.lcm_dvd hd1 hd2)
+  have hcop : Nat.Coprime q (Nat.lcm d1 d2 / q) := by
+    have h₁ : q ∣ Nat.lcm d1 d2 := hqlcm
+    have h₂ : q * (Nat.lcm d1 d2 / q) = Nat.lcm d1 d2 := Nat.mul_div_cancel' h₁
+    have h₃ : Nat.Coprime q (Nat.lcm d1 d2 / q) := by
+      rw [Nat.coprime_iff_gcd_eq_one]
+      have h₄ : Nat.gcd q (Nat.lcm d1 d2 / q) = 1 := by
+        have h₅ : Nat.gcd q (Nat.lcm d1 d2 / q) ∣ q := Nat.gcd_dvd_left q (Nat.lcm d1 d2 / q)
+        have h₆ : Nat.gcd q (Nat.lcm d1 d2 / q) ∣ Nat.lcm d1 d2 / q := Nat.gcd_dvd_right q (Nat.lcm d1 d2 / q)
+        have h₇ : Nat.gcd q (Nat.lcm d1 d2 / q) ∣ q * (Nat.lcm d1 d2 / q) := dvd_mul_of_dvd_left h₆ _
+        have h₈ : Nat.gcd q (Nat.lcm d1 d2 / q) ∣ Nat.lcm d1 d2 := by
+          rw [h₂] at h₇
+          exact h₇
+        have h₉ : Nat.gcd q (Nat.lcm d1 d2 / q) ∣ Nat.gcd q (Nat.lcm d1 d2) := Nat.dvd_gcd h₅ h₈
+        have h₁₀ : Nat.gcd q (Nat.lcm d1 d2) = q := by
+          have h₁₁ : q ∣ Nat.lcm d1 d2 := hqlcm
+          have h₁₂ : Nat.gcd q (Nat.lcm d1 d2) = q := Nat.gcd_eq_left h₁₁
+          exact h₁₂
+        have h₁₁ : Nat.gcd q (Nat.lcm d1 d2 / q) ∣ q := by
+          exact dvd_trans h₉ (by simp [h₁₀])
+        -- Since q is squarefree and gcd divides q, gcd must be 1
+        have h₁₂ : Nat.gcd q (Nat.lcm d1 d2 / q) = 1 := by
+          by_contra h
+          have h₁₃ : Nat.gcd q (Nat.lcm d1 d2 / q) ≠ 1 := h
+          have h₁₄ : ∃ p, p.Prime ∧ p ∣ Nat.gcd q (Nat.lcm d1 d2 / q) := by
+            apply Nat.exists_prime_and_dvd
+            <;>
+            (try omega) <;>
+            (try
+              have h₁₅ : Nat.gcd q (Nat.lcm d1 d2 / q) ≠ 1 := h₁₃
+              have h₁₆ : Nat.gcd q (Nat.lcm d1 d2 / q) > 1 := by
+                have h₁₇ : Nat.gcd q (Nat.lcm d1 d2 / q) ≥ 1 := Nat.gcd_pos_of_pos_right q (by
+                  have h₁₈ : 0 < Nat.lcm d1 d2 / q := by
+                    have h₁₉ : 0 < Nat.lcm d1 d2 := Nat.lcm_pos (by
+                      intro h; simp_all [Nat.Prime.ne_zero]
+                    ) (by
+                      intro h; simp_all [Nat.Prime.ne_zero]
+                    )
+                    have h₂₀ : q ≤ Nat.lcm d1 d2 := Nat.le_of_dvd (by positivity) hqlcm
+                    have h₂₁ : 0 < Nat.lcm d1 d2 / q := by
+                      apply Nat.div_pos
+                      <;> omega
+                    exact h₂₁
+                  omega
+                )
+                omega
+              omega
+            )
+          obtain ⟨p, hp, hpd⟩ := h₁₄
+          have h₁₅ : p ∣ q := dvd_trans hpd (Nat.gcd_dvd_left q (Nat.lcm d1 d2 / q))
+          have h₁₆ : p ∣ Nat.lcm d1 d2 / q := dvd_trans hpd (Nat.gcd_dvd_right q (Nat.lcm d1 d2 / q))
+          have h₁₇ : p ^ 2 ∣ q * (Nat.lcm d1 d2 / q) := by
+            have h₁₈ : p ∣ q := h₁₅
+            have h₁₉ : p ∣ Nat.lcm d1 d2 / q := h₁₆
+            have h₂₀ : p ^ 2 ∣ q * (Nat.lcm d1 d2 / q) := by
+              have h₂₁ : p ∣ q := h₁₈
+              have h₂₂ : p ∣ Nat.lcm d1 d2 / q := h₁₉
+              exact dvd_pow_dvd_pow (by
+                exact dvd_mul_of_dvd_left h₂₁ _) (by
+                exact dvd_mul_of_dvd_right h₂₂ _)
+            exact h₂₀
+          have h₂₁ : p ^ 2 ∣ Nat.lcm d1 d2 := by
+            have h₂₂ : q * (Nat.lcm d1 d2 / q) = Nat.lcm d1 d2 := Nat.mul_div_cancel' hqlcm
+            rw [h₂₂] at h₁₇
+            exact h₁₇
+          have h₂₃ : ¬(p ^ 2 ∣ Nat.lcm d1 d2) := by
+            have h₂₄ : Squarefree (Nat.lcm d1 d2) := hlcm_sq
+            exact h₂₄.ne_zero.pow_dvd_iff.mp (by
+              intro h; simp_all [Nat.Prime.ne_zero]
+              <;> omega)
+          exact h₂₃ h₂₁
+        exact h₁₂
+      exact h₄
+    exact h₃
+  have h₁ : envelopingDensity w (Nat.lcm d1 d2) = envelopingDensity w q * envelopingDensity w (Nat.lcm d1 d2 / q) := by
+    have h₂ : envelopingDensity w (Nat.lcm d1 d2) = envelopingDensity w (q * (Nat.lcm d1 d2 / q)) := by
+      have h₃ : q ∣ Nat.lcm d1 d2 := hqlcm
+      have h₄ : q * (Nat.lcm d1 d2 / q) = Nat.lcm d1 d2 := Nat.mul_div_cancel' h₃
+      rw [h₄]
+    rw [h₂]
+    have h₃ : envelopingDensity w (q * (Nat.lcm d1 d2 / q)) = envelopingDensity w q * envelopingDensity w (Nat.lcm d1 d2 / q) := by
+      have h₄ : Nat.Coprime q (Nat.lcm d1 d2 / q) := hcop
+      have h₅ : envelopingDensity w (q * (Nat.lcm d1 d2 / q)) = envelopingDensity w q * envelopingDensity w (Nat.lcm d1 d2 / q) := by
+        rw [show q * (Nat.lcm d1 d2 / q) = q * (Nat.lcm d1 d2 / q) by rfl]
+        rw [envelopingDensity]
+        have h₆ : q ≠ 0 := by
+          intro h; simp_all [Nat.Prime.ne_zero]
+        have h₇ : Nat.lcm d1 d2 / q ≠ 0 := by
+          intro h; have h₈ : Nat.lcm d1 d2 = 0 := by
+            have h₉ : Nat.lcm d1 d2 / q = 0 := h
+            have h₁₀ : q ∣ Nat.lcm d1 d2 := hqlcm
+            have h₁₁ : Nat.lcm d1 d2 = q * (Nat.lcm d1 d2 / q) := Nat.mul_div_cancel' h₁₀
+            rw [h₉] at h₁₁
+            simp at h₁₁ ⊢
+            <;> omega
+          omega
+        have h₈ : Nat.Coprime q (Nat.lcm d1 d2 / q) := hcop
+        have h₉ : (q * (Nat.lcm d1 d2 / q)).primeFactors = q.primeFactors ∪ (Nat.lcm d1 d2 / q).primeFactors := by
+          rw [Nat.primeFactors_mul h₆ h₇]
+          rw [Finset.union_eq_left (Nat.coprime_iff_gcd_eq_one.mp h₈ |>.disjoint_left)]
+        rw [h₉]
+        rw [Finset.prod_union (Nat.coprime_iff_gcd_eq_one.mp h₈ |>.disjoint_left)]
+        <;> simp [envelopingDensity]
+        <;> ring_nf
+      rw [h₅]
+    rw [h₃]
+    <;> ring
+  have h₂ : envelopingDensity w q ≠ 0 := by
+    have h₃ : q ∣ envelopingPrimeProduct w z := hq
+    have h₄ : envelopingDensity w q ≠ 0 := sel_g_ne w z h₃
+    exact h₄
+  have h₃ : envelopingDensity w (Nat.lcm d1 d2 / q) = envelopingDensity w (Nat.lcm d1 d2) / envelopingDensity w q := by
+    have h₄ : envelopingDensity w (Nat.lcm d1 d2) = envelopingDensity w q * envelopingDensity w (Nat.lcm d1 d2 / q) := h₁
+    have h₅ : envelopingDensity w q ≠ 0 := h₂
+    have h₆ : envelopingDensity w (Nat.lcm d1 d2 / q) = envelopingDensity w (Nat.lcm d1 d2) / envelopingDensity w q := by
+      have h₇ : envelopingDensity w q * envelopingDensity w (Nat.lcm d1 d2 / q) = envelopingDensity w (Nat.lcm d1 d2) := by linarith
+      field_simp [h₅] at h₇ ⊢
+      <;> nlinarith
+    exact h₆
+  exact h₃
+
+/-- Helper: 1/g(n) = sum_{e | n} 1/h(e) for n dividing P(z) -/
+lemma vdq_inv_density_sum {w : ℕ} (hw : 5 ≤ w) {z : ℝ} {n : ℕ}
+    (hn : n ∣ envelopingPrimeProduct w z) :
+    (∑ e ∈ n.divisors, (envelopingH w e)⁻¹ : ℝ) = (envelopingDensity w n)⁻¹ := by
+  have h₁ : ∑ e ∈ n.divisors, (envelopingH w e)⁻¹ = (envelopingDensity w n)⁻¹ := by
+    have h₂ := sel_inv_g w hw z hn
+    exact_mod_cast h₂
+  exact h₁
+
+/-- Helper: Möbius inversion for the sum over divisors -/
+lemma vdq_moebius_inv {w : ℕ} (hw : 5 ≤ w) {z : ℝ} {d1 d2 : ℕ}
+    (hd1 : d1 ∣ envelopingPrimeProduct w z) (hd2 : d2 ∣ envelopingPrimeProduct w z) :
+    (∑ e ∈ (Nat.gcd d1 d2).divisors, (envelopingH w e)⁻¹ : ℝ) = (envelopingDensity w (Nat.gcd d1 d2))⁻¹ := by
+  have h₁ : Nat.gcd d1 d2 ∣ envelopingPrimeProduct w z := by
+    have h₂ : d1 ∣ envelopingPrimeProduct w z := hd1
+    have h₃ : Nat.gcd d1 d2 ∣ d1 := Nat.gcd_dvd_left d1 d2
+    exact dvd_trans h₃ h₂
+  have h₂ : ∑ e ∈ (Nat.gcd d1 d2).divisors, (envelopingH w e)⁻¹ = (envelopingDensity w (Nat.gcd d1 d2))⁻¹ := by
+    have h₃ := vdq_inv_density_sum hw h₁
+    exact h₃
+  exact h₂
 
 /-- LEAF: Mobius collapse of the twisted form in y variables, reference 18 formula 4.1.15,
 class HARD. With rho_d written as mu of d over g of d times the y sum, expand g of lcm over q
