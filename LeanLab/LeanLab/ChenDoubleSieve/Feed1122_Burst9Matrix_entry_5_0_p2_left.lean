@@ -33,7 +33,10 @@ integrated over the left half panel `[1, 8/5]` of `a_{6,1}`. High precision quad
 HARD. -/
 theorem leaf_sigma_left :
     (0.0021039266 : ℝ) ≤ ∫ t in (1 : ℝ)..(8/5 : ℝ), Wu04Integral.sigma0 t / (2 * t) := by
-  sorry
+  have hI : IntervalIntegrable (fun t : ℝ => Wu04Integral.sigma0 t / (2 * t)) volume
+      (1 : ℝ) (8/5 : ℝ) :=
+    sigma0_div_two_integrable_Icc (by norm_num) (by norm_num) (by norm_num)
+  exact hI
 
 /-- LEAF: Wu 2004 display 7.2, the descending window of the kernel Xi1 of display 3.21, page 14,
 for `s = 27/10`, `sp = 347/100`, on `[sp - sp/s - 1, sp - 2] = [3199/2700, 147/100]`.
