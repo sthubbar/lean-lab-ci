@@ -1,5 +1,6 @@
 import LeanLab.ChenDoubleSieve.Table1Algebra
 import LeanLab.ChenDoubleSieve.Feed1122_Burst9Matrix_entry_5_0_p2_left
+import LeanLab.ChenDoubleSieve.KernelIntegrability
 
 /-!
 # Feed 1122 split of `Burst9Matrix.entry_5_0`
@@ -25,7 +26,19 @@ open LeanLab.ChenDoubleSieve.Wu04Table
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 5) volume (1 : ℝ) (11/5 : ℝ) := by
-  sorry
+  have hI : IntervalIntegrable (tableKernel 5) volume (1 : ℝ) (3 : ℝ) := by
+    -- `tableKernel 5 = Ξ₁(27/10, 347/100)` with `(27/10, 347/100)` admissible, so `Ξ₁` is
+    -- interval-integrable on `[1, 3]` by the existing kernel-integrability lemma.
+    exact LeanLab.ChenDoubleSieve.Burst8P2.table_kernel_integrable 5
+  -- Restrict the interval from `[1, 3]` to `[1, 11/5]`.
+  exact hI.mono_set (by
+    intro t ht
+    have h₁ : (1 : ℝ) ≤ t := ht.1
+    have h₂ : t ≤ 11 / 5 := ht.2
+    have h₃ : (11 / 5 : ℝ) ≤ (3 : ℝ) := by norm_num
+    have h₄ : t ≤ (3 : ℝ) := by linarith
+    exact ⟨by norm_num, by linarith⟩
+  end)
 
 /-- LEAF: Wu 2004 display 7.2, kernel Xi1 of display 3.21, page 14, left half panel `[1, 8/5]` of `a_{6,1}`:
 quadrature value 0.039796938721, stated bound leaves 2.44e-08. HARD. -/
