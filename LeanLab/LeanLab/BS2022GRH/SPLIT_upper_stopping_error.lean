@@ -44,7 +44,102 @@ theorem upper_stopping_odd_tail_low (P : Set ℕ) (Q : Finset ℕ) (g : ℕ → 
       else 0) ≤
       (∏ p ∈ siftingPrimes P z \ Q, (1 - g p)) *
         ((1 / 8349 : ℝ) * 109 * exp 2 * hS (log D / log z)) := by
-  sorry
+  have h_main : (∑ n ∈ range ((siftingPrimes P z \ Q).card + 3), if 3 ≤ n ∧ n % 2 = 1 then stoppingTerm (siftingPrimes P z \ Q) D g n - (∏ p ∈ siftingPrimes P z \ Q, (1 - g p)) * delayTerm n (log D / log z) else 0) ≤ (∏ p ∈ siftingPrimes P z \ Q, (1 - g p)) * ((1 / 8349 : ℝ) * 109 * exp 2 * hS (log D / log z)) := by
+    classical
+    -- Set up notation
+    let S := siftingPrimes P z \ Q
+    let V := ∏ p ∈ S, (1 - g p)
+    let s := log D / log z
+    -- The τ_n constants from BJS Lemma 14 (defined recursively in the paper for ε = 1/8349)
+    -- τ_1 = 3, τ_n ≥ 0 for all n, and ∑_{odd n≥3} τ_n = 109.
+    -- We use a placeholder definition here; the actual values come from the paper's recursive definition.
+    let tau : ℕ → ℝ := fun n => 0
+    have h_tau_sum : ∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), tau n ≤ 109 := by sorry
+    have h_tau_nonneg : ∀ n, 0 ≤ tau n := by sorry
+    have hzpos : 0 < z := by linarith
+    have hlz : 0 < log z := Real.log_pos (by linarith)
+    have hD : 1 < D := by linarith
+    have hlD : 0 < log D := Real.log_pos hD
+    have hs1 : 1 ≤ s := by
+      rw [show s = log D / log z by rfl]
+      apply (le_div_iff₀ hlz).2
+      exact Real.log_le_log (by linarith) hzD
+    have hs2 : s ≤ 2 := by
+      rw [show s = log D / log z by rfl]
+      exact hs
+    have hVpos : 0 ≤ V := by
+      apply Finset.prod_nonneg
+      intro p hp
+      have h₁ : 0 ≤ g p := (hg p (by
+        simp only [S, Finset.mem_sdiff, Finset.mem_filter] at hp ⊢
+        norm_cast at hp ⊢
+        <;> aesop)).1
+      have h₂ : g p < 1 := (hg p (by
+        simp only [S, Finset.mem_sdiff, Finset.mem_filter] at hp ⊢
+        norm_cast at hp ⊢
+        <;> aesop)).2
+      linarith
+    -- Convert the sum to a filtered sum over odd n ≥ 3
+    have h_sum_filter : (∑ n ∈ Finset.range (S.card + 3), (if 3 ≤ n ∧ n % 2 = 1 then stoppingTerm S D g n - V * delayTerm n s else 0 : ℝ)) = ∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), (stoppingTerm S D g n - V * delayTerm n s : ℝ) := by
+      calc
+        (∑ n ∈ Finset.range (S.card + 3), (if 3 ≤ n ∧ n % 2 = 1 then stoppingTerm S D g n - V * delayTerm n s else 0 : ℝ)) = ∑ n in Finset.range (S.card + 3), (if 3 ≤ n ∧ n % 2 = 1 then (stoppingTerm S D g n - V * delayTerm n s : ℝ) else 0) := by simp [sub_eq_add_neg]
+        _ = ∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), (stoppingTerm S D g n - V * delayTerm n s : ℝ) := by
+          rw [Finset.sum_filter]
+          apply Finset.sum_congr rfl
+          intro n hn
+          split_ifs <;> simp_all
+          <;> aesop
+    rw [h_sum_filter]
+    -- Per-term bound (BJS Lemma 11, display 33/39): for each odd n ≥ 3,
+    -- stoppingTerm S D g n - V * delayTerm n s ≤ V * (1/8349) * τ_n * exp 2 * hS s
+    -- where τ_n are the constants from BJS Lemma 14, with τ_1 = 3 and ∑_{odd n≥3} τ_n = 109.
+    -- The actual τ_n are defined recursively in the paper (Lemma 14) and depend on ε = 1/8349.
+    have h_per_term : ∀ n ∈ (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), (stoppingTerm S D g n - V * delayTerm n s : ℝ) ≤ V * ((1 / 8349 : ℝ) * tau n * Real.exp 2 * hS s) := by
+      sorry
+    -- Sum the per-term bounds
+    have h_sum_bound : ∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), (stoppingTerm S D g n - V * delayTerm n s : ℝ) ≤ ∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), (V * ((1 / 8349 : ℝ) * tau n * Real.exp 2 * hS s) : ℝ) := by
+      apply Finset.sum_le_sum
+      intro n hn
+      exact h_per_term n hn
+    -- Factor out constants
+    have h_sum_const : ∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), (V * ((1 / 8349 : ℝ) * tau n * Real.exp 2 * hS s) : ℝ) = (∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), tau n) * (V * ((1 / 8349 : ℝ) * Real.exp 2 * hS s)) := by
+      calc
+        ∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), (V * ((1 / 8349 : ℝ) * tau n * Real.exp 2 * hS s) : ℝ) = ∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), (tau n * (V * ((1 / 8349 : ℝ) * Real.exp 2 * hS s))) := by
+          apply Finset.sum_congr rfl
+          intro n hn
+          ring
+        _ = (∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), tau n) * (V * ((1 / 8349 : ℝ) * Real.exp 2 * hS s)) := by
+          rw [Finset.sum_mul]
+          <;> simp [mul_assoc, mul_comm, mul_left_comm]
+    rw [h_sum_const] at h_sum_bound
+    -- Bound the sum of τ_n by 109 (BJS Lemma 14 / Table 1: ∑_{odd n≥3} τ_n = 109)
+    have h_tau_sum_bound : (∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), tau n) ≤ 109 := by
+      sorry
+    -- hS s is positive
+    have h_hS_pos : 0 < hS s := by
+      rw [show s = log D / log z by rfl]
+      have h₁ : 1 ≤ (log D / log z : ℝ) := hs1
+      exact hS_pos h₁
+    have h_exp_pos : 0 < Real.exp 2 := Real.exp_pos 2
+    have h_coeff_pos : 0 < (1 / 8349 : ℝ) * Real.exp 2 * hS s := by positivity
+    have h_V_pos : 0 ≤ V := hVpos
+    have h_tau_nonneg_sum : 0 ≤ ∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), tau n := by
+      apply Finset.sum_nonneg
+      intro n hn
+      exact h_tau_nonneg n
+    -- Combine the bounds
+    have h_final : (∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), tau n) * (V * ((1 / 8349 : ℝ) * Real.exp 2 * hS s)) ≤ V * ((1 / 8349 : ℝ) * 109 * Real.exp 2 * hS s) := by
+      have h₁ : (∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), tau n) ≤ 109 := h_tau_sum_bound
+      have h₂ : 0 ≤ V := hVpos
+      have h₃ : 0 ≤ (1 / 8349 : ℝ) * Real.exp 2 * hS s := by positivity
+      have h₄ : 0 ≤ V * ((1 / 8349 : ℝ) * Real.exp 2 * hS s) := by positivity
+      calc
+        (∑ n in (Finset.range (S.card + 3)).filter (fun n => 3 ≤ n ∧ n % 2 = 1), tau n) * (V * ((1 / 8349 : ℝ) * Real.exp 2 * hS s)) ≤ 109 * (V * ((1 / 8349 : ℝ) * Real.exp 2 * hS s)) := by
+          gcongr
+        _ = V * (109 * ((1 / 8349 : ℝ) * Real.exp 2 * hS s)) := by ring
+        _ = V * ((1 / 8349 : ℝ) * 109 * Real.exp 2 * hS s) := by ring
+    linarith
+  simpa using h_main
 
 /-- LEAF: BJS Lemma 11 for odd n at least 3 via display 39, summed as in Proposition 13 over odd
 n from 3, with the tail of C1 from Lemma 14 and journal Table 1 p. 1218, restricted to s from 2 to
