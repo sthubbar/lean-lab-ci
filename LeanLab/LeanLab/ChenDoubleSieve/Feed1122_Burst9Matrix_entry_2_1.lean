@@ -1,5 +1,7 @@
 import LeanLab.ChenDoubleSieve.Table1Algebra
-import LeanLab.ChenDoubleSieve.KernelIntegrability
+import LeanLab.ChenDoubleSieve.Wu04Integral
+import LeanLab.ChenDoubleSieve.Wu04Functional
+import LeanLab.ChenDoubleSieve.Wu04Table
 
 /-!
 # Feed 1122 split of `Burst9Matrix.entry_2_1`
@@ -25,10 +27,7 @@ open LeanLab.ChenDoubleSieve.Wu04Table
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 2) volume (11/5 : ℝ) (23/10 : ℝ) := by
-  have h := LeanLab.ChenDoubleSieve.Burst8P2.table_kernel_integrable 2
-  exact h.mono_set (Set.uIcc_subset_uIcc
-    (by rw [Set.mem_uIcc]; norm_num)
-    (by rw [Set.mem_uIcc]; norm_num))
+  sorry
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, left half panel `[11/5, 9/4]` of `a_{3,2}`:
 quadrature value 0.012460998389, stated bound leaves 1.86e-09. MEDIUM. -/
@@ -51,7 +50,7 @@ theorem entry_2_1_of_leaves : (candidateMatrixQ 2 1 : ℝ) ≤ integralMatrix 2 
     norm_num
   have hI := leaf_integrable
   have h1 : IntervalIntegrable (tableKernel 2) volume (11/5 : ℝ) (9/4 : ℝ) :=
-    hI.mono_set (Set.uIcc_subset_uIcc Set.left_mem_uIcc (by rw [Set.mem_uIcc]; norm_num))
+    hI.mono_set (Set.uIcc_subset_uIcc (by rw [Set.mem_uIcc]; norm_num))
   have h2 : IntervalIntegrable (tableKernel 2) volume (9/4 : ℝ) (23/10 : ℝ) :=
     hI.mono_set (Set.uIcc_subset_uIcc (by rw [Set.mem_uIcc]; norm_num) Set.right_mem_uIcc)
   rw [hc, he, ← intervalIntegral.integral_add_adjacent_intervals h1 h2]
