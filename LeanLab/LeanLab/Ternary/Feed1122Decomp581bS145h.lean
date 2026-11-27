@@ -99,7 +99,13 @@ theorem s145h_quadrature_main :
       |(tripleProduct p : ℝ) * s145e_leastPrimeMain x p -
             (∫ s in s145f_alpha x p..s145f_theta x p / 2,
               Task571.buchstabModel ((s145f_theta x p - s) / s) / s ^ 2)| ≤ ε := by
-  sorry
+  intro ε hε
+  obtain ⟨X, hX⟩ := s145f_uniform_prime_quadrature ε hε
+  refine ⟨X, fun x hx p hp => ?_⟩
+  obtain ⟨-, -, -, -, hB⟩ := hX x hx p hp
+  by_cases h : 2 * s145f_alpha x p ≤ s145f_theta x p
+  · simpa [h] using hB
+  · exact (h h).elim
 
 theorem s145h_quadrature_core :
     ∀ ε : ℝ, 0 < ε → ∃ X : ℝ, ∀ x : ℝ, X ≤ x → ∀ p ∈ primeTriples x,
