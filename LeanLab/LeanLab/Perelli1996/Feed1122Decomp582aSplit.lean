@@ -15,6 +15,94 @@ open scoped ArithmeticFunction.vonMangoldt
 noncomputable section
 attribute [local instance] Classical.propDecidable
 
+/-- First step of the explicit formula route for the window variance. A Gallagher window
+sum with left endpoint at least the window length is the difference of the partial sums
+at the two endpoints. This is the bridge from the window sums of equations 18 through 25
+to the truncated explicit formula for the half weighted character sums. -/
+theorem win_eq_sub_partial_sum (a : ℕ → ℂ) (N L m : ℕ) (hmL : L ≤ m) (hmN : m < N) :
+    LeanLab.PNTPort.Gallagher.win a N L m =
+      ∑ n ∈ range (m + 1), a n - ∑ n ∈ range (m - L + 1), a n := by
+  unfold LeanLab.PNTPort.Gallagher.win
+  have hset : (range N).filter (fun n => n ≤ m ∧ m < n + L) = Ico (m - L + 1) (m + 1) := by
+    ext n
+    simp only [mem_filter, mem_range, mem_Ico]
+    omega
+  rw [hset]
+  have hsplit : range (m + 1) = range (m - L + 1) ∪ Ico (m - L + 1) (m + 1) := by
+    ext n
+    simp only [mem_range, mem_union, mem_Ico]
+    omega
+  rw [hsplit, Finset.sum_union]
+  · ring
+  · intro n hn1 hn2
+    simp only [mem_range, mem_Ico] at hn1 hn2
+    omega
+
+/-- Trivial L2 energy bound for the Gallagher windows. Each summand appears in exactly
+L windows, so the window mean square is at most L squared times the full L2 mass.
+Applied to the character twisted von Mangoldt coefficients this overshoots the target
+K N log N to the minus D by a positive power of log N whenever q is comparable to a
+power of log N, which is why the cancellation in the zero cross terms of Perelli
+equations 20 through 24 is indispensable. -/
+theorem window_energy_trivial (a : ℕ → ℂ) (M L : ℕ) (hL : 0 < L) :
+    ∑ m ∈ range (M + 1 + L), ‖LeanLab.PNTPort.Gallagher.win a M L m‖ ^ 2 ≤
+      (L : ℝ) ^ 2 * ∑ n ∈ range M, ‖a n‖ ^ 2 := by
+  classical
+  have hM0 : 0 < M := lt_of_lt_of_le hL (Nat.le_succ_of_le le_rfl)
+  set g : ℕ → ℝ := fun n => ‖a n‖ ^ 2 with hg
+  set S : ℕ → Finset ℕ := fun m => (range M).filter (fun n => n ≤ m ∧ m < n + L) with hS
+  have hcardL (m : ℕ) : (S m).card ≤ L := by
+    have hsub : S m ⊆ Ico (m - L + 1) (m + 1) := by
+      intro n hn
+      simp only [hS, mem_filter, mem_range, mem_Ico] at hn ⊢
+      omega
+    rw [Finset.card_le_card hsub, Finset.card_Ico]
+    have : m + 1 - (m - L + 1) = L := by omega
+    exact this
+  have hwin (m : ℕ) : ‖LeanLab.PNTPort.Gallagher.win a M L m‖ ^ 2 ≤
+      (L : ℝ) * ∑ n ∈ S m, g n := by
+    have h1 : ‖LeanLab.PNTPort.Gallagher.win a M L m‖ ≤ ∑ n ∈ S m, ‖a n‖ := by
+      exact norm_sum_le _ _
+    have h2 : (∑ n ∈ S m, ‖a n‖) ^ 2 ≤
+        ((S m).card : ℝ) * ∑ n ∈ S m, ‖a n‖ ^ 2 := by
+      exact sq_sum_le_card_mul_sum_sq _
+    have h3 : ((S m).card : ℝ) ≤ (L : ℝ) := by exact_mod_cast hcardL m
+    have h4 : ∑ n ∈ S m, g n = ∑ n ∈ S m, ‖a n‖ ^ 2 := by rw [hg]
+    calc ‖LeanLab.PNTPort.Gallagher.win a M L m‖ ^ 2
+        ≤ (∑ n ∈ S m, ‖a n‖) ^ 2 :=
+          pow_le_pow_left₀ (norm_nonneg _) h1 2
+      _ ≤ ((S m).card : ℝ) * ∑ n ∈ S m, ‖a n‖ ^ 2 := h2
+      _ ≤ (L : ℝ) * ∑ n ∈ S m, g n := by rw [h4]; exact mul_le_mul_of_nonneg_right h3 (by positivity)
+  -- double count: each n < M lies in exactly L windows within the m range
+  have hcount (n : ℕ) (hn : n ∈ range M) :
+      {m ∈ range (M + 1 + L) | n ≤ m ∧ m < n + L} = Ico n (n + L) := by
+    ext m
+    simp only [mem_filter, mem_range, mem_Ico]
+    have : n + L ≤ M + L := by omega
+    omega
+  have hcomm : ∑ m ∈ range (M + 1 + L), ∑ n ∈ S m, g n =
+      ∑ n ∈ range M, ((L : ℝ) * g n) := by
+    rw [Finset.sum_comm']
+    · refine Finset.sum_congr rfl fun n hn => ?_
+      rw [← Finset.sum_filter (s := range (M + 1 + L))
+        (p := fun m => n ≤ m ∧ m < n + L) (g := fun _ => g n)]
+      rw [hcount n hn, Finset.card_Ico]
+      have hLr : ((n + L - n : ℕ) : ℝ) = (L : ℝ) := by
+        rw [show n + L - n = L from by omega]
+      rw [hLr, Finset.sum_const, smul_eq_mul]
+    · intro m _ n hn
+      simp only [hS, mem_filter, mem_range] at hn
+      exact mem_filter.mpr ⟨hn.1, hn.2⟩
+  calc ∑ m ∈ range (M + 1 + L), ‖LeanLab.PNTPort.Gallagher.win a M L m‖ ^ 2
+      ≤ ∑ m ∈ range (M + 1 + L), ((L : ℝ) * ∑ n ∈ S m, g n) :=
+        Finset.sum_le_sum fun m _ => hwin m
+    _ = (L : ℝ) * ∑ m ∈ range (M + 1 + L), ∑ n ∈ S m, g n := by
+        rw [Finset.mul_sum]
+    _ = (L : ℝ) * ∑ n ∈ range M, ((L : ℝ) * g n) := by rw [hcomm]
+    _ = (L : ℝ) ^ 2 * ∑ n ∈ range M, ‖a n‖ ^ 2 := by
+        rw [hg, Finset.mul_sum]
+        exact Finset.sum_congr rfl fun n _ => by ring
+
 /-- LEAF: Pages 484 and 485 equations 18 through 25, applied on page 487 below
 equation 31, after the Gallagher reduction through Perelli and Pintz 1993 page 47
 equation 21. Class HARD. For every modulus q up to a power of log N and any
