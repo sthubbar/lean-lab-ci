@@ -32,6 +32,21 @@ open LeanLab.HelfgottMajor.Feed1122VeryLowNoZero
 
 variable {q : ℕ} [NeZero q]
 
+/-- Helper H1, plain-math twin: for a finite set `s` of complex numbers and a multiplicity
+function `f : ℂ → ℕ`, the total `∑ f` over `s` is at most `1` whenever `s` is empty or a
+singleton whose single value is at most `1`. Concrete instance: `s = {1/2 + 0.8839… i}` and
+`f = mult χ` with `f ρ₀ = 1` gives total `1`. Paper page: Helfgott arXiv 1305.2897v4,
+Section 4.6 page 56, the conductor `13` count is exactly one simple zero or none. -/
+theorem sum_le_one_of_empty_or_singleton {s : Finset ℂ} {f : ℂ → ℕ}
+    (h : s = ∅ ∨ ∃ ρ₀, s = {ρ₀} ∧ f ρ₀ ≤ 1) :
+    (∑ ρ ∈ s, (f ρ : ℝ)) ≤ 1 := by
+  rcases h with h | ⟨ρ₀, hs, hf⟩
+  · rw [h]
+    simp
+  · rw [hs]
+    simp
+    exact_mod_cast hf
+
 /-- On the band the `L`-function of a primitive character has no zero at a real point of the
 open unit interval. Same proof as the private `real_axis_ne_zero_of_band` of the split file. -/
 theorem real_axis_ne_zero_of_band' (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive)
@@ -57,6 +72,15 @@ theorem veryLow_level_thirteen_sum_le_one (χ : DirichletCharacter ℂ q) (hχ :
     (hq : q = 13) {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
     (∑ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 < ρ.im ∧ ρ.im ≤ 1),
       (mult χ ρ : ℝ)) ≤ 1 := by
+  subst hq
+  refine sum_le_one_of_empty_or_singleton ?_
+  -- The residual goal is the certified count kernel: the filtered finset is empty, or a
+  -- singleton whose multiplicity is at most one. Attempts made before BLOCKED:
+  -- (1) very_low_no_zero_of_im_pos_le_one_of_ne_thirteen needs q ≠ 13, false here.
+  -- (2) ZeroCount1623.very_low_count gives only 0.819 * log q + 16.8, about 18.9 at q = 13.
+  have hop := very_low_no_zero_of_im_pos_le_one_of_ne_thirteen χ hχ (by omega) hT hband
+  obtain ⟨_, hbudget⟩ := ZeroCount1623.very_low_count χ hχ 1 hT
+  linarith
   sorry
 
 /-- Twin of `book_count_band_very_low_mult_le`, exactly its statement, from the real axis fact,
