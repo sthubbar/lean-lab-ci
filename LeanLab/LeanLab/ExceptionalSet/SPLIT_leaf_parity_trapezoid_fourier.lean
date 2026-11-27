@@ -27,6 +27,21 @@ open LeanLab.ExceptionalSet.U1539 (eC)
 noncomputable def trapW (A : ℝ) (h : ℤ) : ℝ :=
   if h = 0 then 1 else min 1 (1 / (A * (h : ℝ) ^ 2))
 
+/-- Proved helper: every trapezoid weight is at most one. -/
+theorem trapW_le_one (A : ℝ) (h : ℤ) : trapW A h ≤ 1 := by
+  unfold trapW
+  split_ifs
+  · norm_num
+  · exact min_le_left _ _
+
+/-- Proved helper: at a nonzero frequency the trapezoid weight is at most the
+reciprocal-square weight. -/
+theorem trapW_le_inv_sq (A : ℝ) (h : ℤ) (hA : 0 < A) (hne : h ≠ 0) :
+    trapW A h ≤ 1 / (A * (h : ℝ) ^ 2) := by
+  unfold trapW
+  rw [if_neg hne]
+  exact min_le_right _ _
+
 /-- LEAF: P0082 page 370 display (40), the Fourier series of the trapezoid. Class MEDIUM.
 For `0 < A ≤ 1 / 4` the period two trapezoid, one on `[k + A, k + 1 - A]` for `k` even, zero
 there for `k` odd, linear on the ramps of width `2 A` around the integers, has coefficients
