@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.SPLIT_strip_count_at_one_le_explicit
+import LeanLab.HelfgottMajor.SPLIT_vonMangoldt_tsum_eleven_tenths_le
 
 /-!
 # Split of `border_logDeriv_le_of_one_le_re` (`HelfgottMajor/SPLIT_border_norm_logDeriv_le`)
@@ -80,7 +81,7 @@ MEDIUM: an explicit Chebyshev bound `ψ(x) ≤ 1.04 x`, Rosser and Schoenfeld 19
 summation gives `∑ Λ(n) n^{-σ} ≤ 1.04 σ / (σ - 1) = 11.44` at `σ = 11/10`. -/
 theorem vonMangoldt_tsum_eleven_tenths_le :
     ∑' n : ℕ, (ArithmeticFunction.vonMangoldt n : ℝ) / (n : ℝ) ^ (11 / 10 : ℝ) ≤ 11.7 := by
-  sorry
+  exact LeanLab.HelfgottMajor.SplitVonMangoldtTsum.vonMangoldt_tsum_eleven_tenths_le_split
 
 /-- The real series `∑ Λ(n) n^{-σ}` converges on `σ > 1`, from Mathlib's
 `ArithmeticFunction.LSeriesSummable_vonMangoldt`. -/
