@@ -9,6 +9,7 @@ numerical input left is f_3(1) ≤ 2/5, the LEAF cex_f3_le_1124; the true value 
 AI wrote the Lean code. Binary Goldbach is open.
 -/
 import LeanLab.Cai2002.Split1122bLemma11Step
+import LeanLab.Cai2002.Split1122bLemma7
 
 open Finset Real
 noncomputable section
@@ -235,7 +236,30 @@ theorem cex_h18 : ∀ n : ℕ, 1 ≤ n → ∀ s : ℝ, (Odd n ∧ 1 ≤ s) ∨ 
 f_3(1) = integral over t > 3 of f_2(t - 1), about 0.2936 by Simpson's rule, see
 notes/burst-20261122/Cai2002-lemma11stepsplit.md, where an independent falsifier found 0.293636.
 Only the bound 2/5 is needed. Class MEDIUM: two nested integrals of elementary functions. -/
+theorem cex_f2_formula_1124 (s : ℝ) (hs2 : 2 ≤ s) (hs4 : s ≤ 4) :
+    bjsF306 2 s = (s - 3 * log (s - 1) + 3 * log 3 - 4) / s := by
+  have h := lemma7_display19_1122 s hs2 hs4
+  rw [eq_div_iff (by positivity)]
+  exact h.symm
+
+theorem cex_f2_log_bound_1124 (s : ℝ) (hs2 : 2 ≤ s) (hs4 : s ≤ 4) :
+    bjsF306 2 s ≤ 1 - (67 / 10 : ℝ) / s + 12 / s ^ 2 := by
+  have hf := cex_f2_formula_1124 s hs2 hs4
+  have hs0 : 0 < s := by linarith
+  have hlog : 2 * (s - 2) / s ≤ log (s - 1) := by
+    have hv0 : 0 ≤ s - 2 := by linarith
+    have h := le_log_one_add_of_nonneg hv0
+    convert h using 1 <;> ring
+  have hl3 := Real.log_three_lt_d9
+  have hA : 3 * log 3 ≤ 33 / 10 := by linarith
+  rw [hf]
+  apply (div_le_iff₀ hs0).2
+  have hneg : -3 * log (s - 1) ≤ -6 * (s - 2) / s := by linarith
+  field_simp [ne_of_gt hs0]
+  linarith
+
 theorem cex_f3_le_1124 : bjsF306 3 1 ≤ 2 / 5 := by
+  have hf2 := cex_f2_log_bound_1124 (s := 2) (by norm_num) (by norm_num)
   sorry
 
 /-- leaf306_lemma11_step of Split306Theorem6.lean, BJS Lemma 11 for n ≥ 2 with the one parameter
