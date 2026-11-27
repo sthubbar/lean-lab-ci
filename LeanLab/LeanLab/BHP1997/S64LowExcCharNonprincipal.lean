@@ -18,6 +18,7 @@ tacit triangle step of page 44.
 
 AI wrote the Lean code. Binary Goldbach is open; nothing here changes that.
 -/
+import LeanLab.BHP1997.S64PerronBase
 import LeanLab.BHP1997.Prep1121LowExcLemma29
 import LeanLab.ExceptionalSet.WindowParseval264
 import LeanLab.DERZ1997.Perron136
@@ -1279,42 +1280,6 @@ theorem leaf_mellin_mean_value :
   refine ⟨18 * Real.pi, by positivity, ?_⟩
   intro Y hY T hT g hg
   exact plancherel_window_y g hg hT hY
-
-/-- Page 3, the definition of Q: `Q ≤ Y^(1/16)` when `Y ≥ 1`. -/
-theorem sieveQ_le_sixteenth {ε x : ℝ} (hY : 1 ≤ x ^ (11 / 20 + ε)) :
-    (sieveQ ε x : ℝ) ≤ (x ^ (11 / 20 + ε)) ^ (1 / 16 : ℝ) := by
-  have hY0 : 0 ≤ x ^ (11 / 20 + ε) := by linarith
-  unfold sieveQ
-  calc
-    _ ≤ ((x ^ (11 / 20 + ε)) ^ ((2 : ℝ) * (1 / 16 - 1 / 10 ^ 5))) ^ (1 / 2 : ℝ) / 2 :=
-      Nat.floor_le (by positivity)
-    _ ≤ ((x ^ (11 / 20 + ε)) ^ ((2 : ℝ) * (1 / 16 - 1 / 10 ^ 5))) ^ (1 / 2 : ℝ) :=
-      div_le_self (by positivity) (by norm_num)
-    _ = (x ^ (11 / 20 + ε)) ^ ((1 / 16 : ℝ) - 1 / 10 ^ 5) := by
-      rw [← Real.rpow_mul hY0]
-      congr 1
-      norm_num
-    _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hY (by norm_num)
-
-/-- For `Y ≥ 6^16`, `6 Y^(1/8) ≤ Y`. -/
-theorem six_mul_eighth_le {Y : ℝ} (hY : (6 : ℝ) ^ 16 ≤ Y) :
-    6 * Y ^ (1 / 8 : ℝ) ≤ Y := by
-  have hY0 : 0 ≤ Y := le_trans (by positivity) hY
-  have hY1 : 1 ≤ Y := le_trans (by norm_num) hY
-  have e : (1 / 16 : ℝ) = ((16 : ℕ) : ℝ)⁻¹ := by norm_num
-  have h1 : (6 : ℝ) ≤ Y ^ (1 / 16 : ℝ) := by
-    have := Real.rpow_le_rpow (by positivity) hY (by norm_num : (0:ℝ) ≤ 1 / 16)
-    rw [e, Real.pow_rpow_inv_natCast (by norm_num) (by norm_num)] at this
-    rw [e]; exact this
-  have h2 : Y ^ (1 / 16 : ℝ) ≤ Y ^ (7 / 8 : ℝ) :=
-    Real.rpow_le_rpow_of_exponent_le hY1 (by norm_num)
-  have h3 : Y = Y ^ (7 / 8 : ℝ) * Y ^ (1 / 8 : ℝ) := by
-    rw [← Real.rpow_add (by linarith)]; norm_num
-  have h4 : 0 ≤ Y ^ (1 / 8 : ℝ) := Real.rpow_nonneg hY0 _
-  calc 6 * Y ^ (1 / 8 : ℝ) ≤ Y ^ (7 / 8 : ℝ) * Y ^ (1 / 8 : ℝ) :=
-        mul_le_mul_of_nonneg_right (h1.trans h2) h4
-    _ = Y := h3.symm
-
 
 /-- Page 44, proof of Lemma 29, the step "the left hand side of (5.3) is
 `≪ Y^2 ∫_{-Y}^{Y} |G(1/2+it, χ)|^2 / (T2^2 + t^2) dt`, where we used

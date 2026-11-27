@@ -16,6 +16,7 @@ AI wrote this Lean code. Goldbach is open.
 import LeanLab.KadiriLumley2014.SPLIT_table_endpoint_budget_high
 import LeanLab.KadiriLumley2014.GIterated92
 import LeanLab.KadiriLumley2014.Conjugation301
+import LeanLab.KadiriLumley2014.SPLIT_endpoint_top_height_zero_tail_high_numeric
 
 namespace LeanLab.KadiriLumley2014.Task92
 open Real Set MeasureTheory
@@ -99,7 +100,7 @@ theorem endpoint_top_numeric_S10 {r : PrintedRow} (hr : r ∈ tableTwo)
     (hhigh : 58 ≤ r.logIndex) :
     higherFactor r.m r.deltaQ * (Real.exp r.uQ + 1) / ((Real.exp r.uQ - 1) * (r.deltaQ : ℝ) ^ r.m) *
         (1 / (3000000000000 : ℝ) ^ r.m) ≤ 1 / 100000 := by
-  sorry
+  exact endpoint_top_numeric_S10_helper hr hhigh
 
 /-- Assembly: the exact statement of endpoint_top_height_zero_tail_high_S10 from the proved
 pointwise bound and the two leaves. -/

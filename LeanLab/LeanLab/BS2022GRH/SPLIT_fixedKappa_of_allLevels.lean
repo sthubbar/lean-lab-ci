@@ -20,6 +20,7 @@ The assembly declares neither the target nor any leaf as a hypothesis.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BS2022GRH.SieveAllLevels1611
+import LeanLab.BS2022GRH.Limit700
 
 namespace LeanLab.BS2022GRH.SieveAllLevels1611
 open Real Finset Classical Filter Topology
@@ -61,7 +62,13 @@ theorem upper_limit (S X R c s₀ : ℝ) (hs₀ : 0 < s₀) (f : ℝ → ℝ)
     (hev : ∀ᶠ δ in 𝓝[>] (0 : ℝ),
       S ≤ (2 * exp eulerMascheroniConstant / f δ + c * hS (f δ)) * X + R) :
     S ≤ (2 * exp eulerMascheroniConstant / s₀ + c * hS s₀) * X + R := by
-  sorry
+  have hh : Tendsto (fun δ => (2 * exp eulerMascheroniConstant / f δ +
+      c * hS (f δ)) * X + R) (𝓝[>] (0 : ℝ))
+      (𝓝 ((2 * exp eulerMascheroniConstant / s₀ + c * hS s₀) * X + R)) :=
+    (((tendsto_const_nhds.div hf hs₀.ne').add
+      (tendsto_const_nhds.mul (Limit700.continuous_hS.continuousAt.tendsto.comp hf))).mul
+        tendsto_const_nhds).add tendsto_const_nhds
+  exact ge_of_tendsto hh hev
 
 /-- LEAF: step 8, lower half. f(s) = 2e^γ log(s - 1)/s and h(s) are continuous at s₀ > 1, so a
 bound holding for all small δ > 0 passes to the limit s₀ of f δ. MEDIUM, as `upper_limit`. Strictly
@@ -72,7 +79,14 @@ theorem lower_limit (S X R c s₀ : ℝ) (hs₀ : 1 < s₀) (f : ℝ → ℝ)
     (hev : ∀ᶠ δ in 𝓝[>] (0 : ℝ),
       (2 * exp eulerMascheroniConstant * log (f δ - 1) / f δ - c * hS (f δ)) * X - R ≤ S) :
     (2 * exp eulerMascheroniConstant * log (s₀ - 1) / s₀ - c * hS s₀) * X - R ≤ S := by
-  sorry
+  have hl := (hf.sub_const 1).log (show s₀ - 1 ≠ 0 by linarith)
+  have hh : Tendsto (fun δ => (2 * exp eulerMascheroniConstant * log (f δ - 1) /
+      f δ - c * hS (f δ)) * X - R) (𝓝[>] (0 : ℝ))
+      (𝓝 ((2 * exp eulerMascheroniConstant * log (s₀ - 1) / s₀ - c * hS s₀) * X - R)) :=
+    (((tendsto_const_nhds.mul hl).div hf (by linarith)).sub
+      (tendsto_const_nhds.mul (Limit700.continuous_hS.continuousAt.tendsto.comp hf))).mul
+        tendsto_const_nhds |>.sub tendsto_const_nhds
+  exact le_of_tendsto hh hev
 
 /-- LEAF: step 8, the level. For D > 0 and z ≥ 2 the level log (D(1 - δ)) / log z / (1 + εF) of
 the lifted system tends to s* = log D / log z / (1 + εF) as δ → 0+. MEDIUM: continuity of log at
@@ -80,7 +94,10 @@ D > 0. Strictly easier than the target. Non-vacuity: z = 2, D = 1, εF = 1. -/
 theorem level_tendsto (z D εF : ℝ) (hD : 0 < D) :
     Tendsto (fun δ => log (D * (1 - δ)) / log z / (1 + εF)) (𝓝[>] 0)
       (𝓝 (log D / log z / (1 + εF))) := by
-  sorry
+  have hx : Tendsto (fun δ : ℝ => D * (1 - δ)) (𝓝[>] 0) (𝓝 D) := by
+    have hc : Continuous (fun δ : ℝ => D * (1 - δ)) := by fun_prop
+    simpa using (hc.tendsto 0).mono_left nhdsWithin_le_nhds
+  exact ((hx.log hD.ne').div_const (log z)).div_const (1 + εF)
 
 /-- The eventual conditions on δ, PROVED: for w < D, small δ > 0 has δ < 1 and w < D(1 - δ). -/
 theorem eventually_small (w D : ℝ) (hw : w < D) (hD : 0 < D) :

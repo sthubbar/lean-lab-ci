@@ -14,6 +14,7 @@ The assembly declares neither the target nor any leaf as a hypothesis.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BS2022GRH.Decomp327a
+import LeanLab.BS2022GRH.DelayTerms700
 
 namespace LeanLab.BS2022GRH.Decomp327a
 open Real Finset Classical ChenThresholdGRH Decomp148f DecompC169d
@@ -25,7 +26,7 @@ on the iterated integrals of displays 15 to 17. Strictly easier than the target:
 sum is claimed. Non-vacuity: s equal to 2 meets both guards. -/
 theorem delay_odd_summable (s : ℝ) (hs1 : 1 ≤ s) (hs3 : s ≤ 3) :
     Summable (fun n : ℕ => if n % 2 = 1 then delayTerm n s else 0) := by
-  sorry
+  exact DelayTerms700.odd_summable s hs1
 
 /-- LEAF: the odd delay series sums to at most F of s minus 1, BJS display 13 cited from Nathanson
 Theorem 9.4, with F of s equal to 2 e^gamma over s for s at most 3, display 8. Class HARD, the
@@ -43,7 +44,7 @@ Strictly easier than the target: no value of the sum is claimed. Non-vacuity: s 
 both guards. -/
 theorem delay_even_summable (s : ℝ) (hs2 : 2 ≤ s) (hs4 : s ≤ 4) :
     Summable (fun n : ℕ => if 0 < n ∧ n % 2 = 0 then delayTerm n s else 0) := by
-  sorry
+  exact DelayTerms700.even_summable s hs2
 
 /-- LEAF: the even delay series sums to at most 1 minus f of s, BJS display 14 cited from Nathanson
 Theorem 9.4, with f of s equal to 2 e^gamma log of s minus 1 over s for s from 2 to 4, display 8

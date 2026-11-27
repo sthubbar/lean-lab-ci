@@ -66,13 +66,8 @@ theorem delay_even_termwise (n : ℕ) (hpos : 0 < n) (heven : n % 2 = 0) (s : �
 delay_even_bound_three_four. -/
 theorem delay_even_summable_split (s : ℝ) (hs2 : 2 ≤ s) (hs4 : s ≤ 4) :
     Summable (fun n : ℕ => if 0 < n ∧ n % 2 = 0 then delayTerm n s else 0) := by
-  refine Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_) delay_odd_majorant_summable
-  · split_ifs with h
-    · exact delayTerm_nonneg n s (by rw [if_neg (by omega)]; exact hs2)
-    · exact le_rfl
-  · split_ifs with h
-    · exact delay_even_termwise n h.1 h.2 s hs2 hs4
-    · positivity
+  -- The parent now has an unconditional proof from CODEX task700.
+  exact delay_even_summable s hs2 hs4
 
 end
 

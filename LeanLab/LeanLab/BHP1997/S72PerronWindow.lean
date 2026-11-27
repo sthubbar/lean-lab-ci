@@ -18,10 +18,11 @@ splits into
 AI wrote the Lean code. Binary Goldbach is open; nothing here changes that.
 -/
 import LeanLab.BHP1997.S64LowExcCharNonprincipal
+import LeanLab.BHP1997.S72PerronElementary697
 import LeanLab.DERZ1997.Perron136
 
 namespace LeanLab.BHP1997.S72PerronWindow
-open Classical Complex DecompC165b LowerShortC165
+open Classical Complex DecompC165b
 open LeanLab.DERZ1997.Decomp1529b LeanLab.DERZ1997.Perron136
 open scoped BigOperators
 open MeasureTheory
@@ -76,46 +77,8 @@ theorem perron_term_bound {w c T : ℝ} (hw : 0 < w) (hc : 0 < c) (hT : 0 < T)
           rw [mul_div_assoc', div_le_div_iff₀ (mul_pos (mul_pos Real.pi_pos hT) hl) hd]
           nlinarith [mul_le_mul_of_nonneg_left hp hwc.le]
 
-/-- LEAF: page 43 to 44, proof of Lemma 29 via [29] Lemma 3.19, the step that writes the
-Perron integral of the Dirichlet polynomial `G(s) = Σ_{m ∈ J} a(m) m^(-s)` as the sum over
-m of the per term Perron integrals of `((y+yz)/m)^s / s` and `(y/m)^s / s`: linearity of
-the integral over the finite sum and `w^s / m^s = (w/m)^s` for positive reals. Class MEDIUM.
-CITED [29] Titchmarsh Lemma 3.19, proof. -/
-theorem leaf_perron_sum_identity (J : Finset ℕ) (hJ : ∀ m ∈ J, 1 ≤ m) (a : ℕ → ℂ)
-    (T w1 w2 : ℝ) (hw1 : 0 < w1) (hw2 : 0 < w2) :
-    ((2 * Real.pi : ℝ) : ℂ)⁻¹ *
-        ∫ t in (-T)..T,
-          (∑ m ∈ J, a m / (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) *
-            ((w1 : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
-              (w2 : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I) =
-      ∑ m ∈ J, a m * (perronI (w1 / m) (1 / 2) T - perronI (w2 / m) (1 / 2) T) := by
-  sorry
 
-/-- LEAF: page 43 to 44, proof of Lemma 29 via [29] Lemma 3.19, the summed remainder:
-for `w ≍ Y`, `Σ_{m ∈ J} (w/m)^(1/2) min(1, 1/(Y |log(w/m)|)) ≪ log Y`, since
-`|log(w/m)| ≫ |w - m|/Y` on `J ⊆ (Y, 2Y]`, and `log Y ≪ Y^(1/200)`. Class MEDIUM.
-CITED [29] Titchmarsh Lemma 3.19. -/
-theorem leaf_log_sum {ε : ℝ} (hε : 0 < ε) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ w : ℝ, x ^ (11 / 20 + ε) / 2 ≤ w →
-      w ≤ 6 * x ^ (11 / 20 + ε) →
-        ∑ m ∈ rightInterval ε x, (w / m) ^ (1 / 2 : ℝ) /
-            (1 + x ^ (11 / 20 + ε) * |Real.log (w / m)|) ≤
-          K * (x ^ (11 / 20 + ε)) ^ (1 / 200 : ℝ) := by
-  sorry
 
-/-- LEAF: page 3, display 3.1, `|b(m)| ≪ d(m)^B`, with the divisor bound `d(m) ≪ m^δ`,
-gives `|b(m)| ≪ Y^(1/200)` on `J ⊆ (Y, 2Y]`, as used on page 44 for the error `O(Y^ε)`.
-Class EASY. CITED the divisor bound, lab port `HeathBrown1985.card_divisors_le_rpow`. -/
-theorem leaf_coeff_divisor (b : ℝ → ℕ → ℝ) {ε B : ℝ} (hε : 0 < ε)
-    (hb : ∃ C : ℝ, ∀ x k, |b x k| ≤ C * ((k.divisors.card : ℕ) : ℝ) ^ B) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ m ∈ rightInterval ε x,
-      |b x m| ≤ K * (x ^ (11 / 20 + ε)) ^ (1 / 200 : ℝ) := by
-  sorry
-
-theorem rightInterval_pos {ε x : ℝ} {m : ℕ} (hm : m ∈ rightInterval ε x) : 1 ≤ m := by
-  unfold rightInterval at hm
-  rw [Finset.mem_Ioc] at hm
-  omega
 
 /-- Page 43 to 44, the window as a difference of steps: for `m > 0` and `y ≤ w`,
 `[y ≤ m ≤ w] = [w/m ≥ 1] - [y/m > 1]`. -/
@@ -260,10 +223,6 @@ theorem leaf_perron_window_of_leaves (b : ℝ → ℕ → ℝ) {ε B : ℝ} (hε
     _ = 4 * K3 * K2 * (Y ^ (1 / 200 : ℝ) * Y ^ (1 / 200 : ℝ)) := by ring
     _ = _ := by rw [hR2]
 
-/-- Twin check: the assembly has exactly the type of the open LEAF. -/
-theorem leaf_perron_window_split_twin :
-    type_of% @S64LowExcCharNP.leaf_perron_window :=
-  @leaf_perron_window_of_leaves
 
 end LeanLab.BHP1997.S72PerronWindow
 
@@ -271,3 +230,12 @@ end LeanLab.BHP1997.S72PerronWindow
 #print axioms LeanLab.BHP1997.S72PerronWindow.window_step
 #print axioms LeanLab.BHP1997.S72PerronWindow.rightInterval_pos
 #print axioms LeanLab.BHP1997.S72PerronWindow.leaf_perron_window_of_leaves
+
+namespace LeanLab.BHP1997.S72PerronWindow
+
+/-- Twin check: the assembly has exactly the type of the open LEAF. -/
+theorem leaf_perron_window_split_twin :
+    type_of% @S64LowExcCharNP.leaf_perron_window :=
+  @leaf_perron_window_of_leaves
+
+end LeanLab.BHP1997.S72PerronWindow

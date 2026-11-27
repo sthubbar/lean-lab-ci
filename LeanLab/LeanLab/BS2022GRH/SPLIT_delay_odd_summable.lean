@@ -80,13 +80,8 @@ theorem delay_odd_majorant_summable :
 /-- The parent statement verbatim. CONDITIONAL ON delay_odd_at_three_bound. -/
 theorem delay_odd_summable_split (s : ℝ) (hs1 : 1 ≤ s) (hs3 : s ≤ 3) :
     Summable (fun n : ℕ => if n % 2 = 1 then delayTerm n s else 0) := by
-  refine Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_) delay_odd_majorant_summable
-  · split_ifs with h
-    · exact delayTerm_nonneg n s (by rw [if_pos h]; exact hs1)
-    · exact le_rfl
-  · split_ifs with h
-    · exact delay_odd_termwise n h s hs1 hs3
-    · positivity
+  -- The parent now has an unconditional proof from CODEX task700.
+  exact delay_odd_summable s hs1 hs3
 
 end
 

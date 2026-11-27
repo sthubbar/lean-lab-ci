@@ -35,7 +35,7 @@ of |g|^2. The variant on P0069 p. 44 has y^(it), a factor Y L, and prints [T, T'
 The leaves here use t in [-Y, Y] and no factor L: a stronger, still true form, by Plancherel
 after y = e^v. MISMATCH with the printed statements, no statement change; see PROGRESS.md.
 -/
-import LeanLab.BHP1997.LowerShortC165
+import LeanLab.BHP1997.Decomp514a
 import LeanLab.BHP1997.Lemma29
 
 namespace LeanLab.BHP1997.DQLeaf518Split
