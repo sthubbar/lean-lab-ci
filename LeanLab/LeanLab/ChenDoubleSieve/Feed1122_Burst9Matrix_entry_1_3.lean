@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Table1Algebra
+import LeanLab.ChenDoubleSieve.KernelIntegrability
 
 /-!
 # Feed 1122 split of `Burst9Matrix.entry_1_3`
@@ -18,13 +19,18 @@ namespace LeanLab.ChenDoubleSieve.Feed1122_Burst9Matrix_entry_1_3
 
 open Real Set MeasureTheory intervalIntegral
 open LeanLab.ChenDoubleSieve.Wu04Table
+open LeanLab.ChenDoubleSieve.Burst8P2
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15: the kernel of row 2 is interval integrable on the panel
 `[12/5, 5/2]`; it is a finite sum of window indicators times continuous functions and the
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 1) volume (12/5 : ℝ) (5/2 : ℝ) := by
-  sorry
+  have hI : IntervalIntegrable (tableKernel 1) volume (1 : ℝ) (3 : ℝ) :=
+    table_kernel_integrable 1
+  exact hI.mono_set (by
+    apply Set.Icc_subset_Icc
+    <;> norm_num)
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, left half panel `[12/5, 49/20]` of `a_{2,4}`:
 quadrature value 0.013126078857, stated bound leaves 1.83e-08. MEDIUM. -/
