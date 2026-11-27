@@ -19,7 +19,11 @@ S of B_pq and q over regions 53 and 66, then summed; the Lemma 21 error is absor
 Mertens bound for the sum of t over log q over these two regions. HARD -/
 theorem rough12_lemma21_sum (w : ℝ → ℝ) (hw : IsBuchstab w) (η : ℝ) (hη : 0 < η) :
     ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y →
-      buchstabMain labels12 w Y - η * (Y / Real.log Y) ≤ roughModel labels12 Y := by sorry
+      buchstabMain labels12 w Y - η * (Y / Real.log Y) ≤ roughModel labels12 Y := by
+  -- BLOCKED OUT OF REACH: the closest imported leaf is for labels11.  Lean reported a type
+  -- mismatch between labels11 and labels12.  The missing result is the uniform Lemma 21
+  -- rough count asymptotic for regions 53 and 66, plus a uniform reciprocal error sum.
+  sorry
 
 /-- LEAF: Jia pages 281 and 282, the prime number theorem Riemann sum step: the double prime
 sum of the Lemma 21 main term over regions 53 and 66 is at least the Buchstab integral over
@@ -27,7 +31,11 @@ the seven printed subdomains, rows eleven to seventeen, times Y over log Y. HARD
 theorem buchstabMain12_riemann (w : ℝ → ℝ) (hw : IsBuchstab w) (η : ℝ) (hη : 0 < η) :
     ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y →
       ((∑ i ∈ (Finset.univ.filter (fun i : Fin 16 => ¬ i.val < 9)), fullRow w i) - η) *
-        (Y / Real.log Y) ≤ buchstabMain labels12 w Y := by sorry
+        (Y / Real.log Y) ≤ buchstabMain labels12 w Y := by
+  -- BLOCKED OUT OF REACH: the closest imported leaf is for labels11.  Lean reported a type
+  -- mismatch between rows below nine and the remaining rows, and between labels11 and labels12.
+  -- The missing result is the prime double sum Riemann limit on regions 53 and 66.
+  sorry
 
 /-- Jia Lemma 27 pages 281 and 282: Decomp564c.rough12_to_integral from the leaves.
 CONDITIONAL ON rough12_lemma21_sum and buchstabMain12_riemann. Same type as the parent. -/
