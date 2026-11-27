@@ -130,17 +130,40 @@ theorem statement_iff_euExc : Euler8n3Statement ↔ ∀ X, euExc X = 0 := by
     rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff] at this
     simpa using this (Finset.mem_Icc.mpr ⟨hn, le_rfl⟩)
 
-/-- ROUTE, sorry, NOT PROVED. The smallest step: a positive proportion of `8n + 3` are represented.
-Expected by a second moment over `x`, as in Hua's sum of a prime and a square; not searched as a
-named theorem for this restricted form. Weaker than the problem. -/
-theorem route_euler_positive_density :
-    ∃ c : ℝ, 0 < c ∧ ∀ᶠ X : ℕ in Filter.atTop, c * X ≤ ((X - euExc X : ℕ) : ℝ) := by
-  sorry
+/-- ROUTE ATTEMPT, BLOCKED. Almost all `8n + 3` are represented, the analogue for `2p + x²` of
+Davenport and Heilbronn 1937 for `p + x²`. Weaker than the problem.
 
-/-- ROUTE, sorry, NOT PROVED. Almost all `8n + 3` are represented, the analogue for `2p + x²` of
-Davenport and Heilbronn 1937 for `p + x²`. Weaker than the problem. -/
+The target is `euExc X = o(X)`, i.e. almost all `8n + 3` are `x² + 2p`. This is an
+analytic-number-theory statement (a square plus twice a prime, restricted to `3 mod 8`): proving
+it requires Bombieri–Vinogradov / large-sieve / circle-method input for the prime values of
+`4n + 1 - 2k(k + 1)`, none of which is available in Mathlib v4.35.0.
+
+The unconditional inputs in this file go the wrong way or give no rate:
+  - `euExc_le`        : `euExc X ≤ X`          (trivial upper bound, not `o(X)`)
+  - `euler_represented_infinite` : infinitely many represented (no density rate)
+  - `euB_sound`       : `euB n = true → represented`, but `euB` only checks `k < 40`; each fixed
+    `k` gives primes of density 0, so the covered set has density 0.
+
+No elementary proof of `euExc X = o(X)` is available from these lemmas, so the sorry is left
+pending the missing analytic infrastructure. -/
 theorem route_euler_almost_all :
     ∀ ε : ℝ, 0 < ε → ∀ᶠ X : ℕ in Filter.atTop, (euExc X : ℝ) ≤ ε * X := by
+  sorry
+
+/-- ROUTE ATTEMPT, BLOCKED. A positive proportion of `8n + 3` are represented.
+Expected by a second moment over `x`, as in Hua's sum of a prime and a square; weaker than the
+problem.
+
+`EulerDensity.positive_density_of_almost_all` reduces this to `route_euler_almost_all` with
+`c = 1 / 2`, but that input is the blocked sorry above, so this route is also pending the missing
+analytic infrastructure. No independent elementary positive-density proof is available from the
+lemmas in this file (each fixed `k` in `euB` covers density 0). -/
+theorem route_euler_positive_density :
+    ∃ c : ℝ, 0 < c ∧ ∀ᶠ X : ℕ in Filter.atTop, c * X ≤ ((X - euExc X : ℕ) : ℝ) := by
+  -- Blocked: this follows from `route_euler_almost_all` via `EulerDensity.positive_density_of_almost_all`
+  -- with `c = 1 / 2`, but that input is the unproved sorry above. No independent elementary
+  -- positive-density proof is available from the lemmas in this file (each fixed `k` in `euB`
+  -- covers density 0), so this sorry is left pending the missing analytic infrastructure.
   sorry
 
 /-! ### 2. Powerful number as a prime plus a powerful number -/
