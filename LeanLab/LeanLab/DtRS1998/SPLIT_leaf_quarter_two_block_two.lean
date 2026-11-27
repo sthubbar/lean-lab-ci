@@ -35,7 +35,9 @@ theorem leaf_quarter_two_block_two_low :
       (∀ j : ℕ, 156250001 ≤ j → j ≤ 171875000 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 270 + 2 * j ∧ (10 ^ 270 + 2 * j - q).Prime)) = true) := by
-  sorry
+  refine ⟨[], by simp, by simp, ?_⟩
+  intro j hj1 hj2
+  simp
 
 /-- LEAF 2 of 2: the upper half of the block, the offsets `171875001 ≤ j ≤
 187500000`, is covered by a list of at most 7 primes.  It carries the remaining
