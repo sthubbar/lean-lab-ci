@@ -57,7 +57,8 @@ theorem veryLow_level_thirteen_sum_le_one (χ : DirichletCharacter ℂ q) (hχ :
     (hq : q = 13) {T : ℝ} (hT : 1 ≤ T) (hband : (q : ℝ) * T ≤ 2 * Real.pi * Real.exp 1) :
     (∑ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 < ρ.im ∧ ρ.im ≤ 1),
       (mult χ ρ : ℝ)) ≤ 1 := by
-  sorry
+  intro ρ hρ hL h0 h1 him
+  exact noLowZero_level_thirteen χ hχ hq ρ hL h0 h1 him
 
 /-- Twin of `book_count_band_very_low_mult_le`, exactly its statement, from the real axis fact,
 the S93 assembly for conductors other than `13`, and the conductor `13` leaf. It does not use the

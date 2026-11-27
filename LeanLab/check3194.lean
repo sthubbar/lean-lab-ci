@@ -1,0 +1,9 @@
+import Mathlib
+#check Complex.winding_number
+#check Complex.winding_number_eq_card_eq_zero
+#check Complex.argumentPrinciple
+#check Complex.analyticOrderNatAt
+#check Complex.analyticOrderNatAt_eq_zero
+#check Complex.analyticOrderNatAt_pos
+#check Complex.deriv_analyticOrderAt
+#check Complex.analyticOrderAt
