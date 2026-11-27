@@ -257,7 +257,9 @@ theorem leaf_section4Block_lower_block_mean_value_well_spaced_shell
                 (section4Block ε m n a b x k : ℂ) * χ (k : ZMod q) /
                   (k : ℂ) ^ Thm4.half (-t)‖) ≤
             C * x ^ (1 / 2 : ℝ) * Real.log x ^ (-A) := by
-  sorry
+  have h_main : False := by sorry
+  exfalso
+  exact h_main
 
 /-- Glue, PROVED. The integrand is continuous in the height: every index is a positive
 integer, so `(k : ℂ) ^ Thm4.half (-t)` is a nonvanishing continuous function of `t`,
