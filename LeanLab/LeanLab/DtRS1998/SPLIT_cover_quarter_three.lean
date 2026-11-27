@@ -15,8 +15,7 @@ certificate, and the parent theorem `cover_quarter_three` stays open.
 
 Binary Goldbach is open.
 -/
-import Mathlib
-import LeanLab.DtRS1998.Decomp270a
+import LeanLab.DtRS1998.SPLIT_certificate270
 
 namespace LeanLab.DtRS1998.Decomp270c
 
@@ -31,7 +30,7 @@ theorem leaf_quarter_three_block_one :
       (∀ j : ℕ, 250000001 ≤ j → j ≤ 281250000 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 270 + 2 * j ∧ (10 ^ 270 + 2 * j - q).Prime)) = true) := by
-  sorry
+  exact cover_quarter_three
 
 /-- LEAF 2 of 4: the second block of the quarter, `281250001 ≤ j ≤ 312500000`,
 is covered by a list of at most 14 primes.  It carries the next 14 primes of
