@@ -21,7 +21,6 @@ about Chen's theorem.  AI wrote the Lean code.
 -/
 import LeanLab.AlmostPrimes.Statements
 import LeanLab.ChenExplicit.Reductions
-import LeanLab.ChenExplicit.TwinCNumeric
 
 namespace LeanLab.AlmostPrimes
 
@@ -41,7 +40,8 @@ using `log (1 - x) ≥ -4x/3` for `0 ≤ x ≤ 1/4`, and `exp (-π²/18) > 1/2`.
 `twinC_multipliable` and the weaker `twinC_ge` in `LeanLab.ChenExplicit`. -/
 theorem leaf_twinC_ge_half : (1 : ℝ) / 2 ≤ LeanLab.ChenExplicit.twinC := by
   have h := LeanLab.ChenExplicit.twinC_ge_065
-  linarith
+  norm_num at h ⊢
+  <;> linarith
 
 /-- `e² < 8`, from `e < 2.7182818286`. -/
 private theorem exp_two_lt_eight : Real.exp 2 < 8 := by
