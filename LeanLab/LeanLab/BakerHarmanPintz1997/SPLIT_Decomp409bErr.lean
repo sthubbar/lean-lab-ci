@@ -33,7 +33,8 @@ theorem leaf_err_swap (x M N w γ : ℝ) (a b : ℕ → ℂ) (hx : 1 ≤ x) (hγ
           (fun d => γ ≤ (d : ℝ) ∧ (d : ℝ) < γ * w), (1 / (d : ℝ)) +
       2 * ((∑ m ∈ Ioc ⌊M⌋₊ ⌊2 * M⌋₊, ‖a m‖) * (∑ n ∈ Ioc ⌊N⌋₊ ⌊2 * N⌋₊, ‖b n‖)) *
         (γ * w + 1) := by
-  sorry
+  unfold conv2E
+  simp only [sum_apply]
 
 /-- LEAF: display (4.13), "using sum over m ~ M of tau(m)^B/m at most L^K". HARD, CITED.
 The harmonic sums of tau to the B over m up to 2M with 2M at most x are O(L^K), K depending
