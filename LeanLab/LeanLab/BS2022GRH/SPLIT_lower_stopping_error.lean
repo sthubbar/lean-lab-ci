@@ -70,6 +70,12 @@ theorem lower_stopping_even_high (P : Set ℕ) (Q : Finset ℕ) (g : ℕ → ℝ
       else 0) ≤
       (∏ p ∈ siftingPrimes P z \ Q, (1 - g p)) *
         ((1 / 8349 : ℝ) * 114 * exp 2 * hS (log D / log z)) := by
+  have hzpos : 0 < z := by linarith
+  have hlz : 0 < log z := log_pos hzpos
+  have hlogD : 0 < log D := by
+    have h := (le_div_iff₀ hlz).mp hs3
+    linarith
+  have hD : 1 < D := (Real.log_pos_iff).mp hlogD
   sorry
 
 /-- The target statement verbatim, from the band LEAF on each of the five bands of width 0.2
