@@ -1,0 +1,9 @@
+import Mathlib
+#check Nat.ceil_pos
+#check Nat.ceil_lt_add_one
+#check Nat.lt_ceil
+#check Nat.ceil_le
+#check Finset.Ico_eq_Icc
+#check Finset.Ico_eq_Icc_succ_top
+#check Finset.Icc_eq_Ico
+#check Nat.pos_of_ne_zero

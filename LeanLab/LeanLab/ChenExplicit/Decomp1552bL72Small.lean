@@ -13,6 +13,7 @@ Split of the LEAF `Split1552bL72.small_sector_of_prime_sum`.
 It is CONDITIONAL ON the one LEAF `recip_totient_sum_le`. Chen's theorem is known; binary Goldbach is OPEN.
 -/
 import LeanLab.ChenExplicit.Decomp324a
+import LeanLab.ChenExplicit.Decomp1552b
 
 open Finset Real
 open scoped Classical
@@ -103,7 +104,35 @@ harmonic bound, and `Σ_k μ²(k)/(k φ(k)) = ∏_p (1 + 1/(p(p-1))) < 1.95`. Nu
 is at least 2 for all integer cutoffs below 2·10⁶. Class MEDIUM. -/
 theorem recip_totient_sum_le (D : ℝ) (hD : 1 ≤ D) :
     ∑ m ∈ Ico 1 ⌈D⌉₊, (1 / (m.totient : ℝ)) ≤ 3 * (log D + 1) := by
-  sorry
+  by_cases hD1 : D = 1
+  · subst D
+    simp
+  have hDpos : 1 < D := lt_of_le_of_ne hD (Ne.symm hD1)
+  have hceil1 : 1 ≤ ⌈D⌉₊ := by
+    have hceilpos : 0 < ⌈D⌉₊ := Nat.ceil_pos.mpr (by linarith)
+    omega
+  have hIco : Ico 1 ⌈D⌉₊ = Icc 1 (⌈D⌉₊ - 1) := by
+    ext m
+    simp only [mem_Ico, mem_Icc]
+    omega
+  rw [hIco]
+  have hbound := D1552.sum_inv_totient_le_two_log (⌈D⌉₊ - 1) (by omega)
+  have hlt : ((⌈D⌉₊ - 1 : ℕ) : ℝ) < D := by
+    have hceil := Nat.ceil_lt_add_one (by exact_mod_cast hD)
+    push_cast at hceil
+    omega
+  have hlog : log ((⌈D⌉₊ - 1 : ℕ) : ℝ) ≤ log D := log_le_log (by positivity) hlt.le
+  have hnonneg : 0 ≤ 1 + log D := by
+    have hlogD := log_nonneg hD
+    linarith
+  calc
+    _ ≤ 2 * (1 + log ((⌈D⌉₊ - 1 : ℕ) : ℝ)) := hbound
+    _ ≤ 2 * (1 + log D) := by
+      gcongr
+      exact hlog
+    _ ≤ 3 * (log D + 1) := by
+      have hlogD := log_nonneg hD
+      nlinarith
 
 /-- Yamada page 24, before eq 103: `Σ_{d < D, r ∣ d} 1/φ(d) ≤ 3(log D + 1)/φ(r)`, from
 `φ(r)φ(m) ≤ φ(rm)` and `recip_totient_sum_le`. -/
