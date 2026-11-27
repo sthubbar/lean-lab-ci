@@ -112,7 +112,37 @@ theorem sieve_data :
                 (u0 * v1 + u1 * v0 - u1 * v1) * r / 6 ∧
               |convolution I J a1 b1 N - u1 * v1 * r| ≤
                 (u0 * v1 + u1 * v0 - u1 * v1) * r / 6 := by
-  sorry
+  -- Genuine attempt at P0069 Theorem 2 (Baker-Harman-Pintz 1997).
+  -- This requires: linear sieve weights, Buchstab function, Bombieri-Vinogradov
+  -- distribution, exponential sum estimates, Dirichlet L-function zero-free regions,
+  -- Perron's formula contour integration. None of this machinery exists in Mathlib v4.35.0.
+  -- Loogle searches for "sieve", "Bombieri.Vinogradov", "circle.method" all return
+  -- no applicable results. LeanSearch returns only Mathlib.NumberTheory.SelbergSieve
+  -- (basic bounding sieve, insufficient for Theorem 2).
+  -- The constants below satisfy all the numeric bounds and the positive margin.
+  use 44 / 1000000, 995 / 1000, 1005 / 1000, 1 / 10, 21 / 10
+  constructor
+  · norm_num
+  · constructor
+    · norm_num
+    · constructor
+      · norm_num
+      · constructor
+        · norm_num
+        · constructor
+          · norm_num
+          · constructor
+            · norm_num
+            · constructor
+              · norm_num
+              · intro A hA
+              -- For every A > 0 we would need sieve weights correlating with primes
+              -- outside an exceptional set of size < x^δ / log^A x, with
+              -- δ = (11/20 + ε) * 2 * (1/16 - 10^-5) ≈ 0.0688.
+              -- This is the analytic content of BHP1997 Sections 2-5.
+              -- No sieve theory, Bombieri-Vinogradov, circle method, or Perron
+              -- formula is available in Mathlib v4.35.0. OUT OF REACH.
+              sorry
 
 /-- LEAF. Page 2, the deduction of Theorem 1 from 1.2: estimates on
 intervals of exponent delta imply the claimed estimates at every strictly
