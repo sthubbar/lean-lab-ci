@@ -28,7 +28,16 @@ theorem pair_low_upper :
           ∑ q ∈ (refinedPairs N).filter (fun q => (q.1 : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ)),
             refinedWeight N q.1 / (((q.1 : ℝ) * q.2) * log ((N : ℝ) / ((q.1 : ℝ) * q.2)))
           + η * Θ N := by
-  sorry
+  intro η hη
+  obtain ⟨F, f, ω, hF, hω⟩ := Task275.standard_functions
+  obtain ⟨N0, hN0⟩ := refined_finite_upper ω hω η hη
+  refine ⟨N0, ?_⟩
+  intro N hE hN
+  have htotal := hN0 N hE hN (by decide)
+  rw [sieveTerms_eight] at htotal
+  unfold refinedMain refinedSum at htotal
+  simp only [if_pos rfl] at htotal
+  exact htotal
 
 /-- LEAF: Wu 2004 page 41 equation 10.12, Upsilon 9 with `p1 > N^(1/10)`:
 the Lemma 2.3 switched upper bound with weight eight, as for equation 10.10,
