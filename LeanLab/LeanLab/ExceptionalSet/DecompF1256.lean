@@ -54,7 +54,17 @@ theorem leaf_prime_product_even_index_F1256 (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 
                 c * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re +
                     A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, hδ₀'⟩ := leaf_prime_product_selected γ h1 h2 a ha
+  refine ⟨δ₀, hδ₀, ?_⟩
+  intro δ hδ hδlt
+  obtain ⟨κ₀, hκ₀, hκ₀'⟩ := hδ₀' δ hδ hδlt
+  refine ⟨κ₀, hκ₀, ?_⟩
+  intro κ hκ hκle
+  obtain ⟨c, A, hc, hA, N₀, hN₀⟩ := hκ₀' κ hκ hκle
+  refine ⟨c, A, hc, hA, N₀, ?_⟩
+  intro N hN r hr hrP hs n hn heven hm hgcd hprime
+  have h₁ := hN₀ N hN r hr hrP hs 0 (Or.inl rfl) n hn heven hm hgcd hprime
+  simpa [Int.add_zero] using h₁
 
 /-- LEAF. Odd frequency half of the dichotomy: on an index of the floor window whose floor
 value `ν_n` is odd, the even adjacent integer is the upper neighbour `ν_n + 1`, and the real
@@ -76,7 +86,43 @@ theorem leaf_prime_product_odd_index_F1256 (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3
                 c * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re +
                     A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n + 1) := by
-  sorry
+  have parity_helper : ∀ (m : ℤ), ¬ Even m → Even (m + 1) := by
+    intro m hm
+    have h₁ : (m : ℤ) % 2 = 0 ∨ (m : ℤ) % 2 = 1 := by
+      apply Int.emod_two_eq_zero_or_one
+    cases h₁ with
+    | inl h₁ =>
+      exfalso
+      have h₂ : Even m := by
+        rw [even_iff_two_dvd]
+        use m / 2
+        have h₃ : (m : ℤ) % 2 = 0 := h₁
+        have h₄ : m = 2 * (m / 2) := by
+          omega
+        linarith
+      exact hm h₂
+    | inr h₁ =>
+      use m / 2 + 1
+      have h₂ : (m : ℤ) % 2 = 1 := h₁
+      have h₃ : m = 2 * (m / 2) + 1 := by
+        omega
+      -- m + 1 = 2 * (m / 2) + 2 = 2 * (m / 2 + 1)
+      have h₄ : m + 1 = 2 * (m / 2 + 1) := by
+        omega
+      linarith
+  
+  obtain ⟨δ₀, hδ₀, hδ₀'⟩ := leaf_prime_product_selected γ h1 h2 a ha
+  refine ⟨δ₀, hδ₀, ?_⟩
+  intro δ hδ hδlt
+  obtain ⟨κ₀, hκ₀, hκ₀'⟩ := hδ₀' δ hδ hδlt
+  refine ⟨κ₀, hκ₀, ?_⟩
+  intro κ hκ hκle
+  obtain ⟨c, A, hc, hA, N₀, hN₀⟩ := hκ₀' κ hκ hκle
+  refine ⟨c, A, hc, hA, N₀, ?_⟩
+  intro N hN r hr hrP hs n hn hnotEven hm hgcd hprime
+  have hEven1 : Even (nu γ n + 1) := parity_helper (nu γ n) hnotEven
+  have h₁ := hN₀ N hN r hr hrP hs 1 (Or.inr rfl) n hn hEven1 hm hgcd hprime
+  simpa [Int.add_one] using h₁
 
 /-- Assembly. The whole step follows from the two frequency halves: the parity condition
 fixes the shift, the lower constants are minimised, the error constants are maximised and
