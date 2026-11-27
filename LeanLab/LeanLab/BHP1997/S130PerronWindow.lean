@@ -96,7 +96,127 @@ is an import plus a case split on `T |log u| ≤ 1`. -/
 theorem leaf_perron_kernel_half (u : ℝ) (hu : 0 < u) (T : ℝ) (hT : 1 ≤ T) :
     ‖perronI u (1 / 2) T - (if 1 < u then 1 else 0)‖ ≤
       if u = 1 then 1 else u ^ (1 / 2 : ℝ) * min 1 (1 / (T * |Real.log u|)) := by
-  sorry
+  have hTpos : 0 < T := by linarith
+  have hc : (0 : ℝ) < 1 / 2 := by norm_num
+  split_ifs <;>
+  (try { contradiction }) <;>
+  (try {
+    -- Case u = 1
+    have h₁ : ‖perronI (1 : ℝ) (1 / 2 : ℝ) T‖ ≤ (1 : ℝ) ^ (1 / 2 : ℝ) := by
+      have h₂ : T * |Real.log (1 : ℝ)| ≤ 1 := by
+        norm_num [Real.log_one, abs_of_nonneg, hTpos.le]
+        <;> linarith
+      have h₃ : ‖perronI (1 : ℝ) (1 / 2 : ℝ) T‖ ≤ (1 : ℝ) ^ (1 / 2 : ℝ) := by
+        apply LeanLab.DERZ1997.Perron136.perron_norm_small
+        <;> norm_num at h₂ ⊢ <;>
+        (try norm_num) <;>
+        (try linarith) <;>
+        (try assumption) <;>
+        (try positivity)
+      exact h₃
+    have h₄ : (1 : ℝ) ^ (1 / 2 : ℝ) = 1 := by norm_num
+    rw [h₄] at h₁
+    simpa [sub_zero] using h₁
+  }) <;>
+  (try {
+    -- Case u > 1
+    have hu1 : 1 < u := by
+      by_contra h
+      have h₁ : u ≤ 1 := by linarith
+      have h₂ : u = 1 := by
+        linarith
+      contradiction
+    have hlog : 0 < Real.log u := Real.log_pos hu1
+    have hlogabs : |Real.log u| = Real.log u := abs_of_pos hlog
+    by_cases hlarge : T * Real.log u ≥ 1
+    · -- Subcase: T * log u ≥ 1
+      have h₁ : ‖perronI u (1 / 2 : ℝ) T - 1‖ ≤ u ^ (1 / 2 : ℝ) * min 1 (1 / (T * Real.log u)) := by
+        have h₂ : ‖perronI u (1 / 2 : ℝ) T - 1‖ ≤ u ^ (1 / 2 : ℝ) * min 1 (1 / (T * Real.log u)) := by
+          have h₃ : ‖perronI u (1 / 2 : ℝ) T - 1‖ ≤ u ^ (1 / 2 : ℝ) * min 1 (1 / (T * Real.log u)) := by
+            apply LeanLab.DERZ1997.Perron136.perron_gt_one_large
+            <;> norm_num at hlarge ⊢ <;>
+            (try norm_num) <;>
+            (try linarith) <;>
+            (try assumption) <;>
+            (try positivity)
+          exact h₃
+        exact h₂
+      have h₂ : min 1 (1 / (T * Real.log u)) = min 1 (1 / (T * |Real.log u|)) := by
+        rw [hlogabs]
+      rw [h₂] at h₁
+      simpa [hu1] using h₁
+    · -- Subcase: T * log u < 1
+      have hsmall : T * Real.log u ≤ 1 := by linarith
+      have h₁ : ‖perronI u (1 / 2 : ℝ) T - 1‖ ≤ u ^ (1 / 2 : ℝ) := by
+        apply LeanLab.DERZ1997.Perron136.perron_gt_one_small
+        <;> norm_num at hsmall ⊢ <;>
+        (try norm_num) <;>
+        (try linarith) <;>
+        (try assumption) <;>
+        (try positivity)
+      have h₂ : u ^ (1 / 2 : ℝ) ≤ u ^ (1 / 2 : ℝ) * min 1 (1 / (T * |Real.log u|)) := by
+        have h₃ : min 1 (1 / (T * |Real.log u|)) = 1 := by
+          have h₄ : T * |Real.log u| ≤ 1 := by
+            rw [hlogabs]
+            linarith
+          have h₅ : 0 < T * |Real.log u| := by positivity
+          have h₆ : 1 / (T * |Real.log u|) ≥ 1 := by
+            apply one_div_le_one_iff.mpr
+            <;> nlinarith
+          rw [min_eq_left (by linarith)]
+        rw [h₃]
+        <;> ring_nf
+        <;> nlinarith [Real.rpow_pos_of_pos hu (1 / 2 : ℝ)]
+      linarith
+  }) <;>
+  (try {
+    -- Case 0 < u < 1
+    have hu1 : u < 1 := by
+      by_contra h
+      have h₁ : u ≥ 1 := by linarith
+      have h₂ : u = 1 := by
+        linarith
+      contradiction
+    have hlog : Real.log u < 0 := Real.log_neg (by linarith) hu1
+    have hlogabs : |Real.log u| = -Real.log u := abs_of_neg hlog
+    by_cases hlarge : T * |Real.log u| ≥ 1
+    · -- Subcase: T * |log u| ≥ 1
+      have h₁ : ‖perronI u (1 / 2 : ℝ) T‖ ≤ u ^ (1 / 2 : ℝ) * min 1 (1 / (T * |Real.log u|)) := by
+        have h₂ : ‖perronI u (1 / 2 : ℝ) T‖ ≤ u ^ (1 / 2 : ℝ) * min 1 (1 / (T * |Real.log u|)) := by
+          have h₃ : ‖perronI u (1 / 2 : ℝ) T‖ ≤ u ^ (1 / 2 : ℝ) * min 1 (1 / (T * |Real.log u|)) := by
+            apply LeanLab.DERZ1997.Perron136.perron_lt_one_large
+            <;> norm_num at hlarge ⊢ <;>
+            (try norm_num) <;>
+            (try linarith) <;>
+            (try assumption) <;>
+            (try positivity) <;>
+            (try { constructor <;> linarith }) <;>
+            (try { simp_all [hlogabs]; <;> linarith })
+          exact h₃
+        exact h₂
+      simpa [hu1, not_lt.mp (by linarith : ¬(1 : ℝ) < u)] using h₁
+    · -- Subcase: T * |log u| < 1
+      have hsmall : T * |Real.log u| ≤ 1 := by linarith
+      have h₁ : ‖perronI u (1 / 2 : ℝ) T‖ ≤ u ^ (1 / 2 : ℝ) := by
+        apply LeanLab.DERZ1997.Perron136.perron_norm_small
+        <;> norm_num at hsmall ⊢ <;>
+        (try norm_num) <;>
+        (try linarith) <;>
+        (try assumption) <;>
+        (try positivity)
+      have h₂ : u ^ (1 / 2 : ℝ) ≤ u ^ (1 / 2 : ℝ) * min 1 (1 / (T * |Real.log u|)) := by
+        have h₃ : min 1 (1 / (T * |Real.log u|)) = 1 := by
+          have h₄ : T * |Real.log u| ≤ 1 := hsmall
+          have h₅ : 0 < T * |Real.log u| := by positivity
+          have h₆ : 1 / (T * |Real.log u|) ≥ 1 := by
+            apply one_div_le_one_iff.mpr
+            <;> nlinarith
+          rw [min_eq_left (by linarith)]
+        rw [h₃]
+        <;> ring_nf
+        <;> nlinarith [Real.rpow_pos_of_pos hu (1 / 2 : ℝ)]
+      simpa [hu1, not_lt.mp (by linarith : ¬(1 : ℝ) < u)] using linarith
+  })
 
 /-- Page 43 to 44, Lemma 3.19 error sum, the harmonic sum in real form, from Mathlib
 `harmonic_le_one_add_log`. PROVED. -/
@@ -295,6 +415,41 @@ theorem leaf_perron_error_count :
     _ ≤ 504 * Real.log Y := by linarith
 
 
+/-- Page 3, the definition of Q: `Q ≤ Y^(1/16)` when `Y ≥ 1`. PROVED, as in S64. -/
+theorem sieveQ_le_sixteenth' {ε x : ℝ} (hY : 1 ≤ x ^ (11 / 20 + ε)) :
+    (sieveQ ε x : ℝ) ≤ (x ^ (11 / 20 + ε)) ^ (1 / 16 : ℝ) := by
+  have hY0 : 0 ≤ x ^ (11 / 20 + ε) := by linarith
+  unfold sieveQ
+  calc
+    _ ≤ ((x ^ (11 / 20 + ε)) ^ ((2 : ℝ) * (1 / 16 - 1 / 10 ^ 5))) ^ (1 / 2 : ℝ) / 2 :=
+      Nat.floor_le (by positivity)
+    _ ≤ ((x ^ (11 / 20 + ε)) ^ ((2 : ℝ) * (1 / 16 - 1 / 10 ^ 5))) ^ (1 / 2 : ℝ) :=
+      div_le_self (by positivity) (by norm_num)
+    _ = (x ^ (11 / 20 + ε)) ^ ((1 / 16 : ℝ) - 1 / 10 ^ 5) := by
+      rw [← Real.rpow_mul hY0]
+      congr 1
+      norm_num
+    _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hY (by norm_num)
+
+/-- For `Y ≥ 6^16`, `6 Y^(1/8) ≤ Y`. PROVED, as in S64. -/
+theorem six_mul_eighth_le' {Y : ℝ} (hY : (6 : ℝ) ^ 16 ≤ Y) :
+    6 * Y ^ (1 / 8 : ℝ) ≤ Y := by
+  have hY0 : 0 ≤ Y := le_trans (by positivity) hY
+  have hY1 : 1 ≤ Y := le_trans (by norm_num) hY
+  have e : (1 / 16 : ℝ) = ((16 : ℕ) : ℝ)⁻¹ := by norm_num
+  have h1 : (6 : ℝ) ≤ Y ^ (1 / 16 : ℝ) := by
+    have := Real.rpow_le_rpow (by positivity) hY (by norm_num : (0:ℝ) ≤ 1 / 16)
+    rw [e, Real.pow_rpow_inv_natCast (by norm_num) (by norm_num)] at this
+    rw [e]; exact this
+  have h2 : Y ^ (1 / 16 : ℝ) ≤ Y ^ (7 / 8 : ℝ) :=
+    Real.rpow_le_rpow_of_exponent_le hY1 (by norm_num)
+  have h3 : Y = Y ^ (7 / 8 : ℝ) * Y ^ (1 / 8 : ℝ) := by
+    rw [← Real.rpow_add (by linarith)]; norm_num
+  have h4 : 0 ≤ Y ^ (1 / 8 : ℝ) := Real.rpow_nonneg hY0 _
+  calc 6 * Y ^ (1 / 8 : ℝ) ≤ Y ^ (7 / 8 : ℝ) * Y ^ (1 / 8 : ℝ) :=
+        mul_le_mul_of_nonneg_right (h1.trans h2) h4
+    _ = Y := h3.symm
+
 /-- Page 43, hypothesis 3.1 on the coefficients, `|b(m)| ≪ d(m)^B`, turned into a power bound
 `|b(m) χ(m)| ≤ A0 m^(1/400)` by the divisor bound `d(m) ≪ m^δ`, PROVED. -/
 theorem coeff_le_rpow (b : ℝ → ℕ → ℝ) {B : ℝ}
@@ -469,7 +624,7 @@ theorem leaf_perron_window_of_s130 (b : ℝ → ℕ → ℝ) {ε B : ℝ} (hε :
     intro u hu; simp only [hG]; split_ifs
     · norm_num
     · exact mul_nonneg (Real.rpow_nonneg hu.le _) (le_min zero_le_one (by positivity))
-  have hcoefJ : ∀ m ∈ rightInterval ε x, ‖a m‖ ≤ A0 * (2 * Y) ^ (1 / 400 : ℝ) := by
+  have hcoefJ : ∀ m ∈ rightInterval ε x, ‖a m ‖ ≤ A0 * (2 * Y) ^ (1 / 400 : ℝ) := by
     intro m hm
     have hm1 := hJ m hm
     refine (hcoef x m hm1 q χ).trans (mul_le_mul_of_nonneg_left ?_ hA0)
