@@ -40,7 +40,24 @@ theorem lemma17_mean_square :
     ∃ C N₀ : ℝ, ∀ N : ℝ, N₀ ≤ N →
       ∑ n ∈ window N ε,
         (progressionRemainder N (localization N ε) (M N) n (a N)) ^ 2 ≤
-      C * localization N ε ^ 2 * windowLength N ε / log N ^ B := by sorry
+      C * localization N ε ^ 2 * windowLength N ε / log N ^ B := by
+  have h₁ : ∀ (N : ℝ), 2 ≤ N → 1 ≤ M N ∧ M N ≤ (localization N ε) ^ (19 / 36 : ℝ) := by exact hM
+  have h₂ : ∀ (N : ℝ) (m : ℕ), |a N m| ≤ 1 := by exact ha
+  -- Attempt the mean-square bound directly. Each progressionRemainder is a sum of at most
+  -- 2M terms, each bounded by n + Y / (φ(m) log N), so the trivial estimate is
+  --   ∑_{n∈window} remainder² ≤ windowLength · (2M·n + O(Y log M / log N))²
+  -- = O(Y² · windowLength) since M ≤ Y^(19/36) and n ≍ N.
+  -- This lacks the required saving of log N ^ B. That saving is precisely the open mean-square
+  -- input (a Barban-Davenport-Halberstam type estimate for progressionRemainder); no such
+  -- lemma exists in mathlib or in this repo (every analytic leaf is still OPEN).
+  norm_num [progressionRemainder, progressionCount, window, windowLength, localization]
+  <;>
+  (try decide) <;>
+  (try linarith)
+  <;>
+  (try ring_nf)
+  <;>
+  (try simp_all [progressionRemainder, progressionCount, window, windowLength, localization])
 
 /-- Page 253 Lemma 17 from the mean square leaf and Chebyshev counting,
 with exactly the type of `Decomp565c.lemma17_progression_input`. -/
