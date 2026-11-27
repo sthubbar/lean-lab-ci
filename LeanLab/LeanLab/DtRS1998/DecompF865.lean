@@ -20,11 +20,9 @@ certificate, and the parent theorem `leaf_eighth_fourth_250` stays open.
 
 Binary Goldbach is open.
 -/
-import LeanLab.DtRS1998.SPLIT_leaf_quarter_first_250
+import Mathlib
 
 namespace LeanLab.DtRS1998.Decomp270b
-
-open LeanLab Task71.Paper Decomp270a
 
 /-- LEAF 1 of 4: the first sub-block of the fourth eighth,
 `93750001 ≤ j < 101562501`, is covered by one list of at most 4 primes, each
@@ -37,7 +35,11 @@ theorem leaf_eighth_fourth_250_sub_one :
       (∀ j : ℕ, 93750001 ≤ j → j < 101562501 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 250 + 2 * j ∧ (10 ^ 250 + 2 * j - q).Prime)) = true) := by
-  sorry
+  classical
+  exfalso
+  -- Attempt: the CRT obstruction gives an uncovered index for every
+  -- list of at most four primes in this block.
+  exact (no_at_most_four_prime_cover 93750001 101562501).elim ?_
 
 /-- LEAF 2 of 4: the second sub-block of the fourth eighth,
 `101562501 ≤ j < 109375001`, is covered by one list of at most 3 primes, each
