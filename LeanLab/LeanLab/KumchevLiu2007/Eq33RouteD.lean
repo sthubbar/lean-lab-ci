@@ -60,6 +60,41 @@ theorem lemma34_first_sum (A : ℝ) (hA : 0 < A) :
             C * H ^ 2 / Real.log X ^ A := by
   sorry
 
+/-- The empty high block in the second sum of display 52. If the dyadic block
+starts at or above the sieve cutoff `z0`, no prime in the block is below `z0`,
+so its coefficient is zero. -/
+theorem lemma34_second_sum_dyadic_empty_high
+    (X B ε M : ℝ) (hz0 : windowY X ε ^ (1 / 4 : ℝ) *
+        (Real.log X ^ B) ^ (-2 : ℤ) ≤ M) (m : ℕ) :
+    (∑ p ∈ ((Finset.range (m + 1)).filter (fun p : ℕ => p.Prime ∧
+        windowY X ε ^ (1 / 6 + ε / 2) ≤ (p : ℝ) ∧
+        (p : ℝ) < windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ) ∧
+        p ∣ m)).filter
+        (fun p : ℕ => M ≤ (p : ℝ) ∧ (p : ℝ) < 2 * M),
+      roughWeight (windowY X ε ^ (1 / 6 + ε / 2)) (m / p)) = 0 := by
+  apply Finset.sum_eq_zero
+  intro p hp
+  obtain ⟨hp1, hpM⟩ := Finset.mem_filter.mp hp
+  obtain ⟨-, -, hpz0, -⟩ := Finset.mem_filter.mp hp1
+  exact (by linarith : False).elim
+
+/-- The empty low block in the second sum of display 52. If the dyadic block
+ends at or below the rough cutoff `z1`, no prime in the block is at least `z1`,
+so its coefficient is zero. -/
+theorem lemma34_second_sum_dyadic_empty_low
+    (X B ε M : ℝ) (hz1 : 2 * M ≤ windowY X ε ^ (1 / 6 + ε / 2)) (m : ℕ) :
+    (∑ p ∈ ((Finset.range (m + 1)).filter (fun p : ℕ => p.Prime ∧
+        windowY X ε ^ (1 / 6 + ε / 2) ≤ (p : ℝ) ∧
+        (p : ℝ) < windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ) ∧
+        p ∣ m)).filter
+        (fun p : ℕ => M ≤ (p : ℝ) ∧ (p : ℝ) < 2 * M),
+      roughWeight (windowY X ε ^ (1 / 6 + ε / 2)) (m / p)) = 0 := by
+  apply Finset.sum_eq_zero
+  intro p hp
+  obtain ⟨hp1, hpM⟩ := Finset.mem_filter.mp hp
+  obtain ⟨-, hpz1, -, -⟩ := Finset.mem_filter.mp hp1
+  exact (by linarith : False).elim
+
 /-- LEAF: P0088 page 11 Lemma 3.4, as applied on page 15 after display 52 to
 the second sum of display 52, with x = Y, y = H, (m, k) = (p, m / p) and
 z = z1 = Y^(1/6 + eps/2), for one dyadic block M at most p below 2M. The
@@ -87,7 +122,7 @@ theorem lemma34_second_sum_dyadic (A : ℝ) (hA : 0 < A) :
               roughWeight (windowY X ε ^ (1 / 6 + ε / 2)) (m / p)) *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  exact lemma34_bilinear_minor_arc_mean_square
 
 /-- P0088 page 15, the display before 52 and display 52 itself, the finite
 core of the Buchstab identity. Let z1 be at most z0, let m be a positive
