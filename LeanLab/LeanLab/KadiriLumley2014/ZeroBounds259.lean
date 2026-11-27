@@ -38,6 +38,13 @@ noncomputable def zeroS3 (m : ℕ) : ℝ :=
     ((1 + m * Real.log (30610000000 / (2 * π))) / ((m : ℝ) ^ 2 * 30610000000 ^ m)) +
     2 * countRemainder 30610000000 / 30610000000 ^ (m + 1)
 
+/-- The reciprocal-power tail bound of display 2.47 at the verified height 3e12. -/
+noncomputable def zeroS3At (m : ℕ) : ℝ :=
+  (1 / (2 * π) + countQ 3000000000000) *
+    ((1 + m * Real.log (3000000000000 / (2 * π))) /
+      ((m : ℝ) ^ 2 * 3000000000000 ^ m)) +
+    2 * countRemainder 3000000000000 / 3000000000000 ^ (m + 1)
+
 /-- S4 from equation 2.43. The coefficients belong to the chosen sigma row. -/
 noncomputable def zeroS4 (m : ℕ) (c1 c2 c3 : ℝ) : ℝ :=
   (c1 * (1 + 1 / (m : ℝ)) + c2 * Real.log 30610000000 / 30610000000 +
@@ -879,6 +886,179 @@ private theorem power_tail {m : ℕ} (hm : 2 ≤ m) (hCount : RosserCountBound) 
               (fun ρ hρ => ite_eq_right (by intro h; linarith [h.2]))
       _ ≤ zeroS3 m := hstep V hVH
   exact Real.tsum_le_of_sum_le hmain hfin_bound
+
+/-- The reciprocal-power tail estimate of display 2.47 at height 3e12. -/
+theorem power_tail_at_S10 {m : ℕ} (hm : 61 ≤ m) (hCount : RosserCountBound) :
+    positiveZeroSum (fun ρ => if 3000000000000 < ρ.im then
+      1 / ρ.im ^ (m + 1) else 0) ≤ zeroS3At m := by
+  have hm1 : 0 < m := by omega
+  have hH0 : (0 : ℝ) < 3000000000000 := by norm_num
+  have hHbig : (1132491 : ℝ) ≤ 3000000000000 := by norm_num
+  have hHlog : 0 < Real.log (3000000000000 : ℝ) := Real.log_pos (by norm_num)
+  have hHshift : 0 < Real.log ((3000000000000 : ℝ) / (2 * π)) := by
+    apply Real.log_pos
+    rw [lt_div_iff₀ two_pi_pos]
+    linarith [Real.pi_lt_four]
+  have hqH : 0 ≤ 1 / (2 * π) + countQ 3000000000000 := by
+    have hq : 0 ≤ countQ 3000000000000 := by
+      have hn : 0 < 0.137 / (3000000000000 : ℝ) +
+          0.443 / ((3000000000000 : ℝ) * Real.log (3000000000000 : ℝ)) := by positivity
+      have key := countQ_mul_log hHbig
+      have hqdef : countQ 3000000000000 =
+          (0.137 / (3000000000000 : ℝ) +
+            0.443 / ((3000000000000 : ℝ) * Real.log (3000000000000 : ℝ))) /
+            Real.log ((3000000000000 : ℝ) / (2 * π)) := by
+        rw [← key]
+        field_simp
+      rw [hqdef]
+      positivity
+    have h2 : (0 : ℝ) < 1 / (2 * π) := by positivity
+    linarith
+  have hPH : 0 ≤ (1 + (m : ℝ) * Real.log ((3000000000000 : ℝ) / (2 * π))) /
+      ((m : ℝ) ^ 2 * (3000000000000 : ℝ) ^ m) := by
+    have h1 : (0 : ℝ) < 1 + (m : ℝ) * Real.log ((3000000000000 : ℝ) / (2 * π)) := by
+      have hmr : (0 : ℝ) < (m : ℝ) := by exact_mod_cast hm1
+      nlinarith
+    have h2 : (0 : ℝ) < (m : ℝ) ^ 2 * (3000000000000 : ℝ) ^ m := by positivity
+    exact div_nonneg h1.le h2.le
+  have hS3nn : 0 ≤ zeroS3At m := by
+    unfold zeroS3At
+    have h3 : 0 ≤ 2 * countRemainder 3000000000000 / (3000000000000 : ℝ) ^ (m + 1) :=
+      div_nonneg (by
+        have h1 : 1 < Real.log (3000000000000 : ℝ) :=
+          (Real.lt_log_iff_exp_lt hH0).mpr
+            (Real.exp_one_lt_three.trans_le (by norm_num : (3 : ℝ) ≤ 3000000000000))
+        have h2 : 0 < Real.log (Real.log (3000000000000 : ℝ)) := Real.log_pos h1
+        unfold countRemainder
+        positivity) (by positivity)
+    have h4 : 0 ≤ (1 / (2 * π) + countQ 3000000000000) *
+        ((1 + (m : ℝ) * Real.log ((3000000000000 : ℝ) / (2 * π))) /
+          ((m : ℝ) ^ 2 * (3000000000000 : ℝ) ^ m)) := mul_nonneg hqH hPH
+    linarith
+  have hstep : ∀ V : ℝ, (3000000000000 : ℝ) ≤ V →
+      positiveZeroSum (fun ρ => if (3000000000000 : ℝ) < ρ.im ∧ ρ.im ≤ V then
+        1 / ρ.im ^ (m + 1) else 0) ≤ zeroS3At m := by
+    intro V hHV
+    have hcont : ContinuousOn (fun t : ℝ => 1 / t ^ (m + 1)) (Icc (3000000000000 : ℝ) V) := by
+      apply ContinuousOn.div continuousOn_const
+      · exact continuousOn_id.pow (m + 1)
+      · intro t ht
+        exact pow_ne_zero _ (hH0.trans_le ht.1).ne'
+    have hcont' : ContinuousOn (fun t : ℝ => -((m : ℝ) + 1) / t ^ (m + 2))
+        (Icc (3000000000000 : ℝ) V) := by
+      apply ContinuousOn.div continuousOn_const
+      · exact continuousOn_id.pow (m + 2)
+      · intro t ht
+        exact pow_ne_zero _ (hH0.trans_le ht.1).ne'
+    have hi : IntervalIntegrable (fun t : ℝ => -((m : ℝ) + 1) / t ^ (m + 2))
+        volume (3000000000000 : ℝ) V := hcont'.intervalIntegrable_of_Icc hHV
+    have hderiv : ∀ t ∈ Icc (3000000000000 : ℝ) V,
+        HasDerivAt (fun t : ℝ => 1 / t ^ (m + 1)) (-((m : ℝ) + 1) / t ^ (m + 2)) t :=
+      fun t ht => reciprocal_power_derivative m (hH0.trans_le ht.1)
+    have hnn : ∀ t ∈ Icc (3000000000000 : ℝ) V, 0 ≤ 1 / t ^ (m + 1) := by
+      intro t ht
+      have h : (0 : ℝ) < t := hH0.trans_le ht.1
+      positivity
+    have hnp : ∀ t ∈ Icc (3000000000000 : ℝ) V, -((m : ℝ) + 1) / t ^ (m + 2) ≤ 0 := by
+      intro t ht
+      have h : (0 : ℝ) < t := hH0.trans_le ht.1
+      have h2 : (0 : ℝ) < t ^ (m + 2) := by positivity
+      have h3 : (-((m : ℝ) + 1)) ≤ 0 := by
+        have : (0 : ℝ) ≤ (m : ℝ) := by positivity
+        linarith
+      exact div_nonpos_of_nonpos_of_nonneg h3 h2.le
+    have hmaster := rosser_window_bound (U := 3000000000000) (V := V)
+      (φ := fun t : ℝ => 1 / t ^ (m + 1)) (φ' := fun t : ℝ => -((m : ℝ) + 1) / t ^ (m + 2))
+      hHbig hHV hcont hderiv hi hnn hnp hCount
+    have hint : (∫ t in (3000000000000 : ℝ)..V, Real.log (t / (2 * π)) * (1 / t ^ (m + 1))) =
+        (1 + (m : ℝ) * Real.log ((3000000000000 : ℝ) / (2 * π))) /
+            ((m : ℝ) ^ 2 * (3000000000000 : ℝ) ^ m) -
+          (1 + (m : ℝ) * Real.log (V / (2 * π))) / ((m : ℝ) ^ 2 * V ^ m) := by
+      have h := integral_log_div_power hm1 (c := 2 * π) (U := 3000000000000) (V := V)
+        two_pi_pos hH0 hHV
+      rw [← h]
+      apply intervalIntegral.integral_congr
+      intro t _
+      ring
+    have hPVnn : 0 ≤ (1 + (m : ℝ) * Real.log (V / (2 * π))) / ((m : ℝ) ^ 2 * V ^ m) := by
+      have hVshift : 0 < Real.log (V / (2 * π)) := by
+        apply Real.log_pos
+        rw [lt_div_iff₀ two_pi_pos]
+        linarith [Real.pi_lt_four]
+      have h1 : (0 : ℝ) < 1 + (m : ℝ) * Real.log (V / (2 * π)) := by
+        have hmr : (0 : ℝ) < (m : ℝ) := by exact_mod_cast hm1
+        nlinarith
+      have hV0 : (0 : ℝ) < V := hH0.trans_le hHV
+      have h2 : (0 : ℝ) < (m : ℝ) ^ 2 * V ^ m := by positivity
+      exact div_nonneg h1.le h2.le
+    rw [hint, mul_one_div] at hmaster
+    unfold zeroS3At
+    have hmul : (1 / (2 * π) + countQ 3000000000000) *
+        ((1 + (m : ℝ) * Real.log ((3000000000000 : ℝ) / (2 * π))) /
+            ((m : ℝ) ^ 2 * (3000000000000 : ℝ) ^ m) -
+          (1 + (m : ℝ) * Real.log (V / (2 * π))) / ((m : ℝ) ^ 2 * V ^ m)) ≤
+        (1 / (2 * π) + countQ 3000000000000) *
+          ((1 + (m : ℝ) * Real.log ((3000000000000 : ℝ) / (2 * π))) /
+            ((m : ℝ) ^ 2 * (3000000000000 : ℝ) ^ m)) :=
+      mul_le_mul_of_nonneg_left (by linarith) hqH
+    linarith
+  have hmain : ∀ ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1},
+      0 ≤ (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+        (if (3000000000000 : ℝ) < (ρ : ℂ).im then 1 / (ρ : ℂ).im ^ (m + 1) else 0) else 0) := by
+    intro ρ
+    split_ifs <;> positivity
+  change ∑' ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1},
+      (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+        (if (3000000000000 : ℝ) < (ρ : ℂ).im then 1 / (ρ : ℂ).im ^ (m + 1) else 0) else 0) ≤
+    zeroS3At m
+  have hfin_bound : ∀ s : Finset {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1},
+      ∑ ρ ∈ s, (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+        (if (3000000000000 : ℝ) < (ρ : ℂ).im then 1 / (ρ : ℂ).im ^ (m + 1) else 0) else 0) ≤
+        zeroS3At m := by
+    intro s
+    set V : ℝ := (3000000000000 : ℝ) + ∑ ρ ∈ s, |(ρ : ℂ).im| + 1 with hVdef
+    have hVH : (3000000000000 : ℝ) ≤ V := by
+      have h := Finset.sum_nonneg (s := s)
+        (f := fun ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1} => |(ρ : ℂ).im|)
+        (fun i _ => abs_nonneg _)
+      rw [hVdef]
+      linarith
+    have hmemV : ∀ ρ ∈ s, (ρ : ℂ).im ≤ V := by
+      intro ρ hρ
+      have h1 : |(ρ : ℂ).im| ≤ ∑ ρ ∈ s, |(ρ : ℂ).im| := Finset.single_le_sum (s := s)
+        (f := fun ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1} => |(ρ : ℂ).im|)
+        (fun i _ => abs_nonneg _) hρ
+      have h2 : (ρ : ℂ).im ≤ |(ρ : ℂ).im| := le_abs_self _
+      rw [hVdef]
+      linarith
+    calc ∑ ρ ∈ s, (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+          (if (3000000000000 : ℝ) < (ρ : ℂ).im then 1 / (ρ : ℂ).im ^ (m + 1) else 0) else 0)
+        = ∑ ρ ∈ s, (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+            (if (3000000000000 : ℝ) < (ρ : ℂ).im ∧ (ρ : ℂ).im ≤ V then
+              1 / (ρ : ℂ).im ^ (m + 1) else 0) else 0) := by
+          apply Finset.sum_congr rfl
+          intro ρ hρ
+          by_cases hp : 0 < (ρ : ℂ).im
+          · by_cases hw : (3000000000000 : ℝ) < (ρ : ℂ).im
+            · rw [if_pos hp, if_pos hp, if_pos hw, if_pos ⟨hw, hmemV ρ hρ⟩]
+            · rw [if_pos hp, if_pos hp, if_neg hw,
+                ite_eq_right (by tauto : ¬ ((3000000000000 : ℝ) < (ρ : ℂ).im ∧ (ρ : ℂ).im ≤ V)),
+                mul_zero]
+          · rw [if_neg hp, if_neg hp]
+      _ ≤ ∑' ρ : {z : ℂ // riemannZeta z = 0 ∧ 0 < z.re ∧ z.re < 1},
+            (if 0 < (ρ : ℂ).im then (analyticOrderNatAt riemannZeta (ρ : ℂ) : ℝ) *
+              (if (3000000000000 : ℝ) < (ρ : ℂ).im ∧ (ρ : ℂ).im ≤ V then
+                1 / (ρ : ℂ).im ^ (m + 1) else 0) else 0) := by
+          apply Summable.sum_le_tsum
+          · intro ρ _
+            split_ifs <;> positivity
+          · exact summable_bounded_positive_zero_family V
+              (fun ρ : ℂ =>
+                if (3000000000000 : ℝ) < ρ.im ∧ ρ.im ≤ V then 1 / ρ.im ^ (m + 1) else 0)
+              (fun ρ hρ => ite_eq_right (by intro h; linarith [h.2]))
+      _ ≤ zeroS3At m := hstep V hVH
+  exact Real.tsum_le_of_sum_le hmain hfin_bound
+
 
 /-- LEAF. Page 7 display 2.48. Source 4, arXiv 1310.6374 page 9,
 Lemma 2.7 and display 2.25. Integrate the density count against the derivative
