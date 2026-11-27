@@ -24,7 +24,46 @@ open LeanLab.ChenDoubleSieve.Wu04Table
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 2) volume (12/5 : ℝ) (5/2 : ℝ) := by
-  sorry
+  have h₁ : IntervalIntegrable (tableKernel 2) volume (12/5 : ℝ) (5/2 : ℝ) := by
+    -- tableKernel 2 = Xi2 (tableParams 2) since 2 < 4
+    have h₂ : (tableKernel 2 : ℝ → ℝ) = (fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams (⟨2, by decide⟩ : Fin 4)) t) := by
+      funext t
+      simp [Wu04Table.tableKernel]
+      <;> rfl
+    rw [h₂]
+    -- Prove that Xi2 is interval integrable by showing it's a sum of interval integrable functions
+    -- Each term in Xi2 is of the form (indicator * continuous) or sigma0 * constant
+    -- We use the fact that continuous functions on compact intervals are interval integrable
+    -- and indicator functions are piecewise constant with finitely many pieces
+    -- The product of a piecewise constant function and a continuous function is piecewise continuous
+    -- with finitely many pieces, hence interval integrable
+    have h₃ : IntervalIntegrable (fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams (⟨2, by decide⟩ : Fin 4)) t) volume (12/5 : ℝ) (5/2 : ℝ) := by
+      -- Use the general fact that a bounded measurable function on a compact interval is interval integrable
+      -- In Lean, we can use the connection between IntervalIntegrable and MeasureTheory.IntegrableOn
+      have h₄ : MeasureTheory.IntegrableOn (fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams (⟨2, by decide⟩ : Fin 4)) t) (Set.Icc (12/5 : ℝ) (5/2 : ℝ)) volume := by
+        -- The function is a sum of terms, each of which is bounded and measurable
+        -- We can prove each term is integrable and then use the fact that the sum of integrable functions is integrable
+        -- For now, we use a more direct approach: the function is continuous almost everywhere and bounded
+        -- This is a standard result in measure theory
+        -- We use the fact that the function is piecewise continuous with finitely many discontinuities
+        -- and hence Riemann integrable, which implies Lebesgue integrable
+        have h₅ : ContinuousOn (fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams (⟨2, by decide⟩ : Fin 4)) t) (Set.Icc (12/5 : ℝ) (5/2 : ℝ) \ { (123/50 : ℝ) }) := by
+          -- Prove continuity on the interval minus the discontinuity point
+          -- The only discontinuity in [12/5, 5/2] is at a1 = 2.46 = 123/50
+          -- On the two subintervals [12/5, 123/50] and [123/50, 5/2], the function is continuous
+          sorry
+        -- A continuous function on a compact set minus a finite set is bounded and measurable
+        -- and hence integrable
+        have h₆ : MeasureTheory.IntegrableOn (fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams (⟨2, by decide⟩ : Fin 4)) t) (Set.Icc (12/5 : ℝ) (5/2 : ℝ)) volume := by
+          sorry
+        exact h₆
+      -- Convert MeasureTheory.IntegrableOn to IntervalIntegrable
+      have h₇ : IntervalIntegrable (fun t : ℝ => Wu04Functional.Xi2 (Wu04Functional.tableParams (⟨2, by decide⟩ : Fin 4)) t) volume (12/5 : ℝ) (5/2 : ℝ) := by
+        rw [intervalIntegrable_iff_integrableOn_Icc_of_le (by norm_num : (12/5 : ℝ) ≤ (5/2 : ℝ))]
+        exact h₄
+      exact h₇
+    exact h₃
+  exact h₁
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, left half panel `[12/5, 49/20]` of `a_{3,4}`:
 quadrature value 0.012834022807, stated bound leaves 3.94e-08. MEDIUM. -/

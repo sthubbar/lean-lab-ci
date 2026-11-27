@@ -1,0 +1,2 @@
+import Mathlib.Analysis.IntervalIntegral
+#check intervalIntegral.intervalIntegrable_iff_integrableOn_Icc
