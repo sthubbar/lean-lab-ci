@@ -6,11 +6,14 @@ stated: it omits the part of the line `re s = 2` above height `T` and it adds th
 horizontal pieces where the residue theorem subtracts them, see the note
 notes/burst-20261124/BhowmikGrimmelt2026-S9-23-contour-shift74.md.  This file states
 the standard rectangle identity in its correct form, as a new LEAF for a later route.
-It does not change and does not prove the sealed leaf.
+It does not change and does not prove the sealed leaf.  The corrected identity is
+proved here from the two leaves of `LEAF_S9_rectangle_parts74.lean` and the proved
+right line formula `arithmetic_right_line469`.
 
 AI wrote the Lean code.  Binary Goldbach is OPEN.
 -/
-import LeanLab.BhowmikGrimmelt2026.Statements
+import LeanLab.BhowmikGrimmelt2026.SPLIT_lemma74
+import LeanLab.BhowmikGrimmelt2026.LEAF_S9_rectangle_parts74
 
 namespace LeanLab.BhowmikGrimmelt2026
 
@@ -54,6 +57,15 @@ theorem leaf_contour_rectangle74 (B T : ℝ) (r : ℕ) [NeZero r] (χ : Dirichle
       (1 / (2 * Real.pi)) * (∫ t in {t : ℝ | T < |t|},
         (-(logDeriv (DirichletCharacter.LFunction χ))) (((2 : ℝ) : ℂ) + (t : ℂ) * Complex.I) *
           mellinR Ψ (((2 : ℝ) : ℂ) + (t : ℂ) * Complex.I)) := by
-  sorry
+  have hS0 : 0 < S := by linarith
+  have hline := arithmetic_right_line469 Ψ S hS0 hsm hcs hsupp r χ 2 (by norm_num)
+  have hsplit := leaf_right_line_split74 T hT r χ S Ψ hS hsm hcs hsupp
+  have hres := leaf_rectangle_residue74 B T r χ S Ψ hB hT hS hsm hcs hsupp hχ hvert hhor
+  rw [hline, hsplit]
+  push_cast at hres ⊢
+  simp only [Pi.neg_apply] at hres ⊢
+  linear_combination hres
 
 end LeanLab.BhowmikGrimmelt2026
+
+#print axioms LeanLab.BhowmikGrimmelt2026.leaf_contour_rectangle74
