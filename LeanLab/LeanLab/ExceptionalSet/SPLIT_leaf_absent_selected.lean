@@ -51,7 +51,37 @@ theorem leaf_absent_even_index (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
               c * F γ N ≤
                 (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re +
                   A * F γ N * divisorError 1 (F γ N ^ (6 * δ)) (nu γ n) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, h₁⟩ := leaf_absent_selected γ h1 h2 a ha
+  refine ⟨δ₀, hδ₀, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κ₀, hκ₀, h₂⟩ := h₁ δ hδ hδsmall
+  refine ⟨κ₀, hκ₀, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨c, A, hc, hA, N₀', h₃⟩ := h₂ κ hκ hκsmall
+  refine ⟨max N₀' 1, by have h : 1 ≤ max N₀' 1 := le_max_right _ _; omega, fun N hN => ?_⟩
+  have hN₀' : N₀' ≤ N := by
+    have h₄ : max N₀' 1 ≤ N := hN
+    have h₅ : N₀' ≤ max N₀' 1 := le_max_left _ _
+    linarith
+  have hOne : (1 : ℕ) ≤ N := by
+    have h₄ : max N₀' 1 ≤ N := hN
+    have h₅ : (1 : ℕ) ≤ max N₀' 1 := le_max_right _ _
+    linarith
+  have hF : (1 : ℝ) ≤ F γ N := by
+    have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast hOne
+    have hlog : 0 ≤ Real.log N := Real.log_le_log (by norm_num) hN1.le
+    have hp : 0 ≤ Real.log N ^ γ := Real.rpow_nonneg hlog
+    have hF' : (1 : ℝ) ≤ Real.exp (Real.log N ^ γ) := by
+      have h₁ : (0 : ℝ) ≤ Real.log N ^ γ := hp
+      have h₂ : Real.exp (Real.log N ^ γ) ≥ Real.exp 0 := Real.exp_le_exp h₁ (by norm_num)
+      linarith
+    simpa [F] using hF'
+  have hP : (1 : ℝ) ≤ F γ N ^ (6 * δ) := by
+    have h₁ : (1 : ℝ) ≤ F γ N := hF
+    have h₂ : 0 ≤ (6 * δ : ℝ) := by positivity
+    exact Real.one_le_rpow h₁ h₂
+  intro hsr hn heven hm
+  have h₄ := h₃ N hN₀' 1 (by norm_num) hP hsr (0 : ℤ) (by norm_num) hn
+    (by simpa using heven) (by simpa [zero_add] using hm) (by rfl)
+  simpa [zero_add] using h₄
 
 /-- LEAF. Odd frequency half of the parity dichotomy: on an index of the floor window whose
 floor value `ν_n` is odd, the even adjacent integer is the upper neighbour `ν_n + 1`, and the
@@ -69,7 +99,51 @@ theorem leaf_absent_odd_index (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
               c * F γ N ≤
                 (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n + 1)).re +
                   A * F γ N * divisorError 1 (F γ N ^ (6 * δ)) (nu γ n + 1) := by
-  sorry
+  obtain ⟨δ₀, hδ₀, h₁⟩ := leaf_absent_selected γ h1 h2 a ha
+  refine ⟨δ₀, hδ₀, fun δ hδ hδsmall => ?_⟩
+  obtain ⟨κ₀, hκ₀, h₂⟩ := h₁ δ hδ hδsmall
+  refine ⟨κ₀, hκ₀, fun κ hκ hκsmall => ?_⟩
+  obtain ⟨c, A, hc, hA, N₀', h₃⟩ := h₂ κ hκ hκsmall
+  refine ⟨max N₀' 1, by have h : 1 ≤ max N₀' 1 := le_max_right _ _; omega, fun N hN => ?_⟩
+  have hN₀' : N₀' ≤ N := by
+    have h₄ : max N₀' 1 ≤ N := hN
+    have h₅ : N₀' ≤ max N₀' 1 := le_max_left _ _
+    linarith
+  have hOne : (1 : ℕ) ≤ N := by
+    have h₄ : max N₀' 1 ≤ N := hN
+    have h₅ : (1 : ℕ) ≤ max N₀' 1 := le_max_right _ _
+    linarith
+  have hF : (1 : ℝ) ≤ F γ N := by
+    have hN1 : (1 : ℝ) ≤ N := by exact_mod_cast hOne
+    have hlog : 0 ≤ Real.log N := Real.log_le_log (by norm_num) hN1.le
+    have hp : 0 ≤ Real.log N ^ γ := Real.rpow_nonneg hlog
+    have hF' : (1 : ℝ) ≤ Real.exp (Real.log N ^ γ) := by
+      have h₁ : (0 : ℝ) ≤ Real.log N ^ γ := hp
+      have h₂ : Real.exp (Real.log N ^ γ) ≥ Real.exp 0 := Real.exp_le_exp h₁ (by norm_num)
+      linarith
+    simpa [F] using hF'
+  have hP : (1 : ℝ) ≤ F γ N ^ (6 * δ) := by
+    have h₁ : (1 : ℝ) ≤ F γ N := hF
+    have h₂ : 0 ≤ (6 * δ : ℝ) := by positivity
+    exact Real.one_le_rpow h₁ h₂
+  intro hsr hn hnodd hm
+  have heven : Even (nu γ n + 1) := by
+    have h₁ : Odd (nu γ n) := by
+      apply Int.odd_iff_not_even.mp
+      exact hnodd
+    obtain ⟨k, hk⟩ := h₁
+    refine ⟨k + 1, _⟩
+    simp [hk] at *
+    omega
+  have h₄ := h₃ N hN₀' 1 (by norm_num) hP hsr (1 : ℤ) (by norm_num) hn
+    heven hm (by rfl)
+  simpa using h₄
+    refine ⟨k + 1, _⟩
+    simp [hk] at *
+    omega
+  have h₄ := h₃ N hN₀' 1 (by norm_num) hP hsr (1 : ℤ) (by norm_num) hn
+    heven hm (by rfl)
+  simpa using h₄
 
 /-- Assembly. The whole statement follows from the two frequency halves: the parity condition
 fixes the shift, the lower constants are minimised, the error constants are maximised and the
