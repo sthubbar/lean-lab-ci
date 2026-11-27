@@ -1,4 +1,5 @@
 import LeanLab.HelfgottMajor.Decomp457b
+import LeanLab.HelfgottMajor.SPLIT_logDeriv_zeta_left_short_le
 
 /-!
 Split of `Decomp457b.principal_log_weight_sq_short`, the short range part of the square
@@ -28,8 +29,8 @@ maximum is `ζ'(-1/2)/ζ(-1/2) ≈ 1.73583` at `t = 0`. Proof route: the functio
 evaluated rigorously on `|t| ≤ 2` with its sign kept, since the triangle inequality of 4.12
 loses too much. Class HARD, rigorous numerics. -/
 theorem logDeriv_zeta_left_short_le (t : ℝ) (ht : |t| ≤ 2) :
-    ‖logDeriv riemannZeta ((-1 / 2 : ℂ) + t * I)‖ ≤ 1.78 := by
-  sorry
+    ‖logDeriv riemannZeta ((-1 / 2 : ℂ) + t * I)‖ ≤ 1.78 :=
+  SqShortLeftLeaves.logDeriv_zeta_left_short_le_of_leaves t ht
 
 /-- The weight is the logarithmic derivative divided by `s = -1/2 + it`. -/
 theorem principalLogWeight_norm_sq' (t : ℝ) :
