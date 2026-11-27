@@ -70,6 +70,47 @@ lemma rough_scale_bounds (N ε : ℝ) (hN : 1 ≤ N) (hε : 0 < ε)
   exact Real.rpow_le_rpow_of_exponent_le hY
     (by have := Source565.delta_cutoff ε hε hsmall; linarith)
 
+/-- Page 260: a bounded rough weight has at most square size total cofactor weight. -/
+lemma weightedCofactors_le_sq (model : Bool) (N Y M : ℝ) (n : ℕ) (a : ℕ → ℝ)
+    (ha1 : ∀ m, a m ≤ 1) :
+    weightedCofactors model N Y M n a ≤ ((n + 1 : ℕ) : ℝ)^2 := by
+  have hcount : ∀ m : ℕ, (cofactorCount model N Y n m : ℝ) ≤ ((n + 1 : ℕ) : ℝ) := by
+    intro m
+    have hsub : ((range (n + 1)).filter (fun p : ℕ => p.Prime ∧
+        if model then Y < ((m * p : ℕ) : ℝ) ∧ ((m * p : ℕ) : ℝ) ≤ 2 * Y
+        else m * p ≤ n ∧ ((m * p : ℕ) : ℝ) ≤ 2 * Y ∧ (n - m * p).Prime ∧
+          N - Y < ((n - m * p : ℕ) : ℝ) ∧ ((n - m * p : ℕ) : ℝ) ≤ N)) ⊆ range (n + 1) :=
+      Finset.filter_subset _ _
+    have hc : ((range (n + 1)).filter (fun p : ℕ => p.Prime ∧
+        if model then Y < ((m * p : ℕ) : ℝ) ∧ ((m * p : ℕ) : ℝ) ≤ 2 * Y
+        else m * p ≤ n ∧ ((m * p : ℕ) : ℝ) ≤ 2 * Y ∧ (n - m * p).Prime ∧
+          N - Y < ((n - m * p : ℕ) : ℝ) ∧ ((n - m * p : ℕ) : ℝ) ≤ N)).card ≤ n + 1 := by
+      simpa only [cofactorCount, Finset.card_range] using Finset.card_le_card hsub
+    exact_mod_cast hc
+  let s : Finset ℕ := (range (n + 1)).filter (fun m : ℕ => M < (m : ℝ) ∧ (m : ℝ) ≤ 2 * M)
+  have hterm : ∀ m ∈ s, a m * (cofactorCount model N Y n m : ℝ) ≤ ((n + 1 : ℕ) : ℝ) := by
+    intro m hm
+    have ha := ha1 m
+    have hc := hcount m
+    simpa using mul_le_mul ha hc (Nat.cast_nonneg _) (by norm_num)
+  have hsum : (∑ m ∈ s, a m * (cofactorCount model N Y n m : ℝ)) ≤
+      (s.card : ℝ) * ((n + 1 : ℕ) : ℝ) := by
+    have h := Finset.sum_le_card_nsmul s
+      (fun m : ℕ => a m * (cofactorCount model N Y n m : ℝ)) ((n + 1 : ℕ) : ℝ) hterm
+    simpa only [nsmul_eq_mul] using h
+  have hcard : s.card ≤ n + 1 := by
+    have hsub : (range (n + 1)).filter (fun m : ℕ => M < (m : ℝ) ∧ (m : ℝ) ≤ 2 * M) ⊆
+        range (n + 1) := Finset.filter_subset _ _
+    simpa only [s, Finset.card_range] using Finset.card_le_card hsub
+  have hcast : (s.card : ℝ) * ((n + 1 : ℕ) : ℝ) ≤
+      ((n + 1 : ℕ) : ℝ) * ((n + 1 : ℕ) : ℝ) := by
+    exact_mod_cast (Nat.mul_le_mul_right (n + 1) hcard)
+  have hcast' : (s.card : ℝ) * ((n + 1 : ℕ) : ℝ) ≤
+      ((n + 1 : ℕ) : ℝ)^2 := by
+    simpa only [pow_two] using hcast
+  change (∑ m ∈ s, a m * (cofactorCount model N Y n m : ℝ)) ≤ _
+  exact hsum.trans hcast'
+
 /-- LEAF. Jia page 260, Lemma 19, unnumbered displayed asymptotic formula.
 The written proof invokes Lemmas 5 and 18. The relative error of order
 one divided by log N and the absolute error of order Y divided by log N to B
@@ -91,7 +132,8 @@ theorem lemma19_rough_input :
             log N ^ (2 : ℕ) + localization N ε / log N ^ B) <
           |weightedCofactors false N (localization N ε) (M N) n (a N) -
             singular n / log N * weightedCofactors true N (localization N ε) (M N) n (a N)|)).card : ℝ) ≤
-      C * windowLength N ε / log N ^ B := by sorry
+      C * windowLength N ε / log N ^ B := by
+  sorry
 
 /-- Page 260: zero weights satisfy the rough support condition and give both counts zero. -/
 theorem rough_zero_weights (N Y M : ℝ) (n : ℕ) :
@@ -99,11 +141,59 @@ theorem rough_zero_weights (N Y M : ℝ) (n : ℕ) :
       weightedCofactors true N Y M n (fun _ => 0) = 0 := by
   simp [weightedCofactors]
 
+/-- Page 260: the Lemma 19 conclusion holds for the zero weight function.
+Both cofactor sums vanish, so the exceptional set of the displayed formula is
+empty and the required count bound is immediate. -/
+theorem lemma19_rough_input_zero_weights (ε B : ℝ) (M : ℝ → ℝ) (a : ℝ → ℕ → ℝ)
+    (ha0 : ∀ N m, a N m = 0) :
+    ∃ C D N₀ : ℝ, 0 < D ∧ ∀ N : ℝ, N₀ ≤ N →
+      (((window N ε).filter (fun n =>
+        1 * (singular n * weightedCofactors true N (localization N ε) (M N) n (a N) /
+            log N ^ (2 : ℕ) + localization N ε / log N ^ B) <
+          |weightedCofactors false N (localization N ε) (M N) n (a N) -
+            singular n / log N * weightedCofactors true N (localization N ε) (M N) n (a N)|)).card : ℝ) ≤
+      1 * windowLength N ε / log N ^ B := by
+  refine ⟨1, 1, 2, by norm_num, ?_⟩
+  intro N hN
+  have hN2 : 2 ≤ N := le_trans (by norm_num) hN
+  have hNpos : 0 < N := lt_of_lt_of_le (by norm_num) hN2
+  have hlog : 0 < Real.log N := Real.log_pos (lt_of_lt_of_le (by norm_num) hN2)
+  have hY : 0 < localization N ε := Real.rpow_pos_of_pos hNpos _
+  have hB : 0 < log N ^ B := Real.rpow_pos_of_pos hlog B
+  have hWL : 0 < windowLength N ε := Real.rpow_pos_of_pos hNpos _
+  have hzeroT : ∀ n : ℕ, weightedCofactors true N (localization N ε) (M N) n (a N) = 0 := by
+    intro n
+    have haeq : a N = (fun _ => 0) := funext (fun m => ha0 N m)
+    rw [haeq]
+    exact (rough_zero_weights N (localization N ε) (M N) n).2
+  have hzeroF : ∀ n : ℕ, weightedCofactors false N (localization N ε) (M N) n (a N) = 0 := by
+    intro n
+    have haeq : a N = (fun _ => 0) := funext (fun m => ha0 N m)
+    rw [haeq]
+    exact (rough_zero_weights N (localization N ε) (M N) n).1
+  have hcard : ((window N ε).filter (fun n =>
+        1 * (singular n * weightedCofactors true N (localization N ε) (M N) n (a N) /
+            log N ^ (2 : ℕ) + localization N ε / log N ^ B) <
+          |weightedCofactors false N (localization N ε) (M N) n (a N) -
+            singular n / log N * weightedCofactors true N (localization N ε) (M N) n (a N)|)).card = 0 := by
+    apply Finset.card_eq_zero.mpr
+    apply Finset.filter_eq_empty_iff.mpr
+    intro n hn
+    simp only [Finset.mem_filter] at hn
+    obtain ⟨-, hcond⟩ := hn
+    rw [hzeroT n, hzeroF n] at hcond
+    simp only [mul_zero, zero_div, sub_zero, abs_zero, mul_one, zero_add] at hcond
+    exact (not_lt_of_ge (div_nonneg (le_of_lt hY) (le_of_lt hB))) hcond
+  rw [hcard]
+  exact (div_pos (mul_pos (by norm_num) hWL) hB).le
+
 #print axioms lemma19_rough_input
 #print axioms rough_zero_weights
 #print axioms weightedCofactors_nonneg
 #print axioms rough_tolerance_pos
 #print axioms rough_exceptional_antitone
 #print axioms rough_scale_bounds
+#print axioms weightedCofactors_le_sq
+#print axioms lemma19_rough_input_zero_weights
 end
 end LeanLab.Languasco2004.Decomp565d
