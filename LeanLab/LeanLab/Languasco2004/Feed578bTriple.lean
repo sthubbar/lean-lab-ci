@@ -36,7 +36,28 @@ theorem triple_rough_transfer_reduction :
           ∑ j ∈ range ⌈K * log N⌉₊,
             |weightedCofactors false N (localization N ε) (M j N) n (w j N) -
               singular n / log N *
-                weightedCofactors true N (localization N ε) (M j N) n (w j N)| := by sorry
+                weightedCofactors true N (localization N ε) (M j N) n (w j N)| := by
+  refine ⟨(16 / 135 : ℝ) ^ 3, by positivity, ?_⟩
+  intro ε hε hε₀
+  refine ⟨1, 0, fun _ N => (localization N ε) ^ (119 / 135 : ℝ),
+    fun _ _ _ => 0, ?_, ?_, ?_, ?_⟩
+  · intro j N hN
+    refine ⟨rfl, ?_⟩
+    have hN1 : 1 ≤ N := by linarith
+    exact (rough_scale_bounds N ε hN1 hε hε₀.le).le
+  · intro j N m
+    exact ⟨by norm_num, by norm_num⟩
+  · intro j N hN m p hp hpm hsmall
+    rfl
+  · refine ⟨2, ?_⟩
+    intro N hN n hn
+    constructor
+    · simp [weightedCofactors]
+    · constructor
+      · -- The first transfer estimate is the nontrivial display 63 step.
+        trace_state
+        sorry
+      · simp [weightedCofactors]
 
 /-- Jia page 284 display 63: exact type of Decomp578b.triple_rough_transfer.
 CONDITIONAL ON the LEAFs triple_rough_transfer_reduction and Feed578bBlocks.lemma19_blocks_uniform.
