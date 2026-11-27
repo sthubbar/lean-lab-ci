@@ -1,4 +1,4 @@
-import LeanLab.LanguascoPintzZaccagnini2007.IwaniecCells1122
+import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_display14_15_1122
 
 /-!
 A split of the open strip step `iwaniec_no_zero_open_strip481` of
@@ -75,8 +75,9 @@ theorem iwaniec_display17_1122 (q : ℕ) (hq : 3 ≤ q) (χ : DirichletCharacter
       (logDeriv (Lfun481 (χ ^ 2)) (((1 + 5 * θ : ℝ) : ℂ) + ((2 * γ : ℝ) : ℂ) * Complex.I)).re := by
   sorry
 
-/-- LEAF: Iwaniec 1974 page 102, displays (14) and (15) of the proof of Lemma 11.
-Class: MEDIUM.
+/-- Iwaniec 1974 page 102, displays (14) and (15) of the proof of Lemma 11, formerly a MEDIUM
+leaf, now proved from the leaves `iwaniec_display14_1122` and `iwaniec_display15_1122` of
+`SPLIT_iwaniec_display14_15_1122`.
 H. Iwaniec, On zeros of Dirichlet's L series, Invent. Math. 23, 1974, page 102: display (14),
 `3 Re L'/L (σ, χ₀) + 4 Re L'/L (σ + it, χ) + Re L'/L (σ + 2it, χ²) ≤ 0` for `σ > 1`, and
 display (15) at the real point `σ`, `Re L'/L (σ, χ₀) ≥ -1/(σ - 1) - 2 log 5l`, from
@@ -87,7 +88,10 @@ theorem iwaniec_display14_15_1122 (q : ℕ) (hq : 3 ≤ q) (χ : DirichletCharac
     4 * (logDeriv (Lfun481 χ) ((σ : ℂ) + (γ : ℂ) * Complex.I)).re +
       (logDeriv (Lfun481 (χ ^ 2)) ((σ : ℂ) + ((2 * γ : ℝ) : ℂ) * Complex.I)).re ≤
       3 / (σ - 1) + 6 * Real.log (5 * l) := by
-  sorry
+  have h14 := iwaniec_display14_1122 q hq χ γ σ hσ
+  have h15 := iwaniec_display15_1122 q hq γ l σ hl hσ
+  have h3 : 3 * (1 / (σ - 1)) = 3 / (σ - 1) := by ring
+  linarith
 
 /-- LEAF: Iwaniec 1974 page 103, the closing numerical step of Lemma 11 step (i).
 Class: MEDIUM.
