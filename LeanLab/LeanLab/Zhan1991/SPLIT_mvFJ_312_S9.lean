@@ -13,6 +13,41 @@ open Finset Real MeasureTheory
 
 noncomputable section
 
+/-- Each factor `fj` is a finite Dirichlet polynomial with support in `(N_j, 2N_j]` and
+coefficients bounded by `log N`. -/
+theorem fj_single_poly_S9 :
+    ∃ c1 N₀ : ℝ, 0 ≤ c1 ∧ ∀ (N : ℕ) (Nv : Fin 20 → ℝ) (j : Fin 20),
+      N₀ ≤ N → Cond35 N Nv →
+      ∃ (Mj Nj : ℕ) (a : ℕ → ℂ),
+        (∀ (q : ℕ) (χ : DirichletCharacter ℂ q) (s : ℂ),
+          fj (j.val + 1) (Nv j) χ s =
+            ∑ n ∈ Finset.Icc (Mj + 1) (Mj + Nj), a n * χ n * (n : ℂ) ^ (-s)) ∧
+        (∀ n, ‖a n‖ ≤ Real.log N ^ c1) ∧
+        (Nj : ℝ) ≤ Nv j ∧ ((Mj + Nj : ℝ) ≤ 2 * Nv j) := by
+  sorry
+
+/-- Product of the single-factor polynomials: the product over `j ∈ J` of `fj` is a
+Dirichlet polynomial with coefficients bounded by a power of the divisor function. -/
+theorem prod_fj_poly_S9 :
+    ∃ c1 N₀ : ℝ, 0 ≤ c1 ∧ ∀ (N : ℕ) (Nv : Fin 20 → ℝ) (J : Finset (Fin 20)),
+      N₀ ≤ N → Cond35 N Nv →
+      ∃ (M Nn : ℕ) (b : ℕ → ℂ),
+        (∀ (q : ℕ) (χ : DirichletCharacter ℂ q) (s : ℂ),
+          ∏ j ∈ J, fj (j.val + 1) (Nv j) χ s =
+            ∑ n ∈ Finset.Icc (M + 1) (M + Nn), b n * χ n * (n : ℂ) ^ (-s)) ∧
+        (∀ n, ‖b n‖ ≤ (Real.log N ^ c1) * (((Nat.divisors n).card : ℝ) ^ J.card)) ∧
+        ((M + Nn : ℝ) ≤ (2 : ℝ) ^ J.card * ∏ j ∈ J, Nv j) := by
+  sorry
+
+/-- Divisor moment bound sufficient for k ≤ 20. -/
+theorem divisor_moment_S9 (k : ℕ) (hk : k ≤ 20) :
+    ∃ c K N₀ : ℝ, 0 ≤ c ∧ ∀ (q : ℕ) (T X : ℝ), 1 ≤ T → N₀ ≤ X →
+      ∑ n ∈ Finset.Icc 1 (Nat.floor X),
+        ((q : ℝ) * T + n) * (((Nat.divisors n).card : ℝ) ^ (2 * k)) *
+          (n : ℝ) ^ (-2 * (1 / 2 : ℝ))
+      ≤ K * ((q : ℝ) * T + X) * Real.log X ^ c := by
+  sorry
+
 /-- LEAF: page 268 second line with page 266 display (3.13): `F_J = Π_{j ∈ J} f_j` is a
 Dirichlet polynomial `Σ_{M < n ≤ M + N'} b(n) χ(n) n^{-s}`, `b(n) = Σ_{n = Π n_j, n_j ∈ I_j}
 Π a_j(n_j)`, so `|b(n)| ≤ d_{|J|}(n) L`, `n ≤ 2^{|J|} Π_{j ∈ J} N_j`; and (3.13) gives
