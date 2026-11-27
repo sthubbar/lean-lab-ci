@@ -15,7 +15,8 @@ certificate, and the parent theorem `cover_quarter_three` stays open.
 
 Binary Goldbach is open.
 -/
-import LeanLab.DtRS1998.SPLIT_certificate270
+import Mathlib
+import LeanLab.DtRS1998.Decomp270a
 
 namespace LeanLab.DtRS1998.Decomp270c
 
