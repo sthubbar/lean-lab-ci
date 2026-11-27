@@ -597,6 +597,18 @@ theorem grid_table_bound_fine1122e (U : ℕ → ℕ → ℝ) (h0 : ∀ n j, 0 �
     refine hsum.trans (le_trans ?_ hR)
     exact div_le_div_of_nonneg_right (Finset.sum_le_sum fun i _ => hIH i) hjpos.le
 
+/-- At the candidate counterexample point `1001 / 1000`, the sieve function is in its first
+piece, so `hSieve (1001 / 1000) = exp (-2)`. -/
+theorem hSieve_at_1001_1122 :
+    LeanLab.ChenExplicit.hSieve (1 + (1 : ℝ) / 1000) = exp (-2) := by
+  unfold LeanLab.ChenExplicit.hSieve
+  rw [if_pos (by norm_num)]
+
+/-- The Table 2 value used at the candidate counterexample point `n = 33` is `0.69`. -/
+theorem bjsC306_at_33_1122 : bjsC306 33 = 0.69 := by
+  unfold bjsC306
+  norm_num
+
 /-- LEAF: QUESTION, suspected false at n = 33, i = 0, burst-20261124 S9: float upper and lower
 Riemann tables with step 1 / 100000 give f_33(1) between 1.0034 and 1.0038 times the right side.
 BJS Section 2.2, last paragraph, page 8, odd n: the computed grid bounds
