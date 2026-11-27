@@ -6,7 +6,7 @@ proof of 3.23 and a CONDITIONAL assembly theorem with the verbatim statement.
 Burst burst-20261122 session S64. AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.BHP1997.Decomp512a
-import LeanLab.BHP1997.TotientTailS72
+import LeanLab.BHP1997.Route512TotientTail
 
 namespace LeanLab.BHP1997.Section2MS
 open Classical
@@ -25,13 +25,12 @@ theorem leaf_ramanujan_sqfree_norm512 (q N : ℕ) (hq : Squarefree q) :
 3.23: Σ_{q>Z} φ(q)^{-2} ≪ Z^{-1}, together with the convergence of Σ_q φ(q)^{-2}, which
 gives the bound min(Z^{-1}, 1) for every Z > 0, uniformly in the upper cutoff R.
 Class MEDIUM: from Σ_{q≤R} (q/φ(q))² ≪ R, which follows from
-q/φ(q) = Σ_{d|q} μ(d)²/φ(d), and partial summation. PROVED in `TotientTailS72`,
-session S72, by an elementary Euler product argument. -/
+q/φ(q) = Σ_{d|q} μ(d)²/φ(d), and partial summation. -/
 theorem leaf_totient_sq_tail512 :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ Z : ℝ, 0 < Z → ∀ R : ℕ,
       ∑ r ∈ (Finset.Icc 1 R).filter (fun r : ℕ => Z < (r : ℝ)),
           1 / (Nat.totient r : ℝ) ^ 2 ≤ K * min (1 / Z) 1 :=
-  TotientTailS72.leaf_totient_sq_tail512
+  totient_sq_tail512
 
 /-- Vaughan 1981 display 3.23 at m = N, verbatim statement of
 `Section2MS.leaf_vaughan_323_512`, CONDITIONAL ON the two LEAFs above. The proof is Vaughan's:
