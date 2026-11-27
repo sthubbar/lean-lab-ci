@@ -1,0 +1,1 @@
+import LeanLab.Teravainen2016.VDecayQuadratic1122d
