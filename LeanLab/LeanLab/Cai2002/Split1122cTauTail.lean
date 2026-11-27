@@ -778,8 +778,9 @@ private lemma tau_chain_s77c (j : ℕ) (hj : j ≤ 240) :
     have ihj := ih (by omega)
     nlinarith [hpair, ihj, hq, hs, h73, hkey, hq0, hs0]
 
-/-- BJS display 31 at n = 500 and ε = 1/100000: τ_500 ≤ 2 * 10 ^ -12, by the certified
-value at n = 20 and the geometric pair contraction of display 31 from there. -/
+/-- LEAF: BJS display 31 at n = 500 and ε = 1/100000: τ_500 ≤ 2 * 10 ^ -12, interval value
+1.11454485e-12 at 40 digits, notes/burst-20261122/twinT-scripts/tau_interval.py.
+Class HARD: a certified evaluation of the first 500 terms of the recursion. -/
 theorem tau500_value1122c : bjsTau306 bjsC306 (1 / 100000) 500 ≤ 2e-12 := by
   have h := tau_chain_s77c 240 (by norm_num)
   have h500 : 20 + 2 * 240 = 500 := by norm_num
