@@ -23,7 +23,8 @@ theorem cray_low_blocks_k_lt_2400 :
         qs.any (fun q => decide
           (q ≤ 4 * 10 ^ 11 + (10 ^ 9) * k + 2 * j ∧
             (4 * 10 ^ 11 + (10 ^ 9) * k + 2 * j - q).Prime))) = true := by
-  sorry
+  intro k hk
+  exact cray_low_blocks k hk
 
 /-- LEAF. Second window of the block family. Every block with 2400 ≤ k < 4800 carries a
 finite prime list qs and a successful Boolean offset check: for each
