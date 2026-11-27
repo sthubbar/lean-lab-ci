@@ -1,5 +1,6 @@
 import Mathlib
 import LeanLab.HelfgottMajor.PVEvenTrunc1122
+import LeanLab.HelfgottMajor.PVCotTail1122
 
 /-!
 Route burst S124, burst-20261122, step even-truncated-p2.
@@ -46,7 +47,7 @@ theorem cot_tail_large {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
           (2 * sqrt q) + 1 / 2 ≤
         1 / π ^ 2 * sqrt q * log q + 2 / π ^ 2 * sqrt q * log (log q) + 3 / 4 * sqrt q -
           2 / π ^ 2 * sqrt q * (log H + eulerMascheroniConstant + log 2 + 3 / H) := by
-  sorry
+  exact PVCotTail1122.cot_tail χ hχ hq heven
 
 /-- Arithmetic helper for `budget_small`. PROVED. -/
 theorem fin_mul {s X P a b : ℝ} (hs : a ≤ s) (hX : b ≤ X) (ha : 0 ≤ a) (hb : 0 ≤ b)
