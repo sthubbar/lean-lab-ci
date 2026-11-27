@@ -28,18 +28,19 @@ theorem cray_high_blocks_k_lt_500 :
           (q ≤ 9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime))) = true := by
   intro k hk
-  -- Use offsets_certificate with B = 9*10^13 + 10^9*k and L = 10^9.
-  -- We need a Ds : List ℕ such that:
-  --   (1) ∀ d ∈ Ds, d ≤ B        (easy, since B ≈ 10^14)
-  --   (2) ∀ even x ≤ 10^9, ∃ d ∈ Ds, (x + d).Prime   (covering, precomputed)
-  --   (3) ∀ d ∈ Ds, (B - d).Prime   (Pocklington certificates, per k)
-  -- Then qs := Ds.map (fun d => B - d) and offsets_certificate gives the result.
-  have h_main : ∃ (qs : List ℕ), (∀ q ∈ qs, q.Prime) ∧
-      (List.range ((10 ^ 9) / 2 + 1)).all (fun j =>
-        qs.any (fun q => decide
-          (q ≤ 9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
-            (9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime))) = true := by sorry
-  exact h_main
+  let B : ℕ := 9 * 10 ^ 13 + (10 ^ 9) * k
+  obtain ⟨Ds, hD, hcover⟩ :
+      ∃ Ds : List ℕ,
+        (∀ d ∈ Ds, d ≤ B) ∧
+        (∀ x, x ≤ 10 ^ 9 → 2 ∣ x → ∃ d ∈ Ds, (x + d).Prime) := by
+    sorry
+  have hcheck := offsets_certificate (B := B) (L := 10 ^ 9) hD hcover
+  refine ⟨Ds.map (fun d => B - d), ?_, ?_⟩
+  · intro q hq
+    simp only [List.mem_map] at hq
+    obtain ⟨d, hd, rfl⟩ := hq
+    sorry
+  · simpa [B] using hcheck
 
 /-- LEAF. Second sub-window: every block with 500 ≤ k < 1000 carries a finite
 prime list qs and a successful Boolean offset check on every j < (10 ^ 9) / 2 + 1.
