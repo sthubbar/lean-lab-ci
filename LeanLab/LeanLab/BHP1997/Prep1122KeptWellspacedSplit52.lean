@@ -216,6 +216,118 @@ private theorem mvt_mean_square_pairs (c₁ c₂ : ℝ) (hc₁ : 0 < c₁) (hc�
 
 end MvtLemma1Helpers
 
+/-- `Thm4.dirPoly` as a sum over its own window. -/
+private theorem dirPoly_eq_sum_filter {q : ℕ} (a : ℕ → ℂ) (c₁ c₂ F : ℝ)
+    (χ : DirichletCharacter ℂ q) (s : ℂ) :
+    Thm4.dirPoly a c₁ c₂ F χ s =
+      ∑ n ∈ (Finset.range (⌊c₂ * F⌋₊ + 1)).filter (fun n : ℕ => c₁ * F < n ∧ (n : ℝ) < c₂ * F), a n * χ (n : ZMod q) / (n : ℂ) ^ s := rfl
+
+/-- P0069 page 48: the product of two Dirichlet polynomials over one window, reindexed by the
+product of the summation indices. This is the step "|LMN|² = |(LMN)²|" at the level of
+coefficients: every factor of the square is a Dirichlet polynomial of a convolution. PROVED. -/
+private theorem dirPoly_mul_conv {q : ℕ} (χ : DirichletCharacter ℂ q) (s : ℂ) (a b : ℕ → ℂ)
+    {c₁ c₂ Fa Fb : ℝ} (hc₁ : 0 < c₁) (hFa : 0 < Fa) (hFb : 0 < Fb) :
+    Thm4.dirPoly a c₁ c₂ Fa χ s * Thm4.dirPoly b c₁ c₂ Fb χ s =
+      ∑ k ∈ ((Finset.range (⌊c₂ * Fa⌋₊ + 1)).filter (fun n : ℕ => c₁ * Fa < n ∧ (n : ℝ) < c₂ * Fa) ×ˢ (Finset.range (⌊c₂ * Fb⌋₊ + 1)).filter (fun n : ℕ => c₁ * Fb < n ∧ (n : ℝ) < c₂ * Fb)).image (fun p : ℕ × ℕ => p.1 * p.2),
+        (∑ p ∈ ((Finset.range (⌊c₂ * Fa⌋₊ + 1)).filter (fun n : ℕ => c₁ * Fa < n ∧ (n : ℝ) < c₂ * Fa) ×ˢ (Finset.range (⌊c₂ * Fb⌋₊ + 1)).filter (fun n : ℕ => c₁ * Fb < n ∧ (n : ℝ) < c₂ * Fb)).filter (fun p : ℕ × ℕ => p.1 * p.2 = k),
+            a p.1 * b p.2) * χ (k : ZMod q) / (k : ℂ) ^ s := by
+  classical
+  set A := (Finset.range (⌊c₂ * Fa⌋₊ + 1)).filter (fun n : ℕ => c₁ * Fa < n ∧ (n : ℝ) < c₂ * Fa) with hA
+  set B := (Finset.range (⌊c₂ * Fb⌋₊ + 1)).filter (fun n : ℕ => c₁ * Fb < n ∧ (n : ℝ) < c₂ * Fb) with hB
+  have hW : ∀ n : ℕ, n ∈ A → c₁ * Fa < (n : ℝ) := fun n hn => (Finset.mem_filter.mp hn).2.1
+  have hW' : ∀ n : ℕ, n ∈ B → c₁ * Fb < (n : ℝ) := fun n hn => (Finset.mem_filter.mp hn).2.1
+  have hposA : ∀ n ∈ A, 0 < n := by
+    intro n hn
+    have h : (0 : ℝ) < (n : ℝ) := lt_of_lt_of_le (mul_pos hc₁ hFa) (hW n hn).le
+    exact_mod_cast h
+  have hposB : ∀ n ∈ B, 0 < n := by
+    intro n hn
+    have h : (0 : ℝ) < (n : ℝ) := lt_of_lt_of_le (mul_pos hc₁ hFb) (hW' n hn).le
+    exact_mod_cast h
+  have hχ : ∀ x y : ℕ, χ ((x : ZMod q) * (y : ZMod q)) = χ (x : ZMod q) * χ (y : ZMod q) :=
+    fun x y => map_mul χ (x : ZMod q) (y : ZMod q)
+  have hcp : ∀ x y : ℕ, ((x : ℂ) * (y : ℂ)) ^ s = (x : ℂ) ^ s * (y : ℂ) ^ s :=
+    fun x y => Complex.natCast_mul_natCast_cpow x y s
+  have hterm : ∀ p ∈ A ×ˢ B,
+      (a p.1 * χ (p.1 : ZMod q) / (p.1 : ℂ) ^ s) * (b p.2 * χ (p.2 : ZMod q) / (p.2 : ℂ) ^ s) =
+      (a p.1 * b p.2) * χ ((p.1 * p.2) : ZMod q) / ((p.1 * p.2) : ℂ) ^ s := by
+    intro p hp
+    obtain ⟨hp1, hp2⟩ := Finset.mem_product.mp hp
+    have h1 : (p.1 : ℂ) ≠ 0 := by exact_mod_cast (hposA p.1 hp1).ne'
+    have h2 : (p.2 : ℂ) ≠ 0 := by exact_mod_cast (hposB p.2 hp2).ne'
+    rw [hχ p.1 p.2, hcp p.1 p.2]
+    field_simp
+  calc Thm4.dirPoly a c₁ c₂ Fa χ s * Thm4.dirPoly b c₁ c₂ Fb χ s
+      = ∑ x ∈ A, ∑ y ∈ B,
+          (a x * χ (x : ZMod q) / (x : ℂ) ^ s) * (b y * χ (y : ZMod q) / (y : ℂ) ^ s) := by
+        rw [dirPoly_eq_sum_filter, dirPoly_eq_sum_filter, Finset.sum_mul_sum]
+    _ = ∑ p ∈ A ×ˢ B,
+          (a p.1 * b p.2) * χ ((p.1 * p.2) : ZMod q) / ((p.1 * p.2) : ℂ) ^ s := by
+        rw [← Finset.sum_product']
+        exact Finset.sum_congr rfl hterm
+    _ = ∑ k ∈ (A ×ˢ B).image (fun p : ℕ × ℕ => p.1 * p.2),
+          (∑ p ∈ (A ×ˢ B).filter (fun p : ℕ × ℕ => p.1 * p.2 = k), a p.1 * b p.2) *
+            χ (k : ZMod q) / (k : ℂ) ^ s := by
+        rw [← Finset.sum_fiberwise_of_maps_to
+          (s := A ×ˢ B) (t := (A ×ˢ B).image (fun p : ℕ × ℕ => p.1 * p.2))
+          (g := fun p : ℕ × ℕ => p.1 * p.2)
+          (f := fun p : ℕ × ℕ =>
+            (a p.1 * b p.2) * χ ((p.1 * p.2) : ZMod q) / ((p.1 * p.2) : ℂ) ^ s)
+          (fun p hp => Finset.mem_image_of_mem _ hp)]
+        apply Finset.sum_congr rfl
+        intro k hk
+        have hcongr : (∑ p ∈ (A ×ˢ B).filter (fun p : ℕ × ℕ => p.1 * p.2 = k),
+              (a p.1 * b p.2) * χ ((p.1 * p.2) : ZMod q) / ((p.1 * p.2) : ℂ) ^ s) =
+            ∑ p ∈ (A ×ˢ B).filter (fun p : ℕ × ℕ => p.1 * p.2 = k),
+              (a p.1 * b p.2) * χ (k : ZMod q) / (k : ℂ) ^ s := by
+          apply Finset.sum_congr rfl
+          intro p hp
+          have h : p.1 * p.2 = k := (Finset.mem_filter.mp hp).2
+          simp only [← Nat.cast_mul]
+          rw [h]
+        rw [hcongr]
+        refine (Finset.sum_congr rfl (fun p _ => mul_div_assoc _ _ _)).trans ?_
+        exact ((Finset.sum_mul _ (fun p : ℕ × ℕ => a p.1 * b p.2)
+          (χ (k : ZMod q) / (k : ℂ) ^ s)).symm).trans (mul_div_assoc _ _ _).symm
+
+/-- A window sum over a subset of the window is a Dirichlet polynomial with the coefficients cut
+off outside the subset. PROVED. -/
+private theorem sum_win_eq_dirPoly {q : ℕ} (χ : DirichletCharacter ℂ q) (s : ℂ) (f : ℕ → ℂ)
+    {c₁ c₂ F : ℝ} {K : Finset ℕ} (hK : K ⊆ (Finset.range (⌊c₂ * F⌋₊ + 1)).filter (fun n : ℕ => c₁ * F < n ∧ (n : ℝ) < c₂ * F)) :
+    (∑ k ∈ K, f k * χ (k : ZMod q) / (k : ℂ) ^ s) =
+      Thm4.dirPoly (fun k => if k ∈ K then f k else 0) c₁ c₂ F χ s := by
+  rw [dirPoly_eq_sum_filter]
+  simp only [ite_mul, zero_mul, ite_div, zero_div]
+  rw [Finset.sum_ite_mem, Finset.inter_eq_right.mpr hK]
+
+/-- The products of two windowed indices stay inside the correspondingly widened window. PROVED. -/
+private theorem win_mul_subset {c₁ c₂ Fa Fb : ℝ} (hc₁ : 0 < c₁) (hc₂ : c₁ < c₂)
+    (hFa : 0 < Fa) (hFb : 0 < Fb) :
+    ((Finset.range (⌊c₂ * Fa⌋₊ + 1)).filter (fun n : ℕ => c₁ * Fa < n ∧ (n : ℝ) < c₂ * Fa) ×ˢ (Finset.range (⌊c₂ * Fb⌋₊ + 1)).filter (fun n : ℕ => c₁ * Fb < n ∧ (n : ℝ) < c₂ * Fb)).image (fun p : ℕ × ℕ => p.1 * p.2) ⊆
+      (Finset.range (⌊c₂ * c₂ * Fa * Fb⌋₊ + 1)).filter (fun n : ℕ => c₁ * c₁ * Fa * Fb < n ∧ (n : ℝ) < c₂ * c₂ * Fa * Fb) := by
+  classical
+  intro k hk
+  obtain ⟨p, hp, rfl⟩ := Finset.mem_image.mp hk
+  obtain ⟨hp1, hp2⟩ := Finset.mem_product.mp hp
+  obtain ⟨hlo1, hhi1⟩ := (Finset.mem_filter.mp hp1).2
+  obtain ⟨hlo2, hhi2⟩ := (Finset.mem_filter.mp hp2).2
+  have h1 : (0 : ℝ) < (p.1 : ℝ) := lt_trans (mul_pos hc₁ hFa) hlo1
+  have h2 : (0 : ℝ) < (p.2 : ℝ) := lt_trans (mul_pos hc₁ hFb) hlo2
+  have hcast : ((p.1 * p.2 : ℕ) : ℝ) = (p.1 : ℝ) * (p.2 : ℝ) := by push_cast; ring
+  have hlt : (p.1 : ℝ) * (p.2 : ℝ) < c₂ * c₂ * Fa * Fb := by
+    have h := mul_lt_mul'' hhi1 hhi2 h1.le h2.le
+    rw [show c₂ * c₂ * Fa * Fb = (c₂ * Fa) * (c₂ * Fb) by ring]
+    exact h
+  have hgt : c₁ * c₁ * Fa * Fb < (p.1 : ℝ) * (p.2 : ℝ) := by
+    have h := mul_lt_mul'' hlo1 hlo2 (mul_pos hc₁ hFa).le (mul_pos hc₁ hFb).le
+    rw [show c₁ * c₁ * Fa * Fb = (c₁ * Fa) * (c₁ * Fb) by ring]
+    exact h
+  refine Finset.mem_filter.mpr ⟨?_, ?_, ?_⟩
+  · rw [Finset.mem_range]
+    exact Nat.lt_succ_of_le (Nat.le_floor (by rw [hcast]; exact hlt.le))
+  · rw [hcast]; exact hgt
+  · rw [hcast]; exact hlt
+
 /-- LEAF: P0069 page 48, Lemma 33 and its proof, "for (beta1, beta2) in R we apply Theorem 4
 with N^2 L, LM, M, T2 in place of M, N, L, T. Thus (3.5) holds with X = Y^2", and for P1 with
 M^2 N, L^2, N, and P2 by beta1 to 1 - beta1 - beta2, ending "||LMN||_2^2 << Y L^-A if t is in
