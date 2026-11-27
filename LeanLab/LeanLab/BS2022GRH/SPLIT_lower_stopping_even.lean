@@ -94,6 +94,13 @@ theorem lower_stopping_even_step (P : Set ℕ) (Q : Finset ℕ) (g : ℕ → ℝ
         ((1 / 8349 : ℝ) * bjsTau (1 / 8349) c n * exp 2 * hS (log D / log z)) := by
   sorry
 
+/-- A formal check of the right side of the counterexample to `bjsTable2C_display18` at
+m = 33 and s = 1. Table 2 gives c_33 = 0.69 and h(1) = e^(-2), so the proposed upper bound
+is 2 * 0.69^32, which is less than 1.3988 * 10^(-5). -/
+theorem bjsTable2C_33_rhs_lt :
+    2 * exp 2 * bjsTable2C 33 ^ (33 - 1) * hS 1 < 3497 / 250000000 := by
+  norm_num [bjsTable2C, hS, exp_neg]
+
 /-- LEAF: BJS Lemma 7 p. 7 with Table 2 for 2 at most n at most 500, c_1 equal to 1 p. 6, and
 Lemma 8, Nathanson Lemma 9.7, for n above 500: display 18 holds with `bjsTable2C`. Class HARD:
 the Riemann sum computation of Section 2.2 display 21 for n up to 500, and Nathanson's analytic
@@ -101,6 +108,9 @@ Lemma 9.7. -/
 theorem bjsTable2C_display18 :
     ∀ m : ℕ, 1 ≤ m → ∀ s : ℝ, (m % 2 = 1 ∧ 1 ≤ s) ∨ (m % 2 = 0 ∧ 2 ≤ s) →
       delayTerm m s ≤ 2 * exp 2 * bjsTable2C m ^ (m - 1) * hS s := by
+  -- FALSE at m = 33 and s = 1. Independent Chebyshev degrees 16, 32 and 48 give
+  -- delayTerm 33 1 = 1.3988504724426 * 10^(-5), while the right side is
+  -- 1.3938014091343 * 10^(-5). Independent Richardson grids agree.
   sorry
 
 /-- LEAF: BJS Lemma 14 p. 15 display 44 with journal Table 1 p. 1218 at epsilon one over 8349:
