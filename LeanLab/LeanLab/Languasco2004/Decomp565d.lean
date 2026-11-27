@@ -91,7 +91,9 @@ theorem lemma19_rough_input :
             log N ^ (2 : ℕ) + localization N ε / log N ^ B) <
           |weightedCofactors false N (localization N ε) (M N) n (a N) -
             singular n / log N * weightedCofactors true N (localization N ε) (M N) n (a N)|)).card : ℝ) ≤
-      C * windowLength N ε / log N ^ B := by sorry
+      C * windowLength N ε / log N ^ B := by
+  intro ε₀ hε₀ ε B hε hε₀' hB M a hM ha hrough
+  exact?
 
 /-- Page 260: zero weights satisfy the rough support condition and give both counts zero. -/
 theorem rough_zero_weights (N Y M : ℝ) (n : ℕ) :
