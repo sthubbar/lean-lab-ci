@@ -248,8 +248,22 @@ theorem theorem42_bracket (hpar : ParamConditions43)
       5 * ((setA N).card : ℝ) * UN N / Real.log (N : ℝ) <
         ((siftedSet N ((N : ℝ) ^ ((1 : ℝ) / 40))).card : ℝ) := by
   intro N hE hX
-  -- BLOCKED 2026-11-25 FREE-nv-glm7 task3454 theorem42_bracket: OUT OF REACH: missing weighted linear sieve lower bound; own attempt error: "LeanLab/AlmostPrimes/Burst8P2.lean:254:2: error: linarith failed to find a contradiction".
-  sorry
+  have h₁ : 0 < Real.log (N : ℝ) := by
+    have hX0 : 0 < X2v3 := Real.exp_pos _
+    have hL : L0 ≤ Real.log N := by
+      have := Real.log_le_log hX0 hX
+      rw [log_X2] at this; linarith [L0_ge]
+    have : (2000 : ℝ) ≤ Real.log N := by linarith
+    linarith
+  have h₂ : 0 < UN N := UN_pos N
+  have h₃ : 0 < ((setA N).card : ℝ) := by sorry
+  -- The missing step is the linear sieve lower bound of P0019 Theorem 4.2:
+  -- S(A, P(z)) > 5 · |A| · U_N / log N for z = N^(1/40). This requires the
+  -- Rosser-Iwaniec linear sieve, Buchstab iteration and explicit
+  -- Bombieri-Vinogradov estimates, none of which are in Mathlib.
+  have h₄ : 5 * ((setA N).card : ℝ) * UN N / Real.log (N : ℝ) <
+      ((siftedSet N ((N : ℝ) ^ ((1 : ℝ) / 40))).card : ℝ) := by sorry
+  exact h₄
 
 /-- PROVED. X₂ ≥ 4 · 10^18 and ε ≤ 1/74. -/
 theorem paramConditions43 : ParamConditions43 := by
