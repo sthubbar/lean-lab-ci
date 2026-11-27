@@ -1,4 +1,4 @@
-import LeanLab.ChenDoubleSieve.Decomp363e
+import LeanLab.ChenDoubleSieve.Lemma41
 
 /-!
 The finite Euler product part of the dimension condition in Wu 2004.

@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Table1Algebra
+import LeanLab.ChenDoubleSieve.KernelIntegrability
 import LeanLab.ChenDoubleSieve.Feed1122_Burst9Matrix_entry_5_0_p2_left
 
 /-!
@@ -25,7 +26,11 @@ open LeanLab.ChenDoubleSieve.Wu04Table
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 5) volume (1 : ℝ) (11/5 : ℝ) := by
-  sorry
+  apply (LeanLab.ChenDoubleSieve.Burst8P2.table_kernel_integrable 5).mono_set
+  intro t ht
+  rw [Set.uIcc_of_le (by norm_num)] at ht
+  rw [Set.uIcc_of_le (by norm_num)]
+  exact ⟨by linarith only [ht.1], by linarith only [ht.2]⟩
 
 /-- LEAF: Wu 2004 display 7.2, kernel Xi1 of display 3.21, page 14, left half panel `[1, 8/5]` of `a_{6,1}`:
 quadrature value 0.039796938721, stated bound leaves 2.44e-08. HARD. -/

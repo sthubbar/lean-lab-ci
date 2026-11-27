@@ -1,4 +1,6 @@
 import LeanLab.ChenDoubleSieve.Decomp348o
+import LeanLab.ChenDoubleSieve.Decomp348b
+import LeanLab.ChenDoubleSieve.Decomp348c
 
 /-!
 Exact lower sieve supplies using the proved density normalization.

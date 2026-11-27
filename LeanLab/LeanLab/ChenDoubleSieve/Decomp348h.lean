@@ -1,4 +1,6 @@
 import LeanLab.ChenDoubleSieve.Decomp348g
+import LeanLab.ChenDoubleSieve.Decomp348b
+import LeanLab.ChenDoubleSieve.Decomp348c
 
 /-!
 Remove the coprimality condition from the actual finite sums in equation 10.5.

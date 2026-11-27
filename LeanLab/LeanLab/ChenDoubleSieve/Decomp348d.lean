@@ -1,5 +1,4 @@
-import LeanLab.ChenDoubleSieve.Decomp348b
-import LeanLab.ChenDoubleSieve.Decomp348c
+import LeanLab.ChenDoubleSieve.Decomp348a
 import LeanLab.ChenDoubleSieve.Decomp315a
 
 /-!

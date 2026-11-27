@@ -75,7 +75,59 @@ theorem leaf_mass_one :
     ∃ K : ℝ, 0 < K ∧ ∃ N0 : ℕ, ∀ N : ℕ, Even N → N0 ≤ N →
       (N : ℝ) / log N * ∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ basicEndpoint 1),
         Task363.localDensity N (basicSifting N p 1) / ((p : ℝ) - 1) ≤ K * Θ N := by
-  sorry
+  obtain ⟨D, hD, MD, hMD⟩ := Task363.density_scale_bounded
+  obtain ⟨K, hK, MK, hMK⟩ := b349v_mass_bounded
+  refine ⟨D * K, mul_pos hD hK, max 2 (max MD MK), ?_⟩
+  intro N hEven hN
+  have hN2 : 2 ≤ N := by omega
+  have hΘ := Θ_pos hN2
+  have hV : 0 ≤ Task348.lowerDensity N :=
+    (Task363.localDensity_pos hEven ((N : ℝ) ^ kappa1)).le
+  have hscale := hMD N hEven (by omega)
+  have hmass := hMK N (by omega)
+  have hsum : (∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ basicEndpoint 1),
+      Task363.localDensity N (basicSifting N p 1) / ((p : ℝ) - 1)) ≤
+      Task348.lowerDensity N *
+        ∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ kappa2),
+          (1 : ℝ) / ((p : ℝ) - 1) := by
+    simp only [basicEndpoint, basicSifting, ↓reduceIte]
+    rw [Finset.mul_sum]
+    apply Finset.sum_le_sum
+    intro p hp
+    have hprop := Wu41.mem_PS.mp hp
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast hprop.1.two_le
+    have hden : 0 ≤ (p : ℝ) - 1 := by linarith
+    have hcut : Task363.localDensity N p ≤ Task348.lowerDensity N := by
+      rw [Task363.localDensity_split N (by positivity : 0 ≤ (N : ℝ) ^ kappa1) hprop.2.1]
+      change Task348.lowerDensity N * _ ≤ Task348.lowerDensity N
+      apply mul_le_of_le_one_right hV
+      apply Finset.prod_le_one₀
+      · intro r hr
+        have hr2 : (2 : ℝ) ≤ r := by exact_mod_cast (Wu41.mem_PS.mp hr).1.two_le
+        have hrden : 0 < (r : ℝ) - 1 := by linarith
+        have := (div_le_one₀ hrden).mpr (show (1 : ℝ) ≤ (r : ℝ) - 1 by linarith)
+        linarith
+      · intro r hr
+        have hr2 : (2 : ℝ) ≤ r := by exact_mod_cast (Wu41.mem_PS.mp hr).1.two_le
+        have : 0 ≤ 1 / ((r : ℝ) - 1) := one_div_nonneg.mpr (by linarith)
+        linarith
+    simpa only [mul_one_div] using div_le_div_of_nonneg_right hcut hden
+  have hmass0 : 0 ≤ ∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ kappa2),
+      (1 : ℝ) / ((p : ℝ) - 1) := by
+    apply Finset.sum_nonneg
+    intro p hp
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Wu41.mem_PS.mp hp).1.two_le
+    exact one_div_nonneg.mpr (by linarith)
+  calc
+    _ ≤ (N : ℝ) / log N * (Task348.lowerDensity N *
+        ∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ kappa2),
+          (1 : ℝ) / ((p : ℝ) - 1)) :=
+      mul_le_mul_of_nonneg_left hsum (div_nonneg (Nat.cast_nonneg N) (Real.log_natCast_nonneg N))
+    _ = ((N : ℝ) / log N * Task348.lowerDensity N) *
+        (∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ kappa2),
+          (1 : ℝ) / ((p : ℝ) - 1)) := by ring
+    _ ≤ (D * Θ N) * K := mul_le_mul hscale hmass hmass0 (by positivity)
+    _ = (D * K) * Θ N := by ring
 
 /-- LEAF: Wu 2004 page 39, size of the main terms of 10.4: the local density at
 N to kappa one is O of C_N over log N by Mertens, and the prime reciprocal sum
@@ -85,7 +137,56 @@ theorem leaf_mass_two_three :
       ∀ i : Fin 12, i ∈ ({2, 3} : Finset (Fin 12)) →
       (N : ℝ) / log N * ∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ basicEndpoint i),
         Task363.localDensity N (basicSifting N p i) / ((p : ℝ) - 1) ≤ K * Θ N := by
-  sorry
+  obtain ⟨D, hD, MD, hMD⟩ := Task363.density_scale_bounded
+  let K : ℝ := max (log (sigma1 / kappa1) + 1) 1
+  have hK : 0 < K := lt_of_lt_of_le (by norm_num) (le_max_right _ _)
+  have hlim := b349_ps_mass_recip_tendsto (a := kappa1) (b := sigma1)
+    (by norm_num [kappa1]) (by norm_num [kappa1]) (by norm_num [kappa1, sigma1])
+  have he : ∀ᶠ N : ℕ in atTop,
+      (∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ sigma1),
+        (1 : ℝ) / ((p : ℝ) - 1)) ≤ log (sigma1 / kappa1) + 1 :=
+    hlim.eventually (eventually_le_nhds (by linarith))
+  obtain ⟨MK, hMK⟩ := eventually_atTop.1 he
+  refine ⟨D * K, mul_pos hD hK, max 2 (max MD MK), ?_⟩
+  intro N hEven hN i hi
+  have hN2 : 2 ≤ N := by omega
+  have hΘ := Θ_pos hN2
+  have hscale := hMD N hEven (by omega)
+  have hi1 : i ≠ 1 := by
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hi
+    rcases hi with rfl | rfl <;> decide
+  have hEnd : basicEndpoint i ≤ sigma1 := by
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hi
+    rcases hi with rfl | rfl <;> norm_num [basicEndpoint, sigma1, sigma2]
+  have hsub : Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ basicEndpoint i) ⊆
+      Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ sigma1) := by
+    intro p hp
+    obtain ⟨hpp, hlow, hupp, hcop⟩ := Wu41.mem_PS.mp hp
+    exact Wu41.mem_PS.mpr ⟨hpp, hlow, hupp.trans_le
+      (rpow_le_rpow_of_exponent_le (by exact_mod_cast (show 1 ≤ N by omega)) hEnd), hcop⟩
+  have hmass : (∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ basicEndpoint i),
+      (1 : ℝ) / ((p : ℝ) - 1)) ≤ K := by
+    apply le_trans (Finset.sum_le_sum_of_subset_of_nonneg hsub ?_)
+      ((hMK N (by omega)).trans (le_max_left _ _))
+    intro p hp _
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Wu41.mem_PS.mp hp).1.two_le
+    exact one_div_nonneg.mpr (by linarith)
+  have hmass0 : 0 ≤ ∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ basicEndpoint i),
+      (1 : ℝ) / ((p : ℝ) - 1) := by
+    apply Finset.sum_nonneg
+    intro p hp
+    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast (Wu41.mem_PS.mp hp).1.two_le
+    exact one_div_nonneg.mpr (by linarith)
+  have hsum : (∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ basicEndpoint i),
+      Task363.localDensity N (basicSifting N p i) / ((p : ℝ) - 1)) =
+      Task348.lowerDensity N *
+        ∑ p ∈ Wu41.PS N ((N : ℝ) ^ kappa1) ((N : ℝ) ^ basicEndpoint i),
+          (1 : ℝ) / ((p : ℝ) - 1) := by
+    simp only [basicSifting, if_neg hi1, b349_localDensity_fixed, Finset.mul_sum, mul_one_div]
+  rw [hsum, ← mul_assoc]
+  calc
+    _ ≤ (D * Θ N) * K := mul_le_mul hscale hmass hmass0 (by positivity)
+    _ = (D * K) * Θ N := by ring
 
 /-! ### Glue, proved -/
 

@@ -4330,21 +4330,24 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
     norm_num [kappa1, kappa2]
   set K0 : ℝ := 4000 * ((C+1)*(M+1)*(hL+1)*(Lu+1) + 42*C*(Lu+7) + 32*C*(hL+1)/kappa2
       + 8*C*(hL+1) + 4*C*Lc + 4*Lc*hL + 4*(hL+1) + 4*M + 4*C + 4*hL + 4*Lc + 1) + 1 with hK0def
-  have hCn1 : (0:ℝ) ≤ C+1 := by linarith
-  have hMn1 : (0:ℝ) ≤ M+1 := by linarith
-  have hLn1 : (0:ℝ) ≤ hL+1 := by linarith
-  have hun1 : (0:ℝ) ≤ Lu+1 := by linarith
+  have hCn1 : (0:ℝ) ≤ C+1 := by linarith only [hC0]
+  have hMn1 : (0:ℝ) ≤ M+1 := by linarith only [hM0]
+  have hLn1 : (0:ℝ) ≤ hL+1 := by linarith only [hL0]
+  have hun1 : (0:ℝ) ≤ Lu+1 := by linarith only [hLu0]
   have hprod4 : (0:ℝ) ≤ (C+1)*(M+1)*(hL+1)*(Lu+1) :=
     mul_nonneg (mul_nonneg (mul_nonneg hCn1 hMn1) hLn1) hun1
-  have hCL7 : (0:ℝ) ≤ 42*C*(Lu+7) := by nlinarith [hC0, hLu0]
+  have hCL7 : (0:ℝ) ≤ 42*C*(Lu+7) := by nlinarith only [hC0, hLu0]
   have hCLh : (0:ℝ) ≤ 32*C*(hL+1)/kappa2 :=
     div_nonneg (mul_nonneg (mul_nonneg (by norm_num) hC0) hLn1) hκ2pos.le
-  have hCLh2 : (0:ℝ) ≤ 8*C*(hL+1) := by nlinarith [hC0, hLn1]
-  have hCLc : (0:ℝ) ≤ 4*C*Lc := by nlinarith [hC0, hLc0]
-  have hLch : (0:ℝ) ≤ 4*Lc*hL := by nlinarith [hLc0, hL0]
+  have hCLh2 : (0:ℝ) ≤ 8*C*(hL+1) := by nlinarith only [hC0, hLn1]
+  have hCLc : (0:ℝ) ≤ 4*C*Lc := by nlinarith only [hC0, hLc0]
+  have hLch : (0:ℝ) ≤ 4*Lc*hL := by nlinarith only [hLc0, hL0]
   have hK00 : 0 < K0 := by
     rw [hK0def]
-    linarith
+    linarith only [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
+  have hK01 : (1 : ℝ) ≤ K0 := by
+    rw [hK0def]
+    linarith only [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
   set δ : ℝ := min 1 (ε/(1000*K0)) with hδdef
   have hδ0 : 0 < δ := by
     rw [hδdef]; exact lt_min one_pos (by positivity)
@@ -4353,7 +4356,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
     have hle := min_le_right (1:ℝ) (ε/(1000*K0))
     rw [← hδdef] at hle
     have h2 : 1000*K0*(ε/(1000*K0)) = ε := by field_simp
-    nlinarith [hle, h2, hK00.le]
+    nlinarith only [hle, h2, hK00.le]
   -- moduli of the kernel in `t` and of the inner integral
   obtain ⟨γf, hγf0, hγf1, hγf⟩ := f_uniform F f h δ hδ0
   obtain ⟨γψ, hγψ0, hγψ⟩ := psi_uniform F f h δ hδ0
@@ -4426,14 +4429,14 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hm1 : 1 ≤ m := by omega
       push_cast [hm1]
       ring
-    linarith
+    linarith only [h2, h3]
   have hiT : ∀ i ∈ Finset.range m, kappa1 + (i:ℝ)*hstep ∈ Set.Icc kappa1 kappa2 := by
     intro i hi
     have hi1 := hiR i hi
     constructor
     · have : (0:ℝ) ≤ (i:ℝ)*hstep := by positivity
-      linarith
-    · nlinarith [hmh, hi1, hhs0.le]
+      linarith only [this]
+    · nlinarith only [hmh, hi1, hhs0.le]
   -- per cell mass ceilings
   have hcellmass := Filter.eventually_all_finset (Finset.range m) |>.mpr
     (fun i hi => cell_mass_le (a := kappa2) (b := 1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep))
@@ -4441,11 +4444,11 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       (by
         have hb : (i:ℝ)*hstep ≤ kappa2 - kappa1 := by
           have hi1 := hiR i hi
-          nlinarith [hmh, hhs0.le, hi1]
+          nlinarith only [hmh, hhs0.le, hi1]
         have hk1 : kappa1 = 1/12 := rfl
         have hk2 : kappa2 = 29/250 := rfl
         rw [hk1, hk2] at hb ⊢
-        nlinarith [hb])
+        nlinarith only [hb])
       (by positivity : (0:ℝ) < δ/m))
   -- the upper end of each cell stays inside the window
   have hib : ∀ i ∈ Finset.range m, kappa1 + ((i:ℝ)+1)*hstep ≤ kappa2 := by
@@ -4454,24 +4457,24 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have := Finset.mem_range.mp hi
       have h2 : i + 1 ≤ m := by omega
       exact_mod_cast h2
-    nlinarith [hmh, hhs0.le, hi1]
+    nlinarith only [hmh, hhs0.le, hi1]
   -- the cell limits for the `p` direction, uniform in the weight variable
   have hnear := Filter.eventually_all_finset (Finset.range m) |>.mpr
     (fun i hi =>
       cell_weight_close_family (a := kappa1 + (i:ℝ)*hstep) (b := kappa1 + ((i:ℝ)+1)*hstep)
         (v := kappa1 + (i:ℝ)*hstep)
-        (by linarith [hκ1pos, (hiT i hi).1])
-        (by nlinarith [hhs0])
-        ⟨le_rfl, by linarith [hhs0]⟩
+        (by linarith only [hκ1pos, (hiT i hi).1])
+        (by nlinarith only [hhs0])
+        ⟨le_rfl, by linarith only [hhs0]⟩
         (fun u t => if t ∈ Set.Icc kappa1 kappa2 ∧ u ∈ Set.Icc kappa2 (1/2 - 3*kappa1)
           then f ((1/2 - t - u)/kappa1) else 0)
         hδ0.le
         (fun u t ht =>
-          clampK_osc hδ0.le hγf (hiT i hi).1 (hib i hi) ⟨le_rfl, by linarith [hhs0]⟩
+          clampK_osc hδ0.le hγf (hiT i hi).1 (hib i hi) ⟨le_rfl, by linarith only [hhs0]⟩
             (fun t' ht' => by
-              rw [abs_sub_comm, abs_of_nonneg (by linarith [ht'.1])]
+              rw [abs_sub_comm, abs_of_nonneg (by linarith only [ht'.1])]
               have hba : kappa1 + ((i:ℝ)+1)*hstep - (kappa1 + (i:ℝ)*hstep) = hstep := by ring
-              linarith [ht'.2, hba])
+              linarith only [ht'.2, hba])
             hhsγ u t ht)
         (fun u => clampK_bounded hCb hC0 (kappa1 + (i:ℝ)*hstep) u)
         (by positivity : (0:ℝ) < δ/m))
@@ -4483,7 +4486,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
     refine h.2.1.comp (by fun_prop) (fun u hu => ?_)
     show (0:ℝ) < (1/2 - (kappa1 + (i:ℝ)*hstep) - u)/kappa1
     apply div_pos _ hκ1pos
-    linarith [hu.2]
+    linarith only [hu.2, hκ1pos]
   have hR : ∀ᶠ N : ℕ in atTop, ∀ i ∈ Finset.range m,
       |(∑ q ∈ (Finset.Ioc ⌊(N:ℝ)^kappa2⌋₊ ⌊(N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep))⌋₊).filter (fun q : ℕ => Nat.Prime q),
           f ((1/2 - (kappa1 + (i:ℝ)*hstep) - Real.log (q:ℝ)/Real.log (N:ℝ))/kappa1) * (((q:ℝ) - 1))⁻¹)
@@ -4498,14 +4501,14 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         have hk1 : kappa1 = 1/12 := rfl
         have hk2 : kappa2 = 29/250 := rfl
         rw [hk1, hk2] at h1 ⊢
-        linarith)
+        linarith only [h1])
       (hcontK i hi)
     simpa only [Real.dist_eq] using hlim.eventually (Metric.closedBall_mem_nhds _ hδ0)
   -- the diagonal band mass of each cell
   have hbmass := Filter.eventually_all_finset (Finset.range m) |>.mpr
     (fun i hi => boundary_band_mass (T := kappa1 + (i:ℝ)*hstep)
       (T' := kappa1 + ((i:ℝ)+1)*hstep)
-      (by linarith [hκ1pos, (hiT i hi).1]) (by nlinarith [hhs0]) (hib i hi)
+      (by linarith only [hκ1pos, (hiT i hi).1]) (by nlinarith only [hhs0]) (hib i hi)
       (by positivity : (0:ℝ) < δ/m))
   -- the non coprime primes of the whole lower band
   have hbadall : ∀ᶠ N : ℕ in atTop,
@@ -4529,14 +4532,14 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         ≤ Real.log (kappa1 + ((i:ℝ)+1)*hstep) - Real.log (kappa1 + (i:ℝ)*hstep) + δ/m :=
     Filter.eventually_all_finset (Finset.range m) |>.mpr (fun i hi =>
       real_band_mass_le (a := kappa1 + (i:ℝ)*hstep) (b := kappa1 + ((i:ℝ)+1)*hstep)
-        (by linarith [hκ1pos, (hiT i hi).1])
-        (by nlinarith [hhs0])
+        (by linarith only [hκ1pos, (hiT i hi).1])
+        (by nlinarith only [hhs0])
         (by
           have hk : kappa2 < 1 := by norm_num [kappa2]
-          linarith [hib i hi, hk])
+          linarith only [hib i hi, hk])
         (by positivity : (0:ℝ) < δ/m))
   have hfloorb : ∀ᶠ N : ℕ in atTop, 2 ≤ ⌊(N:ℝ)^(kappa2/2)⌋₊ := by
-    have h2 := (hpow (kappa2/2) (by linarith [hκ2pos])).eventually (eventually_ge_atTop (2:ℝ))
+    have h2 := (hpow (kappa2/2) (by linarith only [hκ2pos])).eventually (eventually_ge_atTop (2:ℝ))
     filter_upwards [h2] with N hN
     exact (Nat.le_floor_iff' (by norm_num : (2:ℕ) ≠ 0)).2 hN
   have hmain : ∀ᶠ N : ℕ in atTop, |lowerSum5 f B N - lowerIntegral5 f| ≤ ε/2 := by
@@ -4566,7 +4569,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         have hq0 : (0:ℝ) < q := by exact_mod_cast hqp.pos
         have hpq : p ≠ q := by
           have hlt : (p:ℝ) < (q:ℝ) := lt_of_lt_of_le hp2 hq1
-          intro hh; rw [hh] at hlt; linarith
+          intro hh; rw [hh] at hlt; linarith only [hlt]
         have hφ : (Nat.totient (p*q) : ℝ) = ((p:ℝ)-1)*((q:ℝ)-1) := totient_mul_prime hpp hqp hpq
         -- coordinates
         have hN1 : (1:ℝ) < N := by exact_mod_cast (show 1 < N by omega)
@@ -4588,8 +4591,8 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         have hp2' : (2:ℝ) ≤ p := by exact_mod_cast hpp.two_le
         have hq2'' : (2:ℝ) ≤ q := by exact_mod_cast hqp.two_le
         have hw : (0:ℝ) ≤ (((p:ℝ)-1)⁻¹ * (((q:ℝ)-1)⁻¹)) := by
-          have h1 : (0:ℝ) < (p:ℝ) - 1 := by linarith
-          have h2 : (0:ℝ) < (q:ℝ) - 1 := by linarith
+          have h1 : (0:ℝ) < (p:ℝ) - 1 := by linarith only [hp2']
+          have h2 : (0:ℝ) < (q:ℝ) - 1 := by linarith only [hq2'']
           positivity
         rw [← sub_mul, abs_mul, abs_of_nonneg hw]
         exact mul_le_mul_of_nonneg_right hlevel hw
@@ -4637,7 +4640,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         exact hMb N hNM
       have hfin : δ * (∑ p ∈ Sp, ∑ q ∈ (Finset.range N).filter (fun q : ℕ => q.Prime ∧ q.Coprime N ∧ (N:ℝ)^kappa2 ≤ (q:ℝ) ∧ (q:ℝ) < (N:ℝ)^(1/2 - 2*kappa1)/(p:ℝ)), (((p:ℝ)-1)⁻¹ * (((q:ℝ)-1)⁻¹))) ≤ δ * M :=
         mul_le_mul_of_nonneg_left hstep4 hδ0.le
-      linarith [hstep1, hstep2, hstep3, hfin]
+      linarith only [hstep1, hstep2, hstep3, hfin]
     -- ================= the `q`-fibre at fixed `p` =================
     set Fq : ℕ → ℝ := fun p =>
       ∑ q ∈ (Finset.range N).filter (fun q : ℕ => q.Prime ∧ q.Coprime N ∧
@@ -4671,21 +4674,21 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         intro p hp
         have hp2 : 2 ≤ p := (hSp2mem p (Finset.mem_filter.mp hp).1).1.two_le
         have hpR : (2:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp2
-        have h1 : (0:ℝ) < (p:ℝ) - 1 := by linarith
-        have h2 : (0:ℝ) < (p:ℝ)/2 := by linarith
-        have h3 : (p:ℝ)/2 ≤ (p:ℝ) - 1 := by linarith
+        have h1 : (0:ℝ) < (p:ℝ) - 1 := by linarith only [hpR]
+        have h2 : (0:ℝ) < (p:ℝ)/2 := by linarith only [hpR]
+        have h3 : (p:ℝ)/2 ≤ (p:ℝ) - 1 := by linarith only [hpR]
         have h4 : 1/((p:ℝ)-1) ≤ 1/((p:ℝ)/2) := one_div_le_one_div_of_le h2 h3
         have e1 : (((p:ℝ)-1))⁻¹ = 1/((p:ℝ)-1) := by rw [one_div]
         have e2 : (1:ℝ)/((p:ℝ)/2) = 2 * (1/(p:ℝ)) := by
           rw [one_div_div]; ring
-        linarith [h4, e1, e2]
+        linarith only [h4, e1, e2]
       calc (∑ p ∈ Sp2.filter (fun p => ¬ p.Coprime N), (((p:ℝ)-1))⁻¹)
           ≤ 2 * (∑ p ∈ Sp2.filter (fun p => ¬ p.Coprime N), 1/(p:ℝ)) := hstep
-        _ ≤ 2 * (1 / (kappa1 * (N:ℝ)^kappa1)) := by linarith [hex]
+        _ ≤ 2 * (1 / (kappa1 * (N:ℝ)^kappa1)) := by linarith only [hex]
         _ = 2 / (kappa1 * (N:ℝ)^kappa1) := by ring
     have hP1 : |(∑ p ∈ Sp, Fq p) - (∑ p ∈ Sp2, Fq p)|
         ≤ C * (Lu + 7) * (2 / (kappa1 * (N:ℝ)^kappa1)) := by
-      have hCL : (0:ℝ) ≤ C * (Lu + 7) := by nlinarith [hC0, hLu0]
+      have hCL : (0:ℝ) ≤ C * (Lu + 7) := by nlinarith only [hC0, hLu0]
       have hpt : ∀ p ∈ Sp2.filter (fun p => ¬ p.Coprime N),
           |Fq p| ≤ C * (Lu + 7) * (((p:ℝ)-1)⁻¹) := by
         intro p hp
@@ -4695,7 +4698,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         have hpR : (2:ℝ) ≤ (p:ℝ) := by
           have := hprime.two_le
           exact_mod_cast this
-        have hp1 : (0:ℝ) < (p:ℝ) - 1 := by linarith
+        have hp1 : (0:ℝ) < (p:ℝ) - 1 := by linarith only [hpR]
         have hcol := hcolN p hge
         rw [hFq]
         have hq : ∀ q ∈ (Finset.range N).filter (fun q : ℕ => q.Prime ∧ q.Coprime N ∧
@@ -4706,7 +4709,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
           intro q hq
           have hq2 : 2 ≤ q := (Finset.mem_filter.mp hq).2.1.two_le
           have hqR : (2:ℝ) ≤ (q:ℝ) := by exact_mod_cast hq2
-          have hq1 : (0:ℝ) < (q:ℝ) - 1 := by linarith
+          have hq1 : (0:ℝ) < (q:ℝ) - 1 := by linarith only [hqR]
           have hK := clampK_bounded hCb hC0 (Real.log (p:ℝ)/Real.log (N:ℝ))
             (Real.log (q:ℝ)/Real.log (N:ℝ))
           have hpos2 : (0:ℝ) < (((p:ℝ)-1)⁻¹) * (((q:ℝ)-1)⁻¹) :=
@@ -4755,16 +4758,16 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
     -- the `p`-coprimality error is inside the budget
     have hP1b : C * (Lu + 7) * (2 / (kappa1 * (N:ℝ)^kappa1)) ≤ K0 * δ := by
       refine budget_P1 C Lu δ K0 N hC0 hLu0 hδ0 hNpos hnumI ?_
-      have h42 : 6*C*(Lu+7) ≤ 42*C*(Lu+7) := by nlinarith [hC0, hLu0]
-      have hbig : 42*C*(Lu+7) ≤ 4000*(42*C*(Lu+7)) := by nlinarith [hCL7]
+      have h42 : 6*C*(Lu+7) ≤ 42*C*(Lu+7) := by nlinarith only [hC0, hLu0]
+      have hbig : 42*C*(Lu+7) ≤ 4000*(42*C*(Lu+7)) := by nlinarith only [hCL7]
       have hK : 4000*(42*C*(Lu+7)) ≤ K0 := by
-        rw [hK0def]; linarith [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0]
-      linarith [h42, hbig, hK]
+        rw [hK0def]; linarith only [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
+      linarith only [h42, hbig, hK]
     -- ================= (3) the logarithmic mesh =================
     have hk2pow : (4:ℝ) ≤ (N:ℝ)^kappa2 := by
       have h1 : (N:ℝ)^kappa1 ≤ (N:ℝ)^kappa2 :=
         Real.rpow_le_rpow_of_exponent_le hN1 (by norm_num [kappa1, kappa2])
-      linarith [hbigN]
+      linarith only [hbigN, h1]
     have h1N : (1:ℝ) < (N:ℝ) := by
       rcases lt_or_ge (1:ℝ) (N:ℝ) with h' | h'
       · exact h'
@@ -4777,9 +4780,9 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       intro j hj
       constructor
       · have : (0:ℝ) ≤ (j:ℝ)*hstep := mul_nonneg (by positivity) hhs0.le
-        linarith
+        linarith only [this]
       · have hle : (j:ℝ) ≤ (m:ℝ) := by exact_mod_cast hj
-        nlinarith [hmh, hhs0.le, hle]
+        nlinarith only [hmh, hhs0.le, hle]
     have hlwb : ∀ j : ℕ, j ≤ m →
         kappa2 ≤ 1/2 - 2*kappa1 - (kappa1 + (j:ℝ)*hstep) ∧
           1/2 - 2*kappa1 - (kappa1 + (j:ℝ)*hstep) ≤ 1/2 - 3*kappa1 := by
@@ -4787,8 +4790,8 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hj1 := hTb j hj
       constructor
       · have h : kappa2 ≤ 1/2 - 2*kappa1 - kappa2 := by norm_num [kappa1, kappa2]
-        linarith [hj1.2]
-      · linarith [hj1.1]
+        linarith only [hj1.2, h]
+      · linarith only [hj1.1]
     have hTbSucc : ∀ i : ℕ, i < m →
         kappa1 ≤ kappa1 + ((i:ℝ)+1)*hstep ∧ kappa1 + ((i:ℝ)+1)*hstep ≤ kappa2 := by
       intro i hi
@@ -4814,9 +4817,9 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hm : (0:ℝ) < (m:ℝ) := by exact_mod_cast hm0
       have h1 : (0:ℝ) ≤ 40/(N:ℝ)^kappa2 :=
         div_nonneg (by norm_num) (Real.rpow_pos_of_pos hNpos _).le
-      have h2 : (0:ℝ) ≤ 8*hstep/kappa2 := div_nonneg (by linarith [hhs0.le]) hκ2pos.le
-      have h3 : (0:ℝ) ≤ 4*δ/m := div_nonneg (by linarith [hδ0.le]) hm.le
-      linarith
+      have h2 : (0:ℝ) ≤ 8*hstep/kappa2 := div_nonneg (by linarith only [hhs0.le]) hκ2pos.le
+      have h3 : (0:ℝ) ≤ 4*δ/m := div_nonneg (by linarith only [hδ0.le]) hm.le
+      linarith only [h1, h2, h3]
     have hsplit3 : (∑ p ∈ Sp2, Fq p) = ∑ i ∈ Finset.range m, ∑ p ∈ cellN i, Fq p := by
       have h := range_band_chain (s := kappa1) (h := hstep) hN hhs0 m kappa2 hmh
         (fun p : ℕ => p.Prime) Fq
@@ -4834,7 +4837,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hcfi1 := hlwbSucc i hi_lt
       have hTgi : kappa1 + (i:ℝ)*hstep < kappa1 + ((i:ℝ)+1)*hstep := by
         have : (0:ℝ) < hstep := hhs0
-        nlinarith
+        nlinarith only [hhs0]
       have hbandm : (∑ q ∈ (Finset.Ioc ⌊(N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep))⌋₊
             ⌊(N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep))⌋₊).filter
           (fun q : ℕ => Nat.Prime q), (((q:ℝ)-1))⁻¹) ≤ 2*hstep/kappa2 + δ/m := by
@@ -4850,7 +4853,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hb1 : 2*((⌊(N:ℝ)^kappa2⌋₊ : ℝ) - 1)⁻¹ ≤ 4/(N:ℝ)^kappa2 := by
         have h := floor_sub_inv_le hk2pow
         simp only [div_eq_mul_inv] at h ⊢
-        linarith [h]
+        linarith only [h]
       have hb2 : 4*((⌊(N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep))⌋₊ : ℝ) - 1)⁻¹
           ≤ 8/(N:ℝ)^kappa2 := by
         have h := floor_sub_inv_le hpow4
@@ -4862,7 +4865,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
             Real.rpow_le_rpow_of_exponent_le hN1 hcfi1.1
           exact div_le_div_of_nonneg_left (by norm_num : (0:ℝ) ≤ 8) hp2 hle
         simp only [div_eq_mul_inv] at h h2 ⊢
-        linarith [h, h2]
+        linarith only [h, h2]
       have hb3 : 2/(kappa2*(N:ℝ)^kappa2) ≤ 18/(N:ℝ)^kappa2 := by
         have hkx : (0:ℝ) < (N:ℝ)^kappa2 := Real.rpow_pos_of_pos hNpos _
         have hkinv : 2/kappa2 ≤ 18 := by
@@ -4881,7 +4884,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
             Real.rpow_le_rpow_of_exponent_le hN1 hcfi.1
           exact div_le_div_of_nonneg_left (by norm_num : (0:ℝ) ≤ 8) hp2 hle
         simp only [div_eq_mul_inv] at h h2 ⊢
-        linarith [h, h2]
+        linarith only [h, h2]
       have hbracket : 2*((⌊(N:ℝ)^kappa2⌋₊ : ℝ) - 1)⁻¹
           + 4*((⌊(N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep))⌋₊ : ℝ) - 1)⁻¹
           + 2/(kappa2*(N:ℝ)^kappa2)
@@ -4892,28 +4895,28 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
               ⌊(N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep))⌋₊).filter
               (fun q : ℕ => Nat.Prime q), (((q:ℝ)-1))⁻¹) ≤ 4*hstep/kappa2 + 2*δ/m := by
           simp only [div_eq_mul_inv] at hbandm ⊢
-          linarith [hbandm]
+          linarith only [hbandm]
         rw [hBr]
         have hmpos : (0:ℝ) < (m:ℝ) := by exact_mod_cast hm0
-        have hdm4 : (0:ℝ) ≤ 4*δ/m := div_nonneg (by linarith [hδ0.le]) hmpos.le
-        have hh8 : (0:ℝ) ≤ 8*hstep/kappa2 := div_nonneg (by linarith [hhs0.le]) hκ2pos.le
+        have hdm4 : (0:ℝ) ≤ 4*δ/m := div_nonneg (by linarith only [hδ0.le]) hmpos.le
+        have hh8 : (0:ℝ) ≤ 8*hstep/kappa2 := div_nonneg (by linarith only [hhs0.le]) hκ2pos.le
         have hfl1 : (2:ℝ) ≤ ((⌊(N:ℝ)^kappa2⌋₊ : ℝ)) := by
           exact_mod_cast (Nat.le_floor (le_trans (by norm_num) hk2pow))
         have hfl2 : (2:ℝ) ≤ ((⌊(N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep))⌋₊ : ℝ)) := by
           exact_mod_cast (Nat.le_floor (le_trans (by norm_num) hpow4))
         have ht1 : (0:ℝ) ≤ 2*((⌊(N:ℝ)^kappa2⌋₊ : ℝ) - 1)⁻¹ := by
-          have hh : (0:ℝ) < ((⌊(N:ℝ)^kappa2⌋₊ : ℝ) - 1) := by linarith
+          have hh : (0:ℝ) < ((⌊(N:ℝ)^kappa2⌋₊ : ℝ) - 1) := by linarith only [hfl1]
           exact mul_nonneg (by norm_num) (inv_pos.mpr hh).le
         have ht2 : (0:ℝ) ≤ 4*((⌊(N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep))⌋₊ : ℝ) - 1)⁻¹ := by
           have hh : (0:ℝ) < ((⌊(N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep))⌋₊ : ℝ) - 1) :=
-            by linarith
+            by linarith only [hfl2]
           exact mul_nonneg (by norm_num) (inv_pos.mpr hh).le
         have hXinv : (0:ℝ) ≤ ((N:ℝ)^kappa2)⁻¹ :=
           (inv_pos.mpr (Real.rpow_pos_of_pos hNpos _)).le
         have hdm4' : (0:ℝ) ≤ 4*δ*(m:ℝ)⁻¹ := by simpa only [div_eq_mul_inv] using hdm4
         have hh8' : (0:ℝ) ≤ 8*hstep*kappa2⁻¹ := by simpa only [div_eq_mul_inv] using hh8
         simp only [div_eq_mul_inv] at hb1 hb2 hb3 hb4 ⊢
-        nlinarith [hb1, hb2, hb3, hb4, hXinv, hdm4', hh8', ht1, ht2]
+        nlinarith only [hb1, hb2, hb3, hb4, hXinv, hdm4', hh8', ht1, ht2]
       have hpt : ∀ p ∈ cellN i,
           |Fq p - (∑ q ∈ boxI i,
             K2 (Real.log (p:ℝ)/Real.log (N:ℝ)) (Real.log (q:ℝ)/Real.log (N:ℝ))
@@ -4924,21 +4927,21 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         have hp2 : 2 ≤ p := hprime.two_le
         have hp1R : (0:ℝ) < (p:ℝ) - 1 := by
           have h2 : (2:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp2
-          linarith
+          linarith only [h2]
         have hqr := q_region_diff (K := K2) (C := C) (c := 1/2 - 2*kappa1)
           (T := kappa1 + (i:ℝ)*hstep) (T' := kappa1 + ((i:ℝ)+1)*hstep)
           (N := N) (p := p) hN hC0
           (fun t u => clampK_bounded hCb hC0 t u) hTgi.le hpge (le_of_lt hplt) hp2
-          (by linarith [hcfi.1, hκ2pos])
-          (by linarith)
+          (by linarith only [hcfi.1, hκ2pos])
+          (by linarith only [hhs0])
           (by
             have h : kappa2 ≤ 1/2 - 2*kappa1 := by norm_num [kappa1, kappa2]
-            linarith [hTi1.2])
+            linarith only [hTi1.2, h])
           (by
             have hb1' : 1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep) < 1 := by
               have h : 1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep) ≤ 1/2 - 3*kappa1 := hcfi1.2
               have hk : (1:ℝ)/2 - 3*kappa1 < 1 := by norm_num [kappa1]
-              linarith
+              linarith only [h, hk]
             have h : (N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep)) < (N:ℝ) := by
               calc (N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep)) < (N:ℝ)^1 :=
                     Real.rpow_lt_rpow_of_exponent_lt h1N hb1'
@@ -4951,7 +4954,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
             exact_mod_cast this)
           (by
             have hp1 : (N:ℝ)^kappa1 ≤ (p:ℝ) :=
-              le_trans (Real.rpow_le_rpow_of_exponent_le hN1 (by linarith [hTi.1])) hpge
+              le_trans (Real.rpow_le_rpow_of_exponent_le hN1 (by linarith only [hTi.1])) hpge
             have hle : (N:ℝ)^(1/2 - 2*kappa1)/(p:ℝ) ≤ (N:ℝ)^(1/2 - 3*kappa1) := by
               rw [div_le_iff₀ (by positivity)]
               calc (N:ℝ)^(1/2 - 2*kappa1)
@@ -4972,7 +4975,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
           hfloorN.1
           (by
             have h1 : (N:ℝ)^(kappa2/2) ≤ (N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + ((i:ℝ)+1)*hstep)) :=
-              Real.rpow_le_rpow_of_exponent_le hN1 (by linarith [hcfi1.1])
+              Real.rpow_le_rpow_of_exponent_le hN1 (by linarith only [hcfi1.1, hκ2pos])
             exact le_trans hfloorbN (Nat.floor_mono h1))
         simp only [mul_assoc] at hqr ⊢
         exact le_trans hqr (mul_le_mul_of_nonneg_left
@@ -4994,7 +4997,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
             intro p hp
             ring
         _ ≤ C * Br * (lg i + δ/m) := by
-            apply mul_le_mul_of_nonneg_left _ (by nlinarith [hC0, hBr0])
+            apply mul_le_mul_of_nonneg_left _ (by nlinarith only [hC0, hBr0])
             have h := hrealmassN i hi
             have hlg' : lg i + δ/m = Real.log (kappa1 + ((i:ℝ)+1)*hstep)
                 - Real.log (kappa1 + (i:ℝ)*hstep) + δ/m := by rw [hlg]
@@ -5018,7 +5021,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hNle : ⌊(N:ℝ)^(kappa1 + ((i:ℝ)+1)*hstep)⌋₊ < N := by
         have hb1 : kappa1 + ((i:ℝ)+1)*hstep < 1 := by
           have hk : kappa2 < 1 := by norm_num [kappa2]
-          linarith [hTb1.2, hk]
+          linarith only [hTb1.2, hk]
         have hlt : (N:ℝ)^(kappa1 + ((i:ℝ)+1)*hstep) < (N:ℝ) := by
           calc (N:ℝ)^(kappa1 + ((i:ℝ)+1)*hstep) < (N:ℝ)^1 :=
                 Real.rpow_lt_rpow_of_exponent_lt h1N hb1
@@ -5036,29 +5039,29 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
               * (((A:ℝ)-1)⁻¹ * (((q:ℝ)-1)⁻¹)))|
             ≤ C * (2/(N:ℝ)^kappa1) * (Lu + 7) := by
         intro A hA hAb
-        have hxA : (2:ℝ) ≤ A := by linarith [hbigN]
-        have hApos : (0:ℝ) < A - 1 := by linarith
+        have hxA : (2:ℝ) ≤ A := by linarith only [hbigN, hA]
+        have hApos : (0:ℝ) < A - 1 := by linarith only [hxA]
         have hfinv : (((A:ℝ)-1))⁻¹ ≤ 2/(N:ℝ)^kappa1 := by
           have e2 : (2:ℝ)/(N:ℝ)^kappa1 = (((N:ℝ)^kappa1)/2)⁻¹ := by rw [inv_div]
           rw [e2, ← one_div, ← one_div]
-          apply one_div_le_one_div_of_le (by linarith [hbigN] : (0:ℝ) < (N:ℝ)^kappa1/2)
-          nlinarith [hbigN, hA]
+          apply one_div_le_one_div_of_le (by linarith only [hbigN] : (0:ℝ) < (N:ℝ)^kappa1/2)
+          nlinarith only [hbigN, hA]
         have hmass₀ : (∑ q ∈ boxI i, (((q:ℝ)-1))⁻¹) ≤ Lc + 1 := by
           have hcm := hcellmassN i hi
           have hm : (0:ℝ) < (m:ℝ) := by exact_mod_cast hm0
           have hm1 : (1:ℝ) ≤ (m:ℝ) := by exact_mod_cast hm0
           have hdm1 : δ/m ≤ 1 := by
-            rw [div_le_iff₀ hm]; linarith [hm1, hδ1]
+            rw [div_le_iff₀ hm]; linarith only [hm1, hδ1]
           have h1 : (0:ℝ) < 1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep) := by
-            linarith [hlwb1.1, hκ2pos]
+            linarith only [hlwb1.1, hκ2pos]
           have hlogU : Real.log (1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep)) - Real.log kappa2 ≤ Lc := by
             rw [hLcdef, ← Real.log_div h1.ne' hκ2pos.ne']
             exact Real.log_le_log (div_pos h1 hκ2pos) (div_le_div_of_nonneg_right hlwb1.2 hκ2pos.le)
-          linarith [hcm, hdm1, hlogU]
+          linarith only [hcm, hdm1, hlogU]
         have hmass : (∑ q ∈ boxI i, (((q:ℝ)-1))⁻¹) ≤ Lu + 7 := by
           refine le_trans hmass₀ ?_
           have : Lc = Lu := by rw [hLcdef, hLudef]
-          rw [this]; linarith [hLu0]
+          rw [this]; linarith only [hLu0]
         have hterm : ∀ q ∈ boxI i,
             |K2 (Real.log A/Real.log (N:ℝ)) (Real.log (q:ℝ)/Real.log (N:ℝ))
               * (((A:ℝ)-1)⁻¹ * (((q:ℝ)-1)⁻¹))|
@@ -5067,7 +5070,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
           have hq2 : 2 ≤ q := (Finset.mem_filter.mp hq).2.two_le
           have hq1 : (0:ℝ) < (q:ℝ) - 1 := by
             have : (2:ℝ) ≤ (q:ℝ) := by exact_mod_cast hq2
-            linarith
+            linarith only [this]
           have hKb := clampK_bounded hCb hC0 (Real.log A/Real.log (N:ℝ)) (Real.log (q:ℝ)/Real.log (N:ℝ))
           have hpos : (0:ℝ) < (((A:ℝ)-1)⁻¹ * (((q:ℝ)-1)⁻¹)) :=
             mul_pos (inv_pos.mpr hApos) (inv_pos.mpr hq1)
@@ -5092,7 +5095,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         calc C * (((A:ℝ)-1)⁻¹) * (∑ q ∈ boxI i, (((q:ℝ)-1)⁻¹))
             ≤ C * (((A:ℝ)-1)⁻¹) * (Lu + 7) := mul_le_mul_of_nonneg_left hmass hAn
           _ ≤ C * (2/(N:ℝ)^kappa1) * (Lu + 7) := by
-              apply mul_le_mul_of_nonneg_right _ (by linarith [hLu0])
+              apply mul_le_mul_of_nonneg_right _ (by linarith only [hLu0])
               exact mul_le_mul_of_nonneg_left hfinv hC0
       simp only [mul_assoc] at h ⊢
       refine le_trans h ?_
@@ -5101,21 +5104,21 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
           have hbase : (N:ℝ)^kappa1 ≤ (N:ℝ)^(kappa1 + (i:ℝ)*hstep) :=
             Real.rpow_le_rpow_of_exponent_le hN1 hTi.1
           have h := Nat.lt_floor_add_one ((N:ℝ)^(kappa1 + (i:ℝ)*hstep))
-          linarith)
+          linarith only [hbase, h])
         (by
           have hle : (⌊(N:ℝ)^(kappa1 + (i:ℝ)*hstep)⌋₊ : ℝ) ≤ (N:ℝ)^(kappa1 + (i:ℝ)*hstep) :=
             Nat.floor_le (Real.rpow_pos_of_pos hNpos _).le
-          exact le_trans hle (Real.rpow_le_rpow_of_exponent_le hN1 (by linarith)))
+          exact le_trans hle (Real.rpow_le_rpow_of_exponent_le hN1 (by linarith only [hTi.2, hlwb1.1])))
       have e2 := hbd (⌊(N:ℝ)^(kappa1 + ((i:ℝ)+1)*hstep)⌋₊ : ℝ)
         (by
           have hbase : (N:ℝ)^kappa1 ≤ (N:ℝ)^(kappa1 + ((i:ℝ)+1)*hstep) :=
             Real.rpow_le_rpow_of_exponent_le hN1 hTi1.1
           have h := Nat.lt_floor_add_one ((N:ℝ)^(kappa1 + ((i:ℝ)+1)*hstep))
-          linarith)
+          linarith only [hbase, h])
         (by
           have hle : (⌊(N:ℝ)^(kappa1 + ((i:ℝ)+1)*hstep)⌋₊ : ℝ) ≤
               (N:ℝ)^(kappa1 + ((i:ℝ)+1)*hstep) := Nat.floor_le (Real.rpow_pos_of_pos hNpos _).le
-          exact le_trans hle (Real.rpow_le_rpow_of_exponent_le hN1 (by linarith)))
+          exact le_trans hle (Real.rpow_le_rpow_of_exponent_le hN1 (by linarith only [hTi1.2, hlwb1.1])))
       refine le_trans (add_le_add e1 e2) ?_
       have hEq2 : (C * (2/(N:ℝ)^kappa1) * (Lu + 7)) + (C * (2/(N:ℝ)^kappa1) * (Lu + 7))
           = 4*C*(Lu+7)/(N:ℝ)^kappa1 := by
@@ -5141,8 +5144,8 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hlg0 : 0 ≤ lg i := by
         rw [hlg]
         apply sub_nonneg.mpr
-        apply Real.log_le_log (by linarith [hTi.1, hκ1pos])
-        linarith
+        apply Real.log_le_log (by linarith only [hTi.1, hκ1pos])
+        linarith only [hhs0]
       -- the `q`-sum against the clamped kernel
       have hRK : |(∑ q ∈ boxI i, K2 (kappa1 + (i:ℝ)*hstep) (Real.log (q:ℝ)/Real.log (N:ℝ))
             * (((q:ℝ)-1))⁻¹)
@@ -5166,7 +5169,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
             have h1 : ((⌊(N:ℝ)^kappa2⌋₊ : ℝ)) + 1 ≤ (q:ℝ) := by
               exact_mod_cast (show ⌊(N:ℝ)^kappa2⌋₊ + 1 ≤ q from hqI.1)
             have h2 := Nat.lt_floor_add_one ((N:ℝ)^kappa2)
-            linarith
+            linarith only [h1, h2]
           have hqle : (q:ℝ) ≤ (N:ℝ)^(1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep)) :=
             le_trans (by exact_mod_cast hqI.2) (Nat.floor_le (Real.rpow_pos_of_pos hNpos _).le)
           have hu1 : kappa2 ≤ Real.log (q:ℝ)/Real.log (N:ℝ) :=
@@ -5219,21 +5222,21 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hE0 : (0:ℝ) ≤ δ*(lg i + δ/m) + C*(δ/m) := by
         have hm : (0:ℝ) < (m:ℝ) := by exact_mod_cast hm0
         have h1 : (0:ℝ) ≤ δ/m := div_nonneg hδ0.le hm.le
-        nlinarith [hδ0.le, hlg0, hC0, h1]
+        nlinarith only [hδ0.le, hlg0, hC0, h1]
       have hcl := cell_limit_close_pt (K := K2) (N := N) (T := kappa1 + (i:ℝ)*hstep)
         (T' := kappa1 + ((i:ℝ)+1)*hstep) (U := kappa2)
         (U' := 1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep)) (ξ := kappa1 + (i:ℝ)*hstep)
         (E := δ*(lg i + δ/m) + C*(δ/m)) (η := δ/(m:ℝ)) (εR := δ)
-        (by linarith [hTi.1, hκ1pos])
-        (by linarith)
+        (by linarith only [hTi.1, hκ1pos])
+        (by linarith only [hhs0])
         hκ2pos
         (by
           have h1 : (i:ℝ)*hstep ≤ kappa2 - kappa1 := by
             have hi1 := hiR i hi
-            nlinarith [hmh, hhs0.le, hi1]
+            nlinarith only [hmh, hhs0.le, hi1]
           have h2 : kappa2 < 1/2 - 2*kappa1 - kappa2 := by norm_num [kappa1, kappa2]
-          linarith)
-        ⟨le_rfl, by linarith⟩ hE0
+          linarith only [h1, h2])
+        ⟨le_rfl, by linarith only [hhs0]⟩ hE0
         (by
           have hm : (0:ℝ) < (m:ℝ) := by exact_mod_cast hm0
           exact div_pos hδ0 hm)
@@ -5273,18 +5276,18 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hi' : i + 1 ≤ m := Finset.mem_range.mp hi
       have h1 : (0:ℝ) < kappa1 + ((i:ℝ)+1)*hstep := by
         have h := (hTbSucc i (Finset.mem_range.mp hi)).1
-        linarith [h, hκ1pos]
+        linarith only [h, hκ1pos]
       have h2 : (0:ℝ) < kappa1 + (i:ℝ)*hstep := by
         have h := (hTb i (le_of_lt (Finset.mem_range.mp hi))).1
-        linarith [h, hκ1pos]
+        linarith only [h, hκ1pos]
       rw [hlg, Real.log_div h1.ne' h2.ne']
     have hlgN : ∀ i : ℕ, i ≤ m → 0 ≤ lg i := by
       intro i hi
       rw [hlg]
       have hT := hTb i hi
-      have h1 : (0:ℝ) < kappa1 + (i:ℝ)*hstep := by linarith [hT.1, hκ1pos]
+      have h1 : (0:ℝ) < kappa1 + (i:ℝ)*hstep := by linarith only [hT.1, hκ1pos]
       have h2 : kappa1 + (i:ℝ)*hstep ≤ kappa1 + ((i:ℝ)+1)*hstep := by
-        nlinarith [hhs0.le]
+        nlinarith only [hhs0.le]
       exact sub_nonneg.mpr (Real.log_le_log h1 h2)
     have hdel : (∑ i ∈ Finset.range m, δ/(m:ℝ)) = δ := by
       rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
@@ -5297,21 +5300,21 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
     have hKb : 16*C*(hL+1)/kappa2 ≤ K0 := by
       have h16 : 16*C*(hL+1)/kappa2 ≤ 32*C*(hL+1)/kappa2 := by
         have e : 32*C*(hL+1)/kappa2 = 2*(16*C*(hL+1)/kappa2) := by ring
-        have h0 : (0:ℝ) ≤ 16*C*(hL+1)/kappa2 := div_nonneg (by nlinarith [hCLnB]) hκ2pos.le
-        rw [e]; linarith
+        have h0 : (0:ℝ) ≤ 16*C*(hL+1)/kappa2 := div_nonneg (by nlinarith only [hCLnB]) hκ2pos.le
+        rw [e]; linarith only [h0]
       have h2 : 32*C*(hL+1)/kappa2 ≤ K0 := by
-        have h0 : (0:ℝ) ≤ 32*C*(hL+1)/kappa2 := div_nonneg (by nlinarith [hCLnB]) hκ2pos.le
-        have h : 32*C*(hL+1)/kappa2 ≤ 4000*(32*C*(hL+1)/kappa2) := by linarith
+        have h0 : (0:ℝ) ≤ 32*C*(hL+1)/kappa2 := div_nonneg (by nlinarith only [hCLnB]) hκ2pos.le
+        have h : 32*C*(hL+1)/kappa2 ≤ 4000*(32*C*(hL+1)/kappa2) := by linarith only [h0]
         have h3 : 4000*(32*C*(hL+1)/kappa2) ≤ K0 := by
-          rw [hK0def]; linarith [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
-        linarith [h, h3]
-      linarith [h16, h2]
+          rw [hK0def]; linarith only [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
+        linarith only [h, h3]
+      linarith only [h16, h2]
     have hKb2 : 8*(C*(hL+1)) ≤ K0 := by
       have h2 : 8*C*(hL+1) ≤ K0 := by
-        have h : 8*C*(hL+1) ≤ 4000*(8*C*(hL+1)) := by linarith [hCLh2]
+        have h : 8*C*(hL+1) ≤ 4000*(8*C*(hL+1)) := by linarith only [hCLh2]
         have h3 : 4000*(8*C*(hL+1)) ≤ K0 := by
-          rw [hK0def]; linarith [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
-        linarith [h, h3]
+          rw [hK0def]; linarith only [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
+        linarith only [h, h3]
       simpa only [mul_assoc] using h2
     have hKb0 : 80*C*(hL+1)/(N:ℝ)^kappa2 ≤ δ := by
       have hm : (0:ℝ) < (m:ℝ) := by exact_mod_cast hm0
@@ -5319,32 +5322,32 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       refine le_trans ?_ hV
       apply div_le_div_of_nonneg_right _ (Real.rpow_pos_of_pos hNpos _).le
       have hm0' : (0:ℝ) ≤ (m:ℝ) := hm.le
-      have h2 : 80*C*(hL+1) ≤ 80*(C+1)*(hL+2) := by nlinarith [hC0, hLn1]
-      have h0 : (0:ℝ) ≤ 80*(C+1)*(hL+2) := by nlinarith [hC0, hLn1]
+      have h2 : 80*C*(hL+1) ≤ 80*(C+1)*(hL+2) := by nlinarith only [hC0, hLn1]
+      have h0 : (0:ℝ) ≤ 80*(C+1)*(hL+2) := by nlinarith only [hC0, hLn1]
       have h3 : 80*(C+1)*(hL+2) ≤ 80*(C+1)*(hL+2)*((m:ℝ)+1) := by
-        nlinarith [h0, hm0', mul_nonneg h0 hm0']
+        nlinarith only [h0, hm0', mul_nonneg h0 hm0']
       have h4 : 80*(C+1)*(hL+2)*((m:ℝ)+1) ≤ 200*(C+1)*(hL+2)*((m:ℝ)+1) := by
         have hpos : (0:ℝ) ≤ (C+1)*(hL+2)*((m:ℝ)+1) := by
-          have h1 : (0:ℝ) ≤ C + 1 := by linarith
-          have h2' : (0:ℝ) ≤ hL + 2 := by linarith
-          have h3' : (0:ℝ) ≤ (m:ℝ) + 1 := by linarith
-          nlinarith [mul_nonneg h1 h2', h3']
-        nlinarith [hpos]
-      linarith [h2, h3, h4]
+          have h1 : (0:ℝ) ≤ C + 1 := by linarith only [hC0]
+          have h2' : (0:ℝ) ≤ hL + 2 := by linarith only [hL0]
+          have h3' : (0:ℝ) ≤ (m:ℝ) + 1 := by linarith only [hm0']
+          nlinarith only [mul_nonneg h1 h2', h3']
+        nlinarith only [hpos]
+      linarith only [h2, h3, h4]
     have hBrB : Br ≤ 40/(N:ℝ)^kappa2 + 8*δ/kappa2 + 4*δ/m := by
       rw [hBr]
       have h8 : 8*hstep/kappa2 ≤ 8*δ/kappa2 :=
-        div_le_div_of_nonneg_right (by linarith [hhsδ]) hκ2pos.le
-      linarith
+        div_le_div_of_nonneg_right (by linarith only [hhsδ]) hκ2pos.le
+      linarith only [h8]
     have hS1e : (∑ i ∈ Finset.range m, C*(lg i + δ/m)*Br) ≤ 3*K0*δ :=
       budget_S1 C hL δ Br K0 N m lg hC0 hL0 hδ0 hδ1 hm0 hBr0 hκ2pos hNpos
-        (by linarith [hK00] : (1:ℝ) ≤ K0) hsumlg hBrB hKb hKb2 hKb0
+        hK01 hsumlg hBrB hKb hKb2 hKb0
     have hS2e : (∑ i ∈ Finset.range m, 4*C*(Lu+7)/(N:ℝ)^kappa1) ≤ δ :=
       budget_S2 C Lu δ N m hC0 hLu0 hδ0 hm0 hNpos hN1 hnumIV
     have hKtot : (Lc + 1) * (hL + 1 + C) + hL ≤ K0 := by
       have h2 : Lc*hL + Lc*C + Lc + hL + 1 + C + hL ≤ K0 := by
         rw [hK0def]
-        linarith [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
+        linarith only [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
       have hexp : (Lc + 1) * (hL + 1 + C) + hL
           = Lc*hL + Lc*C + Lc + hL + 1 + C + hL := by ring
       rw [hexp]; exact h2
@@ -5354,7 +5357,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hi_lt : i < m := Finset.mem_range.mp hi
       have hlwb1 := hlwb i (le_of_lt hi_lt)
       have h1 : (0:ℝ) < 1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep) := by
-        linarith [hlwb1.1, hκ2pos]
+        linarith only [hlwb1.1, hκ2pos]
       have hlogU : Real.log (1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep)) - Real.log kappa2 ≤ Lc := by
         rw [hLcdef, ← Real.log_div h1.ne' hκ2pos.ne']
         exact Real.log_le_log (div_pos h1 hκ2pos) (div_le_div_of_nonneg_right hlwb1.2 hκ2pos.le)
@@ -5362,11 +5365,12 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       have hm : (0:ℝ) < (m:ℝ) := by exact_mod_cast hm0
       have hdm : (0:ℝ) ≤ δ/m := div_nonneg hδ0.le hm.le
       have hfac : Real.log (1/2 - 2*kappa1 - (kappa1 + (i:ℝ)*hstep)) - Real.log kappa2 + δ/m
-          ≤ Lc + δ/m := by linarith
-      have hA : (0:ℝ) ≤ δ*(lg i + δ/m) + C*(δ/m) := by nlinarith
+          ≤ Lc + δ/m := by linarith only [hlogU]
+      have hA : (0:ℝ) ≤ δ*(lg i + δ/m) + C*(δ/m) := by
+        exact add_nonneg (mul_nonneg hδ0.le (add_nonneg hlgi hdm)) (mul_nonneg hC0 hdm)
       rw [hecc i]
       have hh := mul_le_mul_of_nonneg_right hfac hA
-      linarith [hh]
+      linarith only [hh]
     have hS3e : (∑ i ∈ Finset.range m, ecc i) ≤ K0*δ :=
       budget_S3 C Lc hL δ K0 m lg ecc hC0 hLc0 hL0 hδ0 hδ1 hm0 hecc_le hlgN hsumlg hKtot
     -- the mesh comparison
@@ -5379,7 +5383,7 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
       rw [hF]
       have := mesh_vs_integral (Ψ := Ψ) (h := hstep) (ω := δ) hhs0 hmh
         (fun i => kappa1 + (i:ℝ)*hstep)
-        (fun i hi => ⟨le_rfl, by linarith⟩) hΨ_cont (fun t ht t' ht' hd => hΨ_mod t ht t' ht' hd)
+        (fun i hi => ⟨le_rfl, by linarith only [hhs0]⟩) hΨ_cont (fun t ht t' ht' hd => hΨ_mod t ht t' ht' hd)
       exact this
     have hLpos : (0:ℝ) ≤ hL := hL0
     -- ================= (5) the epsilon assembly =================
@@ -5421,10 +5425,10 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
         have hi' : i + 1 ≤ m := Finset.mem_range.mp hi
         have h1 : (0:ℝ) < kappa1 + ((i:ℝ)+1)*hstep := by
           have h := (hTbSucc i (Finset.mem_range.mp hi)).1
-          linarith [h, hκ1pos]
+          linarith only [h, hκ1pos]
         have h2 : (0:ℝ) < kappa1 + (i:ℝ)*hstep := by
           have h := (hTb i (le_of_lt (Finset.mem_range.mp hi))).1
-          linarith [h, hκ1pos]
+          linarith only [h, hκ1pos]
         rw [hlg, Real.log_div h1.ne' h2.ne']
       rw [hsumEq]
       exact hmesh
@@ -5453,27 +5457,27 @@ private theorem lowerSum5_tendsto_all (F f : ℝ → ℝ) (h : IsLinearSieve F f
             K2 (Real.log (p:ℝ)/Real.log (N:ℝ)) (Real.log (q:ℝ)/Real.log (N:ℝ))
               * (((p:ℝ)-1)⁻¹ * (((q:ℝ)-1)⁻¹)))
         (∑ i ∈ Finset.range m, lg i * Ψ (kappa1 + (i:ℝ)*hstep)) (lowerIntegral5 f)
-      linarith [h1, e1, e5, e2, e6, hA1, hA2', hA4, hA5, hA6, hA7]
+      linarith only [h1, e1, e5, e2, e6, hA1, hA2', hA4, hA5, hA6, hA7]
     -- the total budget
     have hbudget : (δ*M + K0*δ) + (∑ i ∈ Finset.range m, C*(lg i + δ/m)*Br)
           + (∑ i ∈ Finset.range m, 4*C*(Lu+7)/(N:ℝ)^kappa1)
           + (∑ i ∈ Finset.range m, ecc i) + δ*hL ≤ ε/2 := by
       have hM1 : M ≤ K0 := by
         have h : 4*M ≤ K0 := by
-          rw [hK0def]; linarith [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
-        linarith
+          rw [hK0def]; linarith only [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
+        linarith only [h, hM0]
       have hL1 : hL ≤ K0 := by
         have h : 4*hL ≤ K0 := by
-          rw [hK0def]; linarith [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
-        linarith
-      exact budget_final M K0 hL _ _ _ δ ε hM1 hL1 hS1e hS2e hS3e hδ0 (by linarith [hK00] : (1:ℝ) ≤ K0) hδE
-    linarith [htot, hbudget]
+          rw [hK0def]; linarith only [hprod4, hCL7, hCLh, hCLh2, hCLc, hLch, hM0, hC0, hL0, hLc0]
+        linarith only [h, hL0]
+      exact budget_final M K0 hL _ _ _ δ ε hM1 hL1 hS1e hS2e hS3e hδ0 hK01 hδE
+    linarith only [htot, hbudget, hε]
 
   obtain ⟨N0, hN0⟩ := eventually_atTop.1 hmain
   refine ⟨N0, fun N hN => ?_⟩
   rw [Real.dist_eq]
   have h := hN0 N hN
-  linarith
+  linarith only [h, hε]
 
 /-- LEAF. Wu 2004 page 39 equation 10.5, application of Lemmas 2.2 and 2.3.
 This estimates only the count by its finite prime sum main term.

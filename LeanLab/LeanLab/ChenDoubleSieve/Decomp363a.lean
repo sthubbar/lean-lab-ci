@@ -1,4 +1,4 @@
-import LeanLab.ChenDoubleSieve.Decomp348o
+import LeanLab.ChenDoubleSieve.Decomp348a
 
 /-!
 Elementary error absorption for Wu 2004 page 38 before equation 10.2.
@@ -15,7 +15,7 @@ open Task275 Task348
 /-- The exact sealed density target is supplied by the existing clean proof. -/
 theorem scaledDensity_supplied :
     Tendsto scaledDensity evenAtTop (𝓝 (2 / (kappa1 * exp eulerMascheroniConstant))) :=
-  Task348.scaledDensity_supplied
+  Task348.scaledDensity_tendsto
 
 /-- The local density scale divided by the exact normalizer is scaledDensity. -/
 theorem density_scale_ratio {N : ℕ} (hN : 2 ≤ N) :

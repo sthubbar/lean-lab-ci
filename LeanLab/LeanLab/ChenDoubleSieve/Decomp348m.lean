@@ -1,4 +1,4 @@
-import LeanLab.ChenDoubleSieve.Decomp348k
+import LeanLab.ChenDoubleSieve.Decomp348d
 
 /-!
 Uniform large prime divisor correction in the Euler product before equation 10.2.
