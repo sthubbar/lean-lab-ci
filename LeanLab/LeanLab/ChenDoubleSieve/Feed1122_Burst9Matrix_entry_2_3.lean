@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Table1Algebra
+import LeanLab.ChenDoubleSieve.KernelIntegrability
 
 /-!
 # Feed 1122 split of `Burst9Matrix.entry_2_3`
@@ -24,7 +25,38 @@ open LeanLab.ChenDoubleSieve.Wu04Table
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 2) volume (12/5 : ℝ) (5/2 : ℝ) := by
-  sorry
+  have h₁ : IntervalIntegrable (tableKernel 2) volume (1 : ℝ) (3 : ℝ) := by
+    have h₂ : tableKernel 2 = Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by decide⟩) := by
+      dsimp [Wu04Table.tableKernel]
+      <;> rfl
+    rw [h₂]
+    -- Use the general Xi2_integrable lemma from KernelIntegrability
+    have h₃ : (3 : ℝ) < (Wu04Functional.tableParams ⟨2, by decide⟩).sp := by norm_num [Wu04Functional.tableParams, Wu04Functional.Params]
+    have h₄ : ∀ t ∈ Set.Icc (1 : ℝ) (3 : ℝ),
+        let a := Wu04Functional.alpha (Wu04Functional.tableParams ⟨2, by decide⟩)
+        let P := ((Wu04Functional.tableParams ⟨2, by decide⟩).s - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).sp - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).k1 - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).k2 - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).k3 - 1)
+        ((a 1 ≤ t ∧ t ≤ 3) → 0 < P ∧ P ≤ (t + 1) ^ 5) ∧
+        ((a 8 ≤ t ∧ t ≤ a 0) → 0 < ((Wu04Functional.tableParams ⟨2, by decide⟩).k2 - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).k1 - 1 - t) ∧ ((Wu04Functional.tableParams ⟨2, by decide⟩).k2 - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).k1 - 1 - t) ≤ t + 1) ∧
+        ((a 4 ≤ t ∧ t ≤ a 1) → 0 < ((Wu04Functional.tableParams ⟨2, by decide⟩).k3 - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).sp - 1 - t) ∧ ((Wu04Functional.tableParams ⟨2, by decide⟩).k3 - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).sp - 1 - t) ≤ t + 1) ∧
+        ((a 2 ≤ t ∧ t ≤ a 1) → 0 < ((Wu04Functional.tableParams ⟨2, by decide⟩).s - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).sp - 1 - t) ∧ ((Wu04Functional.tableParams ⟨2, by decide⟩).s - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).sp - 1 - t) ≤ t + 1) ∧
+        ((a 0 ≤ t ∧ t ≤ a 1) → 0 < ((Wu04Functional.tableParams ⟨2, by decide⟩).k1 - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).k2 - 1) ∧ ((Wu04Functional.tableParams ⟨2, by decide⟩).k1 - 1) * ((Wu04Functional.tableParams ⟨2, by decide⟩).k2 - 1) ≤ (t + 1) ^ 2) ∧
+        ((a 6 ≤ t ∧ t ≤ a 4) → 0 < ((Wu04Functional.tableParams ⟨2, by decide⟩).k1 * (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).k1 * t) * ((Wu04Functional.tableParams ⟨2, by decide⟩).k3 * (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).k3 * t) ∧ ((Wu04Functional.tableParams ⟨2, by decide⟩).k1 * (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).k1 * t) * ((Wu04Functional.tableParams ⟨2, by decide⟩).k3 * (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).k3 * t) ≤ (Wu04Functional.tableParams ⟨2, by decide⟩).sp ^ 2) ∧
+        ((a 4 ≤ t ∧ t ≤ a 7) → 0 < (Wu04Functional.tableParams ⟨2, by decide⟩).k1 * (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).k1 * t ∧ (Wu04Functional.tableParams ⟨2, by decide⟩).k1 * (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).k1 * t ≤ (Wu04Functional.tableParams ⟨2, by decide⟩).sp * ((Wu04Functional.tableParams ⟨2, by decide⟩).sp - 1 - t)) ∧
+        ((a 5 ≤ t ∧ t ≤ a 7) → 0 < (Wu04Functional.tableParams ⟨2, by decide⟩).k2 * (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).k2 * t ∧ (Wu04Functional.tableParams ⟨2, by decide⟩).k2 * (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).sp - (Wu04Functional.tableParams ⟨2, by decide⟩).k2 * t ≤ (Wu04Functional.tableParams ⟨2, by decide⟩).sp) ∧
+        ((a 7 ≤ t ∧ t ≤ a 1) → 0 < (1 : ℝ) ∧ 1 ≤ (Wu04Functional.tableParams ⟨2, by decide⟩).sp - 1 - t) := by
+      intro t ht
+      have h₅ := LeanLab.ChenDoubleSieve.Burst8P2.tableParams_Xi2Signs ⟨2, by decide⟩ t ht
+      simpa [Wu04Functional.alpha, Wu04Functional.tableParams, Wu04Functional.Params] using h₅
+    -- Apply Xi2_integrable
+    have h₅ : IntervalIntegrable (Wu04Functional.Xi2 (Wu04Functional.tableParams ⟨2, by decide⟩)) volume (1 : ℝ) (3 : ℝ) :=
+      LeanLab.ChenDoubleSieve.Burst8P2.Xi2_integrable h₃ h₄
+    exact h₅
+  -- Restrict the interval from [1, 3] to [12/5, 5/2]
+  have h₂ : IntervalIntegrable (tableKernel 2) volume (12/5 : ℝ) (5/2 : ℝ) := by
+    have h₃ : IntervalIntegrable (tableKernel 2) volume (12/5 : ℝ) (5/2 : ℝ) :=
+      h₁.mono_set (Set.uIcc_subset_uIcc (by norm_num [Set.mem_uIcc]) (by norm_num [Set.mem_uIcc]))
+    exact h₃
+  exact h₂
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, left half panel `[12/5, 49/20]` of `a_{3,4}`:
 quadrature value 0.012834022807, stated bound leaves 3.94e-08. MEDIUM. -/
