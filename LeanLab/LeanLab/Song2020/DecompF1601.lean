@@ -138,7 +138,12 @@ theorem leaf_final_transfer_F1601 (γ : ℝ) (hγ : 44 / 45 < γ) (hγ1 : γ < 1
         2 * D * ((∫ α in (0 : ℝ)..1, ‖fS γ n y α‖ ^ 2) +
           (∫ α in (0 : ℝ)..1, ‖gS n y α‖ ^ 2)) ≤
             C * (y ^ 2 / Real.log (n : ℝ) ^ 4) := by
-  sorry
+  obtain ⟨C₅', hC₅', N₅', h₅⟩ := leaf_lemma5_ms_F1601 γ hγ hγ1
+  refine ⟨C₅', max 1 N₅', ?_⟩
+  intro n hn y hy hy3
+  have hms := h₅ n (by omega) y hy hy3
+  intro D hD hbound
+  nlinarith [hms, hbound]
 
 /-- Assembly of the page 9 logarithmic transfer from the three leaves.
 The statement after the name is the exact target copied character for character. -/
