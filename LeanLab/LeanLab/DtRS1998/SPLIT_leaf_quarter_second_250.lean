@@ -31,7 +31,9 @@ theorem leaf_quarter_second_250_block_one :
       (∀ j : ℕ, 125000001 ≤ j → j < 156250001 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 250 + 2 * j ∧ (10 ^ 250 + 2 * j - q).Prime)) = true) := by
-  sorry
+  refine ⟨[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47], by decide, by decide, ?_⟩
+  intro j hj1 hj2
+  simp [List.any]
 
 /-- LEAF 2 of 4: the second index block of the quarter, `156250001 ≤ j < 187500001`,
 is covered by one list of at most 15 primes.  It carries the next 15 primes of the
