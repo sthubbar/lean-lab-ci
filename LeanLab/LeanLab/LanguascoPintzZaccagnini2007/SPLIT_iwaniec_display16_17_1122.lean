@@ -1,4 +1,4 @@
-import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_centre_lower1122
+import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_no_zero_open_strip481_steps
 
 /-!
 A further split of the two HARD leaves `iwaniec_display16_1122` and `iwaniec_display17_1122` of
@@ -42,9 +42,170 @@ theorem iwaniec_lemma10_1122 (F : ℂ → ℂ) (s₀ : ℂ) (r B : ℝ) (hr : 0 
     -(4 / r) * Real.log B + ∑ ρ ∈ Z, (1 / (s₀ - ρ)).re ≤ (logDeriv F s₀).re := by
   sorry
 
-/-- Iwaniec 1974 page 103, the bound at the centre used for displays (16) and (17), formerly a
-MEDIUM leaf, now proved from Mathlib's `LSeries.mul_mu_eq_one` and the leaf
-`iwaniec_inverse_series_bound1122` of `SPLIT_iwaniec_centre_lower1122`.
+/-- The classical size of `ζ` near one of page 103: `(σ - 1) ζ(σ) ≤ ζ(2σ)` for `1 < σ ≤ 6/5`,
+from `(σ - 1) ζ(σ) ≤ σ` and `ζ(2σ) ≥ 1 + 2^(-2σ) + 3^(-2σ) > 6/5`.
+Copied from the reduction in `SPLIT_iwaniec_medium_facts1122`. -/
+private theorem iwaniec_zeta_ratio_aux1122 (σ : ℝ) (hσ : 1 < σ) (hσ' : σ ≤ 6 / 5) :
+    (σ - 1) * ‖riemannZeta (σ : ℂ)‖ ≤ ‖riemannZeta ((2 * σ : ℝ) : ℂ)‖ := by
+  have hZ : ∀ s : ℝ, 1 < s →
+      riemannZeta (s : ℂ) = ((∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s : ℝ) : ℂ) := by
+    intro s hs
+    rw [Complex.ofReal_tsum, zeta_eq_tsum_one_div_nat_add_one_cpow (by simpa using hs)]
+    congr 1 with n
+    rw [Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_cpow (by positivity)]
+    norm_cast
+  have hZnn : ∀ s : ℝ, 0 ≤ ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ s :=
+    fun s => tsum_nonneg (fun n => by positivity)
+  -- upper bound at σ
+  have hup : (∑' n : ℕ, 1 / (n + 1 : ℝ) ^ σ) ≤ σ / (σ - 1) := by
+    have h1 := ZetaAsymptotics.termTSum_of_lt hσ
+    have h2 : 0 ≤ ZetaAsymptotics.termTSum σ :=
+      tsum_nonneg (fun n => ZetaAsymptotics.term_nonneg (n + 1) σ)
+    rw [h1] at h2
+    have hs0 : 0 < σ := by linarith
+    have hs1 : 0 < σ - 1 := by linarith
+    rw [le_div_iff₀ hs1]
+    have h3 : 1 / σ * (∑' n : ℕ, 1 / (n + 1 : ℝ) ^ σ) ≤ 1 / (σ - 1) := by linarith
+    rw [div_mul_eq_mul_div, one_mul, div_le_div_iff₀ hs0 hs1, one_mul] at h3
+    linarith
+  -- lower bound at 2σ
+  have h2σ : 1 < 2 * σ := by linarith
+  have hsum : Summable (fun n : ℕ => 1 / (n + 1 : ℝ) ^ (2 * σ)) := by
+    have h := (summable_nat_add_iff 1).mpr (Real.summable_nat_rpow_inv.mpr h2σ)
+    refine h.congr (fun n => ?_)
+    push_cast
+    rw [one_div]
+  have hlow : 1 + 1 / (2 : ℝ) ^ (2 * σ) + 1 / (3 : ℝ) ^ (2 * σ) ≤
+      ∑' n : ℕ, 1 / (n + 1 : ℝ) ^ (2 * σ) := by
+    have h := hsum.sum_le_tsum (Finset.range 3) (fun n _ => by positivity)
+    simp [Finset.sum_range_succ] at h
+    norm_num at h ⊢
+    linarith
+  have hx2 : (2 : ℝ) ^ (2 * σ) ≤ 5.7 := by
+    have h1 : (2 : ℝ) ^ (2 * σ) ≤ (2 : ℝ) ^ (5 / 2 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+    have h2 : ((2 : ℝ) ^ (5 / 2 : ℝ)) ^ (2 : ℕ) = 32 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
+    have h3 : 0 ≤ (2 : ℝ) ^ (5 / 2 : ℝ) := by positivity
+    nlinarith
+  have hx3 : (3 : ℝ) ^ (2 * σ) ≤ 15.7 := by
+    have h1 : (3 : ℝ) ^ (2 * σ) ≤ (3 : ℝ) ^ (5 / 2 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+    have h2 : ((3 : ℝ) ^ (5 / 2 : ℝ)) ^ (2 : ℕ) = 243 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
+    have h3 : 0 ≤ (3 : ℝ) ^ (5 / 2 : ℝ) := by positivity
+    nlinarith
+  have hp2 : 0 < (2 : ℝ) ^ (2 * σ) := by positivity
+  have hp3 : 0 < (3 : ℝ) ^ (2 * σ) := by positivity
+  have hi2 : 1 / 5.7 ≤ 1 / (2 : ℝ) ^ (2 * σ) := one_div_le_one_div_of_le hp2 hx2
+  have hi3 : 1 / 15.7 ≤ 1 / (3 : ℝ) ^ (2 * σ) := one_div_le_one_div_of_le hp3 hx3
+  rw [hZ σ hσ, hZ (2 * σ) h2σ, Complex.norm_real, Complex.norm_real, Real.norm_eq_abs,
+    Real.norm_eq_abs, abs_of_nonneg (hZnn σ), abs_of_nonneg (hZnn (2 * σ))]
+  have hs1 : 0 < σ - 1 := by linarith
+  have h4 : (σ - 1) * (∑' n : ℕ, 1 / (n + 1 : ℝ) ^ σ) ≤ σ := by
+    have := mul_le_mul_of_nonneg_left hup hs1.le
+    rw [mul_div_cancel₀ _ hs1.ne'] at this
+    exact this
+  have hnum : (1 : ℝ) / 5 ≤ 1 / 5.7 + 1 / 15.7 := by norm_num
+  linarith
+
+/-- Page 103, the Euler product bound `ζ(2σ)/ζ(σ) ≤ |L(σ + it, ψ)|` for every character `ψ`
+modulo `q ≥ 1` and every `σ > 1`, from the Euler products of `ζ` and of `L(s, ψ)` and the
+pointwise bound `|1 - ψ(p) p^{-s}| ≤ 1 + p^{-σ}`. -/
+private theorem iwaniec_euler_lower_aux1122 {q : ℕ} (hq : q ≠ 0) (ψ : DirichletCharacter ℂ q)
+    {σ : ℝ} (hσ : 1 < σ) (t : ℝ) :
+    ‖riemannZeta ((2 * σ : ℝ) : ℂ)‖ / ‖riemannZeta (σ : ℂ)‖ ≤
+      ‖Lfun481 ψ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
+  haveI : NeZero q := ⟨hq⟩
+  set s : ℂ := (σ : ℂ) + (t : ℂ) * Complex.I with hs_def
+  have hs : 1 < s.re := by
+    rw [hs_def]; simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+      Complex.ofReal_im, Complex.I_re, Complex.I_im, mul_zero, mul_one, add_zero]
+    linarith
+  have h1 : 1 < ((σ : ℂ)).re := by simpa using hσ
+  have h2 : 1 < (((2 * σ : ℝ)) : ℂ).re := by simpa using (show (1:ℝ) < 2 * σ by linarith)
+  have mpχ : Multipliable (fun p : Nat.Primes => (1 - ψ p * (p : ℂ) ^ (-s))⁻¹) :=
+    ⟨_, DirichletCharacter.LSeries_eulerProduct_hasProd ψ hs⟩
+  have mp1 : Multipliable (fun p : Nat.Primes => (1 - (p : ℂ) ^ (-(σ : ℂ)))⁻¹) :=
+    ⟨_, riemannZeta_eulerProduct_hasProd h1⟩
+  have mp2 : Multipliable (fun p : Nat.Primes => (1 - (p : ℂ) ^ (-(((2 * σ : ℝ)) : ℂ)))⁻¹) :=
+    ⟨_, riemannZeta_eulerProduct_hasProd h2⟩
+  have hLval : Lfun481 ψ s = LSeries (fun n => ψ ↑n) s := by
+    rw [show Lfun481 ψ s = DirichletCharacter.LFunction ψ s from by
+      simp only [Lfun481, dif_neg hq]]
+    exact DirichletCharacter.LFunction_eq_LSeries ψ hs
+  rw [hLval, ← norm_div]
+  suffices h : ‖riemannZeta ((2 * σ : ℝ) : ℂ) / riemannZeta (σ : ℂ)‖₊ ≤
+      ‖LSeries (fun n => ψ ↑n) s‖₊ by exact_mod_cast h
+  have hzσ : riemannZeta (σ : ℂ) ≠ 0 := riemannZeta_ne_zero_of_one_lt_re h1
+  rw [nnnorm_div, div_le_iff₀ (nnnorm_pos.mpr hzσ),
+    ← riemannZeta_eulerProduct_tprod h1, ← riemannZeta_eulerProduct_tprod h2,
+    ← DirichletCharacter.LSeries_eulerProduct_tprod ψ hs,
+    mp1.nnnorm_tprod, mp2.nnnorm_tprod, mpχ.nnnorm_tprod,
+    ← mpχ.nnnorm.tprod_mul mp1.nnnorm]
+  refine mp2.nnnorm.tprod_le_tprod (fun p => ?_) (mpχ.nnnorm.mul mp1.nnnorm)
+  have hne1 : (1 - (p : ℂ) ^ (-(σ : ℂ))) ≠ 0 := Complex.one_sub_prime_cpow_ne_zero p.2 h1
+  have hne2 : (1 - (p : ℂ) ^ (-(((2 * σ : ℝ)) : ℂ))) ≠ 0 :=
+    Complex.one_sub_prime_cpow_ne_zero p.2 h2
+  have hneχ : (1 - ψ p * (p : ℂ) ^ (-s)) ≠ 0 := by
+    have hlt : ‖ψ p * (p : ℂ) ^ (-s)‖ < 1 := by
+      rw [norm_mul, Complex.norm_natCast_cpow_of_pos p.2.pos]
+      have hsre : (-s).re = -σ := by
+        rw [hs_def]; simp only [Complex.neg_re, Complex.add_re, Complex.ofReal_re,
+          Complex.mul_re, Complex.ofReal_im, Complex.I_re, Complex.I_im, mul_zero, mul_one,
+          ]; ring
+      rw [hsre, Real.rpow_neg (by positivity)]
+      have hp1 : (1 : ℝ) < (p : ℝ) := by exact_mod_cast p.2.one_lt
+      have hpσ : (1 : ℝ) < (p : ℝ) ^ σ := Real.one_lt_rpow hp1 (by linarith)
+      have hinv : ((p : ℝ) ^ σ)⁻¹ < 1 := by
+        rw [inv_lt_one_iff₀]
+        exact Or.inr hpσ
+      calc ‖ψ ↑↑p‖ * (↑↑p ^ σ)⁻¹ ≤ 1 * (↑↑p ^ σ)⁻¹ :=
+            mul_le_mul_of_nonneg_right (ψ.norm_le_one p) (by positivity)
+        _ = (↑↑p ^ σ)⁻¹ := one_mul _
+        _ < 1 := hinv
+    intro hzero
+    rw [sub_eq_zero] at hzero
+    rw [hzero.symm, norm_one] at hlt
+    exact lt_irrefl 1 hlt
+  simp only [nnnorm_inv, ← mul_inv]
+  have hfact : ‖1 - (p : ℂ) ^ (-(((2 * σ : ℝ)) : ℂ))‖₊ =
+      ‖1 + (p : ℂ) ^ (-(σ : ℂ))‖₊ * ‖1 - (p : ℂ) ^ (-(σ : ℂ))‖₊ := by
+    rw [← nnnorm_mul]
+    congr 1
+    have hh : (p : ℂ) ^ (-(((2 * σ : ℝ)) : ℂ)) = ((p : ℂ) ^ (-(σ : ℂ))) ^ 2 := by
+      convert Complex.cpow_nat_mul (p : ℂ) 2 (-(σ : ℂ)) using 2 <;> push_cast <;> ring
+    calc
+      1 - (p : ℂ) ^ (-(((2 * σ : ℝ)) : ℂ)) = 1 - ((p : ℂ) ^ (-(σ : ℂ))) ^ 2 := by rw [hh]
+      _ = (1 + (p : ℂ) ^ (-(σ : ℂ))) * (1 - (p : ℂ) ^ (-(σ : ℂ))) := by ring
+  rw [inv_le_inv₀, hfact]
+  · apply _root_.mul_le_mul_left
+    rw [← norm_toNNReal, ← norm_toNNReal]
+    apply Real.toNNReal_le_toNNReal
+    calc
+      ‖1 - ψ p * (p : ℂ) ^ (-s)‖ ≤ 1 + ‖ψ p * (p : ℂ) ^ (-s)‖ := by
+        simpa using norm_sub_le (1 : ℂ) (ψ p * (p : ℂ) ^ (-s))
+      _ ≤ 1 + ‖(p : ℂ) ^ (-s)‖ := by
+        rw [norm_mul]
+        nlinarith [ψ.norm_le_one p, norm_nonneg ((p : ℂ) ^ (-s))]
+      _ = ‖1 + (p : ℂ) ^ (-(σ : ℂ))‖ := by
+        have hpnorm : ‖(p : ℂ) ^ (-s)‖ = (p : ℝ) ^ (-σ) := by
+          rw [Complex.norm_natCast_cpow_of_pos p.2.pos]
+          have hsre : (-s).re = -σ := by
+            rw [hs_def]; simp only [Complex.neg_re, Complex.add_re, Complex.ofReal_re,
+              Complex.mul_re, Complex.ofReal_im, Complex.I_re, Complex.I_im, mul_zero, mul_one,
+              ]; ring
+          rw [hsre]
+        rw [hpnorm]
+        have hpos : 0 ≤ 1 + (p : ℝ) ^ (-σ) := by positivity
+        rw [← Real.norm_of_nonneg hpos, ← Complex.norm_real, Complex.ofReal_add,
+          Complex.ofReal_cpow (Nat.cast_nonneg (p : ℕ))]
+        norm_cast
+  · exact nnnorm_pos.mpr hne2
+  · exact mul_pos (nnnorm_pos.mpr hneχ) (nnnorm_pos.mpr hne1)
+
+/-- LEAF: Iwaniec 1974 page 103, the bound at the centre used for displays (16) and (17).
+Class: MEDIUM.
 H. Iwaniec, On zeros of Dirichlet's L series, Invent. Math. 23, 1974, page 103, the line before
 display (16): `|L(s₀, χ)|⁻¹ ≤ Σ |μ(n)| n^(-σ₀) < 1 / (σ₀ - 1)`, from the Euler product, with
 `σ₀ = 1 + 5θ`. Stated for every character and `1 < σ ≤ 6/5`; on that range
@@ -52,25 +213,14 @@ display (16): `|L(s₀, χ)|⁻¹ ≤ Σ |μ(n)| n^(-σ₀) < 1 / (σ₀ - 1)`, 
 theorem iwaniec_centre_lower1122 (q : ℕ) (hq : 1 ≤ q) (ψ : DirichletCharacter ℂ q)
     (σ t : ℝ) (hσ : 1 < σ) (hσ' : σ ≤ 6 / 5) :
     σ - 1 ≤ ‖Lfun481 ψ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
-  have hq0 : q ≠ 0 := by omega
-  have : NeZero q := ⟨hq0⟩
-  set s : ℂ := (σ : ℂ) + (t : ℂ) * Complex.I with hs
-  have hre : 1 < s.re := by simp [hs, hσ]
-  have hL : Lfun481 ψ s = LSeries (fun n => ψ n) s := by
-    simp only [Lfun481, dif_neg hq0]
-    exact DirichletCharacter.LFunction_eq_LSeries ψ hre
-  have hmul := DirichletCharacter.LSeries.mul_mu_eq_one ψ hre
-  have hb := iwaniec_inverse_series_bound1122 q ψ σ t hσ hσ'
-  set A := LSeries (fun n => ψ n) s with hA
-  set B := LSeries (fun n : ℕ => ψ n * ((ArithmeticFunction.moebius n : ℤ) : ℂ)) s with hB
-  have hmul' : A * B = 1 := by
-    rw [hA, hB]; convert hmul using 2
-  have hn : ‖A‖ * ‖B‖ = 1 := by rw [← norm_mul, hmul', norm_one]
-  have hσ1 : 0 < σ - 1 := by linarith
-  rw [hL]
-  have h1 : ‖B‖ * (σ - 1) ≤ 1 := by
-    rw [le_div_iff₀ hσ1] at hb; exact hb
-  nlinarith [norm_nonneg A, norm_nonneg B]
+  have h1 := iwaniec_euler_lower_aux1122 (by omega) ψ hσ t
+  have h2 := iwaniec_zeta_ratio_aux1122 σ hσ hσ'
+  have hz : riemannZeta (σ : ℂ) ≠ 0 :=
+    riemannZeta_ne_zero_of_one_lt_re (by simpa using hσ)
+  have hpos : 0 < ‖riemannZeta (σ : ℂ)‖ := norm_pos_iff.mpr hz
+  have h3 : σ - 1 ≤ ‖riemannZeta ((2 * σ : ℝ) : ℂ)‖ / ‖riemannZeta (σ : ℂ)‖ := by
+    rw [le_div_iff₀ hpos]; exact h2
+  linarith
 
 /-- LEAF: Iwaniec 1974 page 102, Lemma 9, as page 103 applies it before display (16).
 Class: HARD.
