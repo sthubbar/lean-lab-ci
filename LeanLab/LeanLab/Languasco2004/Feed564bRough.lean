@@ -9,6 +9,8 @@ and on nothing else; the numerical value of integral11 is not used here.
 import LeanLab.Languasco2004.Model564
 import LeanLab.Languasco2004.Integral564
 import LeanLab.Languasco2004.Decomp578e
+import LeanLab.Languasco2004.Decomp578c
+import LeanLab.Languasco2004.Sieve565
 
 namespace LeanLab.Languasco2004.Feed564bRough
 open Finset Real Decomp279a Decomp316c Model564 RemainderData564 Integral564
@@ -170,7 +172,8 @@ S of B_pq and q over regions 33, 36, 38, 40, 42, 46 and 49, then summed; the Lem
 is absorbed by the Mertens bound for the sum of t over log q over these regions. HARD -/
 theorem rough11_lemma21_sum (w : ℝ → ℝ) (hw : IsBuchstab w) (η : ℝ) (hη : 0 < η) :
     ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y →
-      buchstabMain labels11 w Y - η * (Y / Real.log Y) ≤ roughModel labels11 Y := by sorry
+      buchstabMain labels11 w Y - η * (Y / Real.log Y) ≤ roughModel labels11 Y := by
+  sorry
 
 /-- LEAF: Jia pages 280 and 281, the prime number theorem Riemann sum step: the double prime
 sum of the Lemma 21 main term over regions 33, 36, 38, 40, 42, 46 and 49 is at least the
@@ -178,7 +181,8 @@ Buchstab integral over the nine printed subdomains, rows two to ten, times Y ove
 theorem buchstabMain11_riemann (w : ℝ → ℝ) (hw : IsBuchstab w) (η : ℝ) (hη : 0 < η) :
     ∃ Y₀ : ℝ, ∀ Y : ℝ, Y₀ ≤ Y →
       ((∑ i ∈ (Finset.univ.filter (fun i : Fin 16 => i.val < 9)), fullRow w i) - η) *
-        (Y / Real.log Y) ≤ buchstabMain labels11 w Y := by sorry
+        (Y / Real.log Y) ≤ buchstabMain labels11 w Y := by
+  sorry
 
 /-- Jia pages 280 and 281: generic assembly of a family transfer from a Buchstab lower
 integral, the summed Lemma 21 step and the Riemann sum step. -/
