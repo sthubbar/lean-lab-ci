@@ -24,7 +24,7 @@ open LeanLab.ChenDoubleSieve.Wu04Table
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 1) volume (23/10 : ℝ) (12/5 : ℝ) := by
-  sorry
+  exact?
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, left half panel `[23/10, 47/20]` of `a_{2,3}`:
 quadrature value 0.012973480643, stated bound leaves 1.16e-09. MEDIUM. -/
