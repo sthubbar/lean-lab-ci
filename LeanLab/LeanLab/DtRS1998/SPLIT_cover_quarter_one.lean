@@ -112,4 +112,16 @@ theorem cover_quarter_one_split :
 
 #print axioms cover_quarter_one_split
 
+/-- Trivial helper lemma: 14 ≥ 0 -/
+theorem fourteen_nonneg : (14 : ℕ) ≥ 0 := by
+  norm_num
+
+/-- Trivial helper lemma: 31250000 ≥ 0 -/
+theorem block_size_nonneg : (31250000 : ℕ) ≥ 0 := by
+  norm_num
+
+/-- Trivial helper lemma: 10^270 is even -/
+theorem ten_pow_270_even : (10 : ℕ) ^ 270 % 2 = 0 := by
+  norm_num
+
 end LeanLab.DtRS1998.Decomp270c
