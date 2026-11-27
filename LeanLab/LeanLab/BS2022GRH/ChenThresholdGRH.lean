@@ -466,7 +466,10 @@ theorem chenThreshold13375_of_leaves (h5 : Thm5J) (h6 : Thm6J) (h7 : Thm7J)
 Theorems 5, 6, 7 from GRH through Lemma 3, Lemma 7 and the linear sieve, with Lemmas 1, 2, 4,
 5, 8, 10 to 14. -/
 theorem theorems567_of_inputs (h3 : Lemma3J) (h7 : Lemma7J) : Thm5J ∧ Thm6J ∧ Thm7J := by
-  sorry
+  refine ⟨?_, ?_, ?_⟩
+  · exact Decomp332a.thm5_of_inputs h3 h7
+  · exact Decomp332c.thm6_of_inputs (Theta332.theta_of_buthe ThetaInputs224.theta_buthe_1e19) h3 h7
+  · exact Decomp332a.thm7_of_inputs h3 h7
 
 /-- The threshold from the basic leaves, CONDITIONAL ON Lemma 3, Lemma 7, the linear sieve
 at ε = 1/8349, ε(1500) < 1/8349 and the bracket certificate, and the OPEN
