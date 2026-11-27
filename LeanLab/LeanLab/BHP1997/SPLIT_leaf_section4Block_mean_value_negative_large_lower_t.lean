@@ -232,6 +232,67 @@ theorem leaf_section4Block_mean_value_negative_large_lower_t_dyadic (g : ℝ →
         rw [hJ]; push_cast
         linarith
 
+/-- Page 27, the unsummed factor has a power gap over the lower height range,
+even after the Mobius divisor of size at most `x^(ε/12)` is grouped with `M`. -/
+theorem section4Block_lower_t_length_gap {ε m n x : ℝ} (hx : 1 ≤ x)
+    (hreg : max (0.45 : ℝ) m + max (0.225 : ℝ) n ≤ 0.775) :
+    x ^ ((0.45 - 2 * ε / 3) / 2) * x ^ (ε / 4) ≤
+      x ^ (1 - m - n - ε / 12) := by
+  have hmn : m + n ≤ (0.775 : ℝ) :=
+    (add_le_add (le_max_right _ _) (le_max_right _ _)).trans hreg
+  rw [← Real.rpow_add (by linarith : 0 < x)]
+  exact Real.rpow_le_rpow_of_exponent_le hx (by linarith)
+
+/-- Page 23, display 3.37. Every nonempty shell in the lower height range
+satisfies the full Lemma 10 shell range once `x ≥ 64` and `ε ≤ 1/10`. -/
+theorem section4Block_lower_t_shell_range {ε x T : ℝ} (hε : ε ≤ 1 / 10)
+    (hx : 64 ≤ x) (S : Finset ℝ) (hne : S.Nonempty)
+    (hS : ∀ t ∈ S, Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ t ∧
+      t ≤ x ^ ((0.45 - 2 * ε / 3) / 2) ∧ T / 2 ≤ t ∧ t ≤ T) :
+    Real.exp (Real.log x ^ (1 / 3 : ℝ)) ≤ T ∧ T ≤ x ^ (0.45 - 2 * ε / 3) := by
+  obtain ⟨t, ht⟩ := hne
+  obtain ⟨hlo, hhi, hhalf, htT⟩ := hS t ht
+  have hx1 : 1 ≤ x := by linarith
+  have htwo : 2 ≤ x ^ ((0.45 - 2 * ε / 3) / 2) := by
+    calc
+      (2 : ℝ) = 64 ^ (1 / 6 : ℝ) := by norm_num
+      _ ≤ x ^ (1 / 6 : ℝ) := Real.rpow_le_rpow (by norm_num) hx (by norm_num)
+      _ ≤ _ := Real.rpow_le_rpow_of_exponent_le hx1 (by linarith)
+  refine ⟨hlo.trans htT, ?_⟩
+  calc
+    T ≤ 2 * x ^ ((0.45 - 2 * ε / 3) / 2) := by linarith
+    _ ≤ x ^ ((0.45 - 2 * ε / 3) / 2) * x ^ ((0.45 - 2 * ε / 3) / 2) :=
+      mul_le_mul_of_nonneg_right htwo (Real.rpow_nonneg (by linarith) _)
+    _ = x ^ (0.45 - 2 * ε / 3) := by
+      rw [← Real.rpow_add (by linarith : 0 < x)]
+      congr 1
+      ring
+
+/-- Pages 26 and 27, the divisor majorant controls each block polynomial.
+This triangle estimate has no cancellation and asserts no logarithmic saving. -/
+theorem section4Block_polynomial_norm_le_divisor_sum {ε m n B : ℝ} (hB : 0 ≤ B)
+    (a b : ℝ → ℕ → ℝ)
+    (ha : ∀ x k, |a x k| ≤ (k.divisors.card : ℝ) ^ B)
+    (hb : ∀ x k, |b x k| ≤ (k.divisors.card : ℝ) ^ B)
+    (x t : ℝ) {q : ℕ} (χ : DirichletCharacter ℂ q) :
+    ‖∑ k ∈ Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊,
+      (section4Block ε m n a b x k : ℂ) * χ (k : ZMod q) /
+        (k : ℂ) ^ Thm4.half (-t)‖ ≤
+      ∑ k ∈ Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊,
+        (k.divisors.card : ℝ) ^ (2 * B + 3) / (k : ℝ) ^ (1 / 2 : ℝ) := by
+  refine (norm_sum_le _ _).trans (Finset.sum_le_sum ?_)
+  intro k hk
+  have hk0 : 0 < k := by have := (Finset.mem_Ioc.mp hk).1; omega
+  have hkR : 0 < (k : ℝ) := by exact_mod_cast hk0
+  have hden : ‖(k : ℂ) ^ Thm4.half (-t)‖ = (k : ℝ) ^ (1 / 2 : ℝ) := by
+    rw [← Complex.ofReal_natCast, Complex.norm_cpow_eq_rpow_re_of_pos hkR]
+    congr 1
+    norm_num [Thm4.half]
+  rw [norm_div, norm_mul, Complex.norm_real, Real.norm_eq_abs, hden]
+  apply div_le_div_of_nonneg_right _ (Real.rpow_nonneg hkR.le _)
+  exact (mul_le_of_le_one_right (abs_nonneg _) (χ.norm_le_one _)).trans
+    (auxiliaryConvolution_divisor_bound_general _ _ _ _ a b hB ha hb x k)
+
 /-- LEAF: Lemma 10 for this block, the bound 3.9 over one dyadic shell of well spaced
 heights. P0069 page 23 Lemma 10 with 3.37 and display 4.8, the grouping 3.38; page 12 display 3.9; page 27,
 the block as `M1 N L` summed over dyadic `D`. For every `T` and every finite one
