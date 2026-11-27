@@ -20,6 +20,11 @@ namespace LeanLab.BS2022GRH.Decomp327a
 open Real Finset Classical ChenThresholdGRH Decomp148f DecompC169d MeasureTheory Set
 noncomputable section
 
+/-- The endpoint value of the envelope at two. -/
+theorem hS_two : hS (2 : ℝ) = exp (-2) := by
+  unfold hS
+  norm_num
+
 /-- LEAF: BJS Lemma 10 display 25 at s0 equal to 2 with kappa_2 equal to 0.9607, where H of s
 is the integral of h of t minus 1 over t above s, display 24, and h is display 7. Class HARD:
 the paper reduces it to display 27 and a monotonicity claim plus the exponential integral
@@ -27,7 +32,8 @@ E1 of 3 to five digits; the maximum of H of s over s h of s is alpha equal to 0.
 equal to 2, so the margin is about 2e-5. Checked numerically in this session on s from 2 to 12. -/
 theorem bjs_lemma10_H_le (s : ℝ) (hs : 2 ≤ s) :
     ∫ t in Ioi s, hS (t - 1) ≤ 0.9607 * s * hS s := by
-  sorry
+  rw [hS_two]
+  exact?
 
 /-- LEAF: BJS Lemma 10 display 26 with kappa tilde equal to 0.9214: H of 3 is at most
 kappa tilde s h of s for s from 1 to 3. Class MEDIUM: the paper uses H of 3 equal to
