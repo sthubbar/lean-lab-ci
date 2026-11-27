@@ -198,6 +198,14 @@ theorem dyadic_level_moment {ι : Type*} (s : Finset ι) (f : ι → ℝ) (hf : 
     rw [hsplit]
     exact mul_le_mul_of_nonneg_right hunit (Real.rpow_nonneg hE r)
 
+/-- A filtered subset of `range M` has at most `M` elements. This is the elementary
+cardinality bound used in the large spectrum estimate. -/
+theorem level_set_card_le_M (M : ℕ) (p : ℕ → Prop) [DecidablePred p] :
+    ((range M).filter p).card ≤ M := by
+  calc
+    ((range M).filter p).card ≤ (range M).card := card_filter_le _ _
+    _ = M := card_range M
+
 /-- LEAF: Proposition 4.2, pages 13 to 14, the large spectrum level set estimate in the
 proof of Green and Tao, Restriction theory of the Selberg sieve, Proposition 4.2,
 arXiv math/0405581. Class HARD. For every positive epsilon the frequencies where the
