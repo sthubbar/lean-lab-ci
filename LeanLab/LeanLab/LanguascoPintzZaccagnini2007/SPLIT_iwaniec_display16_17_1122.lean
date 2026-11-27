@@ -1,4 +1,4 @@
-import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_centre_lower1122
+import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_no_zero_open_strip481_steps
 
 /-!
 A further split of the two HARD leaves `iwaniec_display16_1122` and `iwaniec_display17_1122` of
@@ -42,9 +42,201 @@ theorem iwaniec_lemma10_1122 (F : ℂ → ℂ) (s₀ : ℂ) (r B : ℝ) (hr : 0 
     -(4 / r) * Real.log B + ∑ ρ ∈ Z, (1 / (s₀ - ρ)).re ≤ (logDeriv F s₀).re := by
   sorry
 
-/-- Iwaniec 1974 page 103, the bound at the centre used for displays (16) and (17), formerly a
-MEDIUM leaf, now proved from Mathlib's `LSeries.mul_mu_eq_one` and the leaf
-`iwaniec_inverse_series_bound1122` of `SPLIT_iwaniec_centre_lower1122`.
+private lemma zeta_le (σ : ℝ) (hσ : 1 < σ) :
+    (∑' n : ℕ, ((n:ℝ)) ^ (-σ)) ≤ σ / (σ - 1) := by
+  have hσ0 : (0:ℝ) < σ := by linarith
+  have hs : Summable (fun n : ℕ => ((n:ℝ)) ^ (-σ)) := by
+    have h := (Real.summable_nat_rpow_inv (p := σ)).mpr hσ
+    exact h.congr (fun n => (Real.rpow_neg (Nat.cast_nonneg n) σ).symm)
+  have hanti : AntitoneOn (fun t : ℝ => t ^ (-σ)) (Set.Ici (((1:ℕ)):ℝ)) := by
+    intro a ha b hb hab
+    change b ^ (-σ) ≤ a ^ (-σ)
+    have ha1 : (1:ℝ) ≤ a := by simpa using ha
+    have ha0 : 0 < a := by linarith
+    have h1 : (1:ℝ) ≤ b / a := by rw [le_div_iff₀ ha0]; linarith
+    have h2 : 1 ≤ (b / a) ^ σ := Real.one_le_rpow h1 (le_of_lt hσ0)
+    have h3 : (b / a) ^ (-σ) ≤ 1 := by
+      rw [Real.rpow_neg (by linarith)]
+      exact inv_le_one_of_one_le₀ h2
+    have hbeq : b = a * (b / a) := by field_simp
+    have hstep : b ^ (-σ) = (a * (b / a)) ^ (-σ) := congrArg (fun x => x ^ (-σ)) hbeq
+    calc b ^ (-σ) = (a * (b / a)) ^ (-σ) := hstep
+      _ = a ^ (-σ) * (b / a) ^ (-σ) := Real.mul_rpow ha0.le (by positivity)
+      _ ≤ a ^ (-σ) * 1 :=
+          mul_le_mul_of_nonneg_left h3 (Real.rpow_nonneg ha0.le _)
+      _ = a ^ (-σ) := by ring
+  have hint : MeasureTheory.IntegrableOn (fun t : ℝ => t ^ (-σ)) (Set.Ioi (((1:ℕ)):ℝ)) :=
+    integrableOn_Ioi_rpow_of_lt (by linarith : -σ < -1) (by simp : (0:ℝ) < ((1:ℕ):ℝ))
+  have hnn : ∀ t ∈ Set.Ioi (((1:ℕ)):ℝ), (0:ℝ) ≤ t ^ (-σ) := by
+    intro t ht
+    have ht' : (1:ℝ) < t := by simpa using ht
+    exact Real.rpow_nonneg (le_of_lt (by linarith : (0:ℝ) < t)) _
+  have key := hanti.tsum_comp_add_le_integral 1 hint hnn
+  have hintval : ∫ x in Set.Ioi (((1:ℕ)):ℝ), x ^ (-σ) = 1 / (σ - 1) := by
+    rw [integral_Ioi_rpow_of_lt (by linarith : -σ < -1) (c := ((1:ℕ):ℝ)) (by simp)]
+    have h1 : ((1:ℕ):ℝ) ^ (-σ + 1) = 1 := by
+      have : ((1:ℕ):ℝ) = 1 := by simp
+      rw [this, Real.one_rpow]
+    have h2 : -σ + 1 = -(σ - 1) := by ring
+    rw [h1, h2, neg_div_neg_eq]
+  have hs' : Summable (fun n : ℕ => ((n+1 : ℕ):ℝ) ^ (-σ)) := (summable_nat_add_iff 1).mpr hs
+  have h1 := hs.tsum_eq_zero_add
+  have h2 := hs'.tsum_eq_zero_add
+  have hz : ((0:ℕ):ℝ) ^ (-σ) = 0 := by
+    have h0 : ((0:ℕ):ℝ) = 0 := by norm_num
+    rw [h0, Real.zero_rpow (by linarith : -σ ≠ 0)]
+  have ho : ((1:ℕ):ℝ) ^ (-σ) = 1 := by
+    have h0 : ((1:ℕ):ℝ) = 1 := by norm_num
+    rw [h0, Real.one_rpow]
+  rw [hintval] at key
+  have hsplit : σ / (σ - 1) = 1 + 1 / (σ - 1) := by
+    field_simp
+    ring
+  rw [h1, h2, hz, ho, hsplit]
+  linarith
+
+/-- The complex norm of the Möbius function's value is its square. -/
+private lemma norm_moebius_cast (n : ℕ) :
+    ‖(((ArithmeticFunction.moebius n : ℤ) : ℂ))‖ = ((ArithmeticFunction.moebius n : ℝ)) ^ 2 := by
+  have hc : ((ArithmeticFunction.moebius n : ℤ) : ℂ)
+      = ((ArithmeticFunction.moebius n : ℝ) : ℂ) := by push_cast; ring
+  rw [hc, Complex.norm_real, Real.norm_eq_abs]
+  have h1 : |((ArithmeticFunction.moebius n : ℝ))| = ((|ArithmeticFunction.moebius n| : ℤ) : ℝ) := by
+    rw [Int.cast_abs]
+  rw [h1, ArithmeticFunction.abs_moebius]
+  have h2 : ((ArithmeticFunction.moebius n : ℝ)) ^ 2
+      = (((ArithmeticFunction.moebius n) ^ 2 : ℤ) : ℝ) := by push_cast; ring
+  rw [h2, ArithmeticFunction.moebius_sq]
+
+private lemma moebius_sq_ite (n : ℕ) :
+    ((ArithmeticFunction.moebius n : ℝ)) ^ 2 = (if Squarefree n then (1:ℝ) else 0) := by
+  have h : ((ArithmeticFunction.moebius n : ℝ)) ^ 2
+      = (((ArithmeticFunction.moebius n) ^ 2 : ℤ) : ℝ) := by push_cast; ring
+  rw [h, ArithmeticFunction.moebius_sq]
+  split_ifs <;> norm_num
+
+private lemma moebius_sq_le_one_sub (n : ℕ) :
+    ((ArithmeticFunction.moebius n : ℝ)) ^ 2 ≤ 1 - (if 4 ∣ n then (1:ℝ) else 0) := by
+  rw [moebius_sq_ite]
+  by_cases h4 : 4 ∣ n
+  · have hnsq : ¬ Squarefree n := by
+      intro hs
+      have hu : IsUnit (2:ℕ) := hs 2 (by rw [show 2 * 2 = 4 by norm_num]; exact h4)
+      rw [Nat.isUnit_iff] at hu
+      omega
+    rw [if_neg hnsq, if_pos h4]
+    norm_num
+  · rw [if_neg h4]
+    split_ifs <;> norm_num
+
+/-- The Möbius-squared sum is at most `1/(σ-1)` on `1 < σ ≤ 6/5`. -/
+private lemma mu_sq_le (σ : ℝ) (hσ : 1 < σ) (hσ' : σ ≤ 6 / 5) :
+    (∑' n : ℕ, ((ArithmeticFunction.moebius n : ℝ)) ^ 2 * ((n:ℝ)) ^ (-σ)) ≤ 1 / (σ - 1) := by
+  have hσ0 : (0:ℝ) < σ := by linarith
+  have hσ1 : 0 < σ - 1 := by linarith
+  have hsZ : Summable (fun n : ℕ => ((n:ℝ)) ^ (-σ)) := by
+    have h := (Real.summable_nat_rpow_inv (p := σ)).mpr hσ
+    exact h.congr (fun n => (Real.rpow_neg (Nat.cast_nonneg n) σ).symm)
+  have hZ := zeta_le σ hσ
+  have hZpos : (0:ℝ) ≤ ∑' n : ℕ, ((n:ℝ)) ^ (-σ) :=
+    tsum_nonneg (fun n => Real.rpow_nonneg (Nat.cast_nonneg n) _)
+  have hA : Summable (fun n : ℕ => (if 4 ∣ n then (1:ℝ) else 0) * ((n:ℝ)) ^ (-σ)) := by
+    refine Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_) hsZ
+    · have hnn : (0:ℝ) ≤ ((n:ℝ)) ^ (-σ) := Real.rpow_nonneg (Nat.cast_nonneg n) _
+      split_ifs <;> nlinarith
+    · have hnn : (0:ℝ) ≤ ((n:ℝ)) ^ (-σ) := Real.rpow_nonneg (Nat.cast_nonneg n) _
+      split_ifs <;> nlinarith
+  have hfix : Summable (fun n : ℕ => (1 - (if 4 ∣ n then (1:ℝ) else 0)) * ((n:ℝ)) ^ (-σ)) := by
+    refine Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_) hsZ
+    · have hnn : (0:ℝ) ≤ ((n:ℝ)) ^ (-σ) := Real.rpow_nonneg (Nat.cast_nonneg n) _
+      split_ifs <;> nlinarith
+    · have hnn : (0:ℝ) ≤ ((n:ℝ)) ^ (-σ) := Real.rpow_nonneg (Nat.cast_nonneg n) _
+      split_ifs <;> nlinarith
+  have hterm : ∀ n : ℕ, ((ArithmeticFunction.moebius n : ℝ)) ^ 2 * ((n:ℝ)) ^ (-σ)
+      ≤ (1 - (if 4 ∣ n then (1:ℝ) else 0)) * ((n:ℝ)) ^ (-σ) := by
+    intro n
+    have hnn : (0:ℝ) ≤ ((n:ℝ)) ^ (-σ) := Real.rpow_nonneg (Nat.cast_nonneg n) _
+    have hc := moebius_sq_le_one_sub n
+    nlinarith [hc, hnn]
+  have hSsum : Summable
+      (fun n : ℕ => ((ArithmeticFunction.moebius n : ℝ)) ^ 2 * ((n:ℝ)) ^ (-σ)) := by
+    refine Summable.of_nonneg_of_le (fun n => ?_) hterm hfix
+    exact mul_nonneg (by positivity) (Real.rpow_nonneg (Nat.cast_nonneg n) _)
+  have hS := Summable.tsum_le_tsum hterm hSsum hfix
+  have hsplit : (∑' n : ℕ, (1 - (if 4 ∣ n then (1:ℝ) else 0)) * ((n:ℝ)) ^ (-σ))
+      = (∑' n : ℕ, ((n:ℝ)) ^ (-σ))
+        - ∑' n : ℕ, (if 4 ∣ n then (1:ℝ) else 0) * ((n:ℝ)) ^ (-σ) := by
+    rw [← Summable.tsum_sub hsZ hA]
+    apply tsum_congr
+    intro n
+    ring
+  have hfour : (4:ℝ) ^ (-σ) * (∑' n : ℕ, ((n:ℝ)) ^ (-σ))
+      ≤ ∑' n : ℕ, (if 4 ∣ n then (1:ℝ) else 0) * ((n:ℝ)) ^ (-σ) := by
+    have hinj : Function.Injective (fun m : ℕ => 4 * m) := by
+      intro a b h
+      exact Nat.eq_of_mul_eq_mul_left (by norm_num) h
+    have hmul : ∀ m : ℕ, (((4 * m : ℕ)):ℝ) ^ (-σ) = (4:ℝ) ^ (-σ) * ((m:ℝ)) ^ (-σ) := by
+      intro m
+      push_cast
+      rw [Real.mul_rpow (by norm_num) (Nat.cast_nonneg m)]
+    have hf : Summable (fun m : ℕ => (((4 * m : ℕ)):ℝ) ^ (-σ)) := by
+      have h := hsZ.mul_left ((4:ℝ) ^ (-σ))
+      exact h.congr (fun m => (hmul m).symm)
+    have hkey := Summable.tsum_le_tsum_of_inj
+      (f := fun m : ℕ => (((4 * m : ℕ)):ℝ) ^ (-σ))
+      (g := fun n : ℕ => (if 4 ∣ n then (1:ℝ) else 0) * ((n:ℝ)) ^ (-σ))
+      (fun m => 4 * m) hinj
+      (by
+        intro c hc
+        have hnn : (0:ℝ) ≤ ((c:ℝ)) ^ (-σ) := Real.rpow_nonneg (Nat.cast_nonneg c) _
+        split_ifs <;> nlinarith)
+      (by
+        intro m
+        have hd : 4 ∣ 4 * m := ⟨m, by ring⟩
+        rw [if_pos hd]
+        simp)
+      hf hA
+    have hconv : (∑' m : ℕ, (((4 * m : ℕ)):ℝ) ^ (-σ))
+        = (4:ℝ) ^ (-σ) * (∑' n : ℕ, ((n:ℝ)) ^ (-σ)) := by
+      rw [← tsum_mul_left (a := (4:ℝ) ^ (-σ))]
+      exact tsum_congr (fun m => hmul m)
+    rw [hconv] at hkey
+    exact hkey
+  have h45 : (1:ℝ) / 5.3 ≤ (4:ℝ) ^ (-σ) := by
+    have h4pos : (0:ℝ) < (4:ℝ) ^ σ := Real.rpow_pos_of_pos (by norm_num) σ
+    have hle : (4:ℝ) ^ σ ≤ 5.3 := by
+      have h1 : (4:ℝ) ^ σ ≤ (4:ℝ) ^ (6 / 5 : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) hσ'
+      have h2 : (4:ℝ) ^ (6 / 5 : ℝ) ≤ 5.3 := by
+        have hp : ((4:ℝ) ^ (6 / 5 : ℝ)) ^ 5 = (4:ℝ) ^ 6 := by
+          rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+          norm_num
+        have h5 : ((4:ℝ) ^ (6 / 5 : ℝ)) ^ 5 ≤ (5.3:ℝ) ^ 5 := by
+          rw [hp]
+          norm_num
+        exact le_of_pow_le_pow_left₀ (by norm_num : (5:ℕ) ≠ 0) (by norm_num) h5
+      linarith
+    rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 4), one_div]
+    exact (inv_le_inv₀ (by norm_num : (0:ℝ) < 5.3) h4pos).mpr hle
+  calc (∑' n : ℕ, ((ArithmeticFunction.moebius n : ℝ)) ^ 2 * ((n:ℝ)) ^ (-σ))
+      ≤ (∑' n : ℕ, ((n:ℝ)) ^ (-σ))
+        - ∑' n : ℕ, (if 4 ∣ n then (1:ℝ) else 0) * ((n:ℝ)) ^ (-σ) := by
+        rw [← hsplit]
+        exact hS
+    _ ≤ (∑' n : ℕ, ((n:ℝ)) ^ (-σ)) - (4:ℝ) ^ (-σ) * (∑' n : ℕ, ((n:ℝ)) ^ (-σ)) := by
+        linarith [hfour]
+    _ = (1 - (4:ℝ) ^ (-σ)) * (∑' n : ℕ, ((n:ℝ)) ^ (-σ)) := by ring
+    _ ≤ (1 - (1:ℝ) / 5.3) * (∑' n : ℕ, ((n:ℝ)) ^ (-σ)) := by
+        exact mul_le_mul_of_nonneg_right (by linarith) hZpos
+    _ ≤ (1 - (1:ℝ) / 5.3) * (σ / (σ - 1)) :=
+        mul_le_mul_of_nonneg_left hZ (by norm_num)
+    _ ≤ 1 / (σ - 1) := by
+        have hc : (1 - (1:ℝ) / 5.3) = 43 / 53 := by norm_num
+        rw [hc, mul_div_assoc', div_le_div_iff₀ hσ1 hσ1]
+        nlinarith
+
+/-- LEAF: Iwaniec 1974 page 103, the bound at the centre used for displays (16) and (17).
+Class: MEDIUM.
 H. Iwaniec, On zeros of Dirichlet's L series, Invent. Math. 23, 1974, page 103, the line before
 display (16): `|L(s₀, χ)|⁻¹ ≤ Σ |μ(n)| n^(-σ₀) < 1 / (σ₀ - 1)`, from the Euler product, with
 `σ₀ = 1 + 5θ`. Stated for every character and `1 < σ ≤ 6/5`; on that range
@@ -52,25 +244,72 @@ display (16): `|L(s₀, χ)|⁻¹ ≤ Σ |μ(n)| n^(-σ₀) < 1 / (σ₀ - 1)`, 
 theorem iwaniec_centre_lower1122 (q : ℕ) (hq : 1 ≤ q) (ψ : DirichletCharacter ℂ q)
     (σ t : ℝ) (hσ : 1 < σ) (hσ' : σ ≤ 6 / 5) :
     σ - 1 ≤ ‖Lfun481 ψ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
-  have hq0 : q ≠ 0 := by omega
-  have : NeZero q := ⟨hq0⟩
-  set s : ℂ := (σ : ℂ) + (t : ℂ) * Complex.I with hs
-  have hre : 1 < s.re := by simp [hs, hσ]
-  have hL : Lfun481 ψ s = LSeries (fun n => ψ n) s := by
-    simp only [Lfun481, dif_neg hq0]
-    exact DirichletCharacter.LFunction_eq_LSeries ψ hre
-  have hmul := DirichletCharacter.LSeries.mul_mu_eq_one ψ hre
-  have hb := iwaniec_inverse_series_bound1122 q ψ σ t hσ hσ'
-  set A := LSeries (fun n => ψ n) s with hA
-  set B := LSeries (fun n : ℕ => ψ n * ((ArithmeticFunction.moebius n : ℤ) : ℂ)) s with hB
-  have hmul' : A * B = 1 := by
-    rw [hA, hB]; convert hmul using 2
-  have hn : ‖A‖ * ‖B‖ = 1 := by rw [← norm_mul, hmul', norm_one]
-  have hσ1 : 0 < σ - 1 := by linarith
-  rw [hL]
-  have h1 : ‖B‖ * (σ - 1) ≤ 1 := by
-    rw [le_div_iff₀ hσ1] at hb; exact hb
-  nlinarith [norm_nonneg A, norm_nonneg B]
+  haveI : NeZero q := ⟨by omega⟩
+  set s : ℂ := (σ:ℂ) + (t:ℂ) * Complex.I with hsdef
+  have hre : s.re = σ := by simp [hsdef]
+  have hs : 1 < s.re := by rw [hre]; exact hσ
+  set Gf : ℕ → ℂ := fun n => ψ n with hGf
+  set Mf : ℕ → ℂ := fun n => ((ArithmeticFunction.moebius n : ℂ)) with hMf
+  have hLfun : Lfun481 ψ s = LSeries Gf s := by
+    have h := DirichletCharacter.LFunction_eq_LSeries ψ hs
+    simp only [Lfun481, dif_neg (by omega : q ≠ 0)]
+    simpa [hGf] using h
+  have hprod : LSeries Gf s * LSeries (Gf * Mf) s = 1 := by
+    have h := DirichletCharacter.LSeries.mul_mu_eq_one ψ hs
+    simpa [hGf, hMf] using h
+  have hsumm2 : LSeriesSummable (Gf * Mf) s := by
+    have h := DirichletCharacter.LSeriesSummable_mul ψ
+      (ArithmeticFunction.LSeriesSummable_moebius_iff.mpr hs)
+    simpa [hGf, hMf] using h
+  have hsZ : Summable (fun n : ℕ => ((n:ℝ)) ^ (-σ)) := by
+    have h := (Real.summable_nat_rpow_inv (p := σ)).mpr hσ
+    exact h.congr (fun n => (Real.rpow_neg (Nat.cast_nonneg n) σ).symm)
+  have hSsum : Summable (fun n : ℕ => ((ArithmeticFunction.moebius n : ℝ)) ^ 2 * ((n:ℝ)) ^ (-σ)) := by
+    refine Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_) hsZ
+    · exact mul_nonneg (by positivity) (Real.rpow_nonneg (Nat.cast_nonneg n) _)
+    · have h1 : ((ArithmeticFunction.moebius n : ℝ)) ^ 2 ≤ 1 := by
+        rw [moebius_sq_ite]
+        split_ifs <;> norm_num
+      have h2 : (0:ℝ) ≤ ((n:ℝ)) ^ (-σ) := Real.rpow_nonneg (Nat.cast_nonneg n) _
+      nlinarith [h1, h2]
+  have hpt : ∀ n : ℕ, ‖LSeries.term (Gf * Mf) s n‖
+      ≤ ((ArithmeticFunction.moebius n : ℝ)) ^ 2 * ((n:ℝ)) ^ (-σ) := by
+    intro n
+    rw [LSeries.norm_term_eq]
+    rcases eq_or_ne n 0 with rfl | hn
+    · simp
+    rw [if_neg hn, hre]
+    have hpsi : ‖ψ n‖ ≤ 1 := DirichletCharacter.norm_le_one ψ n
+    have hmu : ‖(((ArithmeticFunction.moebius n : ℤ) : ℂ))‖
+        = ((ArithmeticFunction.moebius n : ℝ)) ^ 2 := norm_moebius_cast n
+    have hval : (Gf * Mf) n = ψ n * ((ArithmeticFunction.moebius n : ℤ) : ℂ) := by
+      simp only [Pi.mul_apply, hGf, hMf]
+    have hnum : ‖(Gf * Mf) n‖ ≤ ((ArithmeticFunction.moebius n : ℝ)) ^ 2 := by
+      rw [hval, norm_mul, hmu]
+      have hnn : (0:ℝ) ≤ ((ArithmeticFunction.moebius n : ℝ)) ^ 2 := by positivity
+      nlinarith [hpsi, hnn]
+    have hnpos : (0:ℝ) < (n:ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hn
+    have hden : (0:ℝ) < (n:ℝ) ^ σ := Real.rpow_pos_of_pos hnpos σ
+    rw [Real.rpow_neg (Nat.cast_nonneg n), div_le_iff₀ hden]
+    have hc : ((ArithmeticFunction.moebius n : ℝ)) ^ 2 * ((n:ℝ) ^ σ)⁻¹ * (n:ℝ) ^ σ
+        = ((ArithmeticFunction.moebius n : ℝ)) ^ 2 := by
+      rw [mul_assoc, inv_mul_cancel₀ (ne_of_gt hden), mul_one]
+    rw [hc]
+    exact hnum
+  have hnorm : ‖LSeries (Gf * Mf) s‖
+      ≤ ∑' n : ℕ, ((ArithmeticFunction.moebius n : ℝ)) ^ 2 * ((n:ℝ)) ^ (-σ) := by
+    have h1 := norm_tsum_le_tsum_norm hsumm2.norm
+    exact le_trans h1 (Summable.tsum_le_tsum hpt hsumm2.norm hSsum)
+  have hprod' : ‖LSeries Gf s‖ * ‖LSeries (Gf * Mf) s‖ = 1 := by
+    rw [← norm_mul, hprod, norm_one]
+  have hS := mu_sq_le σ hσ hσ'
+  have hle : (1:ℝ) ≤ ‖LSeries Gf s‖ * (1 / (σ - 1)) :=
+    calc (1:ℝ) = ‖LSeries Gf s‖ * ‖LSeries (Gf * Mf) s‖ := hprod'.symm
+      _ ≤ ‖LSeries Gf s‖ * (1 / (σ - 1)) :=
+          mul_le_mul_of_nonneg_left (le_trans hnorm hS) (norm_nonneg _)
+  rw [mul_one_div, le_div_iff₀ (by linarith : (0:ℝ) < σ - 1)] at hle
+  rw [hLfun]
+  linarith
 
 /-- LEAF: Iwaniec 1974 page 102, Lemma 9, as page 103 applies it before display (16).
 Class: HARD.
