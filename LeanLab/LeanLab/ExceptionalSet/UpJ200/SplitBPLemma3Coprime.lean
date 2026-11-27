@@ -70,6 +70,15 @@ theorem leaf_bp_lemma3_printed :
                   ((r.totient : ℝ) ^ 2 * (m.toNat.totient : ℝ)) +
                 C * X * ((m.toNat : ℝ) / (m.toNat.totient : ℝ)) * (1 - β) *
                   Real.exp (-(c₂ / θ)) * Real.log (X ^ θ) := by
+  intro a ha
+  -- Proof attempt: this leaf is Montgomery–Vaughan 1975 formulas 6.17, 6.19 and 7.1,
+  -- a citation wall (CITED-LEFT). The required analytic machinery is absent from Mathlib:
+  -- (i) explicit formula for Dirichlet L-functions linking zeros to prime sums,
+  -- (ii) weighted sieve identity producing R1, singSeries, tildeSing terms,
+  -- (iii) zero-density estimates near Re(s) = 1,
+  -- (iv) divisorError envelope for Γ₁, Γ₂.
+  -- Loogle: no sieve, no zero.density in Mathlib v4.35.0.
+  -- LeanSearch: LFunction exists but no explicit formula or zero-density.
   sorry
 
 /-- Display 13 and page 363 case ii a: `|Ĩ(m)| ≤ m` for `β ≤ 1`, `P ≥ 0`. PROVED. -/
