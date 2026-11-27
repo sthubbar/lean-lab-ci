@@ -1,7 +1,4 @@
 import LeanLab.ExceptionalSet.SPLIT_leaf_near_zero_selected
-import LeanLab.ExceptionalSet.Feed1122_near_zero_page_bound_split
-import LeanLab.ExceptionalSet.Feed1122_near_zero_conductor_power_s134
-import LeanLab.ExceptionalSet.Feed1122_near_zero_main_term_reroute_s134
 
 /-!
 Feed 1122, wave 2: a split of `leaf_near_zero_even_index` along the analytic chain of
@@ -54,9 +51,8 @@ theorem leaf_near_zero_even_main_term (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
                 (r : ℝ) ≤ calE γ κ N ^ (1 / 7 : ℝ) →
                 c * (1 - β) * F γ N ≤
                   (R1 (F γ N ^ (6 * δ)) (F γ N) (nu γ n)).re +
-                    A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n) :=
-  -- CLOUD S134: CONDITIONAL ON leaf_exceptional_main_term_lower, see Feed1122_near_zero_main_term_reroute_s134.lean.
-  leaf_near_zero_even_main_term_s134 γ h1 h2 a ha
+                    A * F γ N * divisorError r (F γ N ^ (6 * δ)) (nu γ n) := by
+  sorry
 
 /-- LEAF: P0082 page 358 display 10, citing Davenport chapter 14. HARD.
 The zero `β < 1` of the L function of a nonprincipal real primitive character of conductor `r`
@@ -65,9 +61,8 @@ is positive for every conductor. -/
 theorem leaf_near_zero_page_bound :
     ∃ c : ℝ, 0 < c ∧ ∀ (r : ℕ) (_ : NeZero r) (χ : DirichletCharacter ℂ r) (β : ℝ),
       χ.IsPrimitive → χ ^ 2 = 1 → χ ≠ 1 → 0 < β → β < 1 → χ.LFunction β = 0 →
-        c / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) ≤ 1 - β :=
-  -- CLOUD S134: proved in `Feed1122_near_zero_page_bound_split.lean` from the lab zero gap.
-  leaf_near_zero_page_bound_of_leaves
+        c / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) ≤ 1 - β := by
+  sorry
 
 /-- LEAF: P0082 page 364 last lines, the step from display 10 to `X calE^(-1/10)`. MEDIUM.
 For `1 ≤ r ≤ calE^(1/7)` one has `r^(-1/2) (log r)^(-2) ≥ calE^(-1/14) (log calE)^(-2)`, and this
@@ -75,9 +70,324 @@ is at least `calE^(-1/10)` once `N` is large, since `calE` tends to infinity for
 theorem leaf_near_zero_conductor_power (γ : ℝ) (h1 : 1 < γ) (h2 : γ < 3 / 2)
     (κ : ℝ) (hκ : 0 < κ) :
     ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ r : ℕ, 1 ≤ r → (r : ℝ) ≤ calE γ κ N ^ (1 / 7 : ℝ) →
-      calE γ κ N ^ (-(1 / 10 : ℝ)) ≤ 1 / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) :=
-  -- CLOUD S134: proved in `Feed1122_near_zero_conductor_power_s134.lean`.
-  leaf_near_zero_conductor_power_s134 γ h1 h2 κ hκ
+      calE γ κ N ^ (-(1 / 10 : ℝ)) ≤ 1 / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) := by
+  have hγ3 : 0 < (3 : ℝ) - 2 * γ := by linarith
+  have hcalE_tendsto : Tendsto (fun N : ℕ => calE γ κ N) atTop atTop := by
+    have h₁ : Tendsto (fun N : ℕ => (κ : ℝ) * Real.log (N : ℝ) ^ (3 - 2 * γ)) atTop atTop := by
+      have h₂ : Tendsto (fun N : ℕ => Real.log (N : ℝ)) atTop atTop := by
+        exact Real.tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+      have h₃ : Tendsto (fun N : ℕ => Real.log (N : ℝ) ^ (3 - 2 * γ)) atTop atTop := by
+        exact tendsto_rpow_atTop (by linarith).comp h₂
+      have h₄ : Tendsto (fun N : ℕ => (κ : ℝ) * Real.log (N : ℝ) ^ (3 - 2 * γ)) atTop atTop := by
+        exact h₃.const_mul_atTop (by positivity)
+      exact h₄
+    have h₅ : Tendsto (fun N : ℕ => Real.exp ((κ : ℝ) * Real.log (N : ℝ) ^ (3 - 2 * γ))) atTop atTop := by
+      exact Real.tendsto_exp_atTop.comp h₁
+    have h₆ : (fun N : ℕ => calE γ κ N) = (fun N : ℕ => Real.exp ((κ : ℝ) * Real.log (N : ℝ) ^ (3 - 2 * γ))) := by
+      funext N
+      simp [calE]
+      <;> ring_nf
+      <;> field_simp
+      <;> ring_nf
+    rw [h₆]
+    exact h₅
+  -- Choose C = exp(16) such that C^(2/5) ≥ (log(2C))^2
+  have hC : Real.exp 16 ^ (2 / 5 : ℝ) ≥ Real.log (2 * Real.exp 16) ^ 2 := by
+    have h₁ : Real.exp 16 ^ (2 / 5 : ℝ) = Real.exp (16 * (2 / 5 : ℝ)) := by
+      rw [Real.rpow_natCast]
+      simp [Real.exp_mul, Real.rpow_nat_cast]
+      <;> ring_nf
+      <;> field_simp
+      <;> ring_nf
+    rw [h₁]
+    have h₂ : Real.log (2 * Real.exp 16) = Real.log 2 + 16 := by
+      rw [Real.log_mul (by norm_num) (Real.exp_pos 16)]
+      <;> simp [Real.log_exp]
+      <;> ring
+    rw [h₂]
+    have h₃ : Real.exp (16 * (2 / 5 : ℝ)) ≥ (Real.log 2 + 16 : ℝ) ^ 2 := by
+      have := Real.exp_one_gt_d9
+      have := Real.exp_pos (16 * (2 / 5 : ℝ))
+      norm_num [Real.exp_pos, Real.exp_lt_exp.mpr] at *
+      <;>
+      (try norm_num) <;>\
+      (try linarith [Real.add_one_le_exp (16 * (2 / 5 : ℝ))]) <;>\
+      (try nlinarith [Real.add_one_le_exp (16 * (2 / 5 : ℝ)), Real.log_two_gt_d9]) <;>\
+      (try
+        {
+          have := Real.exp_one_gt_d9
+          norm_num at *
+          <;>
+          nlinarith [Real.add_one_le_exp (16 * (2 / 5 : ℝ)), Real.log_two_gt_d9]
+        })
+    linarith
+  -- Obtain N₀ such that for all N ≥ N₀, calE γ κ N ≥ exp(16)
+  have hN₀ : ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → Real.exp 16 ≤ calE γ κ N := by
+    have h₁ : ∀ᶠ (N : ℕ) in atTop, Real.exp 16 ≤ calE γ κ N := by
+      have h₂ : Tendsto (fun N : ℕ => calE γ κ N) atTop atTop := hcalE_tendsto
+      exact (h₂.eventually (eventually_ge_atTop (Real.exp 16)))
+    obtain ⟨N₀, hN₀⟩ := (eventually_atTop.mp h₁)
+    refine' ⟨N₀, _⟩
+    intro N hN
+    exact hN₀ N hN
+  obtain ⟨N₀, hN₀⟩ := hN₀
+  use N₀
+  intro N hN r hr hrE
+  have hE : Real.exp 16 ≤ calE γ κ N := hN₀ N hN
+  have hEpos : 0 < calE γ κ N := by linarith [Real.exp_pos 16]
+  have hE1 : 1 ≤ calE γ κ N := by linarith [Real.one_lt_iff_neg_pos.mpr (Real.exp_pos 16)]
+  have hrpos : 0 < (r : ℝ) := by positivity
+  have hr1 : 1 ≤ (r : ℝ) := by exact_mod_cast hr
+  -- Since r ≤ calE^(1/7) and calE ≥ 1, we have r ≤ calE
+  have hrcalE : (r : ℝ) ≤ calE γ κ N := by
+    have h₁ : (r : ℝ) ≤ calE γ κ N ^ (1 / 7 : ℝ) := hrE
+    have h₂ : calE γ κ N ^ (1 / 7 : ℝ) ≤ calE γ κ N := by
+      apply Real.rpow_le_rpow_of_exponent_le
+      · linarith
+      · norm_num
+      · linarith
+    linarith
+  -- sqrt(r) ≤ sqrt(calE), so 1/sqrt(r) ≥ calE^(-1/2)
+  have hsqrt : Real.sqrt (r : ℝ) ≤ Real.sqrt (calE γ κ N) := Real.sqrt_le_sqrt hrcalE
+  have hsqrt_pos : 0 < Real.sqrt (r : ℝ) := Real.sqrt_pos.mpr hrpos
+  have hsqrtE_pos : 0 < Real.sqrt (calE γ κ N) := Real.sqrt_pos.mpr hEpos
+  have hinv_sqrt : 1 / Real.sqrt (r : ℝ) ≥ 1 / Real.sqrt (calE γ κ N) := by
+    apply one_div_le_one_div_of_le
+    · positivity
+    · exact hsqrt
+  have hinv_sqrt' : 1 / Real.sqrt (calE γ κ N) = (calE γ κ N) ^ (-(1 / 2 : ℝ)) := by
+    have h₁ : Real.sqrt (calE γ κ N) = (calE γ κ N) ^ (1 / 2 : ℝ) := by
+      rw [Real.sqrt_eq_rpow]
+      <;> norm_num
+    rw [h₁]
+    field_simp [Real.rpow_neg, Real.rpow_add, Real.rpow_one, hEpos.ne']
+    <;> ring_nf
+    <;> field_simp [Real.rpow_neg, Real.rpow_add, Real.rpow_one, hEpos.ne']
+    <;> ring_nf
+  -- log(r+2) ≤ log(calE+2) ≤ log(2*calE) for calE ≥ 2
+  have hlog : Real.log ((r : ℝ) + 2) ≤ Real.log (2 * calE γ κ N) := by
+    have h₁ : (r : ℝ) + 2 ≤ 2 * calE γ κ N := by
+      have h₂ : (r : ℝ) ≤ calE γ κ N := hrcalE
+      have h₃ : (2 : ℝ) ≤ calE γ κ N := by linarith [Real.exp_pos 16]
+      nlinarith
+    have h₂ : 0 < (r : ℝ) + 2 := by positivity
+    have h₃ : 0 < 2 * calE γ κ N := by positivity
+    apply Real.log_le_log
+    · positivity
+    · linarith
+  have hlog_pos : 0 < Real.log ((r : ℝ) + 2) := Real.log_pos (by linarith)
+  have hlogE_pos : 0 < Real.log (2 * calE γ κ N) := Real.log_pos (by
+    have h₁ : (1 : ℝ) < 2 * calE γ κ N := by
+      have h₂ : Real.exp 16 ≤ calE γ κ N := hE
+      have h₃ : (1 : ℝ) < Real.exp 16 := by norm_num [Real.exp_pos]
+      linarith
+    linarith)
+  have hinv_log : 1 / Real.log ((r : ℝ) + 2) ^ 2 ≥ 1 / Real.log (2 * calE γ κ N) ^ 2 := by
+    apply one_div_le_one_div_of_le
+    · positivity
+    · gcongr <;> nlinarith
+  -- Combine: 1/(sqrt(r)*log(r+2)^2) ≥ calE^(-1/2) / log(2*calE)^2
+  have hmain : 1 / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) ≥ (calE γ κ N) ^ (-(1 / 2 : ℝ)) / Real.log (2 * calE γ κ N) ^ 2 := by
+    calc
+      1 / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) = (1 / Real.sqrt (r : ℝ)) * (1 / Real.log ((r : ℝ) + 2) ^ 2) := by
+        field_simp [hsqrt_pos.ne', hlog_pos.ne']
+        <;> ring_nf
+      _ ≥ (1 / Real.sqrt (calE γ κ N)) * (1 / Real.log (2 * calE γ κ N) ^ 2) := by
+        gcongr <;> try norm_num <;> try linarith
+      _ = (calE γ κ N) ^ (-(1 / 2 : ℝ)) / Real.log (2 * calE γ κ N) ^ 2 := by
+        rw [hinv_sqrt']
+        <;> field_simp [hlogE_pos.ne']
+        <;> ring_nf
+  -- Show calE^(-1/2)/log(2*calE)^2 ≥ calE^(-1/10), i.e., calE^(2/5) ≥ log(2*calE)^2
+  have hpow : (calE γ κ N) ^ (-(1 / 2 : ℝ)) / Real.log (2 * calE γ κ N) ^ 2 ≥ (calE γ κ N) ^ (-(1 / 10 : ℝ)) := by
+    have h₁ : Real.exp 16 ≤ calE γ κ N := hE
+    have h₂ : 0 < calE γ κ N := by positivity
+    have h₃ : (calE γ κ N : ℝ) ^ (2 / 5 : ℝ) ≥ Real.log (2 * calE γ κ N) ^ 2 := by
+      -- Use the fact that the function x ↦ x^(2/5) / log(2x)^2 is increasing for x ≥ exp(16)
+      have h₄ : Real.log (calE γ κ N) ≥ 16 := by
+        have h₅ : Real.log (Real.exp 16) ≤ Real.log (calE γ κ N) := Real.log_le_log (by positivity) h₁
+        have h₆ : Real.log (Real.exp 16) = (16 : ℝ) := by norm_num [Real.log_exp]
+        linarith
+      have h₅ : (calE γ κ N : ℝ) ^ (2 / 5 : ℝ) ≥ Real.log (2 * calE γ κ N) ^ 2 := by
+        -- Prove by showing the function is increasing
+        have h₆ : ∀ (x : ℝ), x ≥ Real.exp 16 → x ^ (2 / 5 : ℝ) ≥ Real.log (2 * x) ^ 2 := by
+          intro x hx
+          have h₇ : Real.log x ≥ 16 := by
+            have h₈ : Real.log (Real.exp 16) ≤ Real.log x := Real.log_le_log (by positivity) hx
+            have h₉ : Real.log (Real.exp 16) = (16 : ℝ) := by norm_num [Real.log_exp]
+            linarith
+          have h₈ : 0 < x := by linarith [Real.exp_pos 16]
+          have h₉ : 0 < Real.log x := by linarith
+          have h₁₀ : 0 < Real.log (2 * x) := Real.log_pos (by linarith [Real.exp_pos 16])
+          -- Use the fact that x^(2/5) / log(2x)^2 is increasing for x ≥ exp(16)
+          have h₁₁ : x ^ (2 / 5 : ℝ) = Real.exp ((2 / 5 : ℝ) * Real.log x) := by
+            rw [Real.rpow_def_of_pos h₈]
+            <;> field_simp [Real.exp_mul, Real.exp_log h₈]
+            <;> ring_nf
+          rw [h₁₁]
+          have h₁₂ : Real.log (2 * x) = Real.log 2 + Real.log x := by
+            rw [Real.log_mul (by positivity) (by positivity)]
+            <;> ring
+          rw [h₁₂]
+          have h₁₃ : Real.exp ((2 / 5 : ℝ) * Real.log x) ≥ (Real.log 2 + Real.log x) ^ 2 := by
+            -- Prove this inequality for log x ≥ 16
+            have h₁₄ : Real.log x ≥ 16 := h₇
+            have h₁₅ : Real.exp ((2 / 5 : ℝ) * Real.log x) ≥ (Real.log 2 + Real.log x) ^ 2 := by
+              have h₁₆ : (2 / 5 : ℝ) * Real.log x ≥ Real.log 2 + Real.log x + Real.log (Real.log 2 + Real.log x) := by
+                -- This is a numerical inequality that holds for log x ≥ 16
+                have h₁₇ : Real.log x ≥ 16 := h₇
+                have h₁₈ : (2 / 5 : ℝ) * Real.log x ≥ Real.log 2 + Real.log x + Real.log (Real.log 2 + Real.log x) := by
+                  have h₁₉ : Real.log x ≥ 16 := h₇
+                  have h₂₀ : (2 / 5 : ℝ) * Real.log x = (2 / 5 : ℝ) * Real.log x := rfl
+                  have h₂₁ : Real.log 2 + Real.log x + Real.log (Real.log 2 + Real.log x) ≤ (2 / 5 : ℝ) * Real.log x := by
+                    have h₂₂ : Real.log x ≥ 16 := h₇
+                    have h₂₃ : Real.log 2 ≥ 0 := Real.log_pos (by norm_num) |>.le
+                    have h₂₄ : Real.log (Real.log 2 + Real.log x) ≤ Real.log (Real.log x + Real.log x) := by
+                      apply Real.log_le_log
+                      · linarith
+                      · have : (Real.log 2 : ℝ) ≤ Real.log x := by linarith [Real.log_pos (by norm_num : (1 : ℝ) < 2)]
+                        linarith
+                    have h₂₅ : Real.log (Real.log x + Real.log x) = Real.log (2 * Real.log x) := by
+                      ring_nf
+                      <;> field_simp [Real.log_mul, Real.log_pow]
+                      <;> ring_nf
+                    have h₂₆ : Real.log (2 * Real.log x) = Real.log 2 + Real.log (Real.log x) := by
+                      rw [Real.log_mul (by positivity) (by positivity)]
+                      <;> ring
+                    have h₂₇ : Real.log (Real.log 2 + Real.log x) ≤ Real.log 2 + Real.log (Real.log x) := by linarith
+                    have h₂₈ : Real.log 2 + Real.log x + Real.log (Real.log 2 + Real.log x) ≤ Real.log 2 + Real.log x + Real.log 2 + Real.log (Real.log x) := by linarith
+                    have h₂₉ : Real.log 2 + Real.log x + Real.log 2 + Real.log (Real.log x) = 2 * Real.log 2 + Real.log x + Real.log (Real.log x) := by ring
+                    have h₃₀ : (2 : ℝ) * Real.log 2 + Real.log x + Real.log (Real.log x) ≤ (2 / 5 : ℝ) * Real.log x := by
+                      have h₃₁ : Real.log x ≥ 16 := h₇
+                      have h₃₂ : Real.log (Real.log x) ≤ Real.log x - 1 := by
+                        have h₃₃ : Real.log x ≥ 16 := h₇
+                        have h₃₄ : Real.log (Real.log x) ≤ Real.log x - 1 := by
+                          have h₃₅ : Real.log (Real.log x) ≤ Real.log x - 1 := by
+                            nlinarith [Real.log_le_sub_one_of_pos (by positivity : (0 : ℝ) < Real.log x)]
+                          linarith
+                        linarith
+                      nlinarith [Real.log_pos (by norm_num : (1 : ℝ) < 2)]
+                    linarith
+                  linarith
+                linarith
+              have h₁₉ : Real.exp ((2 / 5 : ℝ) * Real.log x) ≥ Real.exp (Real.log 2 + Real.log x + Real.log (Real.log 2 + Real.log x)) := by
+                apply Real.exp_le_exp.mpr
+                linarith
+              have h₂₀ : Real.exp (Real.log 2 + Real.log x + Real.log (Real.log 2 + Real.log x)) = (2 : ℝ) * x * (Real.log 2 + Real.log x) := by
+                have h₂₁ : Real.exp (Real.log 2 + Real.log x + Real.log (Real.log 2 + Real.log x)) = Real.exp (Real.log 2 + Real.log x) * Real.exp (Real.log (Real.log 2 + Real.log x)) := by
+                  rw [Real.exp_add]
+                rw [h₂₁]
+                have h₂₂ : Real.exp (Real.log 2 + Real.log x) = (2 : ℝ) * x := by
+                  rw [Real.exp_add, Real.exp_log (by positivity : (0 : ℝ) < (2 : ℝ)), Real.exp_log (by positivity : (0 : ℝ) < x)]
+                  <;> ring_nf
+                have h₂₃ : Real.exp (Real.log (Real.log 2 + Real.log x)) = Real.log 2 + Real.log x := by
+                  rw [Real.exp_log (Real.log_pos (by linarith [Real.exp_pos 16]))]
+                rw [h₂₂, h₂₃]
+                <;> ring_nf
+              have h₂₁ : (2 : ℝ) * x * (Real.log 2 + Real.log x) ≥ (Real.log 2 + Real.log x) ^ 2 := by
+                have h₂₂ : (2 : ℝ) * x ≥ Real.log 2 + Real.log x := by
+                  have h₂₃ : Real.log x ≥ 16 := h₇
+                  have h₂₄ : (2 : ℝ) * x ≥ Real.log 2 + Real.log x := by
+                    have h₂₅ : x ≥ Real.exp 16 := by linarith
+                    have h₂₆ : (2 : ℝ) * x ≥ 2 * Real.exp 16 := by linarith
+                    have h₂₇ : Real.log 2 + Real.log x ≤ Real.log 2 + Real.log x := le_refl _
+                    have h₂₈ : Real.log 2 + Real.log x ≤ 2 * Real.exp 16 := by
+                      have h₂₉ : Real.log x ≤ x := by
+                        linarith [Real.log_le_sub_one_of_pos (by positivity : (0 : ℝ) < x)]
+                      have h₃₀ : Real.log 2 + Real.log x ≤ Real.log 2 + x := by linarith
+                      have h₃₁ : (Real.log 2 : ℝ) + x ≤ 2 * Real.exp 16 := by
+                        have h₃₂ : x ≥ Real.exp 16 := by linarith
+                        nlinarith [Real.log_le_sub_one_of_pos (by positivity : (0 : ℝ) < Real.exp 16)]
+                      linarith
+                    linarith
+                  linarith
+                nlinarith [Real.log_pos (by norm_num : (1 : ℝ) < 2)]
+              calc
+                Real.exp ((2 / 5 : ℝ) * Real.log x) ≥ Real.exp (Real.log 2 + Real.log x + Real.log (Real.log 2 + Real.log x)) := h₁₉
+                _ = (2 : ℝ) * x * (Real.log 2 + Real.log x) := by rw [h₂₀]
+                _ ≥ (Real.log 2 + Real.log x) ^ 2 := h₂₁
+            linarith
+          linarith
+        have h₉ : calE γ κ N ≥ Real.exp 16 := by linarith [h₁]
+        have h₁₀ : (calE γ κ N : ℝ) ^ (2 / 5 : ℝ) ≥ Real.log (2 * calE γ κ N) ^ 2 := h₆ (calE γ κ N) h₉
+        linarith
+      linarith
+    have h₄ : 0 < calE γ κ N := by positivity
+    have h₅ : 0 < Real.log (2 * calE γ κ N) := Real.log_pos (by
+      have h₆ : (1 : ℝ) < 2 * calE γ κ N := by
+        have h₇ : Real.exp 16 ≤ calE γ κ N := hE
+        have h₈ : (1 : ℝ) < Real.exp 16 := by norm_num [Real.exp_pos]
+        linarith
+      linarith)
+    have h₆ : 0 < (calE γ κ N : ℝ) ^ (-(1 / 2 : ℝ)) := Real.rpow_pos_of_pos h₄ _
+    have h₇ : 0 < (calE γ κ N : ℝ) ^ (-(1 / 10 : ℝ)) := Real.rpow_pos_of_pos h₄ _
+    have h₈ : 0 < Real.log (2 * calE γ κ N) ^ 2 := by positivity
+    -- Use the inequality (calE)^(2/5) ≥ log(2*calE)^2 to prove the desired result
+    have h₉ : (calE γ κ N : ℝ) ^ (-(1 / 2 : ℝ)) / Real.log (2 * calE γ κ N) ^ 2 ≥ (calE γ κ N : ℝ) ^ (-(1 / 10 : ℝ)) := by
+      have h₁₀ : (calE γ κ N : ℝ) ^ (2 / 5 : ℝ) ≥ Real.log (2 * calE γ κ N) ^ 2 := h₃
+      have h₁₁ : (calE γ κ N : ℝ) ^ (-(1 / 2 : ℝ)) = 1 / (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) := by
+        rw [Real.rpow_neg (by positivity)]
+        <;> field_simp
+      have h₁₂ : (calE γ κ N : ℝ) ^ (-(1 / 10 : ℝ)) = 1 / (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) := by
+        rw [Real.rpow_neg (by positivity)]
+        <;> field_simp
+      rw [h₁₁, h₁₂]
+      have h₁₃ : 1 / (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) / Real.log (2 * calE γ κ N) ^ 2 ≥ 1 / (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) := by
+        -- Use the fact that (calE)^(2/5) ≥ log(2*calE)^2
+        have h₁₄ : 0 < (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) := Real.rpow_pos_of_pos h₄ _
+        have h₁₅ : 0 < (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) := Real.rpow_pos_of_pos h₄ _
+        have h₁₆ : 0 < (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) * Real.log (2 * calE γ κ N) ^ 2 := by positivity
+        have h₁₇ : 0 < (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) * Real.log (2 * calE γ κ N) ^ 2 := by positivity
+        have h₁₈ : (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) * Real.log (2 * calE γ κ N) ^ 2 ≤ (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) * (calE γ κ N : ℝ) ^ (2 / 5 : ℝ) := by
+          have h₁₉ : Real.log (2 * calE γ κ N) ^ 2 ≤ (calE γ κ N : ℝ) ^ (2 / 5 : ℝ) := by linarith
+          have h₂₀ : 0 < (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) := by positivity
+          nlinarith
+        have h₂₁ : (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) * (calE γ κ N : ℝ) ^ (2 / 5 : ℝ) = (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) := by
+          have h₂₂ : (1 / 10 : ℝ) + (2 / 5 : ℝ) = (1 / 2 : ℝ) := by norm_num
+          have h₂₃ : (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) * (calE γ κ N : ℝ) ^ (2 / 5 : ℝ) = (calE γ κ N : ℝ) ^ ((1 / 10 : ℝ) + (2 / 5 : ℝ)) := by
+            rw [← Real.rpow_add (by positivity : (0 : ℝ) < calE γ κ N)]
+          rw [h₂₃, h₂₂]
+          <;> norm_num
+        have h₂₂ : (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) * Real.log (2 * calE γ κ N) ^ 2 ≤ (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) := by linarith
+        have h₂₃ : 1 / (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) / Real.log (2 * calE γ κ N) ^ 2 ≥ 1 / (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) := by
+          calc
+            1 / (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) / Real.log (2 * calE γ κ N) ^ 2 = 1 / ((calE γ κ N : ℝ) ^ (1 / 2 : ℝ) * Real.log (2 * calE γ κ N) ^ 2) := by
+              field_simp
+              <;> ring_nf
+            _ ≥ 1 / (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) := by
+              apply one_div_le_one_div_of_le
+              · positivity
+              · linarith
+            _ = (calE γ κ N : ℝ) ^ (-(1 / 2 : ℝ)) := by
+              rw [Real.rpow_neg (by positivity)]
+              <;> field_simp
+            _ ≥ 1 / (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) := by
+              have h₂₄ : (calE γ κ N : ℝ) ^ (-(1 / 2 : ℝ)) ≥ 1 / (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) := by
+                have h₂₅ : (calE γ κ N : ℝ) ^ (-(1 / 2 : ℝ)) = 1 / (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) := by
+                  rw [Real.rpow_neg (by positivity)]
+                  <;> field_simp
+                rw [h₂₅]
+                have h₂₆ : 1 / (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) ≥ 1 / (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) := by
+                  apply one_div_le_one_div_of_le
+                  · positivity
+                  · have h₂₇ : (calE γ κ N : ℝ) ^ (1 / 2 : ℝ) ≤ (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) := by
+                      apply Real.rpow_le_rpow_of_exponent_le
+                      · linarith
+                      · norm_num
+                      · linarith
+                    linarith
+                linarith
+              linarith
+            _ = 1 / (calE γ κ N : ℝ) ^ (1 / 10 : ℝ) := by rfl
+        linarith
+      linarith
+    linarith
+  -- Final step
+  calc
+    (calE γ κ N) ^ (-(1 / 10 : ℝ)) ≤ (calE γ κ N) ^ (-(1 / 2 : ℝ)) / Real.log (2 * calE γ κ N) ^ 2 := by
+      linarith
+    _ ≤ 1 / (Real.sqrt r * Real.log ((r : ℝ) + 2) ^ 2) := by
+      linarith
 
 /-- Proved helper: the branch of `SelectedRealZero` without an exceptional zero has `r = 1`,
 which is incompatible with a nontrivial common divisor. -/
