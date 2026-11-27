@@ -50,7 +50,11 @@ theorem bmor_two_sided (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (h
     |(∑ ρ ∈ (stripZeros_finite χ T).toFinset, (mult χ ρ : ℝ)) -
       T / Real.pi * Real.log ((q : ℝ) * T / (2 * Real.pi * Real.exp 1))| ≤
         0.298 * Real.log ((q : ℝ) * T) + 4.358 := by
-  sorry
+  apply abs_le
+  <;>
+  (try norm_num) <;>
+  (try linarith) <;>
+  (try nlinarith)
 
 /-- LEAF: Helfgott, book Part I, section 3.7.3.3, page 86, display 3.95 with footnote 5, for chi
 primitive and COMPLEX, meaning the inverse of chi is not chi, and T at least 1. Class HARD,
