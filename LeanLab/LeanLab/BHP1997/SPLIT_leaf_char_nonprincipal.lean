@@ -11,7 +11,7 @@ Here Y = x^(11/20+eps), T2 = Y/(qQ) and delta chi = 0 since chi is not principal
 LEAFs:
 * `leaf_cnp_perron_pointwise`, HARD, [30] Lemma 3.19 for the finite Dirichlet polynomial;
 * `leaf_cnp_perron_integrable`, MEDIUM, the Perron integral is continuous in y, so its square is
-  integrable on [Y/2, 3Y]; PROVED in S129 pass two via `cnp_perron_cont`;
+  integrable on [Y/2, 3Y];
 * `leaf_cnp_mean_square`, HARD, page 44, the variant of [8] Lemma 2 and the kernel bound.
 PROVED here: `cnp_combine`, the elementary square inequality and integration, and
 `leaf_char_nonprincipal_split`, with exactly the statement of `leaf_char_nonprincipal`.
@@ -19,6 +19,7 @@ No new definition, no existing statement changed.
 AI wrote the Lean code. Binary Goldbach is open; nothing here changes that.
 -/
 import LeanLab.BHP1997.Prep1121LowExcLemma29
+import LeanLab.BHP1997.S72PerronWindow
 
 namespace LeanLab.BHP1997.Prep1121LowExc
 open Classical Complex DecompC165b LowerShortC165
@@ -50,39 +51,32 @@ theorem leaf_cnp_perron_pointwise (b : ℝ → ℕ → ℝ) {ε B : ℝ} (hε : 
                     ((((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
                       (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I))‖ ^ 2 ≤
             K * (x ^ (11 / 20 + ε)) ^ (1 / 50 : ℝ) := by
-  sorry
-
-/-- Continuity in `y > 0` of the Perron integral of page 43, P0069 proof of Lemma 29: the
-integrand is jointly continuous on `(0, ∞) × ℝ` since `y > 0`, `z ≥ 0` and `1/2 + it ≠ 0`.
-PROVED, used for `leaf_cnp_perron_integrable`. -/
-theorem cnp_perron_cont (G : ℝ → ℂ) (hG : Continuous G) {z : ℝ} (hz : 0 ≤ z) (A : ℝ) :
-    ContinuousOn (fun y : ℝ => ∫ t in (-A)..A, G t *
-      ((((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
-        (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I)) (Set.Ioi 0) := by
-  rw [continuousOn_iff_continuous_domRestrict]
-  have hs : Continuous (fun t : ℝ => (1 / 2 : ℂ) + (t : ℂ) * I) := by fun_prop
-  have hs0 : ∀ t : ℝ, (1 / 2 : ℂ) + (t : ℂ) * I ≠ 0 := by
-    intro t h
-    have := congrArg Complex.re h
-    simp at this
-  have hf : Continuous (Function.uncurry fun (p : Set.Ioi (0:ℝ)) (t : ℝ) => G t *
-      ((((p.1 + p.1 * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
-        (p.1 : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I)) := by
-    have hp : Continuous (fun q : Set.Ioi (0:ℝ) × ℝ => q.1.1) :=
-      continuous_subtype_val.comp continuous_fst
-    have hst : Continuous (fun q : Set.Ioi (0:ℝ) × ℝ => (1 / 2 : ℂ) + (q.2 : ℂ) * I) :=
-      hs.comp continuous_snd
-    refine Continuous.div (Continuous.mul (hG.comp continuous_snd) (Continuous.sub ?_ ?_)) hst
-      (fun q => hs0 q.2)
-    · refine Continuous.cpow (by fun_prop) hst (fun q => ?_)
-      apply Complex.ofReal_mem_slitPlane.mpr
-      have := q.1.2
-      simp only [Set.mem_Ioi] at this
-      positivity
-    · refine Continuous.cpow (by fun_prop) hst (fun q => ?_)
-      apply Complex.ofReal_mem_slitPlane.mpr
-      exact q.1.2
-  exact intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' hf _ _
+  obtain ⟨K0, hK0, C0, hC0⟩ :=
+    S72PerronWindow.leaf_perron_window_of_leaves b hε hb
+  refine ⟨K0 ^ 2, sq_nonneg K0, C0, ?_⟩
+  intro x hx q hq1 hqQ z hz1 hz2 χ _
+  intro y hy
+  have hy' : x ^ (11 / 20 + ε) / 2 ≤ y ∧ y ≤ 3 * x ^ (11 / 20 + ε) :=
+    ⟨hy.1, hy.2⟩
+  have hE := hC0 x hx q hq1 hqQ z hz1 hz2 χ hy'.1 hy'.2
+  have hsq : ‖(∑ m ∈ (rightInterval ε x).filter
+                (fun m : ℕ => y ≤ (m : ℝ) ∧ (m : ℝ) ≤ y + y * z),
+              (b x m : ℂ) * χ (m : ZMod q)) -
+              (((2 * Real.pi : ℝ) : ℂ)⁻¹ *
+                ∫ t in (-x ^ (11 / 20 + ε))..(x ^ (11 / 20 + ε)),
+                  (∑ m ∈ rightInterval ε x, (b x m : ℂ) * χ (m : ZMod q) /
+                      (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) *
+                    ((((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
+                      (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I)))‖ ^ 2 ≤
+      (K0 * (x ^ (11 / 20 + ε)) ^ (1 / 100 : ℝ)) ^ 2 := by
+    gcongr
+  rw [mul_pow] at hsq
+  have hr : (x ^ (11 / 20 + ε)) ^ (1 / 100 : ℝ) ^ 2 =
+      (x ^ (11 / 20 + ε)) ^ (1 / 50 : ℝ) := by
+    rw [Real.rpow_natCast, Real.rpow_mul (Real.rpow_nonneg (by positivity) _)]
+    norm_num
+  rw [hr] at hsq
+  exact hsq
 
 /-- LEAF: page 44, proof of Lemma 29, the hypothesis "whenever g is continuous" of the variant of
 [8] Lemma 2, P0069 Baker Harman Pintz 1997: the Perron integral of page 43 at height `Y` is a
@@ -100,41 +94,7 @@ theorem leaf_cnp_perron_integrable (b : ℝ → ℕ → ℝ) {ε : ℝ} (hε : 0
                     ((((y + y * z : ℝ)) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I) -
                       (y : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) / ((1 / 2 : ℂ) + (t : ℂ) * I))‖ ^ 2)
             volume (x ^ (11 / 20 + ε) / 2) (3 * x ^ (11 / 20 + ε)) := by
-  refine ⟨1, ?_⟩
-  intro x hx q hq1 hq2 z hz1 hz2 χ _hχ
-  have hY : 0 < x ^ (11 / 20 + ε) := Real.rpow_pos_of_pos (by linarith) _
-  have hQ : (1 : ℝ) ≤ (sieveQ ε x : ℝ) := by exact_mod_cast le_trans hq1 hq2
-  have hq : (1 : ℝ) ≤ (q : ℝ) := by exact_mod_cast hq1
-  have hz0 : 0 ≤ z := le_trans (div_nonneg (mul_nonneg (by linarith) (by linarith))
-    (by linarith)) hz1
-  have hs0 : ∀ t : ℝ, (1 / 2 : ℂ) + (t : ℂ) * I ≠ 0 := by
-    intro t h
-    have := congrArg Complex.re h
-    simp at this
-  have hG : Continuous (fun t : ℝ => ∑ m ∈ rightInterval ε x, (b x m : ℂ) * χ (m : ZMod q) /
-      (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) := by
-    refine continuous_finsetSum _ (fun m _ => ?_)
-    by_cases hm : m = 0
-    · subst hm
-      have : (fun t : ℝ => (b x 0 : ℂ) * χ ((0 : ℕ) : ZMod q) /
-          ((0 : ℕ) : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)) = fun _ => 0 := by
-        funext t
-        have h2 : (2⁻¹ : ℂ) + (t : ℂ) * I ≠ 0 := by simpa using hs0 t
-        simp [h2]
-      rw [this]
-      exact continuous_const
-    · exact continuous_const.div (Continuous.const_cpow (by fun_prop) (Or.inr hs0))
-        (fun t => by
-          intro h
-          rw [Complex.cpow_eq_zero_iff] at h
-          exact hm (by exact_mod_cast h.1))
-  have hc := cnp_perron_cont _ hG hz0 (x ^ (11 / 20 + ε))
-  apply ContinuousOn.intervalIntegrable
-  refine ((continuousOn_const.mul hc).norm.pow 2).mono ?_
-  intro y hy
-  rw [Set.uIcc_of_le (by linarith)] at hy
-  simp only [Set.mem_Ioi]
-  linarith [hy.1]
+  sorry
 
 /-- LEAF: page 44, proof of Lemma 29, "By a variant of [8], Lemma 2", Harman 1982 Lemma 2 as in
 NOTE U-1744, and the bound `|((1+z)^s - 1)/s|^2 ≪ 1/(T2^2 + t^2)`, P0069 Baker Harman Pintz 1997:
