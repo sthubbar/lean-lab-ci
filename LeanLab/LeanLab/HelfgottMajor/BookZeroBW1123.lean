@@ -23,6 +23,20 @@ open LeanLab.HelfgottMajor.ZeroCount1623 LeanLab.HelfgottMajor.BookZeroSplit1122
 open LeanLab.HelfgottMajor.BookZeroHonest1123
 open Complex Set Filter Topology
 
+/-- The main term alone fits the Bellotti and Wong error bound between e and 2 pi e. -/
+lemma bw_main_term_le_error_in_band {T : ℝ} (hT : Real.exp 1 ≤ T)
+    (hb : T ≤ 2 * Real.pi * Real.exp 1) :
+    |T / (2 * Real.pi) * Real.log (T / (2 * Real.pi * Real.exp 1))| ≤
+      0.112 * Real.log T + 0.12567 * Real.log (Real.log T) + 3.77417 := by
+  have hlog : 1 ≤ Real.log T := by
+    simpa only [Real.log_exp] using Real.log_le_log (Real.exp_pos 1) hT
+  have hT1 : 1 ≤ T := (by linarith [Real.exp_one_gt_d9] : (1 : ℝ) ≤ Real.exp 1).trans hT
+  have hloglog := Real.log_nonneg hlog
+  obtain ⟨hlo, hhi⟩ := bookMain_one_band hT1 hb
+  simp only [bookMain, Nat.cast_one, one_mul] at hlo hhi
+  rw [abs_le]
+  constructor <;> linarith
+
 /-- LEAF: Bellotti and Wong, arXiv 2412.15470v2, Theorem 1.1, page 1, second bound, T at
 least e. Class HARD, citation wall, a printed theorem resting on a computer check.
 COUNT TAKEN: the paper's N of T, zeros of zeta, here the L function of chi modulo 1, with
@@ -32,7 +46,23 @@ theorem bw_count (χ : DirichletCharacter ℂ 1) {T : ℝ} (hT : Real.exp 1 ≤ 
     |(∑ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 < ρ.im), (mult χ ρ : ℝ)) -
       T / (2 * Real.pi) * Real.log (T / (2 * Real.pi * Real.exp 1))| ≤
         0.112 * Real.log T + 0.12567 * Real.log (Real.log T) + 3.77417 := by
-  sorry
+  rcases le_or_gt T 14.13 with hlo | hhi
+  · have hN : (∑ ρ ∈ (stripZeros_finite χ T).toFinset.filter (fun ρ => 0 < ρ.im),
+        (mult χ ρ : ℝ)) = 0 := by
+      refine Finset.sum_eq_zero fun ρ hρ => ?_
+      rw [Finset.mem_filter, Set.Finite.mem_toFinset] at hρ
+      obtain ⟨⟨hz, hre0, hre1, him⟩, _⟩ := hρ
+      rw [DirichletCharacter.LFunction_modOne_eq] at hz
+      have hfirst := zeta_first_zero hz hre0 hre1
+      exfalso
+      linarith
+    have hb : T ≤ 2 * Real.pi * Real.exp 1 := by
+      have hpi := Real.pi_gt_three
+      have he := Real.exp_one_gt_d9
+      nlinarith
+    rw [hN, zero_sub, abs_neg]
+    exact bw_main_term_le_error_in_band hT hb
+  · sorry
 
 lemma bookMain_one_eq (T : ℝ) :
     bookMain 1 T = T / (2 * Real.pi) * Real.log (T / (2 * Real.pi * Real.exp 1)) := by
