@@ -248,6 +248,7 @@ theorem theorem42_bracket (hpar : ParamConditions43)
       5 * ((setA N).card : ℝ) * UN N / Real.log (N : ℝ) <
         ((siftedSet N ((N : ℝ) ^ ((1 : ℝ) / 40))).card : ℝ) := by
   intro N hE hX
+  -- BLOCKED 2026-11-25 FREE-nv-glm7 task3454 theorem42_bracket: OUT OF REACH: missing weighted linear sieve lower bound; own attempt error: "LeanLab/AlmostPrimes/Burst8P2.lean:254:2: error: linarith failed to find a contradiction".
   sorry
 
 /-- PROVED. X₂ ≥ 4 · 10^18 and ε ≤ 1/74. -/
