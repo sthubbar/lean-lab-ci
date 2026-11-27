@@ -23,7 +23,7 @@ there for every `K, N₀`, which is not expected. The corrected reduction
 `middleReductionLarge_of_leaves` asks `c₁ ≥ c₁m`, and `theorem2_of_ranges_large` assembles
 Theorem 2 from it; both are PROVED from the LEAFs.
 -/
-import LeanLab.Zhan1991.SPLIT_theorem2_1122
+import LeanLab.Zhan1991.MiddleMajor1124
 
 namespace LeanLab.Zhan1991
 open Finset Real
@@ -117,18 +117,20 @@ theorem middle_block_leaf : ∀ B c1 c2 c3 K N₀ : ℝ, 0 < B → 0 < c1 → 0 
       Real.log N ^ c2 ≤ q1 → ‖Sexp α N A‖ ≤ K' * A * Real.log N ^ (-B) := by
   sorry
 
-/-- LEAF: page 262 last display, the case the blockwise step does not cover, not argued in the
+/-- Page 262 last display, the case the blockwise step does not cover, not argued in the
 paper: (1.2) holds with `τ = A² N⁻¹ L^{-c₁}` and `q ≥ L^{c₂}`, but the fresh approximation with
 `τ₁ = N^{1/3} L^{-c₁} / 4` has `q₁ < L^{c₂}`. Then `a/q ≠ a₁/q₁`, `|λ₁| ≥ 1/(2 q q₁)`,
 `|λ₁| A ≥ L^{c₁+1} / (2 q₁)`, and the Siegel and Walfisz theorem on the window, `A ≥ N^{2/3}`,
-gives `S ≪ (q₁/φ(q₁)) A L^{-c₁-1} + A L^{-B}`. Class HARD. -/
+gives `S ≪ (q₁/φ(q₁)) A L^{-c₁-1} + A L^{-B}`. Formerly class HARD; now PROVED from
+`cond12_sep` and the LEAF `middle_major_est_leaf` of MiddleMajor1124.lean, burst-20261124
+D-extra-2. -/
 theorem middle_major_leaf : ∀ B : ℝ, 0 < B → ∃ c1m : ℝ, ∀ c1 ≥ c1m, ∀ c2 : ℝ, 0 < c2 →
     ∃ K N₀ : ℝ, ∀ (N : ℕ) (A α lam : ℝ) (a : ℤ) (q : ℕ) (a1 : ℤ) (q1 : ℕ) (lam1 : ℝ),
       N₀ ≤ N → (N : ℝ) ^ (2 / 3 : ℝ) ≤ A → A ≤ (N : ℝ) / Real.log N →
       Cond12 α (A ^ 2 / N * Real.log N ^ (-c1)) a q lam → Real.log N ^ c2 ≤ q →
       Cond12 α ((N : ℝ) ^ (1 / 3 : ℝ) / 4 * Real.log N ^ (-c1)) a1 q1 lam1 →
-      (q1 : ℝ) < Real.log N ^ c2 → ‖Sexp α N A‖ ≤ K * A * Real.log N ^ (-B) := by
-  sorry
+      (q1 : ℝ) < Real.log N ^ c2 → ‖Sexp α N A‖ ≤ K * A * Real.log N ^ (-B) :=
+  middle_major_of_est
 
 /-- Page 262 last display and page 263 first line, the corrected reduction: for `c₁` large in
 terms of `B`, (1.3) on the small range gives (1.3) on `N^{2/3} ≤ A ≤ N L⁻¹`. PROVED from the
