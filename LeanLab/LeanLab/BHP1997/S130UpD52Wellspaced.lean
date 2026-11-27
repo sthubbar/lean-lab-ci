@@ -106,6 +106,90 @@ theorem s130w_of_wellspaced_indexed {ε : ℝ} {ι : Type*} (R : ℝ → ι → 
     _ = 12 * M * (Y / T2 ^ 2) * Lg := hmain
     _ ≤ _ := hfin
 
+/-- P0069 page 49, the Buchstab prime sum in g_m. Restricting its prime factors leaves a sum
+between zero and one, since only the least prime factor contributes. -/
+theorem s130w_rough_subsum_le_one (k : ℕ) (s : Finset ℕ) (hs : s ⊆ k.primeFactors) :
+    ∑ p ∈ s, upperRough (k / p) (p : ℝ) ≤ 1 := by
+  have hfull : ∑ p ∈ k.primeFactors, upperRough (k / p) (p : ℝ) ≤ 1 := by
+    have hbuch := upper_rough_buchstab_step k
+      (z1 := 0) (z2 := (k : ℝ) + 1) (by positivity)
+    have hfilter : k.primeFactors.filter
+        (fun p : ℕ => (0 : ℝ) ≤ p ∧ (p : ℝ) < (k : ℝ) + 1) = k.primeFactors := by
+      apply Finset.filter_eq_self.mpr
+      intro p hp
+      have hpk : (p : ℝ) ≤ k := by exact_mod_cast Nat.le_of_mem_primeFactors hp
+      exact ⟨Nat.cast_nonneg _, by linarith⟩
+    rw [hfilter] at hbuch
+    have hzero : upperRough k 0 = 1 := by
+      simp only [upperRough]
+      rw [ite_eq_left (fun p _ => Nat.cast_nonneg p)]
+    rw [hzero] at hbuch
+    linarith [upperRough_nonneg k ((k : ℝ) + 1)]
+  exact (Finset.sum_le_sum_of_subset_of_nonneg hs
+    (fun p _ _ => upperRough_nonneg _ _)).trans hfull
+
+/-- P0069 page 49, the block h_m of the proof of Lemma 34. Its absolute value is at most
+the sum of the absolute values of the n coefficients, with no loss for the prime filter. -/
+theorem s130w_block_abs_le (a : ℕ → ℝ) (k : ℕ) (ns : Finset ℕ)
+    (ps : ℕ → Finset ℕ) (hps : ∀ n ∈ ns, ps n ⊆ (k / n).primeFactors) :
+    |∑ n ∈ ns, a n * ∑ p ∈ ps n, upperRough (k / n / p) (p : ℝ)| ≤
+      ∑ n ∈ ns, |a n| := by
+  apply (Finset.abs_sum_le_sum_abs _ _).trans
+  apply Finset.sum_le_sum
+  intro n hn
+  have hnonneg : 0 ≤ ∑ p ∈ ps n, upperRough (k / n / p) (p : ℝ) :=
+    Finset.sum_nonneg (fun p _ => upperRough_nonneg _ _)
+  rw [abs_mul, abs_of_nonneg hnonneg]
+  simpa only [mul_one] using mul_le_mul_of_nonneg_left
+    (s130w_rough_subsum_le_one (k / n) (ps n) (hps n hn)) (abs_nonneg (a n))
+
+/-- P0069 pages 11 and 49, condition 3.1 for a divisor block h_m. A divisor bound with
+exponent B gives exponent max B 0 plus one, uniformly in both filters. -/
+theorem s130w_block_divisor_bound (a : ℕ → ℝ) (k : ℕ) (ns : Finset ℕ)
+    (ps : ℕ → Finset ℕ) (hns : ns ⊆ k.divisors)
+    (hps : ∀ n ∈ ns, ps n ⊆ (k / n).primeFactors) {C B : ℝ} (hC : 0 ≤ C)
+    (ha : ∀ n, |a n| ≤ C * (n.divisors.card : ℝ) ^ B) :
+    |∑ n ∈ ns, a n * ∑ p ∈ ps n, upperRough (k / n / p) (p : ℝ)| ≤
+      C * (k.divisors.card : ℝ) ^ (max B 0 + 1) := by
+  by_cases hk : k = 0
+  · subst k
+    have hns0 : ns = ∅ := by
+      apply Finset.eq_empty_iff_forall_notMem.mpr
+      intro n hn
+      have := hns hn
+      simp at this
+    simp only [hns0, Finset.sum_empty, abs_zero]
+    positivity
+  have hdpos : 0 < k.divisors.card :=
+    Finset.card_pos.mpr ⟨1, Nat.one_mem_divisors.mpr hk⟩
+  have hd : 0 < (k.divisors.card : ℝ) := by exact_mod_cast hdpos
+  have hterm : ∀ n ∈ ns, |a n| ≤ C * (k.divisors.card : ℝ) ^ max B 0 := by
+    intro n hn
+    have hnk := (Nat.mem_divisors.mp (hns hn)).1
+    have hn0 : n ≠ 0 := by
+      intro hn0
+      subst n
+      exact hk (by simpa using hnk)
+    have hncard : 1 ≤ (n.divisors.card : ℝ) := by
+      exact_mod_cast (Finset.card_pos.mpr ⟨1, Nat.one_mem_divisors.mpr hn0⟩)
+    have hcard : (n.divisors.card : ℝ) ≤ k.divisors.card := by
+      exact_mod_cast Finset.card_le_card (Nat.divisors_subset_of_dvd hk hnk)
+    apply (ha n).trans
+    apply mul_le_mul_of_nonneg_left _ hC
+    exact (Real.rpow_le_rpow_of_exponent_le hncard (le_max_left B 0)).trans
+      (Real.rpow_le_rpow (by positivity) hcard (le_max_right B 0))
+  calc
+    _ ≤ ∑ n ∈ ns, |a n| := s130w_block_abs_le a k ns ps hps
+    _ ≤ ∑ n ∈ ns, C * (k.divisors.card : ℝ) ^ max B 0 :=
+      Finset.sum_le_sum hterm
+    _ = (ns.card : ℝ) * (C * (k.divisors.card : ℝ) ^ max B 0) := by
+      rw [Finset.sum_const, nsmul_eq_mul]
+    _ ≤ (k.divisors.card : ℝ) * (C * (k.divisors.card : ℝ) ^ max B 0) :=
+      mul_le_mul_of_nonneg_right (by exact_mod_cast Finset.card_le_card hns) (by positivity)
+    _ = C * (k.divisors.card : ℝ) ^ (max B 0 + 1) := by
+      rw [Real.rpow_add hd, Real.rpow_one]
+      ring
+
 /-- LEAF: P0069 pages 47 and 49 to 50, Lemma 33 case 5.13 for the block h_m of page 49, the one
 interval bound of the remarks before Lemma 33: N(s, chi) the sum over P <= p1 < 2P,
 Y^eps <= p1, of chi(p1) p1^(-s), satisfying 3.2 by Lemma 5, times the n and psi factor
@@ -137,6 +221,19 @@ theorem s130w_leaf_lemma33_block_wellspaced (h4 : Thm4.Theorem4Paper)
             (1 : DirichletCharacter ℂ q) (m : ZMod q) /
               (m : ℂ) ^ ((1 / 2 : ℂ) + (t : ℂ) * I)‖ ^ 2 ≤
           C * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
+  obtain ⟨Ca, hCa⟩ := ha
+  have hcoeff : ∀ x P k, |c x P k| ≤
+      max Ca 0 * (k.divisors.card : ℝ) ^ (max B 0 + 1) := by
+    intro x P k
+    rw [hc]
+    apply s130w_block_divisor_bound (a x) k _ _
+      (Finset.filter_subset _ _) (fun n _ => Finset.filter_subset _ _)
+      (le_max_right Ca 0)
+    intro n
+    exact (hCa x n).trans (mul_le_mul_of_nonneg_right (le_max_left Ca 0)
+      (Real.rpow_nonneg (Nat.cast_nonneg _) _))
+  -- The divisor bound supplies no logarithmic saving. Lemma 5 and the Lemma 32 moment bound
+  -- remain necessary for the nonzero polynomial.
   sorry
 
 /-- P0069 pages 47 to 50, Lemma 33 case 5.13 for the block h_m, with the exact statement of
