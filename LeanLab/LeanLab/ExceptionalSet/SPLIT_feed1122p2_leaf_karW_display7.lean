@@ -1,4 +1,4 @@
-import LeanLab.ExceptionalSet.SPLIT_feed1122_leaf_karW_display8
+import LeanLab.ExceptionalSet.KaracubaSplit
 
 /-!
 Split of `leaf_karW_display7` of `LeanLab.ExceptionalSet.SPLIT_feed1122_leaf_karW_display8`,
@@ -47,6 +47,194 @@ theorem karW_frak_trivial (K : ℕ) (b : ℝ) :
         simp [karW_eC_norm]
     _ = ((2 * K + 1 : ℕ) : ℝ) ^ 2 := by
         rw [Finset.sum_const, nsmul_eq_mul, hcard]; ring
+
+/-- The geometric sum over the symmetric range, with the regularized convention
+at an integer phase used on p. 246. -/
+theorem karW_sym_geom_task3687 (L : ℕ) (γ : ℝ) :
+    ‖∑ x ∈ Finset.Icc (-(L : ℤ)) (L : ℤ), eC (γ * (x : ℝ))‖ ≤
+      if Int.fract γ = 0 then ((2 * L + 1 : ℕ) : ℝ) else
+        min ((2 * L + 1 : ℕ) : ℝ)
+          (1 / min (Int.fract γ) (1 - Int.fract γ)) := by
+  have heq : ∑ m ∈ Finset.Icc 1 (2 * L + 1), eC (γ * (m : ℝ)) =
+      ∑ x ∈ Finset.Icc (-(L : ℤ)) (L : ℤ), eC (γ * ((L : ℝ) + 1)) * eC (γ * (x : ℝ)) := by
+    apply Finset.sum_bij (fun (m : ℕ) _ => (m : ℤ) - (L + 1))
+    · intro m hm
+      simp only [Finset.mem_Icc] at hm ⊢
+      omega
+    · intro m _ m' _ h
+      omega
+    · intro x hx
+      refine ⟨(x + (L + 1)).toNat, ?_, ?_⟩
+      · simp only [Finset.mem_Icc] at hx ⊢
+        omega
+      · simp only [Finset.mem_Icc] at hx
+        omega
+    · intro m _
+      unfold eC
+      rw [← Complex.exp_add]
+      congr 1
+      push_cast
+      ring
+  have h := LeanLab.ExceptionalSet.Decomp538a.geometric_sum_bound (2 * L + 1) γ
+  rw [heq, ← Finset.mul_sum, norm_mul, karW_eC_norm, one_mul] at h
+  exact h
+
+/-- The choice `n >= n0` gives the power saving needed for the third ratio. -/
+private theorem karW_n0_cube_task3687 {c1 c2 c4 : ℝ} {n : ℕ}
+    (hd : c2 + c4 < c1) (hn : karN0 c1 c2 c4 ≤ n) :
+    1 / ((n : ℝ) ^ 2 * (n + 1)) ≤ c1 - (c2 + c4) := by
+  set d := c1 - (c2 + c4) with hdd
+  have hd0 : 0 < d := by rw [hdd]; linarith
+  have hcube : 1 / d ^ ((1 : ℝ) / 3) ≤ n :=
+    le_trans (le_trans (le_max_right _ _) (le_max_right _ _)) hn
+  have hr0 : 0 < d ^ ((1 : ℝ) / 3) := Real.rpow_pos_of_pos hd0 _
+  have h1 : 1 ≤ (n : ℝ) * d ^ ((1 : ℝ) / 3) := (div_le_iff₀ hr0).mp hcube
+  have h3 : 1 ≤ ((n : ℝ) * d ^ ((1 : ℝ) / 3)) ^ 3 := one_le_pow₀ h1
+  have hd3 : (d ^ ((1 : ℝ) / 3)) ^ 3 = d := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hd0.le]; norm_num
+  rw [mul_pow, hd3] at h3
+  have hn1 : (1 : ℝ) ≤ n := by
+    have : (12 : ℝ) ≤ n := le_trans (le_max_left _ _) hn
+    linarith
+  have hpos : (0 : ℝ) < (n : ℝ) ^ 2 * (n + 1) := by positivity
+  rw [div_le_iff₀ hpos]
+  have : (n : ℝ) ^ 3 ≤ (n : ℝ) ^ 2 * (n + 1) := by nlinarith
+  nlinarith
+
+/-- The arithmetic envelope for the three reciprocal terms. -/
+private theorem karW_factor_sum_le_task3687
+    {q X lq Lg p1 p3 p4 pr nn : ℝ} (s : ℕ)
+    (hq : 1 / q ≤ 2 * p3) (hX : X⁻¹ ≤ (2 : ℝ) ^ s * p1)
+    (hXX : (X ^ 2)⁻¹ * q ≤ (4 : ℝ) ^ s * p4)
+    (hlq0 : 0 ≤ lq) (hlq : lq ≤ nn * Lg) (hLg : 1 ≤ Lg) (hnn : 1 ≤ nn)
+    (h1 : p1 ≤ pr) (h3 : p3 ≤ pr) (h4 : p4 ≤ pr) (hp1 : 0 ≤ p1) (hp4 : 0 ≤ p4)
+    (hX0 : 0 ≤ X⁻¹) (hXX0 : 0 ≤ (X ^ 2)⁻¹ * q) :
+    1 / q + X⁻¹ * lq + (X ^ 2)⁻¹ * q * lq ≤
+      (16 : ℝ) ^ s * (9 * nn) * Lg * pr := by
+  have h2s : (1 : ℝ) ≤ (2 : ℝ) ^ s := one_le_pow₀ (by norm_num)
+  have h4s : (4 : ℝ) ^ s = (2 : ℝ) ^ s * (2 : ℝ) ^ s := by rw [← mul_pow]; norm_num
+  have h16s : (16 : ℝ) ^ s = (4 : ℝ) ^ s * (4 : ℝ) ^ s := by rw [← mul_pow]; norm_num
+  have h4s1 : (1 : ℝ) ≤ (4 : ℝ) ^ s := one_le_pow₀ (by norm_num)
+  have hpr : 0 ≤ pr := le_trans hp1 h1
+  have hnL : 1 ≤ nn * Lg := by nlinarith
+  have hA : 1 / q ≤ 2 * pr * (nn * Lg) := by nlinarith
+  have hB : X⁻¹ * lq ≤ (2 : ℝ) ^ s * pr * (nn * Lg) := by
+    have : X⁻¹ ≤ (2 : ℝ) ^ s * pr := le_trans hX (by nlinarith)
+    calc X⁻¹ * lq ≤ ((2 : ℝ) ^ s * pr) * (nn * Lg) :=
+          mul_le_mul this hlq hlq0 (le_trans hX0 this)
+      _ = _ := by ring
+  have hC : (X ^ 2)⁻¹ * q * lq ≤ (4 : ℝ) ^ s * pr * (nn * Lg) := by
+    have : (X ^ 2)⁻¹ * q ≤ (4 : ℝ) ^ s * pr := le_trans hXX (by nlinarith)
+    calc (X ^ 2)⁻¹ * q * lq ≤ ((4 : ℝ) ^ s * pr) * (nn * Lg) :=
+          mul_le_mul this hlq hlq0 (le_trans hXX0 this)
+      _ = _ := by ring
+  have hsum : 2 + (2 : ℝ) ^ s + (4 : ℝ) ^ s ≤ 9 * (16 : ℝ) ^ s := by
+    rw [h16s, h4s] at *; nlinarith
+  have hfin : (2 + (2 : ℝ) ^ s + (4 : ℝ) ^ s) * (pr * (nn * Lg)) ≤
+      9 * (16 : ℝ) ^ s * (pr * (nn * Lg)) :=
+    mul_le_mul_of_nonneg_right hsum (by positivity)
+  nlinarith
+
+/-- The factor estimate used by the explicit symmetric sums.  This is the same
+reciprocal-sum calculation as `Decomp538a.karacuba_factor_thirty`, with the
+constant enlarged to `30 * 2^(4k)`.  The enlargement removes the paper's
+`k >= 7` threshold and is paid for by the `2^(8k)` allowance in the target. -/
+theorem karacuba_factor_thirty_general (k s : ℕ) (X : ℝ) (q : ℕ)
+    (hk : 2 ≤ k) (hs : s ≤ k) (hX : 1 ≤ X) (hq : 1 ≤ q) :
+    6 * (2 * (k : ℝ) * X + 1 + (q : ℝ) * Real.log q) *
+        ((2 * (k : ℝ) * X + 1) / q + 1) ≤
+      30 * (2 : ℝ) ^ (8 * k - 4 * s) * (k : ℝ) ^ 2 * X ^ 2 *
+        (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q) := by
+  have hqR : (0 : ℝ) < q := by exact_mod_cast (by omega : 0 < q)
+  have hXR : (0 : ℝ) ≤ X := by linarith
+  have he0 : 0 ≤ 8 * k - 4 * s := by omega
+  by_cases hk7 : 7 ≤ k
+  · have h := LeanLab.ExceptionalSet.Decomp538a.karacuba_factor_thirty
+        (k : ℝ) X q (by exact_mod_cast hk7) hX (by exact_mod_cast hq)
+    calc 6 * (2 * (k : ℝ) * X + 1 + (q : ℝ) * Real.log q) *
+          ((2 * (k : ℝ) * X + 1) / q + 1) ≤
+        30 * (k : ℝ) ^ 2 * X ^ 2 *
+          (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q) := h
+      _ ≤ 30 * (2 : ℝ) ^ (8 * k - 4 * s) * (k : ℝ) ^ 2 * X ^ 2 *
+          (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q) := by
+        have hpow : (1 : ℝ) ≤ (2 : ℝ) ^ (8 * k - 4 * s) := one_le_pow₀ (by norm_num)
+        have hmul : (30 : ℝ) ≤ 30 * (2 : ℝ) ^ (8 * k - 4 * s) := by nlinarith
+        have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast hq
+        have hlogq : 0 ≤ Real.log q := Real.log_nonneg hq1
+        have hF0 : (0 : ℝ) ≤ 1 / q + X⁻¹ * Real.log q +
+            (X ^ 2)⁻¹ * q * Real.log q := by
+          have hXinv : (0 : ℝ) ≤ X⁻¹ := inv_nonneg.mpr (by positivity)
+          have hX2inv : (0 : ℝ) ≤ (X ^ 2)⁻¹ := inv_nonneg.mpr (by positivity)
+          positivity
+        have hscaled : 30 * (k : ℝ) ^ 2 * X ^ 2 *
+            (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q) ≤
+            30 * (2 : ℝ) ^ (8 * k - 4 * s) * (k : ℝ) ^ 2 * X ^ 2 *
+            (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q) := by
+          have hm := mul_le_mul_of_nonneg_left hmul
+            (by positivity : (0 : ℝ) ≤ (k : ℝ) ^ 2 * X ^ 2 *
+              (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q))
+          nlinarith [hm]
+        exact hscaled
+  · have hk67 : k ≤ 6 := by omega
+    have hU : 2 * (k : ℝ) * X + 1 ≤ 14 * X + 1 := by
+      have hkX : (k : ℝ) * X ≤ 6 * X := by
+        exact mul_le_mul_of_nonneg_right (by exact_mod_cast hk67) hXR
+      linarith
+    have hfac1 : 2 * (k : ℝ) * X + 1 + (q : ℝ) * Real.log q ≤
+        14 * X + 1 + (q : ℝ) * Real.log q := by linarith
+    have hfac2 : (2 * (k : ℝ) * X + 1) / q + 1 ≤ (14 * X + 1) / q + 1 := by
+      rw [add_le_add_iff_right]
+      exact (div_le_div_iff_of_pos_right hqR).2 (by linarith)
+    have hfac1s : 6 * (2 * (k : ℝ) * X + 1 + (q : ℝ) * Real.log q) ≤
+        6 * (14 * X + 1 + (q : ℝ) * Real.log q) :=
+      mul_le_mul_of_nonneg_left hfac1 (by positivity)
+    have hLHS : 6 * (2 * (k : ℝ) * X + 1 + (q : ℝ) * Real.log q) *
+          ((2 * (k : ℝ) * X + 1) / q + 1) ≤
+        6 * (14 * X + 1 + (q : ℝ) * Real.log q) *
+          ((14 * X + 1) / q + 1) :=
+      mul_le_mul hfac1s hfac2 (by positivity) (by positivity)
+    have h7 := LeanLab.ExceptionalSet.Decomp538a.karacuba_factor_thirty
+      (7 : ℝ) X q (by norm_num) hX (by exact_mod_cast hq)
+    have hcoef : (49 : ℝ) ≤ (2 : ℝ) ^ (8 * k - 4 * s) * (k : ℝ) ^ 2 := by
+      have he4 : 4 ≤ 8 * k - 4 * s := by omega
+      have hp16 : (16 : ℝ) ≤ (2 : ℝ) ^ (8 * k - 4 * s) := by
+        calc 16 = (2 : ℝ) ^ 4 := by norm_num
+          _ ≤ (2 : ℝ) ^ (8 * k - 4 * s) := pow_le_pow_right₀ (by norm_num) he4
+      have hk2sq : (4 : ℝ) ≤ (k : ℝ) ^ 2 := by
+        have hk1 : (2 : ℝ) ≤ k := by exact_mod_cast hk
+        nlinarith [sq_nonneg (k : ℝ)]
+      nlinarith
+    have h7' : 6 * (14 * X + 1 + (q : ℝ) * Real.log q) *
+          ((14 * X + 1) / q + 1) ≤ 30 * 49 * X ^ 2 *
+          (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q) := by
+      convert h7 using 1 <;> ring
+    have hX2 : (0 : ℝ) ≤ X ^ 2 := by positivity
+    have hqlog : (0 : ℝ) ≤ (q : ℝ) * Real.log q := by
+      have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast hq
+      exact mul_nonneg (by positivity) (Real.log_nonneg hq1)
+    have hF0 : (0 : ℝ) ≤ 1 / q + X⁻¹ * Real.log q +
+        (X ^ 2)⁻¹ * q * Real.log q := by
+      have hXinv : (0 : ℝ) ≤ X⁻¹ := inv_nonneg.mpr (by positivity)
+      have hX2inv : (0 : ℝ) ≤ (X ^ 2)⁻¹ := inv_nonneg.mpr (by positivity)
+      positivity
+    have hcoefmul : 49 * (X ^ 2 *
+          (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q)) ≤
+        ((2 : ℝ) ^ (8 * k - 4 * s) * (k : ℝ) ^ 2) * (X ^ 2 *
+          (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q)) := by
+      have hm := mul_le_mul_of_nonneg_left hcoef
+        (by positivity : (0 : ℝ) ≤ X ^ 2 *
+          (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q))
+      convert hm using 1 <;> ring
+    calc 6 * (2 * (k : ℝ) * X + 1 + (q : ℝ) * Real.log q) *
+          ((2 * (k : ℝ) * X + 1) / q + 1) ≤
+        6 * (14 * X + 1 + (q : ℝ) * Real.log q) *
+          ((14 * X + 1) / q + 1) := hLHS
+      _ ≤ 30 * 49 * X ^ 2 *
+          (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q) := h7'
+      _ ≤ 30 * (2 : ℝ) ^ (8 * k - 4 * s) * (k : ℝ) ^ 2 * X ^ 2 *
+          (1 / q + X⁻¹ * Real.log q + (X ^ 2)⁻¹ * q * Real.log q) := by
+        have hmain := mul_le_mul_of_nonneg_left hcoefmul (by norm_num : (0 : ℝ) ≤ 30)
+        nlinarith
 
 /-- LEAF: display (6) and Lemma 3 for one index `s ∈ T`, Karacuba p. 246 bottom to p. 247, class
 HARD. With `M = P2`, `B_s = f^{(s)}(a)/s!`, `ρ = min(c1/3, c3, c4)` and `k ≥ n(n+1)/4`:
