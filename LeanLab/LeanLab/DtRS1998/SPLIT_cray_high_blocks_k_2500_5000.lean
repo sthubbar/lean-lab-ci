@@ -25,7 +25,9 @@ theorem cray_high_blocks_k_2500_3000 :
         qs.any (fun q => decide
           (q ≤ 9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j ∧
             (9 * 10 ^ 13 + (10 ^ 9) * k + 2 * j - q).Prime))) = true := by
-  sorry
+  intro k h2500 h3000
+  refine ⟨[], by simp, ?_⟩
+  simp only [List.all_eq_true]
 
 /-- LEAF. Second sub-window: every block with 3000 ≤ k < 3500 carries a finite
 prime list qs and a successful Boolean offset check on every j < (10 ^ 9) / 2 + 1.
