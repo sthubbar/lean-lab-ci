@@ -19,6 +19,62 @@ namespace LeanLab.ChenDoubleSieve.Feed1122_Burst9Matrix_entry_0_3
 open Real Set MeasureTheory intervalIntegral
 open LeanLab.ChenDoubleSieve.Wu04Table
 
+
+/-- On the left half panel all nonbase windows of the row-zero `Xi2` kernel are inactive. -/
+private lemma kernel_left_base (t : ℝ) (ht : t ∈ Set.uIcc (12/5 : ℝ) (49/20 : ℝ)) :
+    tableKernel 0 t =
+      Wu04Integral.sigma0 t / (5 * t) *
+        log (1024 / (((6 / 5 : ℝ) * (177 / 50) * (253 / 100) * (19 / 10) * (36 / 25)))) := by
+  rw [Set.uIcc_of_le (by norm_num)] at ht
+  simp only [tableKernel]
+  split <;> rename_i h
+  · unfold Wu04Functional.Xi2 Wu04Functional.alpha Wu04Functional.ind
+    norm_num [Wu04Functional.tableParams, Fin.isValue, Finset.prod,
+      Finset.sum_range_succ, Finset.sum_range_zero]
+    · field_simp
+      ring
+    · constructor
+      · linarith [ht.1]
+      · constructor
+        · linarith [ht.2]
+        · linarith [ht.2]
+    · constructor
+      · linarith [ht.2]
+      · constructor
+        · linarith [ht.1]
+        · linarith [ht.2]
+    · constructor
+      · linarith [ht.2]
+      · constructor
+        · linarith [ht.1]
+        · linarith [ht.2]
+    · constructor
+      · linarith [ht.2]
+      · constructor
+        · linarith [ht.1]
+        · linarith [ht.2]
+    · constructor
+      · linarith [ht.2]
+      · constructor
+        · linarith [ht.1]
+        · linarith [ht.2]
+    · constructor
+      · linarith [ht.2]
+      · constructor
+        · linarith [ht.1]
+        · linarith [ht.2]
+    · constructor
+      · linarith [ht.2]
+      · constructor
+        · linarith [ht.1]
+        · linarith [ht.2]
+    · constructor
+      · linarith [ht.2]
+      · constructor
+        · linarith [ht.1]
+        · linarith [ht.2]
+  · omega
+
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15: the kernel of row 1 is interval integrable on the panel
 `[12/5, 5/2]`; it is a finite sum of window indicators times continuous functions and the
 continuous term `σ₀(t)`. MEDIUM. -/
@@ -30,6 +86,11 @@ theorem leaf_integrable :
 quadrature value 0.013443554130, stated bound leaves 4.53e-08. MEDIUM. -/
 theorem leaf_left :
     (3360877203/250000000000 : ℝ) ≤ ∫ t in (12/5 : ℝ)..(49/20 : ℝ), tableKernel 0 t := by
+  have hbase : ∀ t ∈ Set.uIcc (12/5 : ℝ) (49/20 : ℝ),
+      tableKernel 0 t =
+        Wu04Integral.sigma0 t / (5 * t) *
+          log (1024 / (((6 / 5 : ℝ) * (177 / 50) * (253 / 100) * (19 / 10) * (36 / 25)))) :=
+    fun t ht => kernel_left_base t ht
   sorry
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, right half panel `[49/20, 5/2]` of `a_{1,4}`:
