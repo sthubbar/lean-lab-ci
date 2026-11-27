@@ -24,142 +24,179 @@ namespace LeanLab.BakerHarmanPintz1997.Decomp409b
 open Finset Filter Topology Decomp1518
 attribute [local instance] Classical.propDecidable
 
-/-! ### Proved helpers for the coefficient bounds (3.1), S117 -/
-
-/-- `tau n` is the number of divisors of `n`. -/
-theorem s409_tau_eq_card (n : ℕ) : tau n = (n.divisors.card : ℝ) := by
-  simp [tau, ArithmeticFunction.sigma_zero_apply]
-
-/-- A divisor of a nonzero `k` has at least one and at most `tau k` divisors. -/
-theorem s409_one_le_tau {m : ℕ} (hm : m ≠ 0) : 1 ≤ tau m := by
-  rw [s409_tau_eq_card]
-  exact_mod_cast Finset.card_pos.mpr ⟨1, Nat.mem_divisors.mpr ⟨one_dvd _, hm⟩⟩
-
-theorem s409_tau_le_of_dvd {m k : ℕ} (hk : k ≠ 0) (h : m ∣ k) : tau m ≤ tau k := by
-  rw [s409_tau_eq_card, s409_tau_eq_card]
-  exact_mod_cast Finset.card_le_card (Nat.divisors_subset_of_dvd hk h)
-
-/-- The weight bound (3.1) at a divisor `m` of `k`: `tau m ^ B ≤ tau k ^ |B|`. -/
-theorem s409_rpow_tau_le_of_dvd (B : ℝ) {m k : ℕ} (hk : k ≠ 0) (h : m ∣ k) :
-    tau m ^ B ≤ tau k ^ |B| := by
-  have hm : m ≠ 0 := by rintro rfl; exact hk (Nat.eq_zero_of_zero_dvd h)
-  calc tau m ^ B ≤ tau m ^ |B| :=
-        Real.rpow_le_rpow_of_exponent_le (s409_one_le_tau hm) (le_abs_self B)
-    _ ≤ tau k ^ |B| :=
-        Real.rpow_le_rpow (by linarith [s409_one_le_tau hm]) (s409_tau_le_of_dvd hk h) (abs_nonneg B)
-
-/-- Counting the pairs `m, n` with `mn | k`: a double sum over them of terms at most `c`
-is at most `c tau(k)^2`. -/
-theorem s409_double_sum_dvd_le {k : ℕ} (hk : k ≠ 0) (S T : Finset ℕ) (f : ℕ → ℕ → ℝ) {c : ℝ}
-    (hc : 0 ≤ c) (hf : ∀ m n, m * n ∣ k → f m n ≤ c) :
-    ∑ m ∈ S, ∑ n ∈ T, (if m * n ∣ k then f m n else 0) ≤ c * tau k * tau k := by
-  have hstep : ∀ m ∈ S, ∑ n ∈ T, (if m * n ∣ k then f m n else 0) ≤
-      if m ∣ k then c * tau k else 0 := by
-    intro m _
-    by_cases hm : m ∣ k
-    · rw [if_pos hm]
-      calc ∑ n ∈ T, (if m * n ∣ k then f m n else 0)
-          ≤ ∑ n ∈ T, (if n ∣ k then c else 0) := by
-            refine sum_le_sum fun n _ => ?_
-            by_cases hmn : m * n ∣ k
-            · rw [if_pos hmn, if_pos (Dvd.dvd.trans (Dvd.intro_left m rfl) hmn)]
-              exact hf m n hmn
-            · rw [if_neg hmn]; split_ifs <;> linarith
-        _ = ∑ n ∈ T.filter (· ∣ k), c := (sum_filter _ _).symm
-        _ ≤ ∑ n ∈ k.divisors, c := by
-            refine sum_le_sum_of_subset_of_nonneg ?_ (fun _ _ _ => hc)
-            intro n hn
-            exact Nat.mem_divisors.mpr ⟨(mem_filter.mp hn).2, hk⟩
-        _ = c * tau k := by rw [sum_const, nsmul_eq_mul, s409_tau_eq_card, mul_comm]
-    · rw [if_neg hm]
-      refine sum_eq_zero_iff_of_nonneg ?_ |>.mpr ?_ |>.le
-      · intro n _; split_ifs with h
-        · exact absurd (Dvd.dvd.trans (Dvd.intro n rfl) h) hm
-        · exact le_rfl
-      · intro n _; rw [if_neg]; exact fun h => hm (Dvd.dvd.trans (Dvd.intro n rfl) h)
-  calc _ ≤ ∑ m ∈ S, (if m ∣ k then c * tau k else 0) := sum_le_sum hstep
-    _ = ∑ m ∈ S.filter (· ∣ k), c * tau k := (sum_filter _ _).symm
-    _ ≤ ∑ m ∈ k.divisors, c * tau k := by
-        refine sum_le_sum_of_subset_of_nonneg ?_ (fun _ _ _ => by
-          have := s409_one_le_tau hk; positivity)
-        intro n hn
-        exact Nat.mem_divisors.mpr ⟨(mem_filter.mp hn).2, hk⟩
-    _ = c * tau k * tau k := by rw [sum_const, nsmul_eq_mul, s409_tau_eq_card, mul_comm]
-
-theorem s409_norm_psiTrunc_le (l : ℕ) (hl : l ≠ 0) (w γ : ℝ) : ‖psiTrunc l w γ‖ ≤ tau l := by
-  unfold psiTrunc
-  refine (norm_sum_le _ _).trans ?_
-  calc _ ≤ ∑ d ∈ (siftingProduct w).divisors with d ∣ l ∧ (d : ℝ) < γ, (1 : ℝ) := by
-        refine sum_le_sum fun d _ => ?_
-        rw [Complex.norm_intCast]
-        exact_mod_cast ArithmeticFunction.abs_moebius_le_one
-    _ ≤ ∑ d ∈ l.divisors, (1 : ℝ) := by
-        refine sum_le_sum_of_subset_of_nonneg ?_ (fun _ _ _ => zero_le_one)
-        intro d hd
-        exact Nat.mem_divisors.mpr ⟨(mem_filter.mp hd).2.1, hl⟩
-    _ = tau l := by rw [sum_const, nsmul_eq_mul, mul_one, s409_tau_eq_card]
-
-theorem s409_psiErr_le (l : ℕ) (hl : l ≠ 0) (w γ : ℝ) : psiErr l w γ ≤ tau l := by
-  rw [psiErr, s409_tau_eq_card]
-  refine Nat.cast_le.mpr (card_le_card ?_)
-  intro d hd
-  rw [mem_filter] at hd
-  exact Nat.mem_divisors.mpr ⟨hd.2.1, hl⟩
-
-theorem s409_psiErr_nonneg (l : ℕ) (w γ : ℝ) : 0 ≤ psiErr l w γ := by
-  rw [psiErr]; positivity
-
-/-- The exponent algebra: `t^|B| t^|B| t t t = t^(2|B|+3)` for `t ≥ 1`. -/
-theorem s409_rpow_combine {t : ℝ} (ht : 1 ≤ t) (B : ℝ) :
-    t ^ |B| * t ^ |B| * t * t * t = t ^ (2 * |B| + 3) := by
-  have ht0 : 0 < t := by linarith
-  rw [show 2 * |B| + 3 = |B| + |B| + 1 + 1 + 1 by ring, Real.rpow_add ht0, Real.rpow_add ht0,
-    Real.rpow_add ht0, Real.rpow_add ht0, Real.rpow_one]
-
-
-/-- The quotient `k/(mn)` of a nonzero `k` by a divisor `mn` is a nonzero divisor of `k`. -/
-theorem s409_div_dvd_ne_zero {k m n : ℕ} (hk : k ≠ 0) (h : m * n ∣ k) :
-    k / (m * n) ∣ k ∧ k / (m * n) ≠ 0 :=
-  ⟨Nat.div_dvd_of_dvd h, fun h0 => hk (by
-    rw [Nat.div_eq_zero_iff] at h0
-    rcases h0 with h0 | h0
-    · rw [h0] at h; exact Nat.eq_zero_of_zero_dvd h
-    · exact absurd h0 (not_lt.mpr (Nat.le_of_dvd (Nat.pos_of_ne_zero hk) h)))⟩
-
 /-- LEAF: page 27 line 4, the coefficients of M1 N L satisfy (3.1). MEDIUM.
 For k at least 1, the pairs m, n with mn dividing k number at most tau k squared, each
 weight is at most tau k to the power of the absolute value of B, and the truncated Moebius
 sum over divisors of l = k/mn has absolute value at most tau l, which is at most tau k.
 The value at k = 0 is set to zero, since tau 0 = 0. Non-vacuity: a = b = 0 meets the
 hypotheses for every B. -/
+private theorem tau_one_le {k : ℕ} (hk : 0 < k) : 1 ≤ tau k := by
+  have hc : 0 < k.divisors.card := Finset.card_pos.mpr ⟨1, Nat.one_mem_divisors.mpr hk.ne'⟩
+  have h1 : (1 : ℕ) ≤ k.divisors.card := hc
+  simp only [tau, ArithmeticFunction.sigma_zero_apply]
+  exact_mod_cast h1
+
+private theorem psiTrunc_norm_le_tau_409b (l : ℕ) (hl : 0 < l) (w γ : ℝ) :
+    ‖psiTrunc l w γ‖ ≤ tau l := by
+  have hmu : ∀ d : ℕ, ‖(ArithmeticFunction.moebius d : ℂ)‖ ≤ 1 := by
+    intro d
+    exact_mod_cast (ArithmeticFunction.abs_moebius_le_one (n := d))
+  have hsub : (siftingProduct w).divisors.filter (fun d => d ∣ l ∧ (d : ℝ) < γ) ⊆ l.divisors := by
+    intro d hd
+    exact Nat.mem_divisors.mpr ⟨(mem_filter.mp hd).2.1, hl.ne'⟩
+  unfold psiTrunc
+  calc _ ≤ ∑ d ∈ (siftingProduct w).divisors with d ∣ l ∧ (d : ℝ) < γ, ‖(ArithmeticFunction.moebius d : ℂ)‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ d ∈ (siftingProduct w).divisors with d ∣ l ∧ (d : ℝ) < γ, (1 : ℝ) :=
+        sum_le_sum (fun d _ => hmu d)
+    _ ≤ ∑ d ∈ l.divisors, (1 : ℝ) := sum_le_sum_of_subset_of_nonneg hsub (by intros; positivity)
+    _ = _ := by simp [tau, ArithmeticFunction.sigma_zero_apply]
+
+private theorem psiErr_le_tau_409b (l : ℕ) (hl : 0 < l) (w γ : ℝ) : psiErr l w γ ≤ tau l := by
+  have hsub : (siftingProduct w).divisors.filter
+      (fun d => d ∣ l ∧ γ ≤ (d : ℝ) ∧ (d : ℝ) < γ * w) ⊆ l.divisors := by
+    intro d hd
+    exact Nat.mem_divisors.mpr ⟨(mem_filter.mp hd).2.1, hl.ne'⟩
+  simpa only [psiErr, tau, ArithmeticFunction.sigma_zero_apply] using
+    (show (((siftingProduct w).divisors.filter
+      (fun d => d ∣ l ∧ γ ≤ (d : ℝ) ∧ (d : ℝ) < γ * w)).card : ℝ) ≤ (l.divisors.card : ℝ) by
+        exact_mod_cast card_le_card hsub)
+
+private theorem weighted_conv2_norm_le_tau_409b (a b g : ℕ → ℂ) (M N B C : ℝ) (hB : 0 ≤ B)
+    (hC : 0 ≤ C) (ha : ∀ n, ‖a n‖ ≤ tau n ^ B) (hb : ∀ n, ‖b n‖ ≤ tau n ^ B)
+    (hg : ∀ n, 0 < n → ‖g n‖ ≤ tau n ^ C) {k : ℕ} (hk : 0 < k) :
+    ‖∑ m ∈ Ioc ⌊M⌋₊ ⌊2 * M⌋₊, ∑ n ∈ Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+      if m * n ∣ k then a m * b n * g (k / (m * n)) else 0‖ ≤ tau k ^ (2 * B + C + 2) := by
+  let S := (Ioc ⌊M⌋₊ ⌊2 * M⌋₊ ×ˢ Ioc ⌊N⌋₊ ⌊2 * N⌋₊).filter
+    (fun u : ℕ × ℕ => u.1 * u.2 ∣ k)
+  have hsub : S ⊆ k.divisors ×ˢ k.divisors := by
+    intro u hu
+    have hd := (mem_filter.mp hu).2
+    apply mem_product.mpr
+    exact ⟨Nat.mem_divisors.mpr ⟨(dvd_mul_right u.1 u.2).trans hd, hk.ne'⟩,
+      Nat.mem_divisors.mpr ⟨(dvd_mul_left u.2 u.1).trans hd, hk.ne'⟩⟩
+  have htau : ∀ d, d ∣ k → tau d ≤ tau k := by
+    intro d hd
+    simp only [tau, ArithmeticFunction.sigma_zero_apply]
+    exact_mod_cast card_le_card (Nat.divisors_subset_of_dvd hk.ne' hd)
+  have htpos : 0 < tau k := by
+    simp only [tau, ArithmeticFunction.sigma_zero_apply, Nat.cast_pos]
+    exact card_pos.mpr ⟨1, Nat.one_mem_divisors.mpr hk.ne'⟩
+  have hterm : ∀ u ∈ S, ‖a u.1 * b u.2 * g (k / (u.1 * u.2))‖ ≤ tau k ^ (B + B + C) := by
+    intro u hu
+    have hd := mem_product.mp (hsub hu)
+    have ham : ‖a u.1‖ ≤ tau k ^ B :=
+      (ha _).trans (Real.rpow_le_rpow (by simp [tau]) (htau _ (Nat.mem_divisors.mp hd.1).1) hB)
+    have hbn : ‖b u.2‖ ≤ tau k ^ B :=
+      (hb _).trans (Real.rpow_le_rpow (by simp [tau]) (htau _ (Nat.mem_divisors.mp hd.2).1) hB)
+    have hdk : u.1 * u.2 ∣ k := (mem_filter.mp hu).2
+    have hqk : k / (u.1 * u.2) ∣ k := Nat.div_dvd_of_dvd hdk
+    have hq0 : 0 < k / (u.1 * u.2) := by
+      apply Nat.div_pos (Nat.le_of_dvd hk hdk)
+      have : u.1 * u.2 ≠ 0 := by intro he; simp [he] at hdk; omega
+      omega
+    have hgn : ‖g (k / (u.1 * u.2))‖ ≤ tau k ^ C :=
+      (hg _ hq0).trans (Real.rpow_le_rpow (by simp [tau]) (htau _ hqk) hC)
+    rw [norm_mul, norm_mul, Real.rpow_add htpos, Real.rpow_add htpos]
+    exact mul_le_mul (mul_le_mul ham hbn (norm_nonneg _) (Real.rpow_nonneg htpos.le _))
+      hgn (norm_nonneg _) (by positivity)
+  have heq : (∑ m ∈ Ioc ⌊M⌋₊ ⌊2 * M⌋₊, ∑ n ∈ Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+      if m * n ∣ k then a m * b n * g (k / (m * n)) else 0) =
+      ∑ u ∈ S, a u.1 * b u.2 * g (k / (u.1 * u.2)) := by
+    simp [S, sum_filter, sum_product]
+  rw [heq]
+  calc _ ≤ ∑ u ∈ S, ‖a u.1 * b u.2 * g (k / (u.1 * u.2))‖ := norm_sum_le _ _
+    _ ≤ ∑ u ∈ S, tau k ^ (B + B + C) := sum_le_sum hterm
+    _ ≤ ∑ u ∈ k.divisors ×ˢ k.divisors, tau k ^ (B + B + C) :=
+      sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => Real.rpow_nonneg htpos.le _)
+    _ = tau k ^ 2 * tau k ^ (B + B + C) := by
+      simp [tau, ArithmeticFunction.sigma_zero_apply, pow_two]
+    _ = _ := by
+      rw [← Real.rpow_natCast, ← Real.rpow_add htpos]
+      congr 1
+      ring
+
+private theorem conv2T_norm_le_tau_409b (a b : ℕ → ℂ) (M N w γ B : ℝ) (hB : 0 ≤ B)
+    (ha : ∀ n, ‖a n‖ ≤ tau n ^ B) (hb : ∀ n, ‖b n‖ ≤ tau n ^ B) {k : ℕ} (hk : 0 < k) :
+    ‖conv2T a b M N w γ k‖ ≤ tau k ^ (2 * B + 3) := by
+  have hg : ∀ l, 0 < l → ‖psiTrunc l w γ‖ ≤ tau l ^ (1 : ℝ) := by
+    intro l hl
+    simpa only [Real.rpow_one] using psiTrunc_norm_le_tau_409b l hl w γ
+  simpa only [conv2T, show 2 * B + 1 + 2 = 2 * B + 3 by ring] using
+    weighted_conv2_norm_le_tau_409b a b (fun l => psiTrunc l w γ) M N B 1 hB (by norm_num) ha hb hg hk
+
+private theorem conv2E_le_tau_409b (a b : ℕ → ℂ) (M N w γ B : ℝ) (hB : 0 ≤ B)
+    (ha : ∀ n, ‖a n‖ ≤ tau n ^ B) (hb : ∀ n, ‖b n‖ ≤ tau n ^ B) {k : ℕ} (hk : 0 < k) :
+    conv2E a b M N w γ k ≤ tau k ^ (2 * B + 3) := by
+  have he0 : 0 ≤ conv2E a b M N w γ k := by
+    unfold conv2E
+    apply sum_nonneg
+    intro m hm
+    apply sum_nonneg
+    intro n hn
+    split_ifs
+    · unfold psiErr
+      positivity
+    · positivity
+  have ha' : ∀ n, ‖(‖a n‖ : ℂ)‖ ≤ tau n ^ B := by simpa using ha
+  have hb' : ∀ n, ‖(‖b n‖ : ℂ)‖ ≤ tau n ^ B := by simpa using hb
+  have hg : ∀ l, 0 < l → ‖(psiErr l w γ : ℂ)‖ ≤ tau l ^ (1 : ℝ) := by
+    intro l hl
+    rw [Complex.norm_of_nonneg (by unfold psiErr; positivity), Real.rpow_one]
+    exact psiErr_le_tau_409b l hl w γ
+  have h := weighted_conv2_norm_le_tau_409b (fun n => (‖a n‖ : ℂ)) (fun n => (‖b n‖ : ℂ))
+    (fun l => (psiErr l w γ : ℂ)) M N B 1 hB (by norm_num) ha' hb' hg hk
+  have heq : (∑ m ∈ Ioc ⌊M⌋₊ ⌊2 * M⌋₊, ∑ n ∈ Ioc ⌊N⌋₊ ⌊2 * N⌋₊,
+      if m * n ∣ k then (‖a m‖ : ℂ) * (‖b n‖ : ℂ) * (psiErr (k / (m * n)) w γ : ℂ) else 0) =
+      (conv2E a b M N w γ k : ℂ) := by
+    simp only [conv2E, Complex.ofReal_sum]
+    apply sum_congr rfl
+    intro m hm
+    apply sum_congr rfl
+    intro n hn
+    split_ifs <;> push_cast <;> rfl
+  rw [heq, Complex.norm_of_nonneg he0] at h
+  simpa only [show 2 * B + 1 + 2 = 2 * B + 3 by ring] using h
+
+private theorem zero_rpow_le_max (B : ℝ) : (0 : ℝ) ^ B ≤ (0 : ℝ) ^ max B 0 := by
+  rcases lt_trichotomy B 0 with h | h | h
+  · rw [max_eq_right h.le, Real.zero_rpow h.ne]
+    have h1 : (0 : ℝ) ^ (0 : ℝ) = 1 := by simp
+    rw [h1]
+    norm_num
+  · subst h; simp
+  · rw [max_eq_left h.le]
+
 theorem leaf_trunc_coeff_bound (B : ℝ) : ∃ B' : ℝ, ∀ (a b : ℕ → ℂ) (M N w γ : ℝ),
     (∀ k, ‖a k‖ ≤ tau k ^ B) → (∀ k, ‖b k‖ ≤ tau k ^ B) →
     ∀ k : ℕ, ‖(if k = 0 then 0 else conv2T a b M N w γ k)‖ ≤ tau k ^ B' := by
-  refine ⟨2 * |B| + 3, fun a b M N w γ ha hb k => ?_⟩
-  by_cases hk : k = 0
-  · rw [if_pos hk, norm_zero]; exact Real.rpow_nonneg (by rw [tau]; positivity) _
-  rw [if_neg hk]
-  have ht := s409_one_le_tau hk
-  rw [← s409_rpow_combine ht B]
-  unfold conv2T
-  refine (norm_sum_le _ _).trans ?_
-  refine le_trans (sum_le_sum fun m _ => norm_sum_le _ _) ?_
-  have e : ∀ m n, ‖(if m * n ∣ k then a m * b n * psiTrunc (k / (m * n)) w γ else 0)‖ =
-      if m * n ∣ k then ‖a m * b n * psiTrunc (k / (m * n)) w γ‖ else 0 := by
-    intro m n; split_ifs <;> simp
-  simp only [e]
-  refine s409_double_sum_dvd_le hk _ _ _ (by positivity) fun m n hmn => ?_
-  obtain ⟨hl, hl0⟩ := s409_div_dvd_ne_zero hk hmn
-  have hm : m ∣ k := (Dvd.intro n rfl).trans hmn
-  have hn : n ∣ k := (Dvd.intro_left m rfl).trans hmn
-  rw [norm_mul, norm_mul]
-  have h1 := (ha m).trans (s409_rpow_tau_le_of_dvd B hk hm)
-  have h2 := (hb n).trans (s409_rpow_tau_le_of_dvd B hk hn)
-  have h3 := (s409_norm_psiTrunc_le _ hl0 w γ).trans (s409_tau_le_of_dvd hk hl)
-  have h0 : 0 ≤ tau k ^ |B| := Real.rpow_nonneg (by linarith) _
-  calc ‖a m‖ * ‖b n‖ * ‖psiTrunc (k / (m * n)) w γ‖ ≤ tau k ^ |B| * tau k ^ |B| * tau k := by
-        gcongr
-    _ = _ := rfl
+  refine ⟨2 * max B 0 + 3, fun a b M N w γ ha hb k => ?_⟩
+  have hB0 : (0 : ℝ) ≤ max B 0 := le_max_right B 0
+  have ha0 : ∀ k, ‖a k‖ ≤ tau k ^ max B 0 := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · subst hn
+      have h0 : tau 0 = 0 := by simp [tau]
+      have h := ha 0
+      rw [h0] at h ⊢
+      exact h.trans (zero_rpow_le_max B)
+    · exact (ha n).trans (Real.rpow_le_rpow_of_exponent_le (tau_one_le hn) (le_max_left B 0))
+  have hb0 : ∀ k, ‖b k‖ ≤ tau k ^ max B 0 := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · subst hn
+      have h0 : tau 0 = 0 := by simp [tau]
+      have h := hb 0
+      rw [h0] at h ⊢
+      exact h.trans (zero_rpow_le_max B)
+    · exact (hb n).trans (Real.rpow_le_rpow_of_exponent_le (tau_one_le hn) (le_max_left B 0))
+  rcases Nat.eq_zero_or_pos k with hk | hk
+  · subst hk
+    have hexp : (0 : ℝ) < 2 * max B 0 + 3 := by linarith
+    have h0 : tau 0 = 0 := by simp [tau]
+    rw [h0, Real.zero_rpow hexp.ne']
+    simp
+  · simpa only [if_neg hk.ne'] using conv2T_norm_le_tau_409b a b M N w γ (max B 0) hB0 ha0 hb0 hk
 
 /-- LEAF: page 27 lines 1 to 10, display (4.1) for c prime, via Lemma 10 applied to
 M1 N L summed over D = gamma 2^-j. HARD.
@@ -190,32 +227,47 @@ Non-vacuity: a = b = 0. -/
 theorem leaf_err_coeff_bound (B : ℝ) : ∃ B' : ℝ, ∀ (a b : ℕ → ℂ) (M N w γ : ℝ),
     (∀ k, ‖a k‖ ≤ tau k ^ B) → (∀ k, ‖b k‖ ≤ tau k ^ B) →
     ∀ k : ℕ, ‖(if k = 0 then (0 : ℂ) else ((conv2E a b M N w γ k : ℝ) : ℂ))‖ ≤ tau k ^ B' := by
-  refine ⟨2 * |B| + 3, fun a b M N w γ ha hb k => ?_⟩
-  by_cases hk : k = 0
-  · rw [if_pos hk, norm_zero]; exact Real.rpow_nonneg (by rw [tau]; positivity) _
-  rw [if_neg hk, Complex.norm_real, Real.norm_eq_abs]
-  have ht := s409_one_le_tau hk
-  rw [← s409_rpow_combine ht B]
-  have hnn : 0 ≤ conv2E a b M N w γ k := by
-    unfold conv2E
-    refine sum_nonneg fun m _ => sum_nonneg fun n _ => ?_
-    split_ifs
-    · have := s409_psiErr_nonneg (k / (m * n)) w γ; positivity
-    · exact le_rfl
-  rw [abs_of_nonneg hnn]
-  unfold conv2E
-  refine s409_double_sum_dvd_le hk _ _ _ (by positivity) fun m n hmn => ?_
-  obtain ⟨hl, hl0⟩ := s409_div_dvd_ne_zero hk hmn
-  have hm : m ∣ k := (Dvd.intro n rfl).trans hmn
-  have hn : n ∣ k := (Dvd.intro_left m rfl).trans hmn
-  have h1 := (ha m).trans (s409_rpow_tau_le_of_dvd B hk hm)
-  have h2 := (hb n).trans (s409_rpow_tau_le_of_dvd B hk hn)
-  have h3 := (s409_psiErr_le _ hl0 w γ).trans (s409_tau_le_of_dvd hk hl)
-  have h0 : 0 ≤ tau k ^ |B| := Real.rpow_nonneg (by linarith) _
-  have h4 := s409_psiErr_nonneg (k / (m * n)) w γ
-  calc ‖a m‖ * ‖b n‖ * psiErr (k / (m * n)) w γ ≤ tau k ^ |B| * tau k ^ |B| * tau k := by
-        gcongr
-    _ = _ := rfl
+  refine ⟨2 * max B 0 + 3, fun a b M N w γ ha hb k => ?_⟩
+  have hB0 : (0 : ℝ) ≤ max B 0 := le_max_right B 0
+  have ha0 : ∀ n, ‖a n‖ ≤ tau n ^ max B 0 := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · subst hn
+      have h0 : tau 0 = 0 := by simp [tau]
+      have h := ha 0
+      rw [h0] at h ⊢
+      exact h.trans (zero_rpow_le_max B)
+    · exact (ha n).trans (Real.rpow_le_rpow_of_exponent_le (tau_one_le hn) (le_max_left B 0))
+  have hb0 : ∀ n, ‖b n‖ ≤ tau n ^ max B 0 := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · subst hn
+      have h0 : tau 0 = 0 := by simp [tau]
+      have h := hb 0
+      rw [h0] at h ⊢
+      exact h.trans (zero_rpow_le_max B)
+    · exact (hb n).trans (Real.rpow_le_rpow_of_exponent_le (tau_one_le hn) (le_max_left B 0))
+  rcases Nat.eq_zero_or_pos k with hk | hk
+  · subst hk
+    have hexp : (0 : ℝ) < 2 * max B 0 + 3 := by linarith
+    have h0 : tau 0 = 0 := by simp [tau]
+    rw [h0, Real.zero_rpow hexp.ne']
+    simp
+  · have hE : conv2E a b M N w γ k ≤ tau k ^ (2 * max B 0 + 3) :=
+      conv2E_le_tau_409b a b M N w γ (max B 0) hB0 ha0 hb0 hk
+    have hnn : 0 ≤ conv2E a b M N w γ k := by
+      unfold conv2E
+      apply sum_nonneg
+      intro m hm
+      apply sum_nonneg
+      intro n hn
+      split_ifs
+      · unfold psiErr
+        positivity
+      · positivity
+    rw [if_neg hk.ne']
+    rw [Complex.norm_of_nonneg hnn]
+    exact hE
 
 /-- LEAF: page 27 lines 11 and 12, display (4.1) for c double prime, Lemma 10 applied to
 M1 with d restricted to d | P(w), gamma at most d below w gamma, d ~ D. HARD.
@@ -278,45 +330,64 @@ Equivalent to 0.04 L x at least 3 L^(1/3) + A log L, a routine growth comparison
 Non-vacuity: a single eventual inequality, true for every A. -/
 theorem leaf_y1_dominates (A : ℝ) (hA : 0 < A) :
     ∃ X0 : ℝ, ∀ x : ℝ, X0 ≤ x → x ^ (0.96 : ℝ) ≤ y1 x / L x ^ A := by
-  refine ⟨Real.exp ((25 * (3 + 2 * A)) ^ 2 + 1), fun x hx => ?_⟩
-  have hxpos : 0 < x := lt_of_lt_of_le (Real.exp_pos _) hx
-  set u := Real.log x with hu
-  have hu1 : (25 * (3 + 2 * A)) ^ 2 + 1 ≤ u := by
-    rw [hu, Real.le_log_iff_exp_le hxpos]; exact hx
-  have hupos : 0 < u := by nlinarith
-  have hu1' : 1 ≤ u := by nlinarith
-  have hL : L x = u := rfl
-  -- key inequality on the log scale
-  have hsq : 0 < u ^ (1 / 2 : ℝ) := Real.rpow_pos_of_pos hupos _
-  have hsq2 : u ^ (1 / 2 : ℝ) * u ^ (1 / 2 : ℝ) = u := by
-    rw [← Real.rpow_add hupos]; norm_num
-  have hlog : Real.log u ≤ 2 * u ^ (1 / 2 : ℝ) := by
-    have := Real.log_le_rpow_div hupos.le (by norm_num : (0 : ℝ) < 1 / 2)
-    linarith [show u ^ (1 / 2 : ℝ) / (1 / 2) = 2 * u ^ (1 / 2 : ℝ) by ring]
-  have hthird : u ^ (1 / 3 : ℝ) ≤ u ^ (1 / 2 : ℝ) :=
-    Real.rpow_le_rpow_of_exponent_le hu1' (by norm_num)
-  have hbig : 25 * (3 + 2 * A) ≤ u ^ (1 / 2 : ℝ) := by
-    by_contra h
-    push Not at h
-    have h0 : 0 ≤ 25 * (3 + 2 * A) := by linarith
-    have : u ^ (1 / 2 : ℝ) * u ^ (1 / 2 : ℝ) < (25 * (3 + 2 * A)) ^ 2 := by
-      rw [sq]; exact mul_self_lt_mul_self hsq.le h
-    linarith
-  have hkey : 0.96 * u + A * Real.log u ≤ u + -3 * u ^ (1 / 3 : ℝ) := by
-    have h1 : (3 + 2 * A) * u ^ (1 / 2 : ℝ) ≤ 0.04 * u := by
-      have := mul_le_mul_of_nonneg_right hbig hsq.le
-      nlinarith
-    nlinarith
-  have hLA : 0 < L x ^ A := Real.rpow_pos_of_pos (by rw [hL]; exact hupos) _
-  rw [le_div_iff₀ hLA]
-  have e1 : x ^ (0.96 : ℝ) = Real.exp (0.96 * u) := by
-    rw [Real.rpow_def_of_pos hxpos, hu, mul_comm]
-  have e2 : L x ^ A = Real.exp (A * Real.log u) := by
-    rw [hL, Real.rpow_def_of_pos hupos, mul_comm]
-  have e3 : y1 x = Real.exp (u + -3 * u ^ (1 / 3 : ℝ)) := by
-    rw [y1, Real.exp_add, Real.exp_log hxpos]
-  rw [e1, e2, e3, ← Real.exp_add]
-  exact Real.exp_le_exp.mpr hkey
+  refine ⟨Real.exp (max 1 (max 22500 ((100 * (A + 1)) ^ 2))), fun x hx => ?_⟩
+  have ht : max 1 (max 22500 ((100 * (A + 1)) ^ 2)) ≤ L x := by
+    have h := Real.log_le_log (Real.exp_pos _) hx
+    rwa [Real.log_exp] at h
+  have ht1 : (1 : ℝ) ≤ L x := (le_max_left _ _).trans ht
+  have h22500 : (22500 : ℝ) ≤ L x := by
+    refine le_trans (le_trans (le_max_left (22500 : ℝ) ((100 * (A + 1)) ^ 2)) ?_) ht
+    exact le_max_right 1 (max 22500 ((100 * (A + 1)) ^ 2))
+  have h100 : (100 * (A + 1)) ^ 2 ≤ L x := by
+    refine le_trans (le_trans (le_max_right (22500 : ℝ) ((100 * (A + 1)) ^ 2)) ?_) ht
+    exact le_max_right 1 (max 22500 ((100 * (A + 1)) ^ 2))
+  have hx0 : 0 < x := (Real.exp_pos _).trans_le hx
+  have hlogpos : 0 < L x := zero_lt_one.trans_le ht1
+  set u : ℝ := L x ^ (1 / 2 : ℝ) with hu
+  have hu0 : 0 ≤ u := Real.rpow_nonneg hlogpos.le _
+  have husq : u * u = L x := by
+    rw [hu, ← Real.rpow_add hlogpos]
+    norm_num
+  have hsqrt : u = Real.sqrt (L x) := (Real.sqrt_eq_rpow (L x)).symm
+  have hu150 : 150 ≤ u := by
+    rw [hsqrt]
+    calc (150 : ℝ) = Real.sqrt ((150 : ℝ) ^ 2) := by rw [Real.sqrt_sq (by norm_num)]
+      _ ≤ Real.sqrt (L x) := Real.sqrt_le_sqrt (by linarith)
+  have hu100 : 100 * (A + 1) ≤ u := by
+    rw [hsqrt]
+    calc 100 * (A + 1) = Real.sqrt ((100 * (A + 1)) ^ 2) := by
+          rw [Real.sqrt_sq (by positivity)]
+      _ ≤ Real.sqrt (L x) := Real.sqrt_le_sqrt h100
+  have hthird : L x ^ (1 / 3 : ℝ) ≤ u :=
+    Real.rpow_le_rpow_of_exponent_le ht1 (by norm_num)
+  have ha3 : 3 * L x ^ (1 / 3 : ℝ) ≤ 0.02 * L x := by
+    nlinarith [hthird, hu150, hu0, husq]
+  have hloglog : Real.log (L x) ≤ 2 * u := by
+    have h := Real.log_le_rpow_div hlogpos.le (show (0 : ℝ) < 1 / 2 by norm_num)
+    have he : L x ^ (1 / 2 : ℝ) / (1 / 2 : ℝ) = 2 * u := by
+      rw [hu]
+      ring
+    linarith [h, he.le, he.ge]
+  have hb2 : (A + 1) * Real.log (L x) ≤ 0.02 * L x := by
+    nlinarith [hloglog, hu100, hu0, husq, hA]
+  have key : 0.96 * L x + (A + 1) * Real.log (L x) ≤ L x - 3 * L x ^ (1 / 3 : ℝ) := by
+    linarith [ha3, hb2]
+  have hLHS : x ^ (0.96 : ℝ) = Real.exp (0.96 * L x) := by
+    rw [Real.rpow_def_of_pos hx0]
+    congr 1
+    simp only [L]
+    ring
+  have hRHS : y1 x / L x ^ A = Real.exp (L x - 3 * L x ^ (1 / 3 : ℝ) - A * Real.log (L x)) := by
+    have hy : y1 x = x * Real.exp (-3 * Real.log x ^ (1 / 3 : ℝ)) := rfl
+    rw [hy, Real.rpow_def_of_pos hlogpos, show x = Real.exp (L x) by
+      rw [show L x = Real.log x from rfl, Real.exp_log hx0]]
+    rw [← Real.exp_add, ← Real.exp_sub]
+    congr 1
+    simp only [L, Real.log_exp]
+    ring
+  rw [hLHS, hRHS, Real.exp_le_exp]
+  have hlogLx : 0 ≤ Real.log (L x) := Real.log_nonneg ht1
+  linarith [key, hlogLx]
 
 /-- Proved glue: a family and its copy vanishing at k = 0 have the same (4.2). -/
 theorem holds42_of_zero_at_zero {ε : ℝ} {c : ℝ → ℕ → ℂ}
@@ -408,9 +479,6 @@ theorem error_average_split :
         mul_le_mul_of_nonneg_left (add_le_add hmain hsmall) hC
     _ = C * (CB + 1) * y1 x / L x ^ A := by ring
 
-#print axioms leaf_trunc_coeff_bound
-#print axioms leaf_err_coeff_bound
-#print axioms leaf_y1_dominates
 #print axioms holds42_of_zero_at_zero
 #print axioms truncated_transfer_split
 #print axioms error_transfer_split
