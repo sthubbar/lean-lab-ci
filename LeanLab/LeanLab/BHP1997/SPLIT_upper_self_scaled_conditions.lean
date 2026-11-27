@@ -85,7 +85,30 @@ theorem upper_self_scaled_mean_square_of_distribution
     Task308.ShortMeanSquare ε
       (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
         upperDeletedIntegral ω ε) b1 := by
-  sorry
+  refine ⟨fun _ _ _ => ∀, ?_⟩
+  intro A hA
+  obtain ⟨C, hC⟩ := hdist A hA
+  refine ⟨max C 1, ?_⟩
+  intro x hx q hq hqQ
+  constructor
+  · simp only [Finset.card_empty, Nat.cast_zero]
+    positivity
+  · intro z hz1 hz2
+    have hx1 : 1 ≤ x := by
+      have : 1 ≤ max C 1 := le_max_right _ _
+      exact this.trans hx
+    have hlog : 0 ≤ Real.log x := Real.log_nonneg hx1
+    have hY : 0 ≤ x ^ (11 / 20 + ε) :=
+      Real.rpow_nonneg (by linarith) _
+    have hscale : 0 ≤ x ^ (11 / 20 + ε) * Real.log x ^ (-A) :=
+      mul_nonneg hY (Real.rpow_nonneg hlog _)
+    refine le_trans (hC x (by
+      have : C ≤ max C 1 := le_max_left _ _
+      exact this.trans hx) q hq (by
+        exact le_trans (by
+          have : (1 : ∜) ≤ Real.log x := by linarith
+          exact Real.one_le_rpow this hA) hqA) (fun _ => hz2)) ?_
+    exact mul_le_mul_of_nonneg_right (le_max_left _ _) hscale
 
 /-- The target `upper_self_scaled_conditions` of Upper312RouteSelfScaled, verbatim, assembled from
 the three leaves. For each power of the logarithm the two character leaves give the two constants;
