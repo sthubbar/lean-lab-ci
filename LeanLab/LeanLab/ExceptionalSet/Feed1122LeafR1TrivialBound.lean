@@ -2,7 +2,7 @@
 Deepening of `leaf_R1_trivial_bound` of `Feed1122LeafEvenMoment`, the trivial bound before
 display 33 of Brudern-Perelli 1998, P0082, p. 368: `|R₁(m)| ≤ ∫_0^1 |S(α)|² dα ≪ X log X`.
 The Chebyshev half, `Σ_{P<p≤X} (log p)² ≤ 2 X log X`, is proved here from the primorial
-bound of Mathlib; the analytic half, `‖R₁(m)‖ ≤ Σ_{P<p≤X} (log p)²`, is one MEDIUM leaf.
+bound of Mathlib; the analytic half, `‖R₁(m)‖ ≤ Σ_{P<p≤X} (log p)²`, is proved too, by session S91.
 
 AI wrote this Lean code, checked only by the Lean kernel. Binary Goldbach is open.
 -/
@@ -10,15 +10,88 @@ import LeanLab.ExceptionalSet.State1539
 
 namespace LeanLab.ExceptionalSet.U1539
 
-open Real Finset
+open Real Finset MeasureTheory
 
-/-- LEAF: the first inequality before display 33 of P0082, p. 368, together with Parseval:
+/-- `conj e(x) = e(-x)`. -/
+theorem r1p_conj_eC (x : ℝ) : (starRingEnd ℂ) (eC x) = eC (-x) := by
+  unfold eC
+  rw [← Complex.exp_conj]; congr 1
+  simp only [map_mul, Complex.conj_ofReal, Complex.conj_I, map_ofNat]; push_cast; ring
+
+/-- `e(x + y) = e(x) e(y)`. -/
+theorem r1p_eC_add (x y : ℝ) : eC (x + y) = eC x * eC y := by
+  unfold eC; rw [← Complex.exp_add]; congr 1; push_cast; ring
+
+/-- Orthogonality: `∫_0^1 e(αk) dα` is `1` at `k = 0` and `0` otherwise. -/
+theorem r1p_integral_eC_int (k : ℤ) : ∫ α in (0:ℝ)..1, eC (α * k) = if k = 0 then 1 else 0 := by
+  split_ifs with hk
+  · subst hk; simp [eC]
+  · have hc : (2 * Real.pi * Complex.I * k : ℂ) ≠ 0 := by
+      have : (k : ℂ) ≠ 0 := by exact_mod_cast hk
+      have hpi : (Real.pi : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+      simp [Complex.I_ne_zero, hpi, this]
+    have h := integral_exp_mul_complex (a := 0) (b := 1) hc
+    have e : (fun α : ℝ => eC (α * k)) = fun α : ℝ => Complex.exp (2 * Real.pi * Complex.I * k * α) := by
+      funext α; unfold eC; congr 1; push_cast; ring
+    rw [e, h]
+    have h1 : Complex.exp (2 * Real.pi * Complex.I * k * ((1:ℝ):ℂ)) = 1 := by
+      rw [Complex.ofReal_one, mul_one, show (2 * Real.pi * Complex.I * k : ℂ) = (k : ℂ) * (2 * Real.pi * Complex.I) by ring]
+      exact Complex.exp_int_mul_two_pi_mul_I k
+    rw [h1]; simp
+
+/-- `S(α)` is continuous. -/
+theorem r1p_cont_Sp (P X : ℝ) : Continuous (fun α => Sp P X α) := by
+  unfold Sp eC; fun_prop
+
+/-- Parseval for `S`, P0082 p. 368 before display 33: `∫_0^1 |S(α)|² dα = Σ_{P<p≤X} (log p)²`. -/
+theorem r1p_integral_normSq_Sp (P X : ℝ) :
+    ∫ α in Set.Icc (0:ℝ) 1, ‖Sp P X α‖ ^ 2 =
+      ∑ p ∈ (Finset.Ioc ⌊P⌋₊ ⌊X⌋₊).filter Nat.Prime, Real.log p ^ 2 := by
+  set T := (Finset.Ioc ⌊P⌋₊ ⌊X⌋₊).filter Nat.Prime
+  rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le zero_le_one]
+  apply Complex.ofReal_injective
+  rw [← intervalIntegral.integral_ofReal]
+  have hpt : ∀ α : ℝ, ((‖Sp P X α‖ ^ 2 : ℝ) : ℂ) =
+      ∑ p ∈ T, ∑ q ∈ T, ((Real.log p * Real.log q : ℝ) : ℂ) * eC (α * ((p : ℤ) - (q : ℤ) : ℤ)) := by
+    intro α
+    rw [← Complex.normSq_eq_norm_sq, ← Complex.mul_conj]
+    unfold Sp
+    rw [map_sum, sum_mul_sum]
+    refine sum_congr rfl (fun p _ => sum_congr rfl (fun q _ => ?_))
+    rw [map_mul, r1p_conj_eC, Complex.conj_ofReal]
+    have : eC (α * ((p : ℤ) - (q : ℤ) : ℤ)) = eC (α * p) * eC (-(α * q)) := by
+      rw [← r1p_eC_add]; congr 1; push_cast; ring
+    rw [this]; push_cast; ring
+  simp_rw [hpt]
+  have hint : ∀ (c : ℂ) (k : ℤ), IntervalIntegrable (fun α : ℝ => c * eC (α * k)) volume 0 1 := by
+    intro c k
+    apply Continuous.intervalIntegrable
+    unfold eC; fun_prop
+  rw [intervalIntegral.integral_finsetSum (fun p _ => ?_), Complex.ofReal_sum]
+  · refine sum_congr rfl (fun p hp => ?_)
+    rw [intervalIntegral.integral_finsetSum (fun q _ => hint _ _)]
+    simp_rw [intervalIntegral.integral_const_mul, r1p_integral_eC_int, sub_eq_zero, Nat.cast_inj,
+      mul_ite, mul_one, mul_zero]
+    rw [sum_ite_eq, if_pos hp]; push_cast; ring
+  · apply Continuous.intervalIntegrable
+    unfold eC; fun_prop
+
+/-- Formerly a MEDIUM LEAF, PROVED by session S91: the first inequality before display 33 of P0082, p. 368, together with Parseval:
 `‖R₁(m)‖ ≤ ∫_𝔐 |S(α)|² dα ≤ ∫_0^1 |S(α)|² dα = Σ_{P<p≤X} (log p)²`, the last step by the
-orthogonality of `e(αk)` on `[0,1]`. Class MEDIUM: norm of a set integral, monotonicity in
-the measurable set `𝔐 ⊆ [0,1]`, and Parseval for a finite trigonometric sum. -/
+orthogonality of `e(αk)` on `[0,1]`, proved by the norm of a set integral, monotonicity in
+the set `𝔐 ⊆ [0,1]`, and Parseval for a finite trigonometric sum. -/
 theorem leaf_R1_le_sum_log_sq (P X : ℝ) (m : ℤ) :
     ‖R1 P X m‖ ≤ ∑ p ∈ (Finset.Ioc ⌊P⌋₊ ⌊X⌋₊).filter Nat.Prime, Real.log p ^ 2 := by
-  sorry
+  rw [← r1p_integral_normSq_Sp P X]
+  have hnorm : ∀ α : ℝ, ‖Sp P X α ^ 2 * eC (-(α * m))‖ = ‖Sp P X α‖ ^ 2 := by
+    intro α; rw [norm_mul, norm_pow, norm_eC, mul_one]
+  have hc : Continuous (fun α => ‖Sp P X α‖ ^ 2) := (r1p_cont_Sp P X).norm.pow 2
+  calc ‖R1 P X m‖ ≤ ∫ α in majorArcs P X ∩ Set.Icc 0 1, ‖Sp P X α ^ 2 * eC (-(α * m))‖ :=
+        norm_integral_le_integral_norm _
+    _ = ∫ α in majorArcs P X ∩ Set.Icc 0 1, ‖Sp P X α‖ ^ 2 := by simp_rw [hnorm]
+    _ ≤ ∫ α in Set.Icc (0:ℝ) 1, ‖Sp P X α‖ ^ 2 :=
+        setIntegral_mono_set (hc.integrableOn_Icc) (Filter.Eventually.of_forall (fun α => by positivity))
+          (Set.inter_subset_right.eventuallyLE)
 
 /-- Chebyshev's bound in the form used before display 33 of P0082: for `X ≥ 2`,
 `Σ_{P<p≤X} (log p)² ≤ log X · θ(X) ≤ (log 4) X log X ≤ 2 X log X`. Proved from
@@ -86,3 +159,5 @@ end LeanLab.ExceptionalSet.U1539
 
 #print axioms LeanLab.ExceptionalSet.U1539.prime_log_sq_sum_le
 #print axioms LeanLab.ExceptionalSet.U1539.leaf_R1_trivial_bound_of_leaves
+#print axioms LeanLab.ExceptionalSet.U1539.r1p_integral_normSq_Sp
+#print axioms LeanLab.ExceptionalSet.U1539.leaf_R1_le_sum_log_sq
