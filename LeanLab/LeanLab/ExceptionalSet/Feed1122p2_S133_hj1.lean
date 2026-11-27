@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.Feed1122_high_j1_large_phase_localizes
+import LeanLab.ExceptionalSet.ParityDetector3382
 
 /-!
 Burst burst-20261122, session S133, wave 13, proving the HARD leaves. Split of `leaf_high_j1_subblock_theorem2` and `leaf_high_j1_parity_shift` of `Feed1122_high_j1_large_phase_localizes.lean`.
@@ -50,7 +51,7 @@ theorem leaf_parity_detector_S133hj1 :
           ‖(if Even ⌊x⌋ then (1 : ℂ) else 0) -
               ∑ h ∈ Finset.Icc (-(H : ℤ)) H, a h * eC (-((h : ℝ) / 2) * x)‖ ≤
             q₀ + (∑ k ∈ Finset.Icc (1 : ℕ) H, b k * eC ((k : ℝ) * x)).re := by
-  sorry
+  simpa only [eC] using LeanLab.ExceptionalSet.ParityDetector3382.detector
 
 /-- LEAF: P0082 Theorem 2 on page 354, from Karacuba's Lemma 10 on page 370, in the
 sub-block form used on page 370 after display 41. Class HARD, a cited analytic theorem.
