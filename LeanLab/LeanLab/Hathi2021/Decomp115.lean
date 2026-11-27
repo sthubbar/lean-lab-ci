@@ -66,7 +66,36 @@ theorem analytic_lower_bound (C ε : ℝ) (hC : 1 < C) (hε : 0 < ε) :
         ((n₁ : ℝ) * n₂ * logScale n₁ ^ 82) ≤ 0 := by
       nlinarith [mul_nonneg (by positivity : 0 ≤ (n₁ : ℝ) * n₂) (by positivity : 0 ≤ logScale n₁ ^ 82)]
     linarith
-  · sorry
+  · have hεlt : ε < PairLinnik.margin101 (108238 / 10) 82 := lt_of_not_ge hεge
+    have hcoef : 0 < PairLinnik.margin101 (108238 / 10) 82 - ε := by linarith
+    have hmain : ∃ N₀ : ℕ, ∀ n₁ n₂ : ℕ,
+        Odd n₁ → Odd n₂ → N₀ ≤ n₂ → n₂ < n₁ → (n₁ : ℝ) ≤ C * n₂ →
+        (PairLinnik.margin101 (108238 / 10) 82 - ε) *
+          ((n₁ : ℝ) * n₂ * logScale n₁ ^ 82) ≤ weightedCount n₁ n₂ := by
+      classical
+      by_contra h
+      push_neg at h
+      obtain ⟨n₁, n₂, ho₁, ho₂, hn, hlt, hratio, hnot⟩ := h 0
+      have hnonneg : 0 ≤ weightedCount n₁ n₂ := by
+        unfold weightedCount
+        apply Finset.sum_nonneg
+        intro x _
+        split_ifs with hx
+        · apply Finset.prod_nonneg
+          intro i _
+          apply Real.log_nonneg
+          exact_mod_cast (hx.1 i).one_lt.le
+        · exact le_rfl
+      have hleft : 0 ≤ (PairLinnik.margin101 (108238 / 10) 82 - ε) *
+          ((n₁ : ℝ) * n₂ * logScale n₁ ^ 82) := by
+        have hpow : 0 ≤ logScale n₁ ^ 82 := by positivity
+        have hnn : 0 ≤ (n₁ : ℝ) * n₂ := by positivity
+        positivity
+      -- The contradiction route stops here. The remaining fact is the cited
+      -- circle-method lower bound, not an arithmetic consequence of the
+      -- nonnegativity of the finite sum.
+      sorry
+    exact hmain
 
 /-- LEAF. Page 199, the closing numerical inequality at k = 82. -/
 theorem margin_pos : 0 < PairLinnik.margin101 (108238 / 10) 82 := by
