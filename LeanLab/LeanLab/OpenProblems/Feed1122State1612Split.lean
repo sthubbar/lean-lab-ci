@@ -170,7 +170,7 @@ theorem leaf_offdiag_second_moment (R : ℕ → ℕ)
       Finset.sum ((Finset.Icc 1 X).filter (fun n => IsEuler (8 * n + 3)))
           (fun n => (R n : ℝ) * ((R n : ℝ) - 1))
         ≤ b * (X : ℝ) ^ 2 / (Real.log (X : ℝ)) ^ 2 := by
-  sorry
+  exact?
 
 /-- The repaired second moment, the statement of `leaf_second_moment_card` with `hRdef` added, as
 `leaf_first_moment_card` carries it, proved from the off diagonal leaf and the diagonal bound. -/
