@@ -11,6 +11,24 @@ import LeanLab.Ternary.Feed1122Decomp580aP2
 namespace LeanLab.Ternary.Task580
 open MeasureTheory
 
+/-- The squared norm of the finite exponential sum has period one. -/
+theorem finset_expSum_norm_sq_periodic (A : Finset ℕ) (a : ℕ → ℂ) :
+    Function.Periodic
+      (fun α : ℝ => ‖∑ n ∈ A, a n * LeanLab.Ternary.MMS.e ((n : ℝ) * α)‖ ^ 2) 1 := by
+  intro α
+  apply congrArg (fun z : ℂ => ‖z‖ ^ 2)
+  apply Finset.sum_congr rfl
+  intro n hn
+  congr 1
+  have he : Complex.exp (2 * Real.pi * Complex.I * (n : ℂ)) = 1 := by
+    rw [show 2 * Real.pi * Complex.I * (n : ℂ) =
+      (n : ℂ) * (2 * Real.pi * Complex.I) by ring, Complex.exp_nat_mul,
+      Complex.exp_two_pi_mul_I]
+    simp
+  rw [show 2 * (Real.pi : ℂ) * Complex.I * ((α + 1 : ℝ) : ℂ) * n =
+    2 * Real.pi * Complex.I * α * n + 2 * Real.pi * Complex.I * n by push_cast; ring,
+    Complex.exp_add, he, mul_one]
+
 /-- LEAF: Helfgott 1312.7748v2 page 35, the non overlap of the intervals
 `(b/q − δ₀Q/2qx, b/q + δ₀Q/2qx)` for odd `q ≤ Q` and `(b/q − δ₀Q/qx, b/q + δ₀Q/qx)` for even
 `q ≤ 2Q` modulo 1, so the sum of the integrals of the 1 periodic function `|S|²` over these arcs
@@ -30,6 +48,8 @@ theorem prop52_farey_arcs_le_circle (A : Finset ℕ) (a : ℕ → ℂ) (x δ Q�
             ∑ b ∈ (Finset.Icc 1 q).filter (fun b => Nat.Coprime b q),
               ‖∑ n ∈ A, a n * LeanLab.Ternary.MMS.e ((n : ℝ) * ((b : ℝ) / q + α))‖ ^ 2) ≤
       ∫ α in Set.Ioc (0 : ℝ) 1, ‖∑ n ∈ A, a n * LeanLab.Ternary.MMS.e ((n : ℝ) * α)‖ ^ 2 := by
+  classical
+  have hp := finset_expSum_norm_sq_periodic A a
   sorry
 
 /-- Finite Parseval on `(0, 1]` for a finite exponential sum, Helfgott 1312.7748v2 page 35,
