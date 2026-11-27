@@ -11,6 +11,10 @@ most y1/(mnd) + 2 of them. This gives three pieces:
 * `leaf_err_remainder`, the + 2 part, bounded by x^0.96 under (4.8) or (4.9), HARD.
 `leaf_err_rearrange_split` restates `leaf_err_rearrange` verbatim.
 AI wrote the Lean code. Goldbach is open.
+-
+- Helper lemma: divisor moment sum with 1/k factor
+- By `divisor_moment` in Decomp409a, ∑_{k≤N} τ(k)^B ≤ C N (log N)^D
+- Then ∑_{k≤N} τ(k)^B / k ≤ C (log N)^(D+1) by partial summation
 -/
 import LeanLab.BakerHarmanPintz1997.SPLIT_Decomp409b
 
