@@ -30,6 +30,97 @@ open Classical Complex Decomp132 DecompC165b DecompC165d LowerShortC165 LowerSho
 open LeanLab.BHP1997.DQLowerExceptionalMeanSquare
 open scoped BigOperators
 
+/-! ### Strong error bookkeeping -/
+
+/-- Page 51 display 5.17, the strong error of the prime number theorem beats every fixed power
+of `T0` with room for polynomial log factors: for every `c > 0`, `k >= 0` and `N > 0` there is
+a threshold beyond which `exp(-c sqrt(log X)) (log X)^k <= exp(-N (log X)^(1/3))`. This is the
+one-step bookkeeping that turns the square root log error of the strong prime number theorem
+into the stretched error `exp(-N L^(1/3))` of the window leaves, while absorbing the
+polynomial log factors that the partial summation chain multiplies into it. -/
+theorem exp_sqrt_log_poly_le_third {c N k : ℝ} (hc : 0 < c) (hN : 0 < N) (hk : 0 ≤ k) :
+    ∃ C : ℝ, 0 < C ∧ ∀ X : ℝ, C ≤ X →
+      Real.exp (-c * Real.sqrt (Real.log X)) * Real.log X ^ k ≤
+        Real.exp (-N * Real.log X ^ (1 / 3 : ℝ)) := by
+  set M := N + k * (1 + Real.log 6) with hMdef
+  have hM0 : 0 < M := by
+    have hlog6 : 0 ≤ Real.log 6 := Real.log_nonneg (by norm_num)
+    have hnk : 0 ≤ k * (1 + Real.log 6) := by positivity
+    unfold M hMdef
+    linarith
+  obtain ⟨C0, hC0⟩ :=
+    (tendsto_rpow_neg_atTop (show (0 : ℝ) < 1 / 6 by norm_num)).eventually
+      (eventually_lt_nhds (hc / hM0))
+  refine ⟨Real.exp (max C0 1), Real.exp_pos _, fun X hX => ?_⟩
+  have hX1 : (1 : ℝ) < X := by
+    have h2 : (1 : ℝ) < Real.exp (max C0 1) := Real.exp_pos _
+    exact h2.trans (Real.exp_le_exp.mpr hX)
+  have hlpos : 0 < Real.log X := Real.log_pos hX1
+  set l := Real.log X with hl
+  have hlc : (0 : ℝ) ≤ l := hlpos.le
+  have hl1 : (1 : ℝ) ≤ l := by
+    have h2 : (1 : ℝ) < Real.exp (max C0 1) := Real.exp_pos _
+    have h3 : Real.exp (max C0 1) ≤ X := Real.exp_le_exp.mpr hX
+    have h4 : Real.exp 1 ≤ Real.exp (max C0 1) := Real.exp_le_exp.mpr (le_max_right _ _)
+    have h5 : Real.exp 1 ≤ X := le_trans h4 h3
+    have h6 : (1 : ℝ) ≤ Real.exp 1 := le_trans (by norm_num) (le_of_lt (Real.exp_pos 1))
+    have h7 : Real.log (Real.exp 1) ≤ Real.log X := Real.log_le_log h6 h5
+    rw [Real.log_exp] at h7
+    exact h7
+  set t := l ^ (1 / 3 : ℝ) with htdef
+  have ht0 : 0 ≤ t := Real.rpow_nonneg hlc _
+  have htpos : 0 < t := by
+    rw [htdef]
+    exact Real.rpow_pos_of_pos hlpos _
+  have ht1 : (1 : ℝ) ≤ t := by
+    rw [htdef, ← Real.rpow_natCast, ← Real.rpow_mul hlc, Real.rpow_one]
+    exact hl1
+  have hc0 : l ^ (-(1 / 6 : ℝ)) < c / M := hC0 l (Real.tendsto_log_atTop hlpos)
+  have hroot : 0 < l ^ (1 / 6 : ℝ) := Real.rpow_pos_of_pos hlpos _
+  have hcM : M < c * l ^ (1 / 6 : ℝ) := by
+    rw [div_lt_iff₀ hroot] at hc0
+    calc M = M * 1 := by ring
+      _ ≤ M * l ^ (1 / 6 : ℝ) := by
+          exact mul_le_mul_of_nonneg_left (by rw [← Real.rpow_natCast, ← Real.rpow_mul hlc,
+            show ((6 : ℕ) : ℝ) * (1 / 6) = 1 by norm_num, Real.rpow_one]; exact hl1) hM0.le
+      _ < c * l ^ (1 / 6 : ℝ) := by
+          exact lt_of_le_of_lt hc0 (by rw [div_mul_eq_mul_div, div_lt_iff₀ hroot] at hc0 ⊢ <;>
+            exact hc0)
+  have hcube : t ^ 3 = l := by
+    rw [htdef, ← Real.rpow_natCast, ← Real.rpow_mul hlc]
+    norm_num
+  have htfact : t ^ 3 ≤ 6 * Real.exp t := by
+    have h := Real.pow_div_factorial_le_exp t ht0 3
+    have hfac : ((Nat.factorial 3 : ℕ) : ℝ) = 6 := by norm_num
+    simpa [hfac] using h
+  have h3log : Real.log l ≤ t + Real.log 6 := by
+    have h1 : Real.log (t ^ 3) ≤ Real.log (6 * Real.exp t) :=
+      Real.log_le_log (by positivity) htfact
+    rw [hcube, Real.log_mul (by positivity) (Real.exp_pos t), Real.log_pow,
+      show ((3 : ℕ) : ℝ) = 3 by norm_num] at h1
+    linarith
+  have hkey : -c * Real.sqrt l + k * Real.log l ≤ -N * t := by
+    have hspl : Real.sqrt l = t * l ^ (1 / 6 : ℝ) := by
+      rw [Real.sqrt_eq_rpow, htdef, ← Real.rpow_add hlc]
+      congr 1
+      norm_num
+    have hlogl : Real.log l = 3 * Real.log t := by
+      rw [← hcube, Real.log_pow, show ((3 : ℕ) : ℝ) = 3 by norm_num]
+    have hstep1 : c * Real.sqrt l ≥ (N + k * (1 + Real.log 6)) * t := by
+      rw [hspl]
+      calc c * (t * l ^ (1 / 6 : ℝ)) = (c * l ^ (1 / 6 : ℝ)) * t := by ring
+        _ > M * t := mul_lt_mul_of_pos_right hcM htpos
+        _ = (N + k * (1 + Real.log 6)) * t := by rw [hMdef]
+    have hstep2 : k * Real.log l ≤ k * t + k * Real.log 6 := by
+      rw [hlogl]
+      nlinarith [hk, Real.log_nonneg (show (2 : ℝ) ≤ 6 by norm_num)]
+    have ht3 : (0 : ℝ) ≤ Real.log 6 := Real.log_nonneg (by norm_num)
+    nlinarith [hstep1, hstep2, ht1, ht3, hk]
+  have hpow : Real.log X ^ k = Real.exp (Real.log l * k) := (Real.exp_log hlpos).symm
+  rw [hpow, Real.exp_mul, ← Real.exp_add]
+  apply Real.exp_le_exp.mpr
+  linarith
+
 /-! ### The three leaves -/
 
 /-- LEAF: page 51 display 5.17, the prime number theorem for the primes of the rough cofactor
