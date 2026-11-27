@@ -1,4 +1,4 @@
-import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_no_zero_open_strip481_steps
+import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_centre_lower1122
 
 /-!
 A further split of the two HARD leaves `iwaniec_display16_1122` and `iwaniec_display17_1122` of
@@ -42,8 +42,9 @@ theorem iwaniec_lemma10_1122 (F : ℂ → ℂ) (s₀ : ℂ) (r B : ℝ) (hr : 0 
     -(4 / r) * Real.log B + ∑ ρ ∈ Z, (1 / (s₀ - ρ)).re ≤ (logDeriv F s₀).re := by
   sorry
 
-/-- LEAF: Iwaniec 1974 page 103, the bound at the centre used for displays (16) and (17).
-Class: MEDIUM.
+/-- Iwaniec 1974 page 103, the bound at the centre used for displays (16) and (17), formerly a
+MEDIUM leaf, now proved from Mathlib's `LSeries.mul_mu_eq_one` and the leaf
+`iwaniec_inverse_series_bound1122` of `SPLIT_iwaniec_centre_lower1122`.
 H. Iwaniec, On zeros of Dirichlet's L series, Invent. Math. 23, 1974, page 103, the line before
 display (16): `|L(s₀, χ)|⁻¹ ≤ Σ |μ(n)| n^(-σ₀) < 1 / (σ₀ - 1)`, from the Euler product, with
 `σ₀ = 1 + 5θ`. Stated for every character and `1 < σ ≤ 6/5`; on that range
@@ -51,7 +52,25 @@ display (16): `|L(s₀, χ)|⁻¹ ≤ Σ |μ(n)| n^(-σ₀) < 1 / (σ₀ - 1)`, 
 theorem iwaniec_centre_lower1122 (q : ℕ) (hq : 1 ≤ q) (ψ : DirichletCharacter ℂ q)
     (σ t : ℝ) (hσ : 1 < σ) (hσ' : σ ≤ 6 / 5) :
     σ - 1 ≤ ‖Lfun481 ψ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
-  sorry
+  have hq0 : q ≠ 0 := by omega
+  have : NeZero q := ⟨hq0⟩
+  set s : ℂ := (σ : ℂ) + (t : ℂ) * Complex.I with hs
+  have hre : 1 < s.re := by simp [hs, hσ]
+  have hL : Lfun481 ψ s = LSeries (fun n => ψ n) s := by
+    simp only [Lfun481, dif_neg hq0]
+    exact DirichletCharacter.LFunction_eq_LSeries ψ hre
+  have hmul := DirichletCharacter.LSeries.mul_mu_eq_one ψ hre
+  have hb := iwaniec_inverse_series_bound1122 q ψ σ t hσ hσ'
+  set A := LSeries (fun n => ψ n) s with hA
+  set B := LSeries (fun n : ℕ => ψ n * ((ArithmeticFunction.moebius n : ℤ) : ℂ)) s with hB
+  have hmul' : A * B = 1 := by
+    rw [hA, hB]; convert hmul using 2
+  have hn : ‖A‖ * ‖B‖ = 1 := by rw [← norm_mul, hmul', norm_one]
+  have hσ1 : 0 < σ - 1 := by linarith
+  rw [hL]
+  have h1 : ‖B‖ * (σ - 1) ≤ 1 := by
+    rw [le_div_iff₀ hσ1] at hb; exact hb
+  nlinarith [norm_nonneg A, norm_nonneg B]
 
 /-- LEAF: Iwaniec 1974 page 102, Lemma 9, as page 103 applies it before display (16).
 Class: HARD.
