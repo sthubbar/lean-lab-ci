@@ -1,4 +1,5 @@
 import LeanLab.ExceptionalSet.Feed1122_low_j1_large_phase_localizes
+import LeanLab.ExceptionalSet.ParityDetector3382
 
 /-!
 Burst burst-20261122, session S133, wave 13, proving the HARD leaves. Split of `leaf_low_j1_subblock_theorem2` and `leaf_low_j1_parity_shift` of `Feed1122_low_j1_large_phase_localizes.lean`.
@@ -41,7 +42,8 @@ for every real `x` the indicator of `[x]` even differs from
 `P(x) = Σ_{|h| ≤ H} a h e(-h x / 2)` by at most `q₀ + Re Σ_{1 ≤ k ≤ H} b k e(k x)`.
 Selberg's polynomials for the interval `[0, 1/2)` modulo `1` in the variable `x/2` give this
 with `C = 2`: their difference is `(F_H(x/2) + F_H(x/2 - 1/2))/(H + 1)` with `F_H` the Fejér
-kernel, which contains only the even frequencies, Vaaler 1985 Theorem 6. -/
+kernel, which contains only the even frequencies, Vaaler 1985 Theorem 6.
+The proof uses the verified cosine majorant `Selberg524` and the relaxed constant `C = 8`. -/
 theorem leaf_parity_detector_S133lj1 :
     ∃ C : ℝ, 0 < C ∧ ∀ H : ℕ, 1 ≤ H →
       ∃ (a : ℤ → ℂ) (q₀ : ℝ) (b : ℕ → ℂ),
@@ -50,7 +52,7 @@ theorem leaf_parity_detector_S133lj1 :
           ‖(if Even ⌊x⌋ then (1 : ℂ) else 0) -
               ∑ h ∈ Finset.Icc (-(H : ℤ)) H, a h * eC (-((h : ℝ) / 2) * x)‖ ≤
             q₀ + (∑ k ∈ Finset.Icc (1 : ℕ) H, b k * eC ((k : ℝ) * x)).re := by
-  sorry
+  simpa only [eC] using LeanLab.ExceptionalSet.ParityDetector3382.detector
 
 /-- LEAF: P0082 Theorem 2 on page 354, from Karacuba's Lemma 10 on page 370, in the
 sub-block form used on page 370 after display 41. Class HARD, a cited analytic theorem.
