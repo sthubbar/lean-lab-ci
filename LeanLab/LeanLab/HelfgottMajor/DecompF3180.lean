@@ -24,6 +24,24 @@ open scoped ComplexConjugate LSeries.notation
 
 variable {q : ℕ} [NeZero q]
 
+/-! The window height `2πe / q` is above `1` for every conductor in `13` to `17`, so
+the filter `1 < ρ.im` defines a non-trivial interval rather than an empty one. This is a
+purely numerical fact about the band height; it says nothing about whether any zeros lie in
+the interval. Proved, no input. -/
+lemma band_height_gt_one {q : ℕ} [NeZero q] (hq13 : q ≥ 13) (hq17 : q ≤ 17) :
+    1 < 2 * Real.pi * Real.exp 1 / (q : ℝ) := by
+  have h : (2 : ℝ) * Real.pi * Real.exp 1 / (q : ℝ) ≥ (2 : ℝ) * Real.pi * Real.exp 1 / 17 := by
+    apply div_le_div_of_le_left (by positivity) (by linarith)
+    nlinarith [Real.pi_pos, Real.exp_pos 1]
+  have h2 : (2 : ℝ) * Real.pi * Real.exp 1 / 17 > 1 := by
+    have hpi : (3.1415 : ℝ) < Real.pi := Real.pi_gt_d4
+    have hexp : (2.718281828 : ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+    have h : (2 : ℝ) * Real.pi * Real.exp 1 > (2 : ℝ) * 3.1415 * 2.718281828 := by
+      nlinarith
+    norm_num at h ⊢
+    <;> linarith
+  linarith
+
 /-- LEAF. Conductor `13` fixes the modulus in the short band window. Every strip zero of
 `L(·, χ)` with imaginary part in `(1, 2πe / 13]` has multiplicity at most one. -/
 theorem band_above_one_mult_level_thirteen_F3180
