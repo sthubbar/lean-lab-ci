@@ -1,4 +1,5 @@
-import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_display14_15_1122
+import LeanLab.LanguascoPintzZaccagnini2007.IwaniecCells1122
+import LeanLab.PNTPort.DirichletZF.ThreeFourOne
 
 /-!
 A split of the open strip step `iwaniec_no_zero_open_strip481` of
@@ -75,9 +76,424 @@ theorem iwaniec_display17_1122 (q : ℕ) (hq : 3 ≤ q) (χ : DirichletCharacter
       (logDeriv (Lfun481 (χ ^ 2)) (((1 + 5 * θ : ℝ) : ℂ) + ((2 * γ : ℝ) : ℂ) * Complex.I)).re := by
   sorry
 
-/-- Iwaniec 1974 page 102, displays (14) and (15) of the proof of Lemma 11, formerly a MEDIUM
-leaf, now proved from the leaves `iwaniec_display14_1122` and `iwaniec_display15_1122` of
-`SPLIT_iwaniec_display14_15_1122`.
+
+
+private lemma iwaniecAux_log_le_harm (n : ℕ) : Real.log (n:ℝ) ≤ ∑ j ∈ Finset.range n, (1 / (j : ℝ)) := by
+  have htel : (∑ j ∈ Finset.range n, (Real.log ((j + 1 : ℕ) : ℝ) - Real.log (j : ℝ)))
+      = Real.log n := by
+    rw [Finset.sum_range_sub (fun j : ℕ => Real.log (j:ℝ)) n]
+    simp
+  rw [← htel]
+  refine Finset.sum_le_sum fun j hj => ?_
+  rcases Nat.eq_zero_or_pos j with rfl | hj0
+  · norm_num
+  · have hj1 : (0:ℝ) < (j:ℝ) := by exact_mod_cast hj0
+    have hpos : 0 < ((j:ℝ)+1)/(j:ℝ) := by positivity
+    have hdiv : Real.log (((j : ℝ)+1)/j) = Real.log ((j:ℝ)+1) - Real.log (j:ℝ) :=
+      Real.log_div (by positivity) hj1.ne'
+    have hkey : Real.log (((j:ℝ)+1)/j) ≤ ((j:ℝ)+1)/j - 1 := Real.log_le_sub_one_of_pos hpos
+    have hlast : ((j:ℝ)+1)/j - 1 = 1/(j:ℝ) := by field_simp; ring
+    calc Real.log ((j+1:ℕ):ℝ) - Real.log (j:ℝ) = Real.log (((j:ℝ)+1)/j) := by rw [hdiv]; push_cast; ring
+      _ ≤ 1/(j:ℝ) := by rw [← hlast]; exact hkey
+
+private lemma iwaniecAux_antitone_rpow_neg {σ : ℝ} (hσ : 0 < σ) :
+    AntitoneOn (fun x : ℝ => x ^ (-σ)) (Set.Ici 1) := by
+  intro a ha b hb hab
+  have ha1 : (1:ℝ) ≤ a := ha
+  have ha0 : (0:ℝ) < a := by linarith
+  have hb0 : (0:ℝ) < b := by linarith
+  have hgoal : b ^ (-σ) ≤ a ^ (-σ) := by
+    rw [Real.rpow_neg ha0.le, Real.rpow_neg hb0.le]
+    exact inv_anti₀ (by positivity) (Real.rpow_le_rpow ha0.le hab hσ.le)
+  exact hgoal
+
+private lemma iwaniecAux_sum_Ico_rpow_le {σ : ℝ} (hσ : 1 < σ) (j N : ℕ) (hj : 1 ≤ j) :
+    ∑ n ∈ Finset.Ico (j+1) N, ((n:ℝ)) ^ (-σ) ≤ (j:ℝ) ^ (1-σ) / (σ-1) := by
+  have hσ0 : (0:ℝ) < σ := by linarith
+  have hσ1 : (0:ℝ) < σ - 1 := by linarith
+  have hjR : (1:ℝ) ≤ (j:ℝ) := by exact_mod_cast hj
+  rcases le_or_gt N (j+1) with hN | hN
+  · have hempty : Finset.Ico (j+1) N = ∅ := Finset.Ico_eq_empty (by omega)
+    rw [hempty, Finset.sum_empty]
+    have : 0 ≤ (j:ℝ) ^ (1-σ) / (σ-1) := by positivity
+    linarith
+  · have hjN : j ≤ N - 1 := by omega
+    have hNpos : 0 < N - 1 := by omega
+    have hcast : (j:ℝ) ≤ ((N-1:ℕ):ℝ) := by exact_mod_cast hjN
+    have hanti : AntitoneOn (fun x : ℝ => x ^ (-σ)) (Set.Icc (j:ℝ) ((N-1:ℕ):ℝ)) :=
+      (iwaniecAux_antitone_rpow_neg hσ0).mono (by intro x hx; exact le_trans hjR hx.1)
+    have step1 : ∑ i ∈ Finset.Ico j (N-1), (((i+1:ℕ)):ℝ) ^ (-σ) ≤
+        ∫ x in (j:ℝ)..((N-1:ℕ):ℝ), x ^ (-σ) :=
+      AntitoneOn.sum_le_integral_Ico hjN hanti
+    have hreindex : ∑ n ∈ Finset.Ico (j+1) N, ((n:ℝ)) ^ (-σ) =
+        ∑ i ∈ Finset.Ico j (N-1), (((i+1:ℕ)):ℝ) ^ (-σ) := by
+      rw [Finset.sum_Ico_eq_sum_range (fun n : ℕ => ((n:ℝ)) ^ (-σ)) (j+1) N,
+        Finset.sum_Ico_eq_sum_range (fun i : ℕ => (((i+1:ℕ)):ℝ) ^ (-σ)) j (N-1)]
+      have hlen : N - (j+1) = (N-1) - j := by omega
+      rw [hlen]
+      exact Finset.sum_congr rfl (fun k _ => by congr 2; omega)
+    have hint : ∫ x in (j:ℝ)..((N-1:ℕ):ℝ), x ^ (-σ) =
+        ((((N-1:ℕ)):ℝ) ^ (1-σ) - (j:ℝ) ^ (1-σ)) / (1-σ) := by
+      have hside : (0:ℝ) ∉ Set.uIcc (j:ℝ) ((N-1:ℕ):ℝ) := by
+        rw [Set.uIcc_of_le hcast]
+        simp only [Set.mem_Icc, not_and, not_le]
+        intro h
+        linarith
+      have h : ∫ x in (j:ℝ)..((N-1:ℕ):ℝ), x ^ (-σ) =
+          ((((N-1:ℕ)):ℝ) ^ ((-σ)+1) - (j:ℝ) ^ ((-σ)+1)) / ((-σ)+1) :=
+        integral_rpow (Or.inr ⟨by intro hc; linarith [hσ.ne'], hside⟩)
+      rw [h]
+      ring_nf
+    have hNσ : 0 ≤ (((N-1:ℕ)):ℝ) ^ (1-σ) := by positivity
+    rw [← hreindex, hint] at step1
+    have heq : ((((N-1:ℕ)):ℝ) ^ (1-σ) - (j:ℝ) ^ (1-σ)) / (1-σ)
+        = ((j:ℝ) ^ (1-σ) - (((N-1:ℕ)):ℝ) ^ (1-σ)) / (σ-1) := by
+      rw [show (1:ℝ)-σ = -(σ-1) by ring, div_neg]
+      ring
+    have hval : ((j:ℝ) ^ (1-σ) - (((N-1:ℕ)):ℝ) ^ (1-σ)) / (σ-1)
+        ≤ (j:ℝ) ^ (1-σ) / (σ-1) := by
+      apply div_le_div_of_nonneg_right _ hσ1.le
+      linarith
+    rw [heq] at step1
+    linarith
+
+private lemma iwaniecAux_summable_rpow_neg {σ : ℝ} (hσ : 1 < σ) :
+    Summable (fun n : ℕ => (n:ℝ) ^ (-σ)) := by
+  have h := (Real.summable_nat_rpow_inv (p := σ)).mpr hσ
+  rw [show (fun n : ℕ => (n:ℝ) ^ (-σ)) = (fun n : ℕ => ((n:ℝ) ^ σ)⁻¹) from by
+    funext n; rw [Real.rpow_neg (Nat.cast_nonneg n)]]
+  exact h
+
+private lemma iwaniecAux_partial_le {σ : ℝ} (hσ : 1 < σ) (N : ℕ) :
+    ∑ n ∈ Finset.range N, (Real.log (n:ℝ)) * (n:ℝ)^(-σ) ≤
+      (∑' n : ℕ, (n:ℝ)^(-σ)) / (σ-1) := by
+  have hσ1 : (0:ℝ) < σ - 1 := by linarith
+  have hsumm : Summable (fun n : ℕ => (n:ℝ)^(-σ)) := iwaniecAux_summable_rpow_neg hσ
+  have hstep1 : ∑ n ∈ Finset.range N, (Real.log (n:ℝ)) * (n:ℝ)^(-σ) ≤
+      ∑ n ∈ Finset.range N, (∑ j ∈ Finset.range n, (1/(j:ℝ))) * (n:ℝ)^(-σ) := by
+    refine Finset.sum_le_sum fun n hn => ?_
+    exact mul_le_mul_of_nonneg_right (iwaniecAux_log_le_harm n) (by positivity)
+  have hstep2a : ∑ n ∈ Finset.range N, (∑ j ∈ Finset.range n, (1/(j:ℝ))) * (n:ℝ)^(-σ) =
+      ∑ n ∈ Finset.range N, ∑ j ∈ Finset.range n, (1/(j:ℝ)) * (n:ℝ)^(-σ) := by
+    refine Finset.sum_congr rfl (fun n _ => ?_)
+    rw [Finset.sum_mul]
+  have hstep2 : ∑ n ∈ Finset.range N, ∑ j ∈ Finset.range n, (1/(j:ℝ)) * (n:ℝ)^(-σ) =
+      ∑ j ∈ Finset.range N, ∑ n ∈ Finset.Ico (j+1) N, (1/(j:ℝ)) * (n:ℝ)^(-σ) := by
+    simp only [Finset.range_eq_Ico]
+    rw [← Finset.sum_Ico_Ico_comm' (0) N (f := fun j n => (1/(j:ℝ)) * (n:ℝ)^(-σ))]
+  have hstep3 : ∑ j ∈ Finset.range N, ∑ n ∈ Finset.Ico (j+1) N, (1/(j:ℝ)) * (n:ℝ)^(-σ) ≤
+      ∑ j ∈ Finset.range N, ((j:ℝ)^(-σ) / (σ-1)) := by
+    refine Finset.sum_le_sum fun j hj => ?_
+    rcases Nat.eq_zero_or_pos j with rfl | hj0
+    · have h0 : (0:ℝ)^(-σ) = 0 := Real.zero_rpow (by linarith : -σ ≠ 0)
+      simp [h0]
+    · have hj1 : (1:ℕ) ≤ j := hj0
+      have hsum : ∑ n ∈ Finset.Ico (j+1) N, (n:ℝ)^(-σ) ≤ (j:ℝ) ^ (1-σ) / (σ-1) :=
+        iwaniecAux_sum_Ico_rpow_le hσ j N hj1
+      have hm : ∑ n ∈ Finset.Ico (j+1) N, (1/(j:ℝ)) * (n:ℝ)^(-σ)
+          = (1/(j:ℝ)) * ∑ n ∈ Finset.Ico (j+1) N, (n:ℝ)^(-σ) := by
+        rw [Finset.mul_sum]
+      rw [hm]
+      have hjpos : (0:ℝ) < (j:ℝ) := by exact_mod_cast hj0
+      have hnonneg : 0 ≤ 1/(j:ℝ) := by positivity
+      have hb := mul_le_mul_of_nonneg_left hsum hnonneg
+      have heq : (1/(j:ℝ)) * ((j:ℝ) ^ (1-σ) / (σ-1)) = (j:ℝ)^(-σ) / (σ-1) := by
+        have h1 : (1/(j:ℝ)) * ((j:ℝ) ^ (1-σ)) = (j:ℝ)^(-σ) := by
+          rw [one_div, ← Real.rpow_neg_one, ← Real.rpow_add hjpos]
+          ring_nf
+        calc (1/(j:ℝ)) * ((j:ℝ) ^ (1-σ) / (σ-1))
+            = ((1/(j:ℝ)) * (j:ℝ) ^ (1-σ)) / (σ-1) := by ring
+          _ = (j:ℝ)^(-σ) / (σ-1) := by rw [h1]
+      rw [← heq]
+      exact hb
+  have hstep4 : ∑ j ∈ Finset.range N, ((j:ℝ)^(-σ) / (σ-1)) ≤
+      (∑' n : ℕ, (n:ℝ)^(-σ)) / (σ-1) := by
+    rw [← Finset.sum_div]
+    apply div_le_div_of_nonneg_right _ hσ1.le
+    exact hsumm.sum_le_tsum (Finset.range N) (fun i _ => by positivity)
+  calc ∑ n ∈ Finset.range N, (Real.log (n:ℝ)) * (n:ℝ)^(-σ)
+      ≤ _ := hstep1
+    _ = _ := hstep2a
+    _ = _ := hstep2
+    _ ≤ _ := hstep3
+    _ ≤ _ := hstep4
+
+private lemma iwaniecAux_tsum_log_bound {σ : ℝ} (hσ : 1 < σ) :
+    (∑' n : ℕ, (Real.log (n:ℝ)) * (n:ℝ)^(-σ)) ≤
+      (∑' n : ℕ, (n:ℝ)^(-σ)) / (σ-1) := by
+  refine Real.tsum_le_of_sum_range_le (fun n => ?_) (fun N => iwaniecAux_partial_le hσ N)
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp
+  · have : (0:ℝ) ≤ Real.log (n:ℝ) := Real.log_nonneg (by exact_mod_cast hn)
+    positivity
+
+private lemma iwaniecAux_term_one_eq (σ : ℝ) {n : ℕ} (hn : n ≠ 0) :
+    LSeries.term (1 : ℕ → ℂ) (σ : ℂ) n = Complex.ofReal ((n:ℝ)^(-σ)) := by
+  have hmain : (((n:ℝ))^σ)⁻¹ = ((n:ℝ))^(-σ) := (Real.rpow_neg (Nat.cast_nonneg n) σ).symm
+  calc LSeries.term (1 : ℕ → ℂ) (σ : ℂ) n
+      = (Complex.ofReal (((n:ℝ))^σ))⁻¹ := by
+        rw [LSeries.term_of_ne_zero hn]
+        simp only [Pi.one_apply, one_div]
+        rw [← Complex.ofReal_natCast n, ← Complex.ofReal_cpow (Nat.cast_nonneg n)]
+    _ = Complex.ofReal ((((n:ℝ))^σ)⁻¹) := by rw [Complex.ofReal_inv]
+    _ = Complex.ofReal (((n:ℝ))^(-σ)) := by rw [hmain]
+
+private lemma iwaniecAux_zeta_series_re (σ : ℝ) (hσ : 1 < σ) :
+    LSeries (1 : ℕ → ℂ) (σ : ℂ) = Complex.ofReal (∑' n : ℕ, (n:ℝ)^(-σ)) := by
+  have hsumm : LSeriesSummable (1 : ℕ → ℂ) (σ : ℂ) := by
+    rw [LSeriesSummable_one_iff]; simpa using hσ
+  have hzero : ((0:ℝ))^(-σ) = 0 := Real.zero_rpow (by linarith : -σ ≠ 0)
+  have hre : (LSeries (1 : ℕ → ℂ) (σ : ℂ)).re = ∑' n : ℕ, (n:ℝ)^(-σ) := by
+    rw [LSeries, Complex.re_tsum hsumm]
+    refine tsum_congr fun n => ?_
+    rcases eq_or_ne n 0 with rfl | hn
+    · simp [LSeries.term_zero, hzero]
+    · rw [iwaniecAux_term_one_eq σ hn]; simp
+  have him : (LSeries (1 : ℕ → ℂ) (σ : ℂ)).im = 0 := by
+    rw [LSeries, Complex.im_tsum hsumm]
+    have h : ∀ n : ℕ, (LSeries.term (1 : ℕ → ℂ) (σ : ℂ) n).im = 0 := by
+      intro n
+      rcases eq_or_ne n 0 with rfl | hn
+      · simp [LSeries.term_zero]
+      · rw [iwaniecAux_term_one_eq σ hn]; simp
+    simp only [h]
+    exact tsum_zero
+  rw [Complex.ext_iff]
+  exact ⟨hre, by simpa using him⟩
+
+-- the logMul series
+private lemma iwaniecAux_term_logMul_eq (σ : ℝ) {n : ℕ} (hn : n ≠ 0) :
+    LSeries.term (LSeries.logMul (1 : ℕ → ℂ)) (σ : ℂ) n
+      = Complex.ofReal (Real.log (n:ℝ) * (n:ℝ)^(-σ)) := by
+  have hmain : (((n:ℝ))^σ)⁻¹ = ((n:ℝ))^(-σ) := (Real.rpow_neg (Nat.cast_nonneg n) σ).symm
+  calc LSeries.term (LSeries.logMul (1 : ℕ → ℂ)) (σ : ℂ) n
+      = Complex.ofReal (Real.log (n:ℝ)) / Complex.ofReal (((n:ℝ))^σ) := by
+        rw [LSeries.term_of_ne_zero hn]
+        simp only [LSeries.logMul, Pi.one_apply, mul_one]
+        rw [← Complex.ofReal_natCast n, ← Complex.ofReal_cpow (Nat.cast_nonneg n),
+          ← Complex.ofReal_log (Nat.cast_nonneg n)]
+    _ = Complex.ofReal (Real.log (n:ℝ)) * (Complex.ofReal (((n:ℝ))^σ))⁻¹ := by
+        rw [div_eq_mul_inv]
+    _ = Complex.ofReal (Real.log (n:ℝ) * (((n:ℝ))^σ)⁻¹) := by
+        rw [← Complex.ofReal_inv, ← Complex.ofReal_mul]
+    _ = Complex.ofReal (Real.log (n:ℝ) * ((n:ℝ))^(-σ)) := by rw [hmain]
+
+private lemma iwaniecAux_logMul_series (σ : ℝ) (hσ : 1 < σ) :
+    LSeries (LSeries.logMul (1 : ℕ → ℂ)) (σ : ℂ)
+      = Complex.ofReal (∑' n : ℕ, Real.log (n:ℝ) * (n:ℝ)^(-σ)) := by
+  have hconv : LSeries.abscissaOfAbsConv (1 : ℕ → ℂ) < (σ:ℂ).re := by
+    rw [LSeries.abscissaOfAbsConv_one, ← EReal.coe_one, EReal.coe_lt_coe_iff]
+    simpa using hσ
+  have hsumm : LSeriesSummable (LSeries.logMul (1 : ℕ → ℂ)) (σ : ℂ) :=
+    LSeriesSummable_logMul_of_lt_re hconv
+  have hlog0 : Real.log ((0:ℕ):ℝ) * ((0:ℕ):ℝ)^(-σ) = 0 := by
+    have h0 : ((0:ℝ))^(-σ) = 0 := Real.zero_rpow (by linarith : -σ ≠ 0)
+    simp [h0]
+  have hre : (LSeries (LSeries.logMul (1 : ℕ → ℂ)) (σ : ℂ)).re
+      = ∑' n : ℕ, Real.log (n:ℝ) * (n:ℝ)^(-σ) := by
+    rw [LSeries, Complex.re_tsum hsumm]
+    refine tsum_congr fun n => ?_
+    rcases eq_or_ne n 0 with rfl | hn
+    · simp [LSeries.term_zero, hlog0]
+    · rw [iwaniecAux_term_logMul_eq σ hn]; exact Complex.ofReal_re _
+  have him : (LSeries (LSeries.logMul (1 : ℕ → ℂ)) (σ : ℂ)).im = 0 := by
+    rw [LSeries, Complex.im_tsum hsumm]
+    have h : ∀ n : ℕ, (LSeries.term (LSeries.logMul (1 : ℕ → ℂ)) (σ : ℂ) n).im = 0 := by
+      intro n
+      rcases eq_or_ne n 0 with rfl | hn
+      · simp [LSeries.term_zero]
+      · rw [iwaniecAux_term_logMul_eq σ hn]; exact Complex.ofReal_im _
+    simp only [h]
+    exact tsum_zero
+  rw [Complex.ext_iff]
+  exact ⟨hre, by simpa using him⟩
+
+private lemma iwaniecAux_zeta_logDeriv_le (σ : ℝ) (hσ : 1 < σ) :
+    -(logDeriv riemannZeta (σ : ℂ)).re ≤ 1 / (σ - 1) + 3 := by
+  have hσ1 : (0:ℝ) < σ - 1 := by linarith
+  have hs : 1 < (σ:ℂ).re := by simpa using hσ
+  set A : ℝ := ∑' n : ℕ, Real.log (n:ℝ) * (n:ℝ)^(-σ) with hA
+  set Z : ℝ := ∑' n : ℕ, (n:ℝ)^(-σ) with hZ
+  have hvm1 : LSeries (fun n => ((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)) (σ:ℂ)
+      = -deriv (LSeries (1 : ℕ → ℂ)) (σ:ℂ) / LSeries (1 : ℕ → ℂ) (σ:ℂ) :=
+    ArithmeticFunction.LSeries_vonMangoldt_eq hs
+  have hvm2 : LSeries (fun n => ((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)) (σ:ℂ)
+      = -deriv riemannZeta (σ:ℂ) / riemannZeta (σ:ℂ) :=
+    ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div hs
+  have hconv : LSeries.abscissaOfAbsConv (1 : ℕ → ℂ) < (σ:ℂ).re := by
+    rw [LSeries.abscissaOfAbsConv_one, ← EReal.coe_one, EReal.coe_lt_coe_iff]
+    simpa using hσ
+  have hderiv : deriv (LSeries (1 : ℕ → ℂ)) (σ:ℂ) = -Complex.ofReal A := by
+    rw [LSeries_deriv hconv, iwaniecAux_logMul_series σ hσ]
+  have hval : LSeries (1 : ℕ → ℂ) (σ:ℂ) = Complex.ofReal Z := iwaniecAux_zeta_series_re σ hσ
+  have hmain : -(logDeriv riemannZeta (σ:ℂ)) = Complex.ofReal (A / Z) := by
+    calc -(logDeriv riemannZeta (σ:ℂ))
+        = -deriv riemannZeta (σ:ℂ) / riemannZeta (σ:ℂ) := by rw [logDeriv_apply, neg_div]
+      _ = LSeries (fun n => ((ArithmeticFunction.vonMangoldt n : ℝ) : ℂ)) (σ:ℂ) := hvm2.symm
+      _ = -deriv (LSeries (1 : ℕ → ℂ)) (σ:ℂ) / LSeries (1 : ℕ → ℂ) (σ:ℂ) := hvm1
+      _ = -(-Complex.ofReal A) / Complex.ofReal Z := by rw [hderiv, hval]
+      _ = Complex.ofReal (A / Z) := by rw [neg_neg, ← Complex.ofReal_div]
+  have h2 : -(logDeriv riemannZeta (σ:ℂ)).re = A / Z := by
+    rw [← Complex.neg_re, hmain, Complex.ofReal_re]
+  rw [h2]
+  have hAZ := iwaniecAux_tsum_log_bound hσ
+  have hZsumm : Summable (fun n : ℕ => (n:ℝ)^(-σ)) := iwaniecAux_summable_rpow_neg hσ
+  have hZpos : 0 < Z := by
+    have h1 : (1:ℝ) ≤ Z := by
+      have hle := hZsumm.le_tsum 1 (fun j hj => by positivity)
+      simpa [hZ] using hle
+    linarith
+  have hfin : A / Z ≤ 1 / (σ - 1) := by
+    have h1 : A * (σ - 1) ≤ Z := by
+      rw [le_div_iff₀ hσ1] at hAZ
+      exact hAZ
+    rw [div_le_div_iff₀ hZpos hσ1, one_mul]
+    exact h1
+  linarith
+
+
+
+private lemma iwaniecAux_factor_re_nonneg {p : ℕ} (hp : p.Prime) {σ : ℝ} (hσ : 1 < σ) :
+    0 ≤ (logDeriv (fun t : ℂ => 1 - (p:ℂ)^(-t)) (σ:ℂ)).re := by
+  have hpne : p ≠ 0 := hp.ne_zero
+  have hp1 : (1:ℝ) < p := by exact_mod_cast hp.one_lt
+  have hp0 : (0:ℝ) < p := by linarith
+  -- the derivative
+  have hderiv : HasDerivAt (fun t : ℂ => 1 - (p:ℂ)^(-t)) ((p:ℂ)^(-(σ:ℂ)) * Complex.log p) (σ:ℂ) := by
+    have h := ((hasDerivAt_id (σ:ℂ)).neg).const_cpow (c := (p:ℂ)) (Or.inl (by exact_mod_cast hpne))
+    have h2 := h.const_sub 1
+    show HasDerivAt (fun t : ℂ => 1 - (p:ℂ)^(-t)) _ _
+    convert h2 using 1
+    · rfl
+    · show _ = -((p:ℂ)^(-(σ:ℂ)) * Complex.log p * -1); ring
+  rw [logDeriv_apply, hderiv.deriv]
+  have hcast : (p:ℂ)^(-(σ:ℂ)) = Complex.ofReal ((p:ℝ)^(-σ)) := by
+    have hexp : (-(σ:ℂ)) = ((-σ : ℝ) : ℂ) := by push_cast; ring
+    have hbase : (p:ℂ) = ((p:ℝ) : ℂ) := by push_cast; ring
+    rw [hbase, hexp, ← Complex.ofReal_cpow (Nat.cast_nonneg p)]
+  have hlogcast : Complex.log (p:ℂ) = Complex.ofReal (Real.log p) := by
+    rw [← Complex.ofReal_natCast p, Complex.ofReal_log (Nat.cast_nonneg p)]
+  have hden : (1:ℂ) - Complex.ofReal ((p:ℝ)^(-σ)) = Complex.ofReal (1 - (p:ℝ)^(-σ)) := by
+    rw [← Complex.ofReal_one]; push_cast; ring
+  rw [hcast, hlogcast, hden, ← Complex.ofReal_mul, ← Complex.ofReal_div, Complex.ofReal_re]
+  have hpos : 0 < (p:ℝ)^(-σ) := Real.rpow_pos_of_pos hp0 _
+  have hlt : (p:ℝ)^(-σ) < 1 := by
+    have h := Real.rpow_lt_one_of_one_lt_of_neg hp1 (by linarith : -σ < 0)
+    simpa using h
+  have hl : 0 < Real.log p := Real.log_pos hp1
+  positivity
+
+
+
+private lemma iwaniecAux_cpow_ofreal_neg (p : ℕ) (σ : ℝ) :
+    (p:ℂ)^(-(σ:ℂ)) = Complex.ofReal ((p:ℝ)^(-σ)) := by
+  have hexp : (-(σ:ℂ)) = ((-σ : ℝ) : ℂ) := by push_cast; ring
+  have hbase : (p:ℂ) = ((p:ℝ) : ℂ) := by push_cast; ring
+  rw [hbase, hexp, ← Complex.ofReal_cpow (Nat.cast_nonneg p)]
+
+private lemma iwaniecAux_principal_ge_zeta (q : ℕ) [NeZero q] (σ : ℝ) (hσ : 1 < σ) :
+    (logDeriv riemannZeta (σ : ℂ)).re ≤
+      (logDeriv (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q)) (σ : ℂ)).re := by
+  set s : ℂ := (σ:ℂ) with hsdef
+  have hsre : s.re = σ := by simp [hsdef]
+  have hs1 : s ≠ 1 := by
+    intro h
+    have h2 := congrArg Complex.re h
+    simp only [hsre, Complex.one_re] at h2
+    linarith
+  set P : ℂ → ℂ := fun (t : ℂ) => ∏ p ∈ q.primeFactors, (1 - (p:ℂ)^(-t)) with hPdef
+  -- recurrence: the LFunction of the trivial character is P * zeta near s
+  have hvalall : ∀ t : ℂ, t ≠ 1 →
+      DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q) t = P t * riemannZeta t := by
+    intro t ht
+    rw [hPdef]
+    exact DirichletCharacter.LFunctionTrivChar_eq_mul_riemannZeta ht
+  have hval : DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q) s = P s * riemannZeta s :=
+    hvalall s hs1
+  have hderiv_eq : deriv (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q)) s
+      = deriv (fun t => P t * riemannZeta t) s := by
+    refine Filter.EventuallyEq.deriv_eq ?_
+    filter_upwards [isOpen_ne.mem_nhds hs1] with t ht
+    exact hvalall t ht
+  have hlogD : logDeriv (DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q)) s
+      = logDeriv (fun t => P t * riemannZeta t) s := by
+    rw [logDeriv_apply, logDeriv_apply, hderiv_eq, hval]
+  -- nonvanishing / differentiability
+  have hζne : riemannZeta s ≠ 0 := riemannZeta_ne_zero_of_one_lt_re (by rw [hsre]; linarith)
+  have hfacne : ∀ p ∈ q.primeFactors, (1:ℂ) - (p:ℂ)^(-s) ≠ 0 := by
+    intro p hp
+    have hp' : p.Prime := Nat.prime_of_mem_primeFactors hp
+    have hp1 : (1:ℝ) < p := by exact_mod_cast hp'.one_lt
+    have hp0 : (0:ℝ) < p := by linarith
+    intro h
+    have hcast : (p:ℂ)^(-s) = Complex.ofReal ((p:ℝ)^(-σ)) := by
+      rw [hsdef]; exact iwaniecAux_cpow_ofreal_neg p σ
+    rw [hcast, sub_eq_zero] at h
+    have hlt : (p:ℝ)^(-σ) < 1 := by
+      have := Real.rpow_lt_one_of_one_lt_of_neg hp1 (by linarith : -σ < 0)
+      simpa using this
+    have h1 : Complex.ofReal ((p:ℝ)^(-σ)) = Complex.ofReal 1 := by rw [← h]; simp
+    have h2 : (p:ℝ)^(-σ) = 1 := Complex.ofReal_injective h1
+    linarith
+  have hPne : P s ≠ 0 := by
+    rw [hPdef]
+    simp only
+    exact Finset.prod_ne_zero_iff.mpr hfacne
+  have hdiff_fac : ∀ p ∈ q.primeFactors, DifferentiableAt ℂ (fun t : ℂ => 1 - (p:ℂ)^(-t)) s := by
+    intro p hp
+    have hpne : p ≠ 0 := (Nat.prime_of_mem_primeFactors hp).ne_zero
+    have h := ((hasDerivAt_id s).neg).const_cpow (c := (p:ℂ)) (Or.inl (by exact_mod_cast hpne))
+    exact (h.const_sub 1).differentiableAt
+  have hPdiff : DifferentiableAt ℂ P s := by
+    rw [hPdef]
+    exact DifferentiableAt.fun_finsetProd (fun p hp => hdiff_fac p hp)
+  have hmul : logDeriv (fun t => P t * riemannZeta t) s
+      = logDeriv P s + logDeriv riemannZeta s :=
+    logDeriv_mul s hPne hζne hPdiff (differentiableAt_riemannZeta hs1)
+  have hre : 0 ≤ (logDeriv P s).re := by
+    have hprod : logDeriv P s
+        = logDeriv (∏ p ∈ q.primeFactors, (fun t : ℂ => 1 - (p:ℂ)^(-t))) s := by
+      rw [hPdef]
+      congr 1
+      funext t
+      rw [Finset.prod_apply]
+    rw [hprod]
+    rw [logDeriv_prod (fun i hi => hfacne i hi) (fun i hi => hdiff_fac i hi)]
+    rw [Complex.re_sum]
+    exact Finset.sum_nonneg (fun p hp => iwaniecAux_factor_re_nonneg (Nat.prime_of_mem_primeFactors hp) hσ)
+  rw [hlogD, hmul, Complex.add_re]
+  linarith
+
+
+private lemma iwaniecAux_eq481 (q : ℕ) [NeZero q] (ψ : DirichletCharacter ℂ q) :
+    Lfun481 ψ = DirichletCharacter.LFunction ψ := by
+  funext s
+  unfold Lfun481
+  split_ifs with h
+  · exact absurd h (NeZero.ne q)
+  · rfl
+
+private lemma iwaniecAux_341 (q : ℕ) (hq : 3 ≤ q) (χ : DirichletCharacter ℂ q)
+    (σ γ : ℝ) (hσ : 1 < σ) :
+    3 * (logDeriv (Lfun481 (1 : DirichletCharacter ℂ q)) (σ : ℂ)).re +
+      4 * (logDeriv (Lfun481 χ) ((σ : ℂ) + (γ : ℂ) * Complex.I)).re +
+      (logDeriv (Lfun481 (χ ^ 2))
+        ((σ : ℂ) + ((2 * γ : ℝ) : ℂ) * Complex.I)).re ≤ 0 := by
+  haveI : NeZero q := ⟨by omega⟩
+  have key := LeanLab.PNTPort.DirichletZF.three_four_one (N := q) χ hσ γ
+  simp only [iwaniecAux_eq481, logDeriv_apply, neg_div, Complex.neg_re] at key ⊢
+  rw [show ((2 * γ : ℝ) : ℂ) = 2 * (γ : ℂ) by push_cast; ring]
+  linarith [key]
+
+private lemma iwaniecAux_princ (q : ℕ) (hq : 3 ≤ q) (σ : ℝ) (hσ : 1 < σ) :
+    (logDeriv riemannZeta (σ : ℂ)).re ≤
+      (logDeriv (Lfun481 (1 : DirichletCharacter ℂ q)) (σ : ℂ)).re := by
+  haveI : NeZero q := ⟨by omega⟩
+  have h := iwaniecAux_principal_ge_zeta q σ hσ
+  simpa only [iwaniecAux_eq481] using h
+
+/-- LEAF: Iwaniec 1974 page 102, displays (14) and (15) of the proof of Lemma 11.
+Class: MEDIUM.
 H. Iwaniec, On zeros of Dirichlet's L series, Invent. Math. 23, 1974, page 102: display (14),
 `3 Re L'/L (σ, χ₀) + 4 Re L'/L (σ + it, χ) + Re L'/L (σ + 2it, χ²) ≤ 0` for `σ > 1`, and
 display (15) at the real point `σ`, `Re L'/L (σ, χ₀) ≥ -1/(σ - 1) - 2 log 5l`, from
@@ -88,9 +504,34 @@ theorem iwaniec_display14_15_1122 (q : ℕ) (hq : 3 ≤ q) (χ : DirichletCharac
     4 * (logDeriv (Lfun481 χ) ((σ : ℂ) + (γ : ℂ) * Complex.I)).re +
       (logDeriv (Lfun481 (χ ^ 2)) ((σ : ℂ) + ((2 * γ : ℝ) : ℂ) * Complex.I)).re ≤
       3 / (σ - 1) + 6 * Real.log (5 * l) := by
-  have h14 := iwaniec_display14_1122 q hq χ γ σ hσ
-  have h15 := iwaniec_display15_1122 q hq γ l σ hl hσ
-  have h3 : 3 * (1 / (σ - 1)) = 3 / (σ - 1) := by ring
+  haveI : NeZero q := ⟨by omega⟩
+  have h341 := iwaniecAux_341 q hq χ σ γ hσ
+  have hprinc := iwaniecAux_princ q hq σ hσ
+  have hzeta := iwaniecAux_zeta_logDeriv_le σ hσ
+  have hq9 : (9:ℝ) ≤ (q:ℝ) * (|γ| + 3) := by
+    have hq' : (3:ℝ) ≤ (q:ℝ) := by exact_mod_cast hq
+    nlinarith [abs_nonneg γ]
+  have he2 : Real.exp 2 < 9 := by
+    have h : Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+    rw [h]; nlinarith [Real.exp_pos 1, Real.exp_one_lt_d9]
+  have hl2 : 2 ≤ l := by
+    rw [hl, Real.le_log_iff_exp_le (by linarith)]
+    linarith
+  have h15 : (3/2:ℝ) ≤ Real.log (5 * l) := by
+    rw [Real.le_log_iff_exp_le (by linarith)]
+    have h : Real.exp (3/2) ≤ Real.exp 2 := Real.exp_le_exp.mpr (by norm_num)
+    linarith
+  have hstep : 4 * (logDeriv (Lfun481 χ) ((σ : ℂ) + (γ : ℂ) * Complex.I)).re +
+      (logDeriv (Lfun481 (χ ^ 2))
+        ((σ : ℂ) + ((2 * γ : ℝ) : ℂ) * Complex.I)).re ≤
+      -(3 * (logDeriv riemannZeta (σ : ℂ)).re) := by linarith
+  have hstep2 : -(3 * (logDeriv riemannZeta (σ : ℂ)).re) ≤ 3 / (σ - 1) + 9 := by
+    have hz := hzeta
+    rw [div_eq_mul_inv] at hz ⊢
+    linarith
+  have hstep3 : 3 / (σ - 1) + 9 ≤ 3 / (σ - 1) + 6 * Real.log (5 * l) := by
+    have h9 : (9:ℝ) ≤ 6 * Real.log (5 * l) := by linarith [h15]
+    linarith
   linarith
 
 /-- LEAF: Iwaniec 1974 page 103, the closing numerical step of Lemma 11 step (i).
