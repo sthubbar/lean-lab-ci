@@ -144,4 +144,96 @@ theorem upslack_raw_local_density_of_leaves
       _ ≤ (|C₁| + |C₂| + 1) * x ^ (11 / 20 + ε) * Real.log x ^ (-A) := by
           nlinarith
 
+/-- Helper: the Buchstab function is strictly positive above one.
+This follows from the defining delay equation: ω u = 1/u on [1,2], and for u > 2,
+u·ω u = 2·ω 2 + ∫₂ᵘ ω(t-1) dt > 0 since ω > 0 on [1,2] and ω ≥ 0 above 1. -/
+theorem buchstab_pos_above_one {ω : ℝ → ℝ} (hω : IsBuchstab ω) {u : ℝ} (hu : 1 < u) :
+    0 < ω u := by
+  have hnonneg : ∀ v : ℝ, 1 ≤ v → 0 ≤ ω v := by
+    intro v hv
+    exact buchstab_nonneg hω hv
+  have hpos_interval : ∀ v : ℝ, 1 ≤ v → v ≤ 2 → 0 < ω v := by
+    intro v hv1 hv2
+    have hωv : ω v = 1 / v := hω.2.1 v hv1 (by linarith)
+    rw [hωv]
+    have hv0 : 0 < v := by linarith [hv1]
+    positivity
+  by_cases hle2 : u ≤ 2
+  · have hωu : ω u = 1 / u := hω.2.1 u (by linarith [hu, hle2]) (by linarith)
+    rw [hωu]
+    have hu0 : 0 < u := by linarith [hu]
+    positivity
+  · have hu2 : 2 < u := by linarith [hle2]
+    have hcont : ContinuousOn (fun t : ℝ => t * ω t) (Icc 2 u) :=
+      continuousOn_id.mul (hω.1.mono (fun t ht => by change 1 ≤ t; linarith [ht.1]))
+    have hder : ∀ t ∈ Ioo (2 : ℝ) u,
+        HasDerivAt (fun v => v * ω v) (ω (t - 1)) t := by
+      intro t ht
+      have h₁ := hω.2.1 (t - 1) (by linarith [ht.1]) (by linarith [ht.2, hu2])
+      simpa only [h₁, one_div] using hω.2.2 t ht.1
+    have hci : ContinuousOn (fun t : ℝ => ω (t - 1)) (uIcc 2 u) := by
+      rw [uIcc_of_le hu2]
+      apply hω.1.comp (by fun_prop)
+      intro t ht
+      change 1 ≤ t - 1
+      linarith [ht.1]
+    have hFTC := integral_eq_sub_of_hasDerivAt_of_le (by norm_num) hcont hder hci.intervalIntegrable
+    have hI : (∫ t in (2 : ℝ)..u, ω (t - 1)) ≥ 0 := by
+      apply intervalIntegral.integral_nonneg (by norm_num)
+      intro t ht
+      have ht' : 2 ≤ t := by linarith [ht.1]
+      have ht'' : t ≤ u := by linarith [ht.2]
+      have ht''' : 1 ≤ t - 1 := by linarith
+      exact hnonneg (t - 1) ht'''
+    have h2w2 : 0 < 2 * ω 2 := by
+      have hω2 : ω 2 = 1 / 2 := hω.2.1 2 (by norm_num) (by norm_num)
+      rw [hω2]
+      norm_num
+    have hwu : u * ω u = 2 * ω 2 + ∫ t in (2 : ℝ)..u, ω (t - 1) := by
+      have h₁ := hFTC
+      have h₂ : (∫ t in (2 : ℝ)..u, ω (t - 1)) = (u * ω u - 2 * ω 2) := by
+        linarith
+      linarith
+    have hwu_pos : 0 < u * ω u := by
+      have h₁ : 0 ≤ ∫ t in (2 : ℝ)..u, ω (t - 1) := hI
+      have h₂ : 0 < 2 * ω 2 := h2w2
+      rw [hwu]
+      linarith
+    have hu0 : 0 < u := by linarith [hu]
+    have hωu_pos : 0 < ω u := by
+      by_contra h
+      have hωu_nonpos : ω u ≤ 0 := by linarith
+      have h₁ : u * ω u ≤ 0 := by
+        nlinarith
+      linarith
+    exact hωu_pos
+
+/-- Attempt at the rough density leaf. Stuck on the prefix sum condition,
+which requires Buchstab's counting theorem with PNT error terms on short intervals -
+not formalized in the lab or Mathlib. -/
+theorem upslack_rough_c4_density {ω : ℝ → ℝ}
+    (hω : LeanLab.ChenDoubleSieve.Wu04Functional.IsBuchstab ω)
+    (hz : LeanLab.ChenDoubleSieve.Wu04Functional.ZeroBelowOne ω)
+    {ε : ℝ} (hε : 0 < ε) (hε8 : ε ≤ 1 / 10 ^ 8) :
+    ∃ (D : ℝ → ℕ → ℝ) (c K : ℝ), 0 < c ∧ (∀ x m, c ≤ D x m) ∧
+      (∀ x : ℝ, ∀ m ∈ rightInterval ε x, ∀ m' ∈ rightInterval ε x,
+        |D x m - D x m'| ≤ K * |(m : ℝ) - m'| / x ^ (11 / 20 + ε)) ∧
+      (∀ η : ℝ, 0 < η → ∃ X : ℝ, ∀ x : ℝ, X ≤ x → ∀ m ∈ rightInterval ε x,
+        D x m ≤ ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) + η) ∧
+      (∀ A : ℝ, 0 < A → ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ t : ℝ, t ≤ 2 * x ^ (11 / 20 + ε) →
+        |∑ m ∈ (rightInterval ε x).filter (fun m : ℕ => (m : ℝ) ≤ t),
+          (upperRough m ((x ^ (11 / 20 + ε)) ^ upperC4 ε) -
+            D x m / Real.log (x ^ (11 / 20 + ε)))| ≤
+            C * x ^ (11 / 20 + ε) * Real.log x ^ (-A)) := by
+  have h₁ : 0 < ω (1 / (1/4 + (2 * (1 / 16 - 1 / 10 ^ 5)) / 8 - ε)) := by
+    have hc4 : 1 / 4 + (2 * (1 / 16 - 1 / 10 ^ 5)) / 8 - ε > 1 := by
+      norm_num at hε8 ⊢
+      linarith
+    have hinv : 1 < 1 / (1/4 + (2 * (1 / 16 - 1 / 10 ^ 5)) / 8 - ε) := by
+      apply one_div_lt_one
+      · norm_num at hε8 ⊢
+        linarith
+      · linarith
+    exact buchstab_pos_above_one hω hinv
+  sorry
 end LeanLab.BHP1997.DecompC165d
