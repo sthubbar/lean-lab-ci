@@ -20,7 +20,8 @@ import LeanLab.PNTPort.LargeSieve.Basic
 
 /-! CODEX task181, 2026-10-30. AI wrote the Lean code. Binary Goldbach is open.
 All ten original open leaves now have kernel checked proofs with build evidence.
-The separately cited wc_lemma2 remains an input. The inner_l_sum estimate and the
+The separately cited wc_lemma2 remains an input. Update U-1763: wc_lemma2 is now PROVED by
+the Prove2Me port and matches Wang and Chen 1994 Lemma 2 as printed, page 26. The inner_l_sum estimate and the
 new block energy estimate are CONDITIONAL ON an explicitly supplied WCLemma2.
 Evidence: build/codex-task181.log. Source twins and instances: STATEMENTS.md. -/
 

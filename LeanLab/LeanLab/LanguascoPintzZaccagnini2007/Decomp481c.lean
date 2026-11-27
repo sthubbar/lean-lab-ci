@@ -887,6 +887,226 @@ theorem explicit_formula_reduction481
           add_le_add hDnS (add_le_add le_rfl hoffS)
       _ = A * n * Sing n := by rw [hA]; ring
 
+/-- The singular series lower bound of `lpz_efr_singular_series_lower481` on any window of even
+integers. Only evenness is used. U-1762. -/
+private theorem lpz_efr_singular_series_lower_window1762 (W : ℕ → Finset ℕ)
+    (hW : ∀ X n, n ∈ W X → Even n) :
+    ∃ s₀ : ℝ, 0 < s₀ ∧ ∀ (X n : ℕ), n ∈ W X → s₀ ≤ Sing n := by
+  refine ⟨1 / 2, by norm_num, fun X n hn => ?_⟩
+  have h2n : 2 ∣ n := even_iff_two_dvd.mp (hW X n hn)
+  have hS : Sing n = ∏' p : {p : ℕ // p.Prime}, singF n p := rfl
+  rw [hS]
+  by_cases hm : Multipliable (fun p : {p : ℕ // p.Prime} => singF n p)
+  · exact ge_of_tendsto' hm.hasProd (fun s => lpz_efr_prod_singF_ge_half481 h2n s)
+  · rw [tprod_eq_one_of_not_multipliable hm]
+    norm_num
+
+/-- U-1762. `explicit_formula_reduction481` on any window W of even n with X <= 2n, from
+Lemma 4.1 on that window. Same proof; the statement of `explicit_formula_reduction481` is
+unchanged. Used with W = evenWindow131, the range [X/2, X] printed in Pintz ELAZ Theorem 10. -/
+theorem explicit_formula_reduction_window1762
+    (W : ℕ → Finset ℕ)
+    (hW : ∀ X n, n ∈ W X → 1 ≤ n ∧ (X : ℝ) ≤ 2 * n ∧ Even n)
+    (hexp : ∃ c ε₀ B H₀ T₀ : ℝ, 0 < c ∧ 0 < ε₀ ∧ 0 ≤ B ∧
+      ∃ Cε : ℝ → ℕ, (∀ ε, 0 < Cε ε) ∧
+      ∀ H T : ℝ, H₀ ≤ H → T₀ ≤ T →
+        ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
+          ∃ P : ℝ, AdmissibleP131 X P ∧
+          ∃ (K : ℕ) (z : Fin (K + 1) → Σ r : ℕ, DirichletCharacter ℂ r × ℂ)
+            (Sg : Fin (K + 1) → Fin (K + 1) → ℕ → ℂ),
+            (z 0).1 = 1 ∧ (z 0).2.2 = 1 ∧
+            (∀ i, i ≠ 0 → z i ∈ zeroBox481 X H T P) ∧
+            (∀ w, ((univ.filter (fun i => i ≠ 0 ∧ z i = w)).card : ℕ) ≤
+              analyticOrderNatAt (Lfun481 w.2.1) w.2.2) ∧
+            (∀ n ∈ W X, Sg 0 0 n = (Sing n : ℂ)) ∧
+            (∀ i j n, n ∈ W X → ‖Sg i j n‖ ≤ Sing n) ∧
+            (∀ ε : ℝ, 0 < ε → ε < ε₀ → ∀ i j n, n ∈ W X →
+              (¬ (z i).1 ∣ Cε ε * n ∨ ¬ (z j).1 ∣ Cε ε * n) → ‖Sg i j n‖ ≤ ε) ∧
+            ∀ n ∈ W X,
+              |binaryMajor131 X n P -
+                (∑ i, ∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
+                  gammaPair481 (z i).2.2 (z j).2.2 n).re| ≤
+                B * ((X : ℝ) * Real.exp (-c * H) + X / Real.sqrt T))
+    (hdensity : JutilaStatement481)
+    (hcount : ∀ {K : ℕ} (z : Fin K → Σ r : ℕ, DirichletCharacter ℂ r × ℂ),
+      (∀ w, (univ.filter (fun i => z i = w)).card ≤
+        analyticOrderNatAt (Lfun481 w.2.1) w.2.2) →
+      (K : ℝ) ≤ ∑ w ∈ univ.image z, (analyticOrderNatAt (Lfun481 w.2.1) w.2.2 : ℝ))
+    (hgamma : ∀ {s t : ℂ}, (1 / 2 : ℝ) ≤ s.re → (1 / 2 : ℝ) ≤ t.re →
+      s.re ≤ 1 → t.re ≤ 1 → ∀ {n : ℕ}, 1 ≤ n →
+        ‖gammaPair481 s t n‖ ≤ Real.pi * n)
+    (η : ℝ) (hη : 0 < η) :
+    ∃ (K₁ Cstar : ℕ) (A H T : ℝ), 0 < Cstar ∧ 0 ≤ A ∧ 1 ≤ H ∧ 1 ≤ T ∧
+      ∃ X₀ : ℕ, ∀ X : ℕ, X₀ ≤ X →
+        ∃ (P : ℝ) (E : Finset ℕ), AdmissibleP131 X P ∧ E.card ≤ K₁ ∧
+          (∀ r ∈ E, ∃ z ∈ zeroBox481 X H T P, z.1 = r) ∧
+          (∀ n ∈ W X, Nonexceptional131 Cstar E n →
+            |binaryMajor131 X n P - n * Sing n| ≤ η * n * Sing n) ∧
+          (∀ n ∈ W X, |binaryMajor131 X n P| ≤ A * n * Sing n) := by
+  classical
+  obtain ⟨C₀, hC₀, hdens⟩ := lpz_efr_zero_family_card_bound481 hdensity hcount
+  obtain ⟨s₀, hs₀, hs₀le⟩ := lpz_efr_singular_series_lower_window1762 W (fun X n hn => (hW X n hn).2.2)
+  obtain ⟨c, ε₀, B, H₀, T₀, hc, hε₀, hB, Cε, hCε, hmain⟩ := hexp
+  obtain ⟨H, T, ε, hH₀, hH1, hT₀, hT1, hε, hεε₀, hAbs, hSmall⟩ :=
+    lpz_efr_absorption_constants481 c B ε₀ s₀ C₀ η H₀ T₀ hc hB hε₀ hs₀ hC₀ hη
+  set K₁ : ℕ := ⌈C₀ * Real.exp (4 * H)⌉₊ + 1 with hK₁
+  set Cstar : ℕ := Cε ε with hCs
+  set A : ℝ := 1 + ((K₁ : ℝ) + 1) ^ 2 * Real.pi + η / 2 with hA
+  have hCstar : 0 < Cstar := hCε ε
+  have hA0 : 0 ≤ A := by rw [hA]; positivity
+  obtain ⟨X₁, hX₁⟩ := hmain H T hH₀ hT₀
+  obtain ⟨X₂, hX₂⟩ := hdens H T hH1 hT1
+  obtain ⟨X₃, hX₃⟩ := lpz_efr_log_threshold481 H
+  refine ⟨K₁, Cstar, A, H, T, hCstar, hA0, hH1, hT1, max X₁ (max X₂ X₃), ?_⟩
+  intro X hX
+  have hx1 : X₁ ≤ X := by omega
+  have hx2 : X₂ ≤ X := by omega
+  have hx3 : X₃ ≤ X := by omega
+  obtain ⟨P, hP, K, z, Sg, hz01, hz0s, hbox, hmult, hSg00, hSgb, hSgε, hrem⟩ :=
+    hX₁ X hx1
+  have hnR : ∀ n : ℕ, (0 : ℝ) ≤ (n : ℝ) := fun n => Nat.cast_nonneg n
+  have hlog : 2 * H ≤ Real.log X := hX₃ X hx3
+  have hlogpos : 0 < Real.log X := by linarith
+  have hdivH : H / Real.log X ≤ 1 / 2 := by
+    rw [div_le_iff₀ hlogpos]
+    linarith
+  have hstrip : ∀ i : Fin (K + 1), (1 / 2 : ℝ) ≤ (z i).2.2.re ∧ (z i).2.2.re ≤ 1 := by
+    intro i
+    by_cases hi : i = 0
+    · have hz : (z i).2.2 = 1 := by rw [hi]; exact hz0s
+      rw [hz]
+      norm_num
+    · have hmem := hbox i hi
+      simp only [zeroBox481, Set.mem_setOf_eq] at hmem
+      obtain ⟨-, -, -, -, hre, hre1, -⟩ := hmem
+      exact ⟨by linarith, le_of_lt hre1⟩
+  have hγf : ∀ (n : ℕ), 1 ≤ n → ∀ i j,
+      ‖gammaPair481 (z i).2.2 (z j).2.2 n‖ ≤ Real.pi * n :=
+    fun n hn i j => hgamma (hstrip i).1 (hstrip j).1 (hstrip i).2 (hstrip j).2 hn
+  have hK : (K : ℝ) ≤ C₀ * Real.exp (4 * H) := hX₂ X hx2 P hP K z hz01 hz0s hbox hmult
+  have hKle : K ≤ K₁ := by
+    have h1 : (K : ℝ) ≤ (⌈C₀ * Real.exp (4 * H)⌉₊ : ℝ) := le_trans hK (Nat.le_ceil _)
+    have h2 : K ≤ ⌈C₀ * Real.exp (4 * H)⌉₊ := by exact_mod_cast h1
+    rw [hK₁]
+    omega
+  refine ⟨P, (univ.erase (0 : Fin (K + 1))).image (fun i => (z i).1), hP, ?_, ?_, ?_, ?_⟩
+  · have hcard : ((univ.erase (0 : Fin (K + 1))).image (fun i => (z i).1)).card ≤ K := by
+      refine (Finset.card_image_le).trans ?_
+      rw [Finset.card_erase_of_mem (Finset.mem_univ _), Finset.card_univ, Fintype.card_fin]
+      omega
+    omega
+  · intro r hr
+    obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hr
+    exact ⟨z i, hbox i (Finset.mem_erase.mp hi).1, rfl⟩
+  · intro n hn hnonexc
+    have hn1 : 1 ≤ n := (hW X n hn).1
+    have hX2n : (X : ℝ) ≤ 2 * n := (hW X n hn).2.1
+    have hQ0 : 0 ≤ Real.exp (-c * H) + 1 / Real.sqrt T := by
+      have h1 : (0 : ℝ) < Real.exp (-c * H) := Real.exp_pos _
+      have h2 : (0 : ℝ) < Real.sqrt T := Real.sqrt_pos.mpr (by linarith)
+      positivity
+    have hSgε' : ∀ i j, (i ≠ 0 ∨ j ≠ 0) → ‖Sg i j n‖ ≤ ε := by
+      intro i j hij
+      refine hSgε ε hε hεε₀ i j n hn ?_
+      rcases hij with hi | hj
+      · exact Or.inl (hnonexc (z i).1 (Finset.mem_image.mpr
+          ⟨i, Finset.mem_erase.mpr ⟨hi, Finset.mem_univ i⟩, rfl⟩))
+      · exact Or.inr (hnonexc (z j).1 (Finset.mem_image.mpr
+          ⟨j, Finset.mem_erase.mpr ⟨hj, Finset.mem_univ j⟩, rfl⟩))
+    set Tsum : ℝ := (∑ i, ∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
+      gammaPair481 (z i).2.2 (z j).2.2 n).re with hTsum
+    have hrem' : |binaryMajor131 X n P - Tsum| ≤
+        (2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T)) * n := by
+      have hremn := hrem n hn
+      rw [← hTsum] at hremn
+      refine hremn.trans ?_
+      calc B * ((X : ℝ) * Real.exp (-c * H) + X / Real.sqrt T)
+          = X * (B * (Real.exp (-c * H) + 1 / Real.sqrt T)) := by ring
+        _ ≤ (2 * n) * (B * (Real.exp (-c * H) + 1 / Real.sqrt T)) :=
+            mul_le_mul_of_nonneg_right hX2n (mul_nonneg hB hQ0)
+        _ = (2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T)) * n := by ring
+    have h4 : |Tsum - n * Sing n| ≤ ((K : ℝ) + 1) ^ 2 * ε * Real.pi * n := by
+      have h := lpz_efr_explicit_formula_main_term481 z Sg n ε hz0s (hSg00 n hn) (hγf n hn1) hε.le hSgε'
+      rw [← hTsum] at h
+      exact h
+    have hOffN : ((K : ℝ) + 1) ^ 2 * ε * Real.pi * n ≤ (η * s₀ / 2) * n := by
+      have hsq : ((K : ℝ) + 1) ^ 2 ≤ (C₀ * Real.exp (4 * H) + 2) ^ 2 := by
+        nlinarith [hK]
+      calc ((K : ℝ) + 1) ^ 2 * ε * Real.pi * n
+          = ((K : ℝ) + 1) ^ 2 * (ε * Real.pi * n) := by ring
+        _ ≤ (C₀ * Real.exp (4 * H) + 2) ^ 2 * (ε * Real.pi * n) :=
+            mul_le_mul_of_nonneg_right hsq (by positivity)
+        _ = ((C₀ * Real.exp (4 * H) + 2) ^ 2 * Real.pi * ε) * n := by ring
+        _ ≤ (η * s₀ / 2) * n := mul_le_mul_of_nonneg_right hSmall (hnR n)
+    calc |binaryMajor131 X n P - n * Sing n|
+        ≤ |binaryMajor131 X n P - Tsum| + |Tsum - n * Sing n| := abs_sub_le _ _ _
+      _ ≤ (2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T)) * n +
+          ((K : ℝ) + 1) ^ 2 * ε * Real.pi * n := add_le_add hrem' h4
+      _ ≤ (η * s₀ / 2) * n + (η * s₀ / 2) * n :=
+          add_le_add (mul_le_mul_of_nonneg_right hAbs (hnR n)) hOffN
+      _ ≤ η * n * Sing n := by
+          have hs : s₀ ≤ Sing n := hs₀le X n hn
+          have h1 : (η * s₀ / 2) * n + (η * s₀ / 2) * n = (η * n) * s₀ := by ring
+          rw [h1]
+          calc (η * n) * s₀ ≤ (η * n) * Sing n :=
+                mul_le_mul_of_nonneg_left hs (by positivity)
+            _ = η * n * Sing n := by ring
+  · intro n hn
+    have hn1 : 1 ≤ n := (hW X n hn).1
+    have hX2n : (X : ℝ) ≤ 2 * n := (hW X n hn).2.1
+    have hQ0 : 0 ≤ Real.exp (-c * H) + 1 / Real.sqrt T := by
+      have h1 : (0 : ℝ) < Real.exp (-c * H) := Real.exp_pos _
+      have h2 : (0 : ℝ) < Real.sqrt T := Real.sqrt_pos.mpr (by linarith)
+      positivity
+    set Tsum : ℝ := (∑ i, ∑ j, Sg i j n * zeroSign481 i * zeroSign481 j *
+      gammaPair481 (z i).2.2 (z j).2.2 n).re with hTsum
+    have hrem' : |binaryMajor131 X n P - Tsum| ≤
+        (2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T)) * n := by
+      have hremn := hrem n hn
+      rw [← hTsum] at hremn
+      refine hremn.trans ?_
+      calc B * ((X : ℝ) * Real.exp (-c * H) + X / Real.sqrt T)
+          = X * (B * (Real.exp (-c * H) + 1 / Real.sqrt T)) := by ring
+        _ ≤ (2 * n) * (B * (Real.exp (-c * H) + 1 / Real.sqrt T)) :=
+            mul_le_mul_of_nonneg_right hX2n (mul_nonneg hB hQ0)
+        _ = (2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T)) * n := by ring
+    have h5 : |Tsum| ≤ n * Sing n + ((K : ℝ) + 1) ^ 2 * Real.pi * n * Sing n := by
+      have h := lpz_efr_explicit_formula_total_size481 z Sg n (hγf n hn1) (fun i j => hSgb i j n hn)
+        (Sing_nonneg131 n)
+      rw [← hTsum] at h
+      exact h
+    have hDnS : (2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T)) * n ≤
+        (η / 2) * (n * Sing n) := by
+      have hnS : s₀ * (n : ℝ) ≤ Sing n * n :=
+        mul_le_mul_of_nonneg_right (hs₀le X n hn) (hnR n)
+      calc (2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T)) * n
+          ≤ (η * s₀ / 2) * n := mul_le_mul_of_nonneg_right hAbs (hnR n)
+        _ = (η / 2) * (s₀ * n) := by ring
+        _ ≤ (η / 2) * (Sing n * n) := mul_le_mul_of_nonneg_left hnS (by positivity)
+        _ = (η / 2) * (n * Sing n) := by ring
+    have hKle' : ((K : ℝ) + 1) ^ 2 ≤ ((K₁ : ℝ) + 1) ^ 2 := by
+      have h : (K : ℝ) ≤ (K₁ : ℝ) := by exact_mod_cast hKle
+      nlinarith
+    have hoffS : ((K : ℝ) + 1) ^ 2 * Real.pi * n * Sing n ≤
+        ((K₁ : ℝ) + 1) ^ 2 * Real.pi * n * Sing n := by
+      have h0 : 0 ≤ Real.pi * n * Sing n :=
+        mul_nonneg (mul_nonneg Real.pi_pos.le (Nat.cast_nonneg n)) (Sing_nonneg131 n)
+      calc ((K : ℝ) + 1) ^ 2 * Real.pi * n * Sing n
+          = ((K : ℝ) + 1) ^ 2 * (Real.pi * n * Sing n) := by ring
+        _ ≤ ((K₁ : ℝ) + 1) ^ 2 * (Real.pi * n * Sing n) :=
+            mul_le_mul_of_nonneg_right hKle' h0
+        _ = ((K₁ : ℝ) + 1) ^ 2 * Real.pi * n * Sing n := by ring
+    have hb : |binaryMajor131 X n P| ≤ |binaryMajor131 X n P - Tsum| + |Tsum| := by
+      simpa using abs_add_le (binaryMajor131 X n P - Tsum) Tsum
+    calc |binaryMajor131 X n P|
+        ≤ |binaryMajor131 X n P - Tsum| + |Tsum| := hb
+      _ ≤ (2 * B * (Real.exp (-c * H) + 1 / Real.sqrt T)) * n +
+          (n * Sing n + ((K : ℝ) + 1) ^ 2 * Real.pi * n * Sing n) := add_le_add hrem' h5
+      _ ≤ (η / 2) * (n * Sing n) +
+          (n * Sing n + ((K₁ : ℝ) + 1) ^ 2 * Real.pi * n * Sing n) :=
+          add_le_add hDnS (add_le_add le_rfl hoffS)
+      _ = A * n * Sing n := by rw [hA]; ring
+
 /-- P0045 page 6, display 10: combine the real and nonreal character cases.
 The conclusion remains conditional on the explicit classification and zero region inputs. -/
 theorem exceptional_radical481 (hclass : RealPrimitiveStatement481)

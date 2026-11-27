@@ -830,7 +830,8 @@ theorem task194_third_of_wc (hWC : U1543.WCLemma3) (N c : ℝ) (a : ℤ) (q : �
   ring
 
 /-- LEAF. Lemma 6.5, pages 169 and 170, in the nontrivial regime of page 168.
-External input: Wang and Chen 1994 Lemma 3, quoted as Lemma 6.4.
+Wang and Chen 1994 Lemma 3, quoted as Lemma 6.4, is PROVED in the lab as `U1543.wc_lemma3`;
+U-1763 checked it against the print, Acta Math. Sinica 37, page 26: MATCH.
 The inclusive cutoff of display 3.8 is retained. -/
 theorem second_sum (N c : ℝ) (a : ℤ) (q : ℕ) (θ : ℝ)
     (hN : exp 30.95 ≤ N) (hc : 0 < c) (hc1 : c < 1)
@@ -841,7 +842,8 @@ theorem second_sum (N c : ℝ) (a : ℤ) (q : ℕ) (θ : ℝ)
   exact task194_second_of_wc U1543.wc_lemma3 N c a q θ hN hc hc1 hq hcop hθ hA hC
 
 /-- LEAF. Lemma 6.6, page 170, in the nontrivial regime of page 168.
-External input: Wang and Chen 1994 Lemma 3, quoted as Lemma 6.4.
+Wang and Chen 1994 Lemma 3, quoted as Lemma 6.4, is PROVED in the lab as `U1543.wc_lemma3`;
+U-1763 checked it against the print, Acta Math. Sinica 37, page 26: MATCH.
 The inclusive cutoff of display 3.8 is retained. -/
 theorem third_sum (N c : ℝ) (a : ℤ) (q : ℕ) (θ : ℝ)
     (hN : exp 30.95 ≤ N) (hc : 0 < c) (hc1 : c < 1)
@@ -2422,7 +2424,8 @@ theorem task194_fourth_numeric (N : ℝ) (q : ℕ)
     (task194_affine_numeric N q hN hq hA hC)
 
 /-- LEAF. Lemma 6.7, pages 170 to 174, in the nontrivial regime of page 168.
-External inputs: Wang and Chen 1994 Lemma 2 and Rosser and Schoenfeld 1962.
+External input: Rosser and Schoenfeld 1962. Wang and Chen 1994 Lemma 2, quoted as Lemma 6.3, is
+PROVED in the lab as `U1543.wc_lemma2`; U-1763 checked it against the print, page 26: MATCH.
 The inclusive cutoff of display 3.8 is retained. -/
 theorem fourth_sum (N c : ℝ) (a : ℤ) (q : ℕ) (θ : ℝ)
     (hN : exp 30.95 ≤ N) (hc : 0 < c) (hc1 : c < 1)
