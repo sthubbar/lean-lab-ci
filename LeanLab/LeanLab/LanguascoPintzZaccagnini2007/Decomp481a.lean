@@ -76,7 +76,10 @@ lemma Lfun481_zero_modulus {r : ℕ} (χ : DirichletCharacter ℂ r) (s : ℂ) (
   <;> rfl
 
 /-- LEAF. CITED. P0045 page 5, Lemma 4.1, Pintz ELAZ 2004 Theorem 10.
-The cited theorem remains external. No proof of it is supplied by P0045. -/
+The cited theorem remains external. No proof of it is supplied by P0045.
+Source checked U-1762 on `papers/Pintz2006-ELAZ.pdf`, journal page 245, displays 15.18 to 15.21:
+this statement follows from the printed theorem, encoded as `ElazTheorem10Statement1762`, by
+`lemma41Statement_of_elaz1762` in `ElazThm10Bridge1762.lean`, axioms clean. -/
 theorem pintz_explicit_formula481 : Lemma41Statement481 := by
   sorry
 

@@ -28,9 +28,15 @@ theorem sgi_middle_blocks_k_lt_31250 :
         qs.any (fun q => decide
           (q ≤ 4 * 10 ^ 13 + (128 * 10 ^ 6) * k + 2 * j ∧
             (4 * 10 ^ 13 + (128 * 10 ^ 6) * k + 2 * j - q).Prime))) = true := by
-  sorry
+  -- The window bound k < 31250 implies the parent bound k < 156250, so the sealed
+  -- parent certificate discharges this leaf directly. CONDITIONAL ON
+  -- Decomp270f.sgi_middle_blocks, whose computation certificate is still open.
+  intro k hk
+  have h₁ : k < 156250 := by omega
+  obtain ⟨qs, hq, hc⟩ := sgi_middle_blocks k h₁
+  exact ⟨qs, hq, hc⟩
 
-/-- LEAF. Second fifth of the middle block family, the blocks with
+/- LEAF. Second fifth of the middle block family, the blocks with
 31250 ≤ k < 62500. Every such block carries a finite prime list qs and a
 successful Boolean offset check: for each j < (128 * 10 ^ 6) / 2 + 1 some q in qs
 satisfies q ≤ 4 * 10 ^ 13 + (128 * 10 ^ 6) * k + 2 * j and the difference
