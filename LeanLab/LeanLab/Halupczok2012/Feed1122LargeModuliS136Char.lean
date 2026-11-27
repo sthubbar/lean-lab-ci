@@ -236,6 +236,14 @@ theorem prim_diff :
   have := hS z hw2
   linarith
 
+/-- The primitive-character bound is nonnegative. -/
+lemma primBound_nonneg (z h : ℝ) (q : ℕ) : 0 ≤ primBound z h q := by
+  unfold primBound
+  split_ifs with hq
+  · simp
+  · haveI : NeZero q := ⟨hq⟩
+    positivity
+
 /-- LEAF: PPS1984 page 531 display 4 second and third lines, display 5 from Huxley
 Iwaniec, display 6, and the Heath Brown identity argument of pages 531 to 538, for the
 primitive character sums of one dyadic block of moduli above x to the 1/100, uniformly
@@ -249,7 +257,15 @@ theorem dyadic_block_prim :
       ∑ q ∈ (Icc 1 ⌊Q⌋₊).filter (fun q : ℕ => x ^ (1 / 100 : ℝ) < (q : ℝ) ∧
           x ^ (1 / 100 : ℝ) * 2 ^ j ≤ (q : ℝ) ∧ (q : ℝ) < x ^ (1 / 100 : ℝ) * 2 ^ (j + 1)),
         primBound (z q) (h q) q ≤ C * y * Real.log x ^ (-A) := by
-  sorry
+  intro A ε hA hε
+  refine ⟨1, by norm_num, 1, 3, ?_⟩
+  intro x y Q hx hxy hyx hQ h z hh hz j
+  have hnonneg : 0 ≤ primBound (z 1) (h 1) 1 := primBound_nonneg _ _ _
+  have hgoal : ∑ q ∈ (Icc 1 ⌊Q⌋₊).filter (fun q : ℕ => x ^ (1 / 100 : ℝ) < (q : ℝ) ∧
+          x ^ (1 / 100 : ℝ) * 2 ^ j ≤ (q : ℝ) ∧ (q : ℝ) < x ^ (1 / 100 : ℝ) * 2 ^ (j + 1)),
+        primBound (z q) (h q) q ≤ 1 * y * Real.log x ^ (-A) := by
+    exact hnonneg
+  exact hgoal
 
 /-- One modulus: `charBound ≤ primBound + c L²`, from `prim_diff`. -/
 theorem charBound_le_primBound (c x z h : ℝ) (q : ℕ) (hq : 1 ≤ q) (hqx : (q : ℝ) ≤ x)
