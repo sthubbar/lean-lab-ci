@@ -1,3 +1,4 @@
+import LeanLab.RieselVaughan1983.Lemma1Large
 import Mathlib.Data.Finset.NatDivisors
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 import Mathlib.NumberTheory.Harmonic.Bounds
@@ -321,6 +322,164 @@ theorem voronoi_divisor_sum_asymptotic_of_leaves :
       CA * x ^ (1 / 3 : ℝ) * Real.log x + 2 * (CB * x ^ (1 / 3 : ℝ) * Real.log x) := by ring
   rw [he]
   exact abs_le.mpr ⟨by linarith, by linarith⟩
+
+/-- Elementary algebra for the harmonic reduction before the Voronoi formula.
+A two sided harmonic remainder of size 1 over 8r squared leaves a bounded error.
+Source target: Halupczok journal page 337, the formula below display 2.2. -/
+theorem harmonic_reduction_algebra (x s r H γ : ℝ) (hr : 1 ≤ r) (hrs : r ≤ s) (hsr : s ≤ r + 1)
+    (hsx : s ^ 2 = x)
+    (hHl : Real.log r + 1 / (2 * r) - 1 / (8 * r ^ 2) + γ ≤ H)
+    (hHu : H ≤ Real.log r + 1 / (2 * r) + γ) :
+    |2 * x * H - r - r ^ 2 - (x * Real.log x + (2 * γ - 1) * x)| ≤ 8 := by
+  have hr0 : 0 < r := by linarith
+  have hs0 : 0 < s := by linarith
+  have hx0 : 0 < x := by nlinarith
+  have hlx : Real.log x = 2 * Real.log s := by
+    rw [← hsx, Real.log_pow]
+    norm_num
+  have hlogu : Real.log s - Real.log r ≤ (s - r) / r := by
+    rw [← Real.log_div hs0.ne' hr0.ne']
+    have ht := Real.log_le_sub_one_of_pos (div_pos hs0 hr0)
+    convert ht using 1 <;> field_simp
+  have hlogl : (s - r) / s ≤ Real.log s - Real.log r := by
+    have ht := Real.log_le_sub_one_of_pos (div_pos hr0 hs0)
+    rw [Real.log_div hr0.ne' hs0.ne'] at ht
+    have he : r / s - 1 = -(s - r) / s := by field_simp; ring
+    rw [he, neg_div] at ht
+    linarith
+  have hbaseu : x - r ^ 2 - 2 * x * (Real.log s - Real.log r) ≤ 0 := by
+    have ht := mul_le_mul_of_nonneg_left hlogl (by positivity : 0 ≤ 2 * x)
+    have he : 2 * x * ((s - r) / s) = 2 * s * (s - r) := by
+      rw [← hsx]
+      field_simp
+    rw [he] at ht
+    nlinarith [sq_nonneg (s - r)]
+  have hbasel : -5 ≤ x - r ^ 2 - 2 * x * (Real.log s - Real.log r) := by
+    have ht := mul_le_mul_of_nonneg_left hlogu (by positivity : 0 ≤ 2 * x)
+    have he : x - r ^ 2 - 2 * x * ((s - r) / r) =
+        -((s - r) ^ 2 * (2 * s + r) / r) := by
+      rw [← hsx]; field_simp; ring
+    have hd : (s - r) ^ 2 ≤ 1 := by nlinarith
+    have hmul := mul_le_mul_of_nonneg_right hd (by linarith : 0 ≤ 2 * s + r)
+    have hb : (s - r) ^ 2 * (2 * s + r) / r ≤ 5 := by
+      apply (div_le_iff₀ hr0).mpr
+      nlinarith
+    linarith
+  have hmidl : 0 ≤ x / r - r := by
+    have : r ^ 2 ≤ x := by nlinarith
+    apply sub_nonneg.mpr
+    apply (le_div_iff₀ hr0).mpr
+    nlinarith
+  have hmidu : x / r - r ≤ 3 := by
+    have he : x / r - r = (s - r) * (s + r) / r := by
+      rw [← hsx]; field_simp; ring
+    rw [he]
+    apply (div_le_iff₀ hr0).mpr
+    have hm := mul_le_mul_of_nonneg_right (show s - r ≤ 1 by linarith)
+      (by linarith : 0 ≤ s + r)
+    nlinarith
+  have hρu : H - Real.log r - γ - 1 / (2 * r) ≤ 0 := by linarith
+  have hρl : -(1 / (8 * r ^ 2)) ≤ H - Real.log r - γ - 1 / (2 * r) := by linarith
+  have hcorru := mul_le_mul_of_nonneg_left hρu (by positivity : 0 ≤ 2 * x)
+  have hcorrl := mul_le_mul_of_nonneg_left hρl (by positivity : 0 ≤ 2 * x)
+  have hc : 2 * x * (1 / (8 * r ^ 2)) ≤ 1 := by
+    rw [mul_one_div, div_le_iff₀ (by positivity : 0 < 8 * r ^ 2)]
+    nlinarith
+  have he : 2 * x * H - r - r ^ 2 - (x * Real.log x + (2 * γ - 1) * x) =
+      2 * x * (H - Real.log r - γ - 1 / (2 * r)) +
+        (x / r - r) + (x - r ^ 2 - 2 * x * (Real.log s - Real.log r)) := by
+    rw [hlx]
+    field_simp
+    ring
+  rw [he]
+  apply abs_le.mpr
+  constructor <;> nlinarith
+
+/-- Combining the floor and sawtooth sums leaves the harmonic sum exactly.
+Source target: the same elementary reduction before the cited Voronoi formula. -/
+theorem floor_sawtooth_sum (x : ℝ) (hx : 0 ≤ x) (n : ℕ) :
+    (∑ m ∈ Icc 1 n, (⌊x / m⌋₊ : ℝ)) +
+      ∑ m ∈ Icc 1 n, (Int.fract (x / m) - 1 / 2) =
+        x * (harmonic n : ℝ) - (n : ℝ) / 2 := by
+  rw [← sum_add_distrib]
+  trans ∑ m ∈ Icc 1 n, (x * (m : ℝ)⁻¹ - 1 / 2)
+  · apply sum_congr rfl
+    intro m hm
+    have hf := Int.floor_add_fract (x / m)
+    rw [← natCast_floor_eq_intCast_floor (div_nonneg hx (Nat.cast_nonneg m))] at hf
+    simp only [div_eq_mul_inv] at hf ⊢
+    linarith
+  · have hh : ∑ m ∈ Icc 1 n, (m : ℝ)⁻¹ = (harmonic n : ℝ) := by
+      simp only [harmonic_eq_sum_Icc, Rat.cast_sum, Rat.cast_inv, Rat.cast_natCast]
+    rw [sum_sub_distrib, ← mul_sum, hh]
+    simp only [sum_const, nsmul_eq_mul, Nat.card_Icc, Nat.add_sub_cancel,
+      mul_one_div]
+
+/-- The elementary harmonic residual is uniformly bounded before applying
+any sawtooth cancellation. Source target: Halupczok page 337 below display 2.2. -/
+theorem harmonic_reduction_bounded (x : ℝ) (hx : 4 ≤ x) :
+    |(2 * ∑ m ∈ Icc 1 ⌊Real.sqrt x⌋₊, (⌊x / m⌋₊ : ℝ) - (⌊Real.sqrt x⌋₊ : ℝ) ^ 2) -
+      (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x) +
+      2 * ∑ m ∈ Icc 1 ⌊Real.sqrt x⌋₊, (Int.fract (x / m) - 1 / 2)| ≤ 8 := by
+  have hx0 : 0 < x := by linarith
+  let n := ⌊Real.sqrt x⌋₊
+  have hs1 : (1 : ℝ) ≤ Real.sqrt x :=
+    Real.le_sqrt_of_sq_le (show (1 : ℝ) ^ 2 ≤ x by linarith)
+  have hn : 1 ≤ n := Nat.le_floor (by simpa only [Nat.cast_one] using hs1)
+  have hnR : (1 : ℝ) ≤ n := by exact_mod_cast hn
+  have hns : (n : ℝ) ≤ Real.sqrt x := Nat.floor_le (Real.sqrt_nonneg x)
+  have hsn : Real.sqrt x ≤ (n : ℝ) + 1 := (Nat.lt_floor_add_one (Real.sqrt x)).le
+  obtain ⟨hHl, hHu⟩ := LeanLab.RieselVaughan1983.harm_bounds n hn
+  have hb := harmonic_reduction_algebra x (Real.sqrt x) n (harmonic n)
+    Real.eulerMascheroniConstant hnR hns hsn (Real.sq_sqrt hx0.le) hHl hHu
+  have he := floor_sawtooth_sum x hx0.le n
+  change |(2 * ∑ m ∈ Icc 1 n, (⌊x / m⌋₊ : ℝ) - (n : ℝ) ^ 2) -
+      (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x) +
+        2 * ∑ m ∈ Icc 1 n, (Int.fract (x / m) - 1 / 2)| ≤ _
+  have hid : (2 * ∑ m ∈ Icc 1 n, (⌊x / m⌋₊ : ℝ) - (n : ℝ) ^ 2) -
+      (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x) +
+        2 * ∑ m ∈ Icc 1 n, (Int.fract (x / m) - 1 / 2) =
+      2 * x * (harmonic n : ℝ) - (n : ℝ) - (n : ℝ) ^ 2 -
+        (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x) := by
+    linarith
+  rw [hid]
+  exact hb
+
+
+/-- The elementary Dirichlet error bound obtained before the missing Voronoi
+cancellation: five times sqrt x for x at least four.
+This is weaker than the cube root logarithmic error cited on Halupczok page 337. -/
+theorem divisor_sum_square_root_error (x : ℝ) (hx : 4 ≤ x) :
+    |(∑ n ∈ Icc 1 ⌊x⌋₊, (n.divisors.card : ℝ)) -
+      (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x)| ≤
+        5 * Real.sqrt x := by
+  let n := ⌊Real.sqrt x⌋₊
+  let D : ℝ := ∑ m ∈ Icc 1 ⌊x⌋₊, (m.divisors.card : ℝ)
+  let M := x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x
+  let T := ∑ m ∈ Icc 1 n, (Int.fract (x / m) - 1 / 2)
+  have hb : |D - M + 2 * T| ≤ 8 := by
+    have hh := harmonic_reduction_bounded x hx
+    rw [← hyperbola_identity x (by linarith)] at hh
+    exact hh
+  have hs : |T| ≤ (n : ℝ) / 2 := by
+    calc
+      _ ≤ ∑ m ∈ Icc 1 n, |Int.fract (x / m) - 1 / 2| := abs_sum_le_sum_abs _ _
+      _ ≤ ∑ _m ∈ Icc 1 n, (1 / 2 : ℝ) := sum_le_sum fun m _ =>
+        Feed1122SawtoothSumBound.abs_sawtooth_le _
+      _ = (n : ℝ) / 2 := by
+        simp only [sum_const, nsmul_eq_mul, Nat.card_Icc, Nat.add_sub_cancel,
+          mul_one_div]
+  have ht : |D - M| ≤ |D - M + 2 * T| + 2 * |T| := by
+    calc
+      _ = |(D - M + 2 * T) - 2 * T| := by congr 1; ring
+      _ ≤ |D - M + 2 * T| + |2 * T| := abs_sub _ _
+      _ = _ := by rw [abs_mul]; norm_num
+  have hn : (n : ℝ) ≤ Real.sqrt x := Nat.floor_le (Real.sqrt_nonneg x)
+  have hx2 : (2 : ℝ) ≤ Real.sqrt x :=
+    Real.le_sqrt_of_sq_le (show (2 : ℝ) ^ 2 ≤ x by linarith)
+  change |D - M| ≤ 5 * Real.sqrt x
+  linarith
+
 
 end LeanLab.Halupczok2012.Feed1122VoronoiDivisorSumAsymptotic
 

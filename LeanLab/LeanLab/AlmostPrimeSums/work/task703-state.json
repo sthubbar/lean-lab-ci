@@ -1,0 +1,22 @@
+{
+  "start_utc": "2026-11-24 11:10:51",
+  "target_end_utc": "2026-11-24 13:40:51",
+  "hard_stop_utc": "2026-11-24 14:10:51",
+  "branch": "codex/task703",
+  "main": "845e4bc632 merged with both ledger sides preserved",
+  "last_unit_commit": "3c913f100c for LevelBV. Completion audit committed as a2bdb95921.",
+  "original_admissions_closed": 8,
+  "new_unconditional_theorems": 4,
+  "remaining_direct_admissions": 33,
+  "baseline": "Historical Nov24 full baseline retained in its logs. Current merge repair separately rebuilt all four resolved feed modules with exit zero.",
+  "next": "Push codex/task703 and update existing PR body with refreshed checks.",
+  "raw_downloads": "Only /tmp/task703. Search summary in build.",
+  "publication": "Ready to push checked repair to existing PR https://github.com/sthubbar/lean-lab/pull/1983",
+  "last_utc": "2026-11-27 18:21:42 UTC",
+  "candidate": "No pending proof. Twelve completed declarations comprise ten unconditional theorems and two leaves CONDITIONAL ON LevelBV. The new levelBV703 supplies that input.",
+  "pending_instances": "None. ACTUAL REMAINDER INSTANCES EXIT 0.",
+  "checks": "RESULT PASS  CODEX-task703  folder AlmostPrimeSums  base 845e4bc63",
+  "seal": "SEAL PASS",
+  "warnings": "One WARN for sixteen existing open declarations and assemblies with sorryAx. Twelve completed declarations have only allowed axioms.",
+  "merge_repair": "Main proofs retained exactly. All four resolved modules built. Twelve named result axioms clean. All statements preserved."
+}

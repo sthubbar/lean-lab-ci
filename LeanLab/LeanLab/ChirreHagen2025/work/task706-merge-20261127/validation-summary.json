@@ -1,0 +1,21 @@
+{
+  "main": "b4a8eaf18919a4e12e77c8272f4dde1d628f22bd",
+  "conflicted_source_matches_main": true,
+  "statements_changed": 0,
+  "main_proof_preferred": true,
+  "first_check_result": "RESULT PASS  CODEX-task706  folder ChirreHagen2025  base 2b01d01bb",
+  "first_seal": "SEAL PASS",
+  "main_file_build_exit": 0,
+  "final_result": "RESULT PASS  CODEX-task706  folder ChirreHagen2025  base b4a8eaf18",
+  "final_seal": "SEAL PASS",
+  "finished_utc": "2026-11-27T18:17:22Z",
+  "source_file_identical_to_main": true,
+  "check_axiom_reports": 18,
+  "retained_sorry_reports": 7,
+  "main_file_axiom_status": {
+    "zeroTerm_summable": "CONDITIONAL ON reciprocal_mass_le",
+    "mangoldt_partial_summation": "clean",
+    "psi_integral_explicit": "OPEN",
+    "weighted_explicit_formula_of_leaves": "CONDITIONAL ON the retained inputs"
+  }
+}

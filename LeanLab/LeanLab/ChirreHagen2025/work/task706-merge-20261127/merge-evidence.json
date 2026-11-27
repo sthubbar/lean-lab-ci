@@ -1,0 +1,41 @@
+{
+  "utc": "2026-11-27T18:11:44.233607+00:00",
+  "main": "2b01d01bbb188d6373264a09da80bf57f92458b0",
+  "ledgers": [
+    {
+      "file": "LOG.md",
+      "base_sha256": "11d9a658f56f6cd32f09818ab7b0d0ab20c1b3dcc4019908a22b7b75456ebad5",
+      "ours_tail_bytes": 2137,
+      "main_tail_bytes": 846891,
+      "merged_sha256": "7ab4f6c0cae8a1afceb785d294e80277a37c59c6e4a6933668b5857f083818ec",
+      "both_tails_preserved": true
+    },
+    {
+      "file": "LeanLab/LeanLab/ChirreHagen2025/PROGRESS.md",
+      "base_sha256": "5e22bef51ad1598bbf72924d88b2fbf04c922cbfb43f1107d3261c28b6bcaa01",
+      "ours_tail_bytes": 35576,
+      "main_tail_bytes": 4901,
+      "merged_sha256": "0a0e231531aa9201fa2291ecbadba0fe3d5b05dd1cc669d66dea6bb5475f56d5",
+      "both_tails_preserved": true
+    },
+    {
+      "file": "LeanLab/LeanLab/ChirreHagen2025/STATEMENTS.md",
+      "base_sha256": "3c7685b5951c4a4550ee0276535e72801af6bfa3ff1fa9035654af5beb48ae2b",
+      "ours_tail_bytes": 5944,
+      "main_tail_bytes": 6300,
+      "merged_sha256": "edb6b20ef4ee2eb86806bbfb288a29ba8b3578db2093fb412e9ce87bff6d26c8",
+      "both_tails_preserved": true
+    }
+  ],
+  "source": {
+    "file": "LeanLab/LeanLab/ChirreHagen2025/Decomp391aSplitExplicit.lean",
+    "kept": "origin/main entire file",
+    "unchanged_statements": [
+      "zeroTerm_summable",
+      "mangoldt_partial_summation",
+      "psi_integral_explicit",
+      "weighted_explicit_formula_of_leaves"
+    ],
+    "main_sha256": "32a86ce8f763ee0120b3e152a48febe40747a765cdcddd4ccad2b6d49505eb7f"
+  }
+}

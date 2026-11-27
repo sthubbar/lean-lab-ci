@@ -1,4 +1,5 @@
 import LeanLab.AlmostPrimeSums.Decomp243a
+import LeanLab.AlmostPrimeSums.Prime703
 
 /-!
 AI wrote this Lean code, burst S82 burst-20261122 feed1122. Binary Goldbach is open.
@@ -192,7 +193,88 @@ used to pass from `X = π(N)` to the ideal mass `N / log N` of BJS p. 43 equatio
 Class MEDIUM. -/
 theorem leaf_pi_lower : ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
     (N : ℝ) / log N ≤ Nat.primeCounting N := by
-  sorry
+  obtain ⟨C, hC, herr⟩ := Prime703.theta_error_log_sq703
+  have hlog : Tendsto (fun x : ℝ => log x) atTop atTop := tendsto_log_atTop
+  have htheta : ∀ᶠ x : ℝ in atTop,
+      x - x / (4 * log x) ≤ Chebyshev.theta x ∧ x / 2 ≤ Chebyshev.theta x := by
+    filter_upwards [herr, eventually_ge_atTop (2 : ℝ),
+      hlog.eventually_ge_atTop (max 1 (4 * C))] with x he hx hL
+    have hx0 : 0 < x := by linarith
+    have hL1 : 1 ≤ log x := (le_max_left _ _).trans hL
+    have hLC : 4 * C ≤ log x := (le_max_right _ _).trans hL
+    have hl : 0 < log x := by linarith
+    have hc : C * x / log x ^ 2 ≤ x / (4 * log x) := by
+      rw [div_le_div_iff₀ (sq_pos_of_pos hl) (by positivity : 0 < 4 * log x)]
+      have hh := mul_le_mul_of_nonneg_right hLC (mul_nonneg hx0.le hl.le)
+      nlinarith only [hh]
+    have hlow := (abs_le.mp he).1
+    have hsharp : x - x / (4 * log x) ≤ Chebyshev.theta x := by linarith
+    have hfrac : x / (4 * log x) ≤ x / 2 :=
+      div_le_div_of_nonneg_left hx0.le (by norm_num) (by linarith)
+    exact ⟨hsharp, by linarith⟩
+  obtain ⟨X, hX⟩ := eventually_atTop.mp htheta
+  let a : ℝ := max X 3
+  have ha3 : 3 ≤ a := le_max_right _ _
+  have ha2 : 2 ≤ a := by linarith
+  have ha0 : 0 < a := by linarith
+  refine ⟨max ⌈2 * a⌉₊ 2, fun N hN => ?_⟩
+  have hN2 : 2 ≤ N := (le_max_right _ _).trans hN
+  let x : ℝ := N
+  have hx2 : 2 ≤ x := by dsimp [x]; exact_mod_cast hN2
+  have hx0 : 0 < x := by linarith
+  have h2a : 2 * a ≤ x := (Nat.le_ceil (2 * a)).trans (by
+    dsimp [x]
+    exact_mod_cast (le_max_left ⌈2 * a⌉₊ 2).trans hN)
+  have hax : a ≤ x := by linarith
+  have hl : 0 < log x := log_pos (by linarith)
+  have hthetaX := hX x ((le_max_left _ _).trans hax)
+  have hIhead : IntervalIntegrable
+      (fun t : ℝ => Chebyshev.theta t / (t * log t ^ 2)) MeasureTheory.volume 2 a :=
+    (intervalIntegrable_iff_integrableOn_Icc_of_le ha2).mpr
+      (Chebyshev.integrableOn_theta_div_id_mul_log_sq a)
+  have hItail : IntervalIntegrable
+      (fun t : ℝ => Chebyshev.theta t / (t * log t ^ 2)) MeasureTheory.volume a x :=
+    (intervalIntegrable_iff_integrableOn_Icc_of_le hax).mpr
+      ((Chebyshev.integrableOn_theta_div_id_mul_log_sq x).mono_set
+        (fun t ht => ⟨ha2.trans ht.1, ht.2⟩))
+  have hhead : 0 ≤ ∫ t in (2 : ℝ)..a, Chebyshev.theta t / (t * log t ^ 2) := by
+    apply intervalIntegral.integral_nonneg ha2
+    intro t ht
+    exact div_nonneg (Chebyshev.theta_nonneg t)
+      (mul_nonneg (by linarith [ht.1]) (sq_nonneg _))
+  have hpoint : ∀ t ∈ Set.Icc a x,
+      1 / (2 * log x ^ 2) ≤ Chebyshev.theta t / (t * log t ^ 2) := by
+    intro t ht
+    have ht0 : 0 < t := ha0.trans_le ht.1
+    have hlt : 0 < log t := log_pos (by linarith [ht.1])
+    have htx : log t ≤ log x := log_le_log ht0 ht.2
+    have hhalf := (hX t ((le_max_left _ _).trans ht.1)).2
+    calc 1 / (2 * log x ^ 2) ≤ 1 / (2 * log t ^ 2) :=
+        one_div_le_one_div_of_le (by positivity)
+          (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ hlt.le htx 2) (by norm_num))
+      _ = (t / 2) / (t * log t ^ 2) := by field_simp [ht0.ne', hlt.ne']
+      _ ≤ _ := div_le_div_of_nonneg_right hhalf (by positivity)
+  have htail : (x - a) / (2 * log x ^ 2) ≤
+      ∫ t in a..x, Chebyshev.theta t / (t * log t ^ 2) := by
+    have hh := intervalIntegral.integral_mono_on hax intervalIntegrable_const hItail hpoint
+    simpa only [intervalIntegral.integral_const, smul_eq_mul, div_eq_mul_inv, one_mul] using hh
+  have hmain : x / log x - x / (4 * log x ^ 2) ≤ Chebyshev.theta x / log x := by
+    have hh := div_le_div_of_nonneg_right hthetaX.1 hl.le
+    convert hh using 1
+    field_simp [hl.ne']
+    <;> ring
+  have hcover : x / (4 * log x ^ 2) ≤ (x - a) / (2 * log x ^ 2) := by
+    have hh : x / 4 ≤ (x - a) / 2 := by linarith
+    simpa only [div_div] using div_le_div_of_nonneg_right hh (sq_nonneg (log x))
+  have hpi : (Nat.primeCounting N : ℝ) = Chebyshev.theta x / log x +
+      (∫ t in (2 : ℝ)..a, Chebyshev.theta t / (t * log t ^ 2)) +
+      ∫ t in a..x, Chebyshev.theta t / (t * log t ^ 2) := by
+    have hh := Chebyshev.primeCounting_eq_theta_div_log_add_integral hx2
+    rw [← intervalIntegral.integral_add_adjacent_intervals hIhead hItail] at hh
+    simpa only [x, Nat.floor_natCast, add_assoc] using hh
+  change x / log x ≤ (Nat.primeCounting N : ℝ)
+  rw [hpi]
+  linarith
 
 /-- LEAF: Chebyshev upper bound `π(x) ≤ 2 x / log x` for large `x`,
 used to absorb the relative sieve error of BJS p. 44 equation 145. Class MEDIUM. -/

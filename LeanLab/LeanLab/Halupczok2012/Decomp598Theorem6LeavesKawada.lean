@@ -1,4 +1,5 @@
 import LeanLab.Halupczok2012.Statements
+import LeanLab.Halupczok2012.Fourier398
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.SpecialFunctions.Exp
@@ -63,7 +64,75 @@ theorem leaf_circle_identity (X1 X2 Y : ℝ) (q2 : ℕ) (a2 : ℤ) (k : ℕ)
     (hY : 0 < Y) (hX2 : X2 ≤ 2 * X1 - Y) (hk : k ∈ kRange X1 Y) :
     (binSumAP X2 Y q2 a2 (2 * k) : ℂ) =
       ∫ α in unitDom X1, circF X1 X2 Y q2 a2 (2 * k) α := by
-  sorry
+  have hkw := (Fourier398.window_mem X1 Y k).mp hk
+  let U := (range (⌊X2 + Y⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧ X2 < p ∧
+    (p : ℝ) ≤ X2 + Y ∧ (p : ℤ) ≡ a2 [ZMOD q2])
+  let V := (range (⌊2 * X1 + 2 * Y - X2⌋₊ + 1)).filter (fun p : ℕ => p.Prime ∧
+    2 * X1 - X2 - Y < p ∧ (p : ℝ) ≤ 2 * X1 + 2 * Y - X2)
+  let w := fun p : ℕ => (Real.log p : ℂ)
+  have hphase (t : ℝ) : eA t = Decomp398a.phase t := by
+    unfold eA Decomp398a.phase LeanLab.PNTPort.LargeSieve.e
+    congr 1
+    push_cast
+    ring
+  have hint : (∫ α in unitDom X1, circF X1 X2 Y q2 a2 (2 * k) α) =
+      ∑ p ∈ U, ∑ j ∈ V, if p + j = 2 * k then w p * w j else 0 := by
+    unfold circF P2 P3 unitDom
+    simp_rw [hphase]
+    rw [add_comm 1 (X1 ^ (-(1 / 6) : ℝ))]
+    exact Fourier398.finite_convolution U V w w (2 * k) _
+  have hinner : ∀ p ∈ U, (∑ j ∈ V, if p + j = 2 * k then w p * w j else 0) =
+      if p ≤ 2 * k ∧ (2 * k - p).Prime then w p * w (2 * k - p) else 0 := by
+    intro p hp
+    have hpU := (mem_filter.mp hp).2
+    by_cases hc : p ≤ 2 * k ∧ (2 * k - p).Prime
+    · rw [ite_eq_left hc]
+      have hcast : ((2 * k - p : ℕ) : ℝ) = 2 * (k : ℝ) - p := by
+        rw [Nat.cast_sub hc.1]
+        push_cast
+        ring
+      have hjlo : 2 * X1 - X2 - Y < ((2 * k - p : ℕ) : ℝ) := by
+        rw [hcast]
+        linarith [hpU.2.2.1]
+      have hjhi : ((2 * k - p : ℕ) : ℝ) ≤ 2 * X1 + 2 * Y - X2 := by
+        rw [hcast]
+        linarith [hpU.2.1]
+      have hj : 2 * k - p ∈ V := by
+        refine mem_filter.mpr ⟨mem_range.mpr ?_, hc.2, hjlo, hjhi⟩
+        exact Nat.lt_succ_of_le (Nat.le_floor hjhi)
+      rw [sum_eq_single_of_mem (2 * k - p) hj]
+      · simp [Nat.add_sub_of_le hc.1]
+      · intro j hj hjne
+        rw [ite_eq_right]
+        omega
+    · rw [ite_eq_right hc]
+      apply sum_eq_zero
+      intro j hj
+      rw [ite_eq_right]
+      intro he
+      have hjp := (mem_filter.mp hj).2.1
+      have hsub : 2 * k - p = j := by omega
+      exact hc ⟨by omega, hsub.symm ▸ hjp⟩
+  have hset : U.filter (fun p => p ≤ 2 * k ∧ (2 * k - p).Prime) =
+      (range (2 * k + 1)).filter (fun p : ℕ => p.Prime ∧ (2 * k - p).Prime ∧
+        X2 < p ∧ (p : ℝ) ≤ X2 + Y ∧ (p : ℤ) ≡ a2 [ZMOD q2]) := by
+    ext p
+    simp only [U, mem_filter, mem_range]
+    constructor
+    · rintro ⟨⟨hpr, hp, hlo, hhi, hmod⟩, hle, hsub⟩
+      exact ⟨by omega, hp, hsub, hlo, hhi, hmod⟩
+    · rintro ⟨hpr, hp, hsub, hlo, hhi, hmod⟩
+      exact ⟨⟨Nat.lt_succ_of_le (Nat.le_floor hhi), hp, hlo, hhi, hmod⟩, by omega, hsub⟩
+  rw [hint]
+  symm
+  calc
+    _ = ∑ p ∈ U, if p ≤ 2 * k ∧ (2 * k - p).Prime then w p * w (2 * k - p) else 0 :=
+      sum_congr rfl hinner
+    _ = ∑ p ∈ U.filter (fun p => p ≤ 2 * k ∧ (2 * k - p).Prime), w p * w (2 * k - p) :=
+      (sum_filter _ _).symm
+    _ = _ := by
+      rw [hset]
+      simp only [binSumAP, w, Complex.ofReal_sum, Complex.ofReal_mul]
 
 /-- LEAF: minor arc estimate, Kawada section 4 display 3.5 with Bessel's inequality and
 Cauchy Schwarz display 3.6, for k = 2. Class HARD. P0077 pages 338 to 339, display 2.4:

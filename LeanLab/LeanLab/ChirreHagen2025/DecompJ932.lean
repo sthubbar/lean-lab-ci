@@ -1,5 +1,6 @@
 import LeanLab.ChirreHagen2025.Additional122
 import LeanLab.ChirreHagen2025.MeanSquare122
+import LeanLab.ChirreHagen2025.Pointwise297
 
 /-!
 Decomposition of Lemma 2.3 from P0075.
@@ -10,11 +11,13 @@ namespace LeanLab.ChirreHagen2025.DecompJ932
 
 open MeasureTheory Additional122
 
-/-- LEAF sorry. P0075 page 4, equation 2.7. Integrand bound via unconditional formula. -/
+/-- Derived envelope from P0075 pages 2 and 3, Lemma 2.1.
+CONDITIONAL ON the Backlund input through Pointwise297. -/
 theorem leaf_integrand_bound : RiemannHypothesis → ∀ t : ℝ, 10 ^ 4 ≤ t →
     ‖deriv riemannZeta (1 + t * Complex.I) / riemannZeta (1 + t * Complex.I)‖ ^ 2
     ≤ 10 * t := by
-  sorry
+  -- CONDITIONAL ON Decomp122b.backlund_reduction through Pointwise297.
+  exact Pointwise297.leaf_integrand_bound
 
 /-- LEAF sorry. P0075 pages 4 and 5. Integration step up to T. -/
 theorem leaf_integration_step : RiemannHypothesis → ∀ T : ℝ, 4 * 10 ^ 13 ≤ T →

@@ -1,0 +1,528 @@
+{
+  "Additional122": [
+    "Statements"
+  ],
+  "AlmostAll": [
+    "SmoothGoldbach"
+  ],
+  "Audit377": [
+    "Additional122"
+  ],
+  "Audit391b": [
+    "Statements"
+  ],
+  "Audit429": [
+    "Statements"
+  ],
+  "Audit706": [
+    "Decomp536a"
+  ],
+  "AxiomsCloud14": [
+    "Bilinear64"
+  ],
+  "AxiomsU1381": [
+    "U1348GoldbachU6806Sp"
+  ],
+  "Backlund377": [
+    "Decomp377b",
+    "Decomp358c",
+    "Decomp358d"
+  ],
+  "BacklundIntegral272": [],
+  "Bilinear": [
+    "Weighted"
+  ],
+  "Bilinear128": [
+    "ThetaPsi"
+  ],
+  "Bilinear64": [
+    "ThetaPsi"
+  ],
+  "CutoffAudit272": [],
+  "Decomp122": [
+    "Decomp272b",
+    "Statements"
+  ],
+  "Decomp122b": [
+    "Statements"
+  ],
+  "Decomp272a": [
+    "SeriesBounds297",
+    "Statements"
+  ],
+  "Decomp272b": [
+    "Decomp272a"
+  ],
+  "Decomp272c": [
+    "Decomp122b"
+  ],
+  "Decomp358a": [
+    "Decomp272c"
+  ],
+  "Decomp358b": [
+    "Decomp272c"
+  ],
+  "Decomp358bSplitPsiLarge": [
+    "Decomp358b"
+  ],
+  "Decomp358c": [
+    "Decomp358b",
+    "BacklundIntegral272"
+  ],
+  "Decomp358d": [
+    "Decomp391b",
+    "Decomp272c"
+  ],
+  "Decomp358e": [
+    "Decomp272a"
+  ],
+  "Decomp358f": [
+    "Decomp358e"
+  ],
+  "Decomp358g": [
+    "Decomp358e",
+    "Decomp272b"
+  ],
+  "Decomp358h": [
+    "Decomp358f",
+    "Decomp358g",
+    "SeriesBounds297",
+    "Decomp122"
+  ],
+  "Decomp377a": [
+    "Additional122"
+  ],
+  "Decomp377b": [
+    "Decomp358a"
+  ],
+  "Decomp377c": [
+    "Additional122"
+  ],
+  "Decomp377d": [
+    "Statements"
+  ],
+  "Decomp391a": [
+    "Decomp429e"
+  ],
+  "Decomp391aSplitExplicit": [
+    "Decomp391a",
+    "ZeroConvergence391d"
+  ],
+  "Decomp391b": [
+    "Decomp391a",
+    "IntegralRepair391c"
+  ],
+  "Decomp429a": [
+    "Decomp377d",
+    "GammaGeometry429",
+    "LogKernel429"
+  ],
+  "Decomp429b": [
+    "Decomp377a"
+  ],
+  "Decomp429c": [
+    "Decomp377a",
+    "DecompJ611",
+    "PrimePowers272",
+    "FinitePrimePowers272",
+    "Decomp377c"
+  ],
+  "Decomp429d": [
+    "Decomp429a",
+    "Decomp429b",
+    "Decomp429c"
+  ],
+  "Decomp429e": [
+    "Audit429"
+  ],
+  "Decomp536a": [
+    "IntegralRepair391c"
+  ],
+  "Decomp608a": [],
+  "Decomp608b": [
+    "Decomp608a"
+  ],
+  "Decomp608c": [
+    "Decomp608a"
+  ],
+  "Decomp608d": [
+    "Decomp608b",
+    "Decomp608c",
+    "Decomp608e",
+    "Decomp358f"
+  ],
+  "Decomp608e": [],
+  "Decomp608f": [
+    "Decomp608e",
+    "Decomp608b",
+    "Decomp608c"
+  ],
+  "DecompJ207": [
+    "Summability272",
+    "PrimePowers272",
+    "Statements",
+    "Additional122"
+  ],
+  "DecompJ611": [
+    "FinitePrimePowers272",
+    "Decomp377c",
+    "Additional122",
+    "DecompJ207"
+  ],
+  "DecompJ818": [
+    "Statements",
+    "Additional122",
+    "Summability272",
+    "TailIntegral297",
+    "TailNumeric297",
+    "PrimeSplit297"
+  ],
+  "DecompJ867": [
+    "ValueSplit358",
+    "Statements",
+    "Additional122"
+  ],
+  "DecompJ932": [
+    "Additional122",
+    "MeanSquare122",
+    "Pointwise297"
+  ],
+  "DecompJ966": [
+    "ZeroBounds122"
+  ],
+  "FinitePrimePowers272": [
+    "Summability272"
+  ],
+  "Flag1738": [
+    "Decomp429e"
+  ],
+  "FractionalAudit429": [
+    "Decomp377d"
+  ],
+  "GammaGeometry429": [
+    "Statements"
+  ],
+  "HeadInterval297": [
+    "TailIntegral297"
+  ],
+  "Improved": [
+    "Lower"
+  ],
+  "IntegralRepair391c": [
+    "Statements"
+  ],
+  "Lemma24": [
+    "SmoothTheorem2"
+  ],
+  "Lemma25": [],
+  "Lemma26BPT": [
+    "SmoothTheorem2"
+  ],
+  "Lemma26BPTGoldbach": [
+    "SmoothGoldbach",
+    "AlmostAll",
+    "Lemma26BPT"
+  ],
+  "Lemma26Goldbach": [
+    "SmoothGoldbach",
+    "AlmostAll",
+    "Lemma26Proof"
+  ],
+  "Lemma26HSW": [
+    "SmoothTheorem2"
+  ],
+  "Lemma26HSWGoldbach": [
+    "SmoothGoldbach",
+    "AlmostAll",
+    "Lemma26HSW"
+  ],
+  "Lemma26Proof": [
+    "SmoothTheorem2"
+  ],
+  "Local36": [
+    "ThetaPsi"
+  ],
+  "Local36Goldbach": [
+    "Bilinear128",
+    "Local36"
+  ],
+  "LocalBarrier": [],
+  "LogKernel429": [
+    "Statements"
+  ],
+  "Lower": [
+    "Statements",
+    "Upper",
+    "Reduction"
+  ],
+  "MeanSquare122": [
+    "Statements"
+  ],
+  "PairCorr": [
+    "Weighted"
+  ],
+  "Pointwise297": [
+    "TailIntegral297",
+    "Decomp122b"
+  ],
+  "PrimePowers272": [
+    "Additional122"
+  ],
+  "PrimeSplit297": [
+    "TailIntegral297",
+    "Summability272"
+  ],
+  "Reduction": [
+    "Statements"
+  ],
+  "Schoenfeld": [
+    "Bilinear"
+  ],
+  "SeriesBounds297": [],
+  "SharpGoldbach": [
+    "SmoothJ",
+    "SmoothSharp"
+  ],
+  "SmoothGoldbach": [
+    "SmoothJ",
+    "Lemma24"
+  ],
+  "SmoothJ": [
+    "Bilinear128"
+  ],
+  "SmoothKernel": [],
+  "SmoothSharp": [
+    "SmoothTheorem2"
+  ],
+  "SmoothTheorem2": [
+    "SmoothY",
+    "Local36"
+  ],
+  "SmoothY": [
+    "SmoothKernel"
+  ],
+  "Statements": [],
+  "Step6": [],
+  "Summability272": [
+    "Additional122"
+  ],
+  "TailIntegral297": [],
+  "TailNumeric297": [
+    "TailIntegral297"
+  ],
+  "Theorem1Zeros": [
+    "SmoothGoldbach"
+  ],
+  "ThetaPsi": [
+    "Schoenfeld"
+  ],
+  "U1263Core": [
+    "Lemma24",
+    "Lemma26BPT"
+  ],
+  "U1263Diag": [
+    "U1263Core"
+  ],
+  "U1263Diag244": [
+    "U1263Core"
+  ],
+  "U1263Goldbach": [
+    "SharpGoldbach",
+    "U1263Theorem2"
+  ],
+  "U1263GoldbachFine": [
+    "SharpGoldbach",
+    "U1263Theorem2Fine"
+  ],
+  "U1263Theorem2": [
+    "SmoothSharp",
+    "U1263Diag"
+  ],
+  "U1263Theorem2Fine": [
+    "SmoothSharp",
+    "U1263Diag244"
+  ],
+  "U1348Abel": [
+    "Weighted"
+  ],
+  "U1348Bilinear": [
+    "SmoothJ",
+    "U1348Abel"
+  ],
+  "U1348Goldbach": [
+    "U1348Bilinear",
+    "U1263Theorem2Fine"
+  ],
+  "U1348GoldbachU6806": [
+    "U1348Goldbach",
+    "U6806Theorem2",
+    "U6759Theorem2"
+  ],
+  "U1348GoldbachU6806Sp": [
+    "U1348Goldbach",
+    "U6806Theorem2Sp",
+    "U6759Theorem2Sp"
+  ],
+  "U6743Core": [
+    "U1263Core"
+  ],
+  "U6743Diag": [
+    "U6743Core"
+  ],
+  "U6743DiagS1": [
+    "U6743Core"
+  ],
+  "U6743DiagS2": [
+    "U6743DiagS1"
+  ],
+  "U6743DiagS3": [
+    "U6743DiagS2"
+  ],
+  "U6743DiagS4": [
+    "U6743DiagS3"
+  ],
+  "U6743DiagS5": [
+    "U6743DiagS4"
+  ],
+  "U6743DiagSplit": [
+    "U6743DiagS5"
+  ],
+  "U6743Goldbach": [
+    "SharpGoldbach",
+    "U6743Theorem2"
+  ],
+  "U6743Theorem2": [
+    "SmoothSharp",
+    "U6743Diag"
+  ],
+  "U6759Core": [
+    "U6743Core"
+  ],
+  "U6759Diag": [
+    "U6759Mid1",
+    "U6759Mid2",
+    "U6743Diag"
+  ],
+  "U6759DiagSp": [
+    "U6759DiagSpS7"
+  ],
+  "U6759DiagSpS1": [
+    "U6759Mid1",
+    "U6759Mid2",
+    "U6743DiagSplit"
+  ],
+  "U6759DiagSpS2": [
+    "U6759DiagSpS1"
+  ],
+  "U6759DiagSpS3": [
+    "U6759DiagSpS2"
+  ],
+  "U6759DiagSpS4": [
+    "U6759DiagSpS3"
+  ],
+  "U6759DiagSpS5": [
+    "U6759DiagSpS4"
+  ],
+  "U6759DiagSpS6": [
+    "U6759DiagSpS5"
+  ],
+  "U6759DiagSpS7": [
+    "U6759DiagSpS6"
+  ],
+  "U6759Goldbach": [
+    "SharpGoldbach",
+    "U6759Theorem2"
+  ],
+  "U6759Mid1": [
+    "U6759Core",
+    "U6743Core"
+  ],
+  "U6759Mid2": [
+    "U6759Mid1"
+  ],
+  "U6759Theorem2": [
+    "SmoothSharp",
+    "U6759Diag"
+  ],
+  "U6759Theorem2Sp": [
+    "SmoothSharp",
+    "U6759DiagSp"
+  ],
+  "U6806DiagA": [
+    "U6759Diag"
+  ],
+  "U6806DiagASp": [
+    "U6806DiagASpS3"
+  ],
+  "U6806DiagASpS1": [
+    "U6759DiagSp"
+  ],
+  "U6806DiagASpS2": [
+    "U6806DiagASpS1"
+  ],
+  "U6806DiagASpS3": [
+    "U6806DiagASpS2"
+  ],
+  "U6806DiagB": [
+    "U6806DiagA"
+  ],
+  "U6806DiagBSp": [
+    "U6806DiagBSpS3"
+  ],
+  "U6806DiagBSpS1": [
+    "U6806DiagASp"
+  ],
+  "U6806DiagBSpS2": [
+    "U6806DiagBSpS1"
+  ],
+  "U6806DiagBSpS3": [
+    "U6806DiagBSpS2"
+  ],
+  "U6806DiagC": [
+    "U6806DiagB"
+  ],
+  "U6806DiagCSp": [
+    "U6806DiagCSpS3"
+  ],
+  "U6806DiagCSpS1": [
+    "U6806DiagBSp"
+  ],
+  "U6806DiagCSpS2": [
+    "U6806DiagCSpS1"
+  ],
+  "U6806DiagCSpS3": [
+    "U6806DiagCSpS2"
+  ],
+  "U6806Goldbach": [
+    "SharpGoldbach",
+    "U6806Theorem2"
+  ],
+  "U6806GoldbachHSW": [
+    "U6806Goldbach"
+  ],
+  "U6806Theorem2": [
+    "SmoothSharp",
+    "U6806DiagC"
+  ],
+  "U6806Theorem2Sp": [
+    "SmoothSharp",
+    "U6806DiagCSp"
+  ],
+  "Upper": [
+    "Statements"
+  ],
+  "ValueSplit358": [
+    "Summability272",
+    "TailIntegral297",
+    "TailNumeric297"
+  ],
+  "Weighted": [
+    "Improved"
+  ],
+  "ZeroBounds122": [
+    "Statements"
+  ],
+  "ZeroConvergence391d": [
+    "Decomp391a"
+  ]
+}

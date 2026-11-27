@@ -28,12 +28,209 @@ false as cut and is refuted on main by
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.Decomp556a
+import LeanLab.KumchevLiu2007.Kernel634Base
+import Mathlib.NumberTheory.Chebyshev
 
 namespace LeanLab.KumchevLiu2007.Task556a
 
 open Real Complex LeanLab.KumchevLiu2007
 open scoped BigOperators
 attribute [local instance] Classical.propDecidable
+
+/-- Derived elementary estimate for P0088 page 15, the passage to the reciprocal logarithm prime model. -/
+theorem psc_tail_log_absorb (B ε : ℝ) (hε : 0 < ε) :
+    ∀ᶠ X : ℝ in Filter.atTop,
+      2 * Real.sqrt X * Real.log X ≤
+        windowY X ε * (Real.log X ^ B) ^ (-5 : ℤ) := by
+  let d : ℝ := 7 / 12 + ε / 2 - 1 / 2
+  have hd : 0 < d := by dsimp [d]; linarith
+  have ht := (isLittleO_log_rpow_rpow_atTop (1 + 5 * B) hd).bound
+    (by norm_num : (0 : ℝ) < 1 / 2)
+  filter_upwards [ht, Filter.eventually_gt_atTop (1 : ℝ)] with X hs hX
+  have hx : 0 < X := by linarith
+  have hl : 0 < Real.log X := Real.log_pos hX
+  have hp : 0 < Real.log X ^ B := Real.rpow_pos_of_pos hl _
+  have hs' : Real.log X ^ (1 + 5 * B) ≤ 1 / 2 * X ^ d := by
+    simpa only [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hl _),
+      abs_of_pos (Real.rpow_pos_of_pos hx _)] using hs
+  have heq : Real.log X * (Real.log X ^ B) ^ (5 : ℕ) =
+      Real.log X ^ (1 + 5 * B) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hl.le, Real.rpow_add hl]
+    simp only [Real.rpow_one]
+    norm_num only [Nat.cast_ofNat]
+    rw [mul_comm B (5 : ℝ)]
+  have hpow : Real.sqrt X * X ^ d = windowY X ε := by
+    rw [Real.sqrt_eq_rpow, ← Real.rpow_add hx]
+    congr 1
+    dsimp [d]; ring
+  rw [zpow_neg, zpow_ofNat, ← div_eq_mul_inv]
+  apply (le_div_iff₀ (pow_pos hp 5)).mpr
+  calc
+    2 * Real.sqrt X * Real.log X * (Real.log X ^ B) ^ (5 : ℕ) =
+        2 * Real.sqrt X * Real.log X ^ (1 + 5 * B) := by rw [← heq]; ring
+    _ ≤ 2 * Real.sqrt X * (1 / 2 * X ^ d) :=
+      mul_le_mul_of_nonneg_left hs' (by positivity)
+    _ = windowY X ε := by rw [← hpow]; ring
+
+/-- Derived elementary estimate for P0088 page 15, the passage to the reciprocal logarithm prime model. -/
+theorem psc_tail_global_bound (X Y u v : ℝ) (hX : 1 ≤ X) (hXY : 0 < X - Y) :
+    ∑ m ∈ (primeWindow X Y).filter (fun m : ℕ => u ≤ (m : ℝ) ∧ (m : ℝ) < v),
+      (if m.Prime then 0 else (ArithmeticFunction.vonMangoldt m : ℝ)) ≤
+      2 * Real.sqrt X * Real.log X := by
+  classical
+  calc
+    _ ≤ ∑ m ∈ Finset.Ioc 0 ⌊X⌋₊,
+        (if m.Prime then 0 else (ArithmeticFunction.vonMangoldt m : ℝ)) := by
+      apply Finset.sum_le_sum_of_subset_of_nonneg
+      · intro m hm
+        have hm' := (Finset.mem_filter.mp (Finset.mem_filter.mp hm).1).2
+        have hm0 : 0 < m := by
+          by_contra hn
+          have : m = 0 := by omega
+          subst m
+          simp only [Nat.cast_zero] at hm'
+          linarith [hm'.1]
+        exact Finset.mem_Ioc.mpr ⟨hm0, Nat.le_floor hm'.2.le⟩
+      · intro m _ _
+        split_ifs <;> positivity
+    _ = Chebyshev.psi X - Chebyshev.theta X := by
+      rw [Chebyshev.psi_sub_theta_eq_sum_not_prime, Finset.sum_filter]
+      apply Finset.sum_congr rfl
+      intro m _
+      split_ifs <;> simp_all
+    _ ≤ _ := Chebyshev.psi_sub_theta_le hX
+
+/-- Derived elementary estimate for P0088 page 15, the passage to the reciprocal logarithm prime model. -/
+theorem psc_window_log_absorb (B ε : ℝ) (hB : 0 < B) (hε : 0 < ε)
+    (hε1 : ε ≤ 11 / 36) :
+    ∀ᶠ X : ℝ in Filter.atTop,
+      1 ≤ windowY X ε ∧ 2 * windowY X ε ≤ X ∧
+      4 * windowY X ε ^ 2 / X ≤
+        windowY X ε * (Real.log X ^ B) ^ (-5 : ℤ) := by
+  let d : ℝ := 1 - (7 / 12 + ε / 2)
+  have hd : 0 < d := by dsimp [d]; linarith
+  have ht := (isLittleO_log_rpow_rpow_atTop (5 * B) hd).bound
+    (by norm_num : (0 : ℝ) < 1 / 4)
+  filter_upwards [ht, Real.tendsto_log_atTop.eventually_ge_atTop 1,
+    Filter.eventually_gt_atTop (1 : ℝ)] with X hs hl1 hX
+  have hx : 0 < X := by linarith
+  have hl : 0 < Real.log X := by linarith
+  have hp : 0 < Real.log X ^ B := Real.rpow_pos_of_pos hl _
+  have hp1 : 1 ≤ (Real.log X ^ B) ^ (5 : ℕ) := by
+    exact one_le_pow₀ (Real.one_le_rpow hl1 hB.le)
+  have hy : 0 < windowY X ε := Real.rpow_pos_of_pos hx _
+  have hy1 : 1 ≤ windowY X ε := Real.one_le_rpow hX.le (by linarith)
+  have hs' : Real.log X ^ (5 * B) ≤ 1 / 4 * X ^ d := by
+    simpa only [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hl _),
+      abs_of_pos (Real.rpow_pos_of_pos hx _)] using hs
+  have hpow : windowY X ε * X ^ d = X := by
+    rw [windowY, ← Real.rpow_add hx,
+      show 7 / 12 + ε / 2 + d = 1 by dsimp [d]; ring, Real.rpow_one]
+  have hp5 : (Real.log X ^ B) ^ (5 : ℕ) = Real.log X ^ (5 * B) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hl.le]
+    norm_num only [Nat.cast_ofNat]
+    rw [mul_comm B (5 : ℝ)]
+  have hYP : windowY X ε * (Real.log X ^ B) ^ (5 : ℕ) ≤ X / 4 := by
+    rw [hp5]
+    calc
+      _ ≤ windowY X ε * (1 / 4 * X ^ d) := mul_le_mul_of_nonneg_left hs' hy.le
+      _ = (windowY X ε * X ^ d) / 4 := by ring
+      _ = X / 4 := by rw [hpow]
+  have hYle : windowY X ε ≤ X / 4 :=
+    (le_mul_of_one_le_right hy.le hp1).trans hYP
+  refine ⟨hy1, by linarith, ?_⟩
+  rw [zpow_neg, zpow_ofNat, ← div_eq_mul_inv]
+  apply (le_div_iff₀ (pow_pos hp 5)).mpr
+  rw [div_mul_eq_mul_div, div_le_iff₀ hx]
+  nlinarith [mul_le_mul_of_nonneg_left hYP hy.le]
+
+/-- Derived elementary estimate for P0088 page 15, the passage to the reciprocal logarithm prime model. -/
+theorem psc_log_swap_bound (S : Finset ℕ) (X Y : ℝ) (hX : 0 < X)
+    (hL : 1 ≤ Real.log X) (hY : 0 ≤ Y) (hYX : 2 * Y ≤ X)
+    (hS : ∀ m ∈ S, X - Y ≤ (m : ℝ) ∧ (m : ℝ) ≤ X)
+    (hc : (S.card : ℝ) ≤ 2 * Y) (a : ℕ → ℂ) (ha : ∀ m, ‖a m‖ ≤ 1) :
+    ‖(∑ m ∈ S, if m.Prime then a m else 0) -
+      (∑ m ∈ S, if m.Prime then a m * (Real.log (m : ℝ) : ℂ) else 0) /
+        (Real.log X : ℂ)‖ ≤ 4 * Y ^ 2 / X := by
+  have hL0 : 0 < Real.log X := by linarith
+  rw [Finset.sum_div, ← Finset.sum_sub_distrib]
+  calc
+    _ ≤ ∑ m ∈ S, (2 * Y / X) := by
+      apply (norm_sum_le _ _).trans
+      apply Finset.sum_le_sum
+      intro m hm
+      obtain ⟨hm1, hm2⟩ := hS m hm
+      have hgap : 0 ≤ Real.log X - Real.log (m : ℝ) ∧
+          Real.log X - Real.log (m : ℝ) ≤ 2 * Y / X := by
+        have hm0 : 0 < (m : ℝ) := by linarith
+        refine ⟨sub_nonneg.mpr (Real.log_le_log hm0 hm2), ?_⟩
+        have hg := Real.log_le_sub_one_of_pos (div_pos hX hm0)
+        rw [Real.log_div hX.ne' hm0.ne'] at hg
+        apply hg.trans
+        apply (le_div_iff₀ hX).mpr
+        calc
+          (X / (m : ℝ) - 1) * X = (X - (m : ℝ)) * X / (m : ℝ) := by field_simp
+          _ ≤ Y * X / (m : ℝ) := by gcongr; linarith
+          _ ≤ 2 * Y := (div_le_iff₀ hm0).mpr (by nlinarith)
+      obtain ⟨hg0, hg⟩ := hgap
+      have hr : ‖(1 : ℂ) - (Real.log (m : ℝ) : ℂ) / (Real.log X : ℂ)‖ ≤
+          2 * Y / X := by
+        rw [← Complex.ofReal_div, ← Complex.ofReal_one, ← Complex.ofReal_sub,
+          Complex.norm_real, Real.norm_eq_abs]
+        have he : 1 - Real.log (m : ℝ) / Real.log X =
+            (Real.log X - Real.log (m : ℝ)) / Real.log X := by field_simp
+        rw [he, abs_of_nonneg (div_nonneg hg0 hL0.le)]
+        exact (div_le_self hg0 hL).trans hg
+      by_cases hp : m.Prime
+      · simp only [if_pos hp]
+        rw [show a m - a m * (Real.log (m : ℝ) : ℂ) / (Real.log X : ℂ) =
+          a m * (1 - (Real.log (m : ℝ) : ℂ) / (Real.log X : ℂ)) by ring, norm_mul]
+        exact (mul_le_mul_of_nonneg_right (ha m) (norm_nonneg _)).trans (by simpa using hr)
+      · simp only [if_neg hp, zero_div, sub_self, norm_zero]
+        positivity
+    _ = (S.card : ℝ) * (2 * Y / X) := by simp
+    _ ≤ (2 * Y) * (2 * Y / X) := mul_le_mul_of_nonneg_right hc (by positivity)
+    _ = 4 * Y ^ 2 / X := by ring
+
+/-- Derived elementary estimate for P0088 page 15, the passage to the reciprocal logarithm prime model. -/
+theorem psc_reciprocal_swap_bound (S : Finset ℕ) (X Y : ℝ) (hX : 0 < X)
+    (hL : 1 ≤ Real.log X) (hY : 0 ≤ Y) (hYX : 2 * Y ≤ X)
+    (hS : ∀ m ∈ S, X - Y ≤ (m : ℝ) ∧ (m : ℝ) ≤ X ∧ 1 ≤ Real.log (m : ℝ))
+    (hc : (S.card : ℝ) ≤ 2 * Y) :
+    |(S.card : ℝ) / Real.log X - ∑ m ∈ S, 1 / Real.log (m : ℝ)| ≤
+      4 * Y ^ 2 / X := by
+  have hL0 : 0 < Real.log X := by linarith
+  have he : (S.card : ℝ) / Real.log X = ∑ _m ∈ S, 1 / Real.log X := by simp [div_eq_mul_inv]
+  rw [he, ← Finset.sum_sub_distrib]
+  calc
+    _ ≤ ∑ m ∈ S, |1 / Real.log X - 1 / Real.log (m : ℝ)| := Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ _m ∈ S, 2 * Y / X := by
+      apply Finset.sum_le_sum
+      intro m hm
+      obtain ⟨hm1, hm2, hmL⟩ := hS m hm
+      have hmL0 : 0 < Real.log (m : ℝ) := by linarith
+      have hgap : 0 ≤ Real.log X - Real.log (m : ℝ) ∧
+          Real.log X - Real.log (m : ℝ) ≤ 2 * Y / X := by
+        have hm0 : 0 < (m : ℝ) := by linarith
+        refine ⟨sub_nonneg.mpr (Real.log_le_log hm0 hm2), ?_⟩
+        have hg := Real.log_le_sub_one_of_pos (div_pos hX hm0)
+        rw [Real.log_div hX.ne' hm0.ne'] at hg
+        apply hg.trans
+        apply (le_div_iff₀ hX).mpr
+        calc
+          (X / (m : ℝ) - 1) * X = (X - (m : ℝ)) * X / (m : ℝ) := by field_simp
+          _ ≤ Y * X / (m : ℝ) := by gcongr; linarith
+          _ ≤ 2 * Y := (div_le_iff₀ hm0).mpr (by nlinarith)
+      obtain ⟨hg0, hg⟩ := hgap
+      have heq : 1 / Real.log X - 1 / Real.log (m : ℝ) =
+          -(Real.log X - Real.log (m : ℝ)) / (Real.log X * Real.log (m : ℝ)) := by
+        field_simp; ring
+      rw [heq, abs_div, abs_neg, abs_of_nonneg hg0,
+        abs_of_pos (mul_pos hL0 hmL0)]
+      exact (div_le_self hg0 (by nlinarith : 1 ≤ Real.log X * Real.log (m : ℝ))).trans hg
+    _ = (S.card : ℝ) * (2 * Y / X) := by simp
+    _ ≤ (2 * Y) * (2 * Y / X) := mul_le_mul_of_nonneg_right hc (by positivity)
+    _ = 4 * Y ^ 2 / X := by ring
 
 /-- LEAF: P0088 page 15, Section 4 first paragraph, the short interval form of
 the Siegel Walfisz theorem, von Mangoldt weighted, for hypothesis A1.2 of page 5
@@ -597,5 +794,55 @@ theorem leaf_principal_prime_count_level_one_from_leaves (B ε : ℝ) (hB : 0 < 
 
 #print axioms leaf_nonprincipal_prime_character_sum_from_leaves
 #print axioms leaf_principal_prime_count_level_one_from_leaves
+
+/-- P0088 page 15, the smooth reciprocal logarithm model on the open interval above one. -/
+theorem psc_reciprocal_log_smooth : ContDiffOn ℝ ⊤ (fun u : ℝ => 1 / Real.log u) (Set.Ioi 1) := by
+  refine contDiffOn_const.div (Real.contDiffOn_log.mono ?_) ?_
+  · intro u hu
+    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+    change 1 < u at hu
+    linarith
+  · intro u hu
+    exact (Real.log_pos hu).ne'
+
+/-- Derived obstruction for the endpoint PNT route to P0088 page 15. -/
+theorem psc_long_interval_majorant_not_short (a c : ℝ) (ha : a < 1) :
+    ¬ ∃ C X0 : ℝ, ∀ X : ℝ, max 2 X0 ≤ X →
+      X * Real.exp (-c * Real.sqrt (Real.log X)) ≤ C * X ^ a := by
+  rintro ⟨C, X0, hC⟩
+  have hCp : 0 < C := by
+    have hz : 0 < max (2 : ℝ) X0 := lt_of_lt_of_le (by norm_num) (le_max_left _ _)
+    have h := hC (max 2 X0) le_rfl
+    have hp : 0 < max (2 : ℝ) X0 ^ a := Real.rpow_pos_of_pos hz _
+    have hl : 0 < max (2 : ℝ) X0 * Real.exp (-c * Real.sqrt (Real.log (max 2 X0))) := by positivity
+    by_contra hnot
+    have hnon : C ≤ 0 := le_of_not_gt hnot
+    have hn := mul_nonpos_of_nonpos_of_nonneg hnon hp.le
+    linarith
+  let u : ℝ := max (max 2 X0) ((|c| + |Real.log C| + 2) / (1 - a))
+  have hu : 2 ≤ u := (le_max_left 2 X0).trans (le_max_left _ _)
+  have huX0 : max 2 X0 ≤ u := le_max_left _ _
+  have hub : (|c| + |Real.log C| + 2) / (1 - a) ≤ u := le_max_right _ _
+  have hd : 0 < 1 - a := by linarith
+  have hm := (div_le_iff₀ hd).mp hub
+  have hq : |Real.log C| + 2 ≤ (1 - a) * u - c := by linarith [le_abs_self c]
+  have hprod : 2 * (|Real.log C| + 2) ≤ u * ((1 - a) * u - c) :=
+    mul_le_mul hu hq (by positivity) (by linarith)
+  have hgap : Real.log C + u ^ 2 * a < u ^ 2 - c * u := by
+    nlinarith [le_abs_self (Real.log C), abs_nonneg (Real.log C)]
+  have hX : max 2 X0 ≤ Real.exp (u ^ 2) := by
+    have hh := Real.add_one_le_exp (u ^ 2)
+    nlinarith [sq_nonneg (u - 1)]
+  have h := hC (Real.exp (u ^ 2)) hX
+  rw [Real.log_exp, Real.sqrt_sq_eq_abs, abs_of_nonneg (by linarith : 0 ≤ u)] at h
+  rw [Real.rpow_def_of_pos (Real.exp_pos _), Real.log_exp] at h
+  have hl : Real.exp (u ^ 2) * Real.exp (-c * u) = Real.exp (u ^ 2 - c * u) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  have hr : C * Real.exp (u ^ 2 * a) = Real.exp (Real.log C + u ^ 2 * a) := by
+    rw [Real.exp_add, Real.exp_log hCp]
+  rw [hl, hr] at h
+  exact (not_lt_of_ge h) (Real.exp_lt_exp.mpr hgap)
 
 end LeanLab.KumchevLiu2007.Task556a

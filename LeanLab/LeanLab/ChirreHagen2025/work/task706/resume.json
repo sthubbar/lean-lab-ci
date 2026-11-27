@@ -1,0 +1,40 @@
+{
+  "task": "CODEX task706",
+  "branch": "codex/task706",
+  "start_utc": "2026-11-24T11:12:12Z",
+  "minimum_utc": "2026-11-24T12:12:12Z",
+  "aim_utc": "2026-11-24T13:42:12Z",
+  "deadline_utc": "2026-11-24T14:12:12Z",
+  "baseline_pid": 14734,
+  "baseline_session": 61768,
+  "baseline_parent_paused": false,
+  "active_baseline_lake_pid": 4321,
+  "count_validation_session": 5837,
+  "count_validation_script": "work/task706/validate_count.py",
+  "pending": "None. PR1984 is open for the lab gate.",
+  "proved_task_results": 8,
+  "conditional_task_results": 1,
+  "sorry_before": 42,
+  "sorry_after": 38,
+  "new_statements": 4,
+  "assigned_leaves": "Both BLOCKED with three routes in PROGRESS. No Decomp536a edit.",
+  "publication_remaining": [
+    "Fresh merge origin/main with append history preserved.",
+    "Final source reread and six or seven MATCH entries.",
+    "One LOG.md line with actual times, results, conditional input, sorry delta, QUESTION and model metadata.",
+    "Commit all changes before check_branch.",
+    "Run scripts/seal_check.py and scripts/check_branch.sh ChirreHagen2025 CODEX-task706 with toolchain env. Capture console outside repository to avoid metadata FAIL.",
+    "Commit actual CHECK file and any final evidence.",
+    "Push codex/task706 and open PR to main titled CODEX task706: ChirreHagen2025. Include every gate FAIL and WARN and RESULT."
+  ],
+  "env": {
+    "ELAN_HOME": "/workspace/.leanlab-tools/elan",
+    "PATH_prefix": "/workspace/.leanlab-tools/elan/bin"
+  },
+  "github": "gh is authenticated as sthubbar. No push attempted yet.",
+  "model": "Codex based on GPT-6. Exact model variant and effort are not exposed.",
+  "last_clock_utc": "2026-11-24T14:12:12Z",
+  "exact_header_audit": "14 old headers byte-identical; entire Decomp536a identical to initial merged main. Saved build/task706-sealed-headers.json.",
+  "status": "Published",
+  "pr": "https://github.com/sthubbar/lean-lab/pull/1984"
+}

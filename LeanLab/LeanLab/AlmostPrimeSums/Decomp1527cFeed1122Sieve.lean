@@ -17,6 +17,8 @@ theorems with exactly the parents' statements, CONDITIONAL ON `LevelBV`, respect
 AI-written Lean code, Claude, 2026-11-23. Binary Goldbach is OPEN; nothing here is progress on it.
 -/
 import LeanLab.AlmostPrimeSums.Decomp1527c
+import LeanLab.AlmostPrimeSums.Double243
+import LeanLab.AlmostPrimeSums.Lower243
 
 namespace LeanLab.AlmostPrimeSums.Decomp1527cFeed1122Sieve
 open Finset Real Filter Topology LeanLab.ChenExplicit LeanLab.AlmostPrimeSums.Decomp1527c
@@ -495,7 +497,7 @@ theorem card_TSet_le :
     ∀ η : ℝ, 0 < η → ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
       (#(TSet N ((N : ℝ) ^ ((1 : ℝ) / 8)) ((N : ℝ) ^ ((1 : ℝ) / 3))) : ℝ)
       ≤ ((∫ β in (1 / 8 : ℝ)..(1 / 3), log (2 - 3 * β) / (β * (1 - β))) + η) * (N / log N) := by
-  sorry
+  exact Double243.triple_mass_upper
 
 /-- Coefficient algebra for `sumSAq_upper_of_leaves`. -/
 theorem coef_sumSAq {E δ L η : ℝ} (hE1 : 1 ≤ E) (hδ0 : 0 < δ) (hδ1 : δ ≤ 1 / 40)
@@ -722,5 +724,104 @@ theorem SB_upper_of_leaves (h : LevelBVTriples) :
     _ = (3 * (4 * E / 3 + δ) * (c + δ) * (1 + δ) / 2) * W := by ring
     _ ≤ ((c + η) * (2 * E)) * W := mul_le_mul_of_nonneg_right hc hWpos.le
     _ = (c + η) * (2 * E * W) := by ring
+
+
+/-- The middle prime sum converges to the scaled kernel integral.
+Derived from BJS p. 54 equation 173 and the two proved Abel bounds. -/
+theorem prime_sum_sAq_tendsto :
+    Tendsto (fun N : ℕ =>
+      ∑ q ∈ (range N).filter (fun q : ℕ => q.Prime ∧ (N : ℝ) ^ ((1 : ℝ) / 8) ≤ q ∧
+          (q : ℝ) < (N : ℝ) ^ ((1 : ℝ) / 3)),
+        1 / (((q : ℝ) - 1) * (4 - 8 * log q / log N))) atTop (𝓝 (log 6 / 4)) := by
+  have hlog : Tendsto (fun N : ℕ => log (N : ℝ)) atTop atTop :=
+    tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
+  have hzlim : Tendsto (fun N : ℕ => (N : ℝ) ^ ((1 : ℝ) / 8)) atTop atTop :=
+    (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 8)).comp tendsto_natCast_atTop_atTop
+  have hlow : ∀ᶠ N : ℕ in atTop,
+      log 6 / 4 - 72 / log N ≤
+      ∑ q ∈ (range N).filter (fun q : ℕ => q.Prime ∧ (N : ℝ) ^ ((1 : ℝ) / 8) ≤ q ∧
+          (q : ℝ) < (N : ℝ) ^ ((1 : ℝ) / 3)),
+        1 / (((q : ℝ) - 1) * (4 - 8 * log q / log N)) := by
+    filter_upwards [eventually_ge_atTop (2 : ℕ), hzlim.eventually_ge_atTop 2] with N hN hz2
+    have hNp : (0 : ℝ) < N := by exact_mod_cast (show 0 < N by omega)
+    have hl : 0 < log (N : ℝ) := log_pos (by exact_mod_cast (show 1 < N by omega))
+    let z : ℝ := (N : ℝ) ^ ((1 : ℝ) / 8)
+    let y : ℝ := (N : ℝ) ^ ((1 : ℝ) / 3)
+    have hzlog : log z = log N / 8 := by dsimp [z]; rw [log_rpow hNp]; ring
+    have hylog : log y = log N / 3 := by dsimp [y]; rw [log_rpow hNp]; ring
+    have hzy : z ≤ y := rpow_le_rpow_of_exponent_le
+      (by exact_mod_cast (show 1 ≤ N by omega)) (by norm_num)
+    have hset : (range N).filter (fun q : ℕ => q.Prime ∧
+        (N : ℝ) ^ ((1 : ℝ) / 8) ≤ q ∧ (q : ℝ) < (N : ℝ) ^ ((1 : ℝ) / 3)) =
+        LeanLab.ChenExplicit.D1552.primesIco z y := by
+      ext q
+      simp only [mem_filter, mem_range, LeanLab.ChenExplicit.D1552.primesIco, Nat.lt_ceil]
+      have hyN : y ≤ (N : ℝ) := rpow_le_self_of_one_le
+        (by exact_mod_cast (show 1 ≤ N by omega)) (by norm_num)
+      constructor
+      · rintro ⟨hqN, hprime, hlow, hhigh⟩
+        exact ⟨hhigh, hprime, hlow⟩
+      · rintro ⟨hhigh, hprime, hlow⟩
+        exact ⟨by exact_mod_cast hhigh.trans_le hyN, hprime, hlow, hhigh⟩
+    have hk := Lower243.logarithmic_kernel_lower z y (log N / 2) hz2 hzy
+      (by rw [hylog]; linarith)
+    have hi : ((log (log y) - log (log N / 2 - log y)) -
+        (log (log z) - log (log N / 2 - log z))) = log 6 := by
+      rw [hzlog, hylog,
+        show log (N : ℝ) / 2 - log N / 3 = log N / 6 by ring,
+        show log (N : ℝ) / 2 - log N / 8 = (3 / 8) * log N by ring,
+        log_div hl.ne' (by norm_num), log_div hl.ne' (by norm_num),
+        log_div hl.ne' (by norm_num), log_mul (by norm_num : (3 / 8 : ℝ) ≠ 0) hl.ne',
+        log_div (by norm_num : (3 : ℝ) ≠ 0) (by norm_num : (8 : ℝ) ≠ 0)]
+      ring
+    rw [hi, hzlog, hylog] at hk
+    have hpoint : (log (N : ℝ) / 8) *
+        (∑ q ∈ LeanLab.ChenExplicit.D1552.primesIco z y,
+          1 / ((q : ℝ) * (log N / 2 - log q))) ≤
+        ∑ q ∈ LeanLab.ChenExplicit.D1552.primesIco z y,
+          1 / (((q : ℝ) - 1) * (4 - 8 * log q / log N)) := by
+      rw [mul_sum]
+      apply sum_le_sum
+      intro q hq
+      obtain ⟨hqmem, hprime, _⟩ := mem_filter.mp hq
+      have hqy : (q : ℝ) < y := Nat.lt_ceil.mp (mem_range.mp hqmem)
+      have hq0 : (0 : ℝ) < q := by exact_mod_cast hprime.pos
+      have hq1 : 0 < (q : ℝ) - 1 := by
+        have hh : (1 : ℝ) < q := by exact_mod_cast hprime.one_lt
+        linarith
+      have hden : 0 < log (N : ℝ) / 2 - log q := by
+        have hh := log_lt_log hq0 hqy
+        rw [hylog] at hh
+        linarith
+      have hscale : 4 - 8 * log q / log (N : ℝ) =
+          8 / log N * (log N / 2 - log q) := by field_simp [hl.ne']; ring
+      have heq : 1 / (((q : ℝ) - 1) * (4 - 8 * log q / log N)) =
+          log N / 8 * (1 / (((q : ℝ) - 1) * (log N / 2 - log q))) := by
+        rw [hscale]
+        field_simp [hl.ne', hq1.ne', hden.ne']
+      rw [heq]
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      exact one_div_le_one_div_of_le (mul_pos hq1 hden)
+        (mul_le_mul_of_nonneg_right (by linarith : (q : ℝ) - 1 ≤ q) hden.le)
+    rw [hset]
+    calc
+      log 6 / 4 - 72 / log (N : ℝ) = log N / 8 *
+        (log 6 / (log N / 2) - 12 / (log N / 8 * (log N / 2 - log N / 3))) := by
+          field_simp [hl.ne']
+          <;> ring
+      _ ≤ _ := mul_le_mul_of_nonneg_left hk (by positivity)
+      _ ≤ _ := hpoint
+  have hlowlim : Tendsto (fun N : ℕ => log 6 / 4 - 72 / log N) atTop (𝓝 (log 6 / 4)) := by
+    simpa using (tendsto_const_nhds.sub (hlog.const_div_atTop (72 : ℝ)))
+  apply Metric.tendsto_atTop.mpr
+  intro ε hε
+  obtain ⟨N₁, hN₁⟩ := prime_sum_sAq_le (ε / 2) (by linarith)
+  obtain ⟨N₂, hN₂⟩ := eventually_atTop.mp
+    (hlow.and (hlowlim.eventually (lt_mem_nhds (by linarith : log (6 : ℝ) / 4 - ε < log 6 / 4))))
+  refine ⟨max N₁ N₂, fun N hN => ?_⟩
+  have hu := hN₁ N ((le_max_left _ _).trans hN)
+  obtain ⟨hlo, hclose⟩ := hN₂ N ((le_max_right _ _).trans hN)
+  rw [Real.dist_eq, abs_lt]
+  constructor <;> linarith
 
 end LeanLab.AlmostPrimeSums.Decomp1527cFeed1122Sieve
