@@ -19,7 +19,7 @@ theorem leaf_prop51_dyad_F3462 : Prop51On dyad := by
 /-- LEAF. The residue class equidistribution estimate for the dyadic range. It bounds the
 error caused by splitting the cutoff sum into admissible residue classes. -/
 theorem leaf_lemma52_dyad_F3462 : Lemma52On dyad := by
-  sorry
+  exact lemma52_dyad
 
 /-- LEAF. The exponential sum estimate over the admissible residue classes. It bounds the
 Fourier sum used to control the admissible classes. -/
