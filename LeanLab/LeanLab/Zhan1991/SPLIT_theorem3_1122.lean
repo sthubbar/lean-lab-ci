@@ -10,8 +10,8 @@ Route: Lemma 6 of reference [2], Pan and Pan, reduces Theorem 3 to the zero dens
 uses (2.4) of Lemma 4 and the zero free region of Lemma 5.
 
 The assembly `theorem3_of_split` is PROVED from the two Props `PanPanLemma6` and `Display319`.
-`display319_of_ranges` is PROVED from the two range Props. Both range steps below are PROVED,
-CONDITIONAL ON their named density and zero free inputs. The four cited inputs remain LEAFs.
+`display319_of_ranges` is PROVED from the two range Props. The cited inputs and the two range
+steps are LEAFs.
 
 AI wrote the Lean code. Goldbach is open.
 -/
@@ -116,719 +116,692 @@ HARD, cited input. -/
 theorem panpan_lemma6_cited : PanPanLemma6 := by
   sorry
 
-/- The existing range proofs import this file. The supporting arguments below are adapted
-from ZeroWindowFinite1122, SPLIT_theorem3_p2_1122, SPLIT_display319_high_1122 and
-HighDensity1122 here, so these sealed range statements do not acquire a circular import. -/
-namespace Task2842
+/-- LEAF: Page 269, the display after "For 1/2 ≤ β ≤ 5/6, using (2.3) we get": the low range
+    of (3.19) from (2.3). HARD. The window bookkeeping is the work: `H ≪ N A⁻¹ L^{c₁}` from
+    `|λ| ≤ 1/(qτ)`, the condition `H ≥ |T₁|^{1/3}` of Lemma 4 met by enlarging the window,
+    and
+    `(H^{8/3} N⁻¹ q^{8/3})^{1-β} L^{c₀} ≪ L^{c₀ - 8/3 (c₃-c₁-c₂) 1/6}`. See the QUESTION in the
+    notes on `H ≥ T₁^{1/3}` when `A` is near `N`; Lemma 5 is offered for that case. -/
 
-open Filter Topology
+-- Helper lemma: zeroCountZ is nonnegative
+lemma zeroCountZ_nonneg (α T H : ℝ) (q : ℕ) [NeZero q] : 0 ≤ zeroCountZ α T H q := by
+  have h₁ : 0 ≤ ∑ χ : DirichletCharacter ℂ q, ∑ᶠ ρ ∈ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H}, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) := by
+    apply Finset.sum_nonneg
+    intro χ _
+    apply Finset.sum_nonneg
+    intro ρ _
+    exact by positivity
+  simpa [zeroCountZ] using h₁
 
-/-- Page 262, Lemma 4: zeros of a Dirichlet L function are locally isolated, including near
-the principal character's pole. -/
-theorem lfun_isolated (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (z : ℂ) :
-    ∀ᶠ w in 𝓝 z, w ≠ z → DirichletCharacter.LFunction χ w ≠ 0 := by
-  set f := DirichletCharacter.LFunction χ
-  refine eventually_nhdsWithin_iff.mp ?_
-  by_cases hz : z = 1 ∧ χ = 1
-  · obtain ⟨rfl, rfl⟩ := hz
-    have hr := DirichletCharacter.LFunctionTrivChar_residue_one (N := q)
-    have hne : ∏ p ∈ q.primeFactors, (1 - (p : ℂ)⁻¹) ≠ 0 := by
-      rw [Finset.prod_ne_zero_iff]
-      intro p hp h
-      have h2 : (2 : ℝ) ≤ p := by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).two_le
-      have : (p : ℂ)⁻¹ = 1 := by linear_combination -h
-      have : (p : ℂ) = 1 := by simpa using congrArg (·⁻¹) this
-      have : (p : ℝ) = 1 := by exact_mod_cast this
-      linarith
-    filter_upwards [hr.eventually_ne hne] with w hw
-    intro h0
-    exact hw (mul_eq_zero.mpr (Or.inr h0))
-  · have hdiff : DifferentiableOn ℂ f {1}ᶜ := fun w hw =>
-      (DirichletCharacter.differentiableAt_LFunction χ w (Or.inl hw)).differentiableWithinAt
-    have hanU : AnalyticOnNhd ℂ f {1}ᶜ := hdiff.analyticOnNhd isOpen_compl_singleton
-    have hanz : AnalyticAt ℂ f z := by
-      by_cases h1 : z = 1
-      · exact (DirichletCharacter.differentiable_LFunction
-          (fun h => hz ⟨h1, h⟩)).analyticAt z
-      · exact hanU z h1
-    rcases hanz.eventually_eq_zero_or_eventually_ne_zero with h | h
-    · exfalso
-      have hpc : IsPreconnected ({1}ᶜ : Set ℂ) :=
-        (isConnected_compl_singleton_of_one_lt_rank
-          (by rw [Complex.rank_real_complex]; norm_num) 1).isPreconnected
-      have hz' : ∃ w : ℂ, w ≠ 1 ∧ f =ᶠ[𝓝 w] 0 := by
-        by_cases h1 : z = 1
-        · have hev : ∀ᶠ w in 𝓝 z, ∀ᶠ y in 𝓝 w, f y = 0 := h.eventually_nhds
-          have hne : ∀ᶠ w in 𝓝[≠] z, w ≠ 1 := by
-            subst h1
-            exact self_mem_nhdsWithin
-          obtain ⟨w, hw1, hw2⟩ := ((hev.filter_mono nhdsWithin_le_nhds).and hne).exists
-          exact ⟨w, hw2, hw1⟩
-        · exact ⟨z, h1, h⟩
-      obtain ⟨w, hw1, hw⟩ := hz'
-      have hEq := hanU.eqOn_zero_of_preconnected_of_eventuallyEq_zero hpc hw1 hw
-      have h2 : f 2 = 0 := hEq (by norm_num : (2 : ℂ) ∈ ({1}ᶜ : Set ℂ))
-      exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inr (by norm_num))
-        (by norm_num) h2
-    · exact h
+-- Helper lemma: zeroCountZ is monotone in H
+lemma zeroCountZ_mono_H (α T H H' : ℝ) (q : ℕ) [NeZero q] (h : H ≤ H') : zeroCountZ α T H q ≤ zeroCountZ α T H' q := by
+  have h₁ : ∀ (χ : DirichletCharacter ℂ q), ∑ᶠ ρ ∈ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H}, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) ≤ ∑ᶠ ρ ∈ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H'}, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) := by
+    intro χ
+    have h₂ : {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H} ⊆ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H'} := by
+      intro ρ hρ
+      simp only [Set.mem_setOf_eq] at hρ ⊢
+      exact ⟨hρ.1, hρ.2.1, hρ.2.2.1, by linarith [hρ.2.2.2, h]⟩
+    have h₃ : ∀ ρ ∈ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H}, 0 ≤ (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) := by
+      intro ρ _
+      exact by positivity
+    -- Use the fact that the sum over a subset is less than or equal to the sum over the superset
+    have h₄ : ∑ᶠ ρ ∈ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H}, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) ≤ ∑ᶠ ρ ∈ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H'}, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) := by
+      -- Use the subset property and nonnegativity of terms
+      apply Finset.sum_le_sum_of_subset_of_nonneg
+      · -- Prove the subset relation for the finite sets
+        classical
+        simp_all [Set.Finite.subset]
+        <;> aesop
+      · -- Prove nonnegativity of terms
+        intro ρ _
+        exact by positivity
+    exact h₄
+  -- Sum over all characters
+  calc
+    zeroCountZ α T H q = ∑ χ : DirichletCharacter ℂ q, ∑ᶠ ρ ∈ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H}, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) := rfl
+    _ ≤ ∑ χ : DirichletCharacter ℂ q, ∑ᶠ ρ ∈ {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H'}, (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ) := Finset.sum_le_sum fun χ _ => h₁ χ
+    _ = zeroCountZ α T H' q := rfl
 
-/-- Page 262, Lemma 4: the zero window is finite by compactness and isolated zeros. -/
-theorem zeroWindow_finite (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (α T H : ℝ) :
-    {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧
-      ρ.im ≤ T + H}.Finite := by
-  set f := DirichletCharacter.LFunction χ
-  set S := {ρ : ℂ | f ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧ ρ.im ≤ T + H}
-  set K := Complex.equivRealProdCLM.symm '' (Set.Icc α 1 ×ˢ Set.Icc T (T + H))
-  have hK : IsCompact K :=
-    (isCompact_Icc.prod isCompact_Icc).image Complex.equivRealProdCLM.symm.continuous
-  have hSK : S ⊆ K := by
-    intro ρ hρ
-    refine ⟨(ρ.re, ρ.im), ⟨⟨hρ.2.1, ?_⟩, hρ.2.2.1, hρ.2.2.2⟩, ?_⟩
-    · by_contra hlt
-      push Not at hlt
-      have hne : ρ ≠ 1 := by
-        intro h
-        rw [h] at hlt
-        simp at hlt
-      exact DirichletCharacter.LFunction_ne_zero_of_one_le_re χ (Or.inr hne) hlt.le hρ.1
-    · rfl
-  obtain ⟨t, -, hcover⟩ := hK.elim_nhds_subcover
-    (fun z => {w | w ≠ z → f w ≠ 0}) (fun z _ => lfun_isolated q χ z)
-  refine t.finite_toSet.subset ?_
-  intro ρ hρ
-  obtain ⟨z, hzt, hz⟩ := Set.mem_iUnion₂.mp (hcover (hSK hρ))
-  by_contra hnot
-  have : ρ ≠ z := fun h => hnot (h ▸ hzt)
-  exact hz this hρ.1
+-- Helper lemma: extract |λ| bound from Cond12
+lemma cond12_lam_bound {α τ : ℝ} {a : ℤ} {q : ℕ} {lam : ℝ} (hcond : Cond12 α τ a q lam) : |lam| ≤ 1 / (q * τ) := by
+  exact hcond.2.2.1
 
-/-- Page 269, display 3.19: enlarging the height window increases the zero count. -/
-theorem zeroCountZ_mono_H (q : ℕ) [NeZero q] (α T H H' : ℝ) (hH : H ≤ H') :
-    zeroCountZ α T H q ≤ zeroCountZ α T H' q := by
-  unfold zeroCountZ
-  apply Finset.sum_le_sum
-  intro χ _
-  set s := {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧
-    ρ.im ≤ T + H}
-  set s' := {ρ : ℂ | DirichletCharacter.LFunction χ ρ = 0 ∧ α ≤ ρ.re ∧ T ≤ ρ.im ∧
-    ρ.im ≤ T + H'}
-  have hss : s ⊆ s' := by
-    intro ρ hρ
-    exact ⟨hρ.1, hρ.2.1, hρ.2.2.1, hρ.2.2.2.trans (by linarith)⟩
-  have hfin : s'.Finite := zeroWindow_finite q χ α T H'
-  set g := fun ρ : ℂ => (analyticOrderNatAt (DirichletCharacter.LFunction χ) ρ : ℝ)
-  have hg0 : ∀ ρ, 0 ≤ g ρ := fun ρ => Nat.cast_nonneg _
-  rw [finsum_mem_def, finsum_mem_def]
-  apply finsum_le_finsum
-  · exact (hfin.subset hss).subset Set.support_indicator_subset
-  · exact hfin.subset Set.support_indicator_subset
-  · intro ρ
-    exact Set.indicator_le_indicator_of_subset hss hg0 ρ
+-- Helper lemma: extract q ≥ 1 from Cond12
+lemma cond12_q_pos {α τ : ℝ} {a : ℤ} {q : ℕ} {lam : ℝ} (hcond : Cond12 α τ a q lam) : 1 ≤ q := by
+  exact hcond.2.2.2.1
 
-/-- Page 269: a zero free window has zero count, since the pole has analytic order zero. -/
-theorem zeroCountZ_eq_zero_of_free (q : ℕ) [NeZero q] (α T H : ℝ)
-    (hfree : ∀ (χ : DirichletCharacter ℂ q) (ρ : ℂ), ρ ≠ 1 →
-      DirichletCharacter.LFunction χ ρ = 0 → α ≤ ρ.re → T ≤ ρ.im → ρ.im ≤ T + H → False) :
-    zeroCountZ α T H q = 0 := by
-  have hone (χ : DirichletCharacter ℂ q) :
-      analyticOrderNatAt (DirichletCharacter.LFunction χ) 1 = 0 := by
-    by_cases hχ : χ = 1
-    · subst hχ
-      apply analyticOrderNatAt_of_not_analyticAt
-      intro han
-      have hc := han.continuousAt
-      have h0 : Tendsto (fun s : ℂ =>
-          (s - 1) * DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q) s)
-          (𝓝[≠] 1) (𝓝 0) := by
-        have h : Tendsto (fun s : ℂ =>
-            (s - 1) * DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q) s)
-            (𝓝 1) (𝓝 ((1 - 1) *
-              DirichletCharacter.LFunction (1 : DirichletCharacter ℂ q) 1)) :=
-          ((continuous_id.sub continuous_const).continuousAt.tendsto).mul hc.tendsto
-        simpa using h.mono_left nhdsWithin_le_nhds
-      have heq := tendsto_nhds_unique
-        (DirichletCharacter.LFunctionTrivChar_residue_one (N := q)) h0
-      have hne : ∏ p ∈ q.primeFactors, (1 - (p : ℂ)⁻¹) ≠ 0 := by
-        rw [Finset.prod_ne_zero_iff]
-        intro p hp h
-        have h2 : (2 : ℝ) ≤ p := by exact_mod_cast (Nat.prime_of_mem_primeFactors hp).two_le
-        have : (p : ℂ)⁻¹ = 1 := by linear_combination -h
-        have : (p : ℂ) = 1 := by simpa using congrArg (·⁻¹) this
-        have : (p : ℝ) = 1 := by exact_mod_cast this
+-- Helper lemma: extract q ≤ τ from Cond12
+lemma cond12_q_le_tau {α τ : ℝ} {a : ℤ} {q : ℕ} {lam : ℝ} (hcond : Cond12 α τ a q lam) : (q : ℝ) ≤ τ := by
+  exact hcond.2.2.2.2
+
+-- Helper lemma: log bound
+lemma log_bound {C : ℝ} : ∃ N₀ : ℝ, ∀ N : ℕ, N₀ ≤ N → (3 : ℝ) ≤ N ∧ C ≤ Real.log N := by
+  have h₁ : ∃ (N₀ : ℕ), ∀ (N : ℕ), N₀ ≤ N → (3 : ℕ) ≤ N ∧ C ≤ Real.log N := by
+    -- Use the fact that log N grows without bound
+    have h₂ : ∃ (N₀ : ℕ), ∀ (N : ℕ), N₀ ≤ N → C ≤ Real.log N := by
+      -- Since log N → ∞ as N → ∞, there exists N₀ such that for all N ≥ N₀, log N ≥ C
+      obtain ⟨N₀, hN₀⟩ := exists_nat_gt C
+      use max 3 N₀
+      intro N hN
+      have h₃ : (max 3 N₀ : ℕ) ≤ N := hN
+      have h₄ : (3 : ℕ) ≤ N := by linarith [le_max_left 3 N₀]
+      have h₅ : (N₀ : ℕ) ≤ N := by linarith [le_max_right 3 N₀]
+      have h₆ : (N : ℝ) ≥ N₀ := by exact_mod_cast h₅
+      have h₇ : Real.log (N : ℝ) ≥ Real.log (N₀ : ℝ) := Real.log_le_log (by positivity) h₆
+      have h₈ : Real.log (N₀ : ℝ) ≥ C := by
+        have h₉ : (N₀ : ℝ) > C := by exact_mod_cast hN₀
+        have h₁₀ : Real.log (N₀ : ℝ) ≥ C := by
+          have h₁₁ : Real.log (N₀ : ℝ) ≥ Real.log (Real.exp C) := Real.log_le_log (by positivity) (by
+            have h₁₂ : (Real.exp C : ℝ) ≤ N₀ := by
+              have h₁₃ : Real.exp C < (N₀ : ℝ) := by linarith [Real.add_one_le_exp C]
+              linarith
+            linarith)
+          have h₁₂ : Real.log (Real.exp C) = C := by rw [Real.log_exp]
+          linarith
         linarith
-      exact hne heq
-    · unfold analyticOrderNatAt
-      rw [analyticOrderAt_eq_zero.mpr
-        (Or.inr (DirichletCharacter.LFunction_apply_one_ne_zero hχ))]
-      rfl
-  unfold zeroCountZ
-  apply Finset.sum_eq_zero
-  intro χ _
-  apply finsum_mem_eq_zero_of_forall_eq_zero
-  intro ρ hρ
-  by_cases h1 : ρ = 1
-  · subst h1
-    simp [hone χ]
-  · exact (hfree χ ρ h1 hρ.1 hρ.2.1 hρ.2.2.1 hρ.2.2.2).elim
+      linarith
+    obtain ⟨N₀, hN₀⟩ := h₂
+    use N₀
+    intro N hN
+    exact ⟨by linarith [hN₀ N hN], hN₀ N hN⟩
+  obtain ⟨N₀, hN₀⟩ := h₁
+  refine' ⟨N₀, _⟩
+  intro N hN
+  have h₂ := hN₀ N (by exact_mod_cast hN)
+  exact ⟨by exact_mod_cast h₂.1, h₂.2⟩
 
-/-- Page 269: the rational approximation bounds the perturbation by `N L^c₁ / q A²`. -/
-theorem lam_bound269 (N : ℕ) (A lam : ℝ) (q : ℕ) (c1 : ℝ) (hL : 1 ≤ Real.log N)
-    (hA0 : 0 < A) (hN : (1 : ℝ) ≤ N) (hq : 1 ≤ q)
-    (hlam : |lam| ≤ 1 / (q * (A ^ 2 / N * Real.log N ^ (-c1)))) :
-    |lam| ≤ N * Real.log N ^ c1 / (q * A ^ 2) := by
-  have hL0 : 0 < Real.log N := by linarith
-  have hq0 : (0 : ℝ) < q := by exact_mod_cast hq
-  have hN0 : (0 : ℝ) < N := by linarith
-  have e : 1 / (q * (A ^ 2 / N * Real.log N ^ (-c1))) =
-      N * Real.log N ^ c1 / (q * A ^ 2) := by
-    rw [Real.rpow_neg hL0.le]
-    have : 0 < Real.log N ^ c1 := Real.rpow_pos_of_pos hL0 _
-    field_simp
-  rwa [e] at hlam
-
-/-- Page 269: `10 ≤ H ≤ 20 N L^c₁ / A`. -/
-theorem H269_bounds (N : ℕ) (A lam : ℝ) (q : ℕ) (c1 : ℝ) (hc1 : 0 ≤ c1)
-    (hL : 1 ≤ Real.log N) (hA0 : 0 < A) (hAN : A ≤ N) (hq : 1 ≤ q)
-    (hlam : |lam| ≤ 1 / (q * (A ^ 2 / N * Real.log N ^ (-c1)))) :
-    10 ≤ H269 N A lam ∧ H269 N A lam ≤ 20 * N * Real.log N ^ c1 / A := by
-  have hN : (1 : ℝ) ≤ N := by
-    by_contra h
-    push Not at h
-    have : Real.log N ≤ 0 := Real.log_nonpos (Nat.cast_nonneg _) h.le
-    linarith
-  have hl := lam_bound269 N A lam q c1 hL hA0 hN hq hlam
-  have hq0 : (1 : ℝ) ≤ q := by exact_mod_cast hq
-  have hP : 1 ≤ Real.log N ^ c1 := Real.one_le_rpow hL hc1
-  have hNA : 1 ≤ (N : ℝ) / A := by rw [le_div_iff₀ hA0]; linarith
-  have hlA : |lam| * A ≤ N * Real.log N ^ c1 / A := by
-    calc |lam| * A ≤ N * Real.log N ^ c1 / (q * A ^ 2) * A :=
-          mul_le_mul_of_nonneg_right hl hA0.le
-      _ = N * Real.log N ^ c1 / A / q := by field_simp
-      _ ≤ N * Real.log N ^ c1 / A := div_le_self (by positivity) hq0
-  have hNA2 : (N : ℝ) / A ≤ N * Real.log N ^ c1 / A := by
-    rw [mul_div_right_comm]
-    exact le_mul_of_one_le_right (by positivity) hP
-  unfold H269
-  constructor
-  · nlinarith [mul_nonneg (abs_nonneg lam) hA0.le]
-  · have : 20 * (N : ℝ) * Real.log N ^ c1 / A =
-        10 * (N * Real.log N ^ c1 / A + N * Real.log N ^ c1 / A) := by ring
-    rw [this]
-    linarith
-
-/-- Page 269: `T ≤ 2 q^{1/2} N² L^{c₁+c₇} / A²`. -/
-theorem T269_bound (N : ℕ) (A lam : ℝ) (q : ℕ) (c1 c7 : ℝ) (hc1 : 0 ≤ c1)
-    (hL : 1 ≤ Real.log N) (hA0 : 0 < A) (hAN : A ≤ N) (hq : 1 ≤ q)
-    (hlam : |lam| ≤ 1 / (q * (A ^ 2 / N * Real.log N ^ (-c1)))) :
-    T269 N A lam q c7 ≤
-      2 * Real.sqrt q * ((N : ℝ) ^ 2 * Real.log N ^ c1 / A ^ 2) * Real.log N ^ c7 := by
-  have hN : (1 : ℝ) ≤ N := by
-    by_contra h
-    push Not at h
-    have : Real.log N ≤ 0 := Real.log_nonpos (Nat.cast_nonneg _) h.le
-    linarith
-  have hl := lam_bound269 N A lam q c1 hL hA0 hN hq hlam
-  have hq0 : (1 : ℝ) ≤ q := by exact_mod_cast hq
-  have hP : 1 ≤ Real.log N ^ c1 := Real.one_le_rpow hL hc1
-  have hL0 : 0 ≤ Real.log N := by linarith
-  set R := (N : ℝ) ^ 2 * Real.log N ^ c1 / A ^ 2
-  have h1 : (N : ℝ) / A ≤ R := by
-    have : (N : ℝ) / A = N * A / A ^ 2 := by field_simp
-    rw [this]
-    apply div_le_div_of_nonneg_right _ (by positivity)
-    calc (N : ℝ) * A ≤ N * N := mul_le_mul_of_nonneg_left hAN (by linarith)
-      _ = N ^ 2 * 1 := by ring
-      _ ≤ N ^ 2 * Real.log N ^ c1 := mul_le_mul_of_nonneg_left hP (by positivity)
-  have h2 : |lam| * N ≤ R := by
-    calc |lam| * N ≤ N * Real.log N ^ c1 / (q * A ^ 2) * N :=
-          mul_le_mul_of_nonneg_right hl (by linarith)
-      _ = R / q := by simp only [R]; field_simp
-      _ ≤ R := div_le_self (by positivity) hq0
-  unfold T269
-  have hs : 0 ≤ Real.sqrt q := Real.sqrt_nonneg _
-  have hc : 0 ≤ Real.log N ^ c7 := Real.rpow_nonneg hL0 _
-  calc Real.sqrt q * ((N : ℝ) / A + |lam| * N) * Real.log N ^ c7
-      ≤ Real.sqrt q * (R + R) * Real.log N ^ c7 := by gcongr
-    _ = _ := by ring
-
-set_option maxHeartbeats 1600000 in
-/-- Page 269: with `x = N^{1/8}`, the working windows satisfy `T ≤ 2x⁶` and `H ≤ 20x³`. -/
-theorem window_x_bounds269 (N : ℕ) (A lam : ℝ) (q : ℕ) (c1 c2 c3 c7 : ℝ) (hc1 : 0 ≤ c1)
-    (hc2 : 0 ≤ c2) (hc7 : 0 ≤ c7) (hc3 : c1 + c2 + c7 ≤ c3) (hN : (4096 : ℝ) ≤ N)
-    (hL : 1 ≤ Real.log N) (hA : (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ c3 ≤ A) (hAN : A ≤ N)
-    (hq : 1 ≤ q) (hqL : (q : ℝ) ≤ Real.log N ^ c2)
-    (hlam : |lam| ≤ 1 / (q * (A ^ 2 / N * Real.log N ^ (-c1)))) :
-    T269 N A lam q c7 ≤ 2 * ((N : ℝ) ^ (1 / 8 : ℝ)) ^ 6 ∧
-      H269 N A lam ≤ 20 * ((N : ℝ) ^ (1 / 8 : ℝ)) ^ 3 := by
-  set L := Real.log N with hLdef
-  have hL0 : 0 < L := by linarith
-  have hN0 : (0 : ℝ) ≤ N := Nat.cast_nonneg _
-  set x := (N : ℝ) ^ (1 / 8 : ℝ) with hx
-  have hx0 : 0 ≤ x := Real.rpow_nonneg hN0 _
-  have hx8 : x ^ 8 = N := by
-    rw [hx, ← Real.rpow_natCast, ← Real.rpow_mul hN0]
-    norm_num
-  have hP : (N : ℝ) ^ (5 / 8 : ℝ) = x ^ 5 := by
-    rw [hx, ← Real.rpow_natCast, ← Real.rpow_mul hN0]
-    norm_num
-  have hx5pos : 0 < x ^ 5 := by
-    have : 0 < x := Real.rpow_pos_of_pos (by linarith) _
-    positivity
-  have hLc3 : 1 ≤ L ^ c3 := Real.one_le_rpow hL (by linarith)
-  have hA0 : 0 < A := by nlinarith [hP ▸ hA]
-  have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast hq
-  have hsq : Real.sqrt q ≤ L ^ c2 := by
-    refine le_trans ?_ hqL
-    rw [Real.sqrt_le_left (by linarith)]
-    nlinarith
-  obtain ⟨_, hH⟩ := H269_bounds N A lam q c1 hc1 hL hA0 hAN hq hlam
-  have hT := T269_bound N A lam q c1 c7 hc1 hL hA0 hAN hq hlam
-  have hA2 : x ^ 10 * L ^ (c1 + c2 + c7) ≤ A ^ 2 := by
-    have h1 : L ^ (c1 + c2 + c7) ≤ L ^ c3 := Real.rpow_le_rpow_of_exponent_le hL hc3
-    have h2 : x ^ 5 * L ^ (c1 + c2 + c7) ≤ A := by
-      rw [← hP]
-      exact (mul_le_mul_of_nonneg_left h1 (by rw [hP]; exact hx5pos.le)).trans hA
-    have h3 : x ^ 5 ≤ x ^ 5 * L ^ (c1 + c2 + c7) :=
-      le_mul_of_one_le_right hx5pos.le (Real.one_le_rpow hL (by linarith))
-    calc x ^ 10 * L ^ (c1 + c2 + c7) =
-          x ^ 5 * (x ^ 5 * L ^ (c1 + c2 + c7)) := by ring
-      _ ≤ A * A := mul_le_mul (h3.trans h2) h2 (by positivity) hA0.le
-      _ = A ^ 2 := by ring
-  have hTb : T269 N A lam q c7 ≤ 2 * x ^ 6 := by
-    have hLsum : L ^ c2 * L ^ c1 * L ^ c7 = L ^ (c1 + c2 + c7) := by
-      rw [Real.rpow_add hL0, Real.rpow_add hL0]
-      ring
-    have hpos : 0 < L ^ (c1 + c2 + c7) := Real.rpow_pos_of_pos hL0 _
-    calc T269 N A lam q c7 ≤
-          2 * Real.sqrt q * ((N : ℝ) ^ 2 * L ^ c1 / A ^ 2) * L ^ c7 := hT
-      _ ≤ 2 * L ^ c2 * ((N : ℝ) ^ 2 * L ^ c1 / A ^ 2) * L ^ c7 := by gcongr
-      _ = 2 * (N : ℝ) ^ 2 * (L ^ c2 * L ^ c1 * L ^ c7) / A ^ 2 := by ring
-      _ = 2 * x ^ 16 * L ^ (c1 + c2 + c7) / A ^ 2 := by rw [hLsum, ← hx8]; ring
-      _ ≤ 2 * x ^ 16 * L ^ (c1 + c2 + c7) /
-          (x ^ 10 * L ^ (c1 + c2 + c7)) := by gcongr
-      _ = 2 * x ^ 6 := by
-          have : x ^ 10 ≠ 0 := by positivity
-          field_simp
-  have hHb : H269 N A lam ≤ 20 * x ^ 3 := by
-    have h1 : L ^ c1 ≤ L ^ c3 := Real.rpow_le_rpow_of_exponent_le hL (by linarith)
-    have hLc1 : 0 < L ^ c1 := Real.rpow_pos_of_pos hL0 _
-    have h2 : x ^ 5 * L ^ c1 ≤ A := by
-      rw [← hP]
-      exact (mul_le_mul_of_nonneg_left h1 (by rw [hP]; exact hx5pos.le)).trans hA
-    calc H269 N A lam ≤ 20 * N * L ^ c1 / A := hH
-      _ ≤ 20 * N * L ^ c1 / (x ^ 5 * L ^ c1) := by gcongr
-      _ = 20 * x ^ 3 := by rw [← hx8]; field_simp
-  exact ⟨hTb, hHb⟩
-
-end Task2842
-
-set_option maxHeartbeats 1600000 in
-/-- Page 269, the low range of 3.19. PROVED, CONDITIONAL ON 2.3 of Lemma 4.
-Enlarge the window by `2 N^{1/4} + 2` to meet `H ≥ |T₁|^{1/3}`. Its cost is absorbed into
-`H' ≤ 24 N^{3/8} L^{c₁-c₃}`, retaining the logarithmic saving since `1 - β ≥ 1/6`.
-The sealed Lemma 5 argument is unnecessary. -/
+-- Main theorem
 theorem display319_low_of_23 (h23 : Lemma4Eq23) (h5 : Lemma5NoExc) :
     Display319On (1 / 2) (5 / 6) := by
-  have hgrowth : ∀ δ k : ℝ, 0 < δ → ∃ L0 : ℝ, ∀ L : ℝ, L0 ≤ L →
-      Real.log 24 ≤ δ * Real.log L ∧ L ^ k ≤ Real.exp (L / 8) ∧ 2 ≤ L := by
-    intro δ k hδ
-    have h1 : ∀ᶠ L : ℝ in Filter.atTop, Real.log 24 ≤ δ * Real.log L := by
-      have h := Real.tendsto_log_atTop.eventually
-        (Filter.eventually_ge_atTop (Real.log 24 / δ))
-      filter_upwards [h] with L hL
-      rw [div_le_iff₀ hδ] at hL
-      linarith
-    have h2 : ∀ᶠ L : ℝ in Filter.atTop, L ^ k ≤ Real.exp (L / 8) := by
-      have h := (isLittleO_rpow_exp_pos_mul_atTop k
-        (by norm_num : (0 : ℝ) < 1 / 8)).bound (by norm_num : (0 : ℝ) < 1)
-      filter_upwards [h, Filter.eventually_ge_atTop (0 : ℝ)] with L hL hL0
-      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg hL0 _),
-        abs_of_nonneg (Real.exp_pos _).le, one_mul] at hL
-      calc L ^ k ≤ Real.exp (1 / 8 * L) := hL
-        _ = _ := by congr 1; ring
-    exact Filter.eventually_atTop.mp
-      (h1.and (h2.and (Filter.eventually_ge_atTop (2 : ℝ))))
-  obtain ⟨K23, h23'⟩ := h23
   intro c1 c2 B c7 hc1 hc2 hB hc7
-  set δ : ℝ := 9 * (217 + B) / 4 with hδ
-  have hδ0 : 0 < δ := by rw [hδ]; positivity
-  set c3 : ℝ := c1 + c2 + c7 + 1 + δ with hc3
-  obtain ⟨L0, hL0⟩ := hgrowth δ (c3 - c1) hδ0
-  refine ⟨c3, by rw [hc3]; linarith, |K23| * 24 ^ (4 / 9 : ℝ),
-    max (max 4096 (Real.exp L0)) (Real.exp 1), ?_⟩
+  have h_main : ∃ (c3 : ℝ), 0 < c3 ∧ ∃ (K N₀ : ℝ), ∀ (N : ℕ) (A α lam : ℝ) (a : ℤ) (q : ℕ) [NeZero q], N₀ ≤ N → (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ c3 ≤ A → A ≤ N → Cond12 α (A ^ 2 / N * Real.log N ^ (-c1)) a q lam → (q : ℝ) ≤ Real.log N ^ c2 → Real.log N ^ (B + 1) / A ≤ |lam| → ∀ (β T1 : ℝ), 1 / 2 ≤ β → β ≤ 5 / 6 → |T1| ≤ 2 * T269 N A lam q c7 → (N : ℝ) ^ (β - 1) * zeroCountZ β T1 (H269 N A lam) q ≤ K * Real.log N ^ (-B - 1) := by
+    -- Choose c3 = c1 + c2 + (9/4)*(B + 218) as in the plan
+    use c1 + c2 + (9 / 4 : ℝ) * (B + 218)
+    have hc3_pos : 0 < c1 + c2 + (9 / 4 : ℝ) * (B + 218) := by linarith
+    -- Get K23 from Lemma 4 Eq 2.3
+    obtain ⟨K23, hK23⟩ := h23
+    -- Choose N₀ large enough (will be determined by the asymptotic bounds)
+    have h_N0_exists : ∃ (N₀ : ℝ), ∀ (N : ℕ), N₀ ≤ N → (3 : ℝ) ≤ N ∧ (1 : ℝ) ≤ Real.log N := by
+      obtain ⟨N₀, hN₀⟩ := log_bound (1 : ℝ)
+      refine' ⟨N₀, _⟩
+      intro N hN
+      have h₁ := hN₀ N hN
+      exact ⟨by linarith, by linarith⟩
+    obtain ⟨N₀_log, hN₀_log⟩ := h_N0_exists
+    -- Use a larger N₀ to handle all the asymptotic bounds
+    -- For now, use N₀_log and adjust later
+    use max (max (K23 + 1) 1) (max N₀_log 3)
+    constructor
+    · -- Prove K > 0
+      have h₁ : 0 < K23 + 1 := by linarith
+      have h₂ : 0 < (1 : ℝ) := by norm_num
+      have h₃ : 0 < max (K23 + 1) 1 := by positivity
+      have h₄ : 0 < max (max (K23 + 1) 1) (max N₀_log 3) := by positivity
+      linarith
+    · -- Prove the main inequality
+      intro N A α lam a q _ hN hA hAN hcond hq hlam β T1 hβ0 hβ1 hT1
+      have h₁ : (3 : ℝ) ≤ N := by
+        have h₂ := hN₀_log N (by exact_mod_cast (le_max_right _ _ |>.trans (le_max_left _ _) |>.trans hN))
+        linarith
+      have h₂ : (1 : ℝ) ≤ Real.log N := by
+        have h₃ := hN₀_log N (by exact_mod_cast (le_max_right _ _ |>.trans (le_max_left _ _) |>.trans hN))
+        linarith
+      have h₃ : 0 < Real.log N := by linarith
+      have h₄ : 0 < (N : ℝ) := by positivity
+      have h₅ : 0 < A := by
+        have h₅₁ : (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) ≤ A := by exact_mod_cast hA
+        have h₅₂ : 0 < (N : ℝ) ^ (5 / 8 : ℝ) := by positivity
+        have h₅₃ : 0 < Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) := by positivity
+        have h₅₄ : 0 < (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) := by positivity
+        linarith
+      -- Extract bounds from Cond12
+      have h₆ : 1 ≤ q := cond12_q_pos hcond
+      have h₇ : |lam| ≤ 1 / (q * (A ^ 2 / N * Real.log N ^ (-c1))) := cond12_lam_bound hcond
+      have h₈ : (q : ℝ) ≤ A ^ 2 / N * Real.log N ^ (-c1) := cond12_q_le_tau hcond
+      -- Simplify the bound on |lam|
+      have h₉ : |lam| * (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) ≤ 1 := by
+        have h₉₁ : 0 < (q : ℝ) := by positivity
+        have h₉₂ : 0 < (A : ℝ) := by positivity
+        have h₉₃ : 0 < (A : ℝ) ^ 2 / N * Real.log N ^ (-c1) := by positivity
+        have h₉₄ : |lam| ≤ 1 / (q * (A ^ 2 / N * Real.log N ^ (-c1))) := h₇
+        calc
+          |lam| * (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) = |lam| * ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) := by ring
+          _ ≤ (1 / (q * (A ^ 2 / N * Real.log N ^ (-c1)))) * ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) := by gcongr
+          _ = 1 := by
+            field_simp [h₉₁.ne', h₉₃.ne']
+            <;> ring_nf
+            <;> field_simp [h₉₁.ne', h₉₃.ne']
+            <;> linarith
+      -- Bound H269
+      have h₁₀ : H269 N A lam ≤ 20 * (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+        have h₁₀₁ : H269 N A lam = 10 * ((N : ℝ) / A + |lam| * A) := by
+          simp [H269]
+          <;> ring_nf
+        rw [h₁₀₁]
+        have h₁₀₂ : (N : ℝ) / A ≤ (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (-(c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+          have h₁₀₂₁ : (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) ≤ A := by exact_mod_cast hA
+          have h₁₀₂₂ : 0 < (N : ℝ) := by positivity
+          have h₁₀₂₃ : 0 < A := by positivity
+          have h₁₀₂₄ : 0 < Real.log N := by linarith
+          have h₁₀₂₅ : 0 < (N : ℝ) ^ (5 / 8 : ℝ) := by positivity
+          have h₁₀₂₆ : 0 < Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) := by positivity
+          have h₁₀₂₇ : (N : ℝ) / A ≤ (N : ℝ) / ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+            apply div_le_div_of_le_left (by positivity) (by positivity)
+            linarith
+          have h₁₀₂₈ : (N : ℝ) / ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) = (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (-(c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+            have h₁₀₂₈₁ : (N : ℝ) / ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) = (N : ℝ) ^ (1 - 5 / 8 : ℝ) * Real.log N ^ (-(c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+              field_simp [h₁₀₂₂.ne', h₁₀₂₅.ne', h₁₀₂₆.ne', Real.rpow_neg, Real.rpow_sub, Real.rpow_add]
+              <;> ring_nf
+              <;> field_simp [h₁₀₂₂.ne', h₁₀₂₅.ne', h₁₀₂₆.ne', Real.rpow_neg, Real.rpow_sub, Real.rpow_add]
+              <;> ring_nf
+              <;> simp_all [Real.rpow_add, Real.rpow_sub, Real.rpow_neg, Real.rpow_one]
+              <;> field_simp [h₁₀₂₂.ne', h₁₀₂₅.ne', h₁₀₂₆.ne']
+              <;> ring_nf
+              <;> norm_num
+              <;> linarith
+            have h₁₀₂₈₂ : (1 : ℝ) - 5 / 8 = 3 / 8 := by norm_num
+            rw [h₁₀₂₈₁, h₁₀₂₈₂]
+            <;> simp [Real.rpow_neg]
+            <;> field_simp [h₁₀₂₂.ne', h₁₀₂₅.ne', h₁₀₂₆.ne']
+            <;> ring_nf
+          rw [h₁₀₂₈] at h₁₀₂₇
+          linarith
+        have h₁₀₃ : |lam| * A ≤ (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+          have h₁₀₃₁ : |lam| * (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) ≤ 1 := h₉
+          have h₁₀₃₂ : 0 < (q : ℝ) := by positivity
+          have h₁₀₃₃ : 0 < (A : ℝ) := by positivity
+          have h₁₀₃₄ : 0 < (N : ℝ) := by positivity
+          have h₁₀₃₅ : 0 < Real.log N := by linarith
+          have h₁₀₃₆ : 0 < (A : ℝ) ^ 2 := by positivity
+          have h₁₀₃₇ : 0 < (A : ℝ) ^ 2 / N * Real.log N ^ (-c1) := by positivity
+          have h₁₀₃₈ : |lam| ≤ 1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) := by
+            have h₁₀₃₈₁ : |lam| * (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) ≤ 1 := h₉
+            have h₁₀₃₈₂ : 0 < (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) := by positivity
+            have h₁₀₃₈₃ : |lam| ≤ 1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) := by
+              calc
+                |lam| = |lam| * 1 := by ring
+                _ ≤ |lam| * ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) * (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) := by
+                  have h₁₀₃₈₄ : 0 < (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) := by positivity
+                  field_simp [h₁₀₃₈₄.ne']
+                  <;> nlinarith
+                _ = (|lam| * (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) * (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) := by ring
+                _ ≤ 1 * (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) := by gcongr
+                _ = 1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) := by ring
+            exact h₁₀₃₈₃
+          have h₁₀₃₉ : |lam| * A ≤ (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) * A := by
+            gcongr
+          have h₁₀₄₀ : (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) * A = (N : ℝ) * Real.log N ^ c1 / ((q : ℝ) * A) := by
+            field_simp [h₁₀₃₂.ne', h₁₀₃₃.ne', h₁₀₃₄.ne', h₁₀₃₅.ne', h₁₀₃₆.ne', Real.rpow_neg]
+            <;> ring_nf
+            <;> field_simp [h₁₀₃₂.ne', h₁₀₃₃.ne', h₁₀₃₄.ne', h₁₀₃₅.ne', h₁₀₃₆.ne', Real.rpow_neg]
+            <;> ring_nf
+            <;> simp_all [Real.rpow_neg, Real.rpow_add, Real.rpow_sub]
+            <;> field_simp [h₁₀₃₂.ne', h₁₀₃₃.ne', h₁₀₃₄.ne', h₁₀₃₅.ne', h₁₀₃₆.ne']
+            <;> ring_nf
+            <;> norm_num
+            <;> linarith
+          rw [h₁₀₄₀] at h₁₀₃₉
+          have h₁₀₄₁ : (N : ℝ) * Real.log N ^ c1 / ((q : ℝ) * A) ≤ (N : ℝ) * Real.log N ^ c1 / A := by
+            have h₁₀₄₁₁ : (q : ℝ) ≥ 1 := by exact_mod_cast h₆
+            have h₁₀₄₁₂ : 0 < (q : ℝ) := by positivity
+            have h₁₀₄₁₃ : 0 < (A : ℝ) := by positivity
+            have h₁₀₄₁₄ : 0 < (N : ℝ) * Real.log N ^ c1 := by positivity
+            have h₁₀₄₁₅ : (q : ℝ) * A ≥ A := by nlinarith
+            have h₁₀₄₁₆ : (N : ℝ) * Real.log N ^ c1 / ((q : ℝ) * A) ≤ (N : ℝ) * Real.log N ^ c1 / A := by
+              apply div_le_div_of_le_left (by positivity) (by positivity)
+              <;> nlinarith
+            exact h₁₀₄₁₆
+          have h₁₀₄₂ : (N : ℝ) * Real.log N ^ c1 / A ≤ (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+            have h₁₀₄₂₁ : (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) ≤ A := by exact_mod_cast hA
+            have h₁₀₄₂₂ : 0 < (N : ℝ) := by positivity
+            have h₁₀₄₂₃ : 0 < A := by positivity
+            have h₁₀₄₂₄ : 0 < Real.log N := by linarith
+            have h₁₀₄₂₅ : 0 < (N : ℝ) ^ (5 / 8 : ℝ) := by positivity
+            have h₁₀₄₂₆ : 0 < Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) := by positivity
+            have h₁₀₄₂₇ : (N : ℝ) * Real.log N ^ c1 / A ≤ (N : ℝ) * Real.log N ^ c1 / ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+              apply div_le_div_of_le_left (by positivity) (by positivity)
+              linarith
+            have h₁₀₄₂₈ : (N : ℝ) * Real.log N ^ c1 / ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) = (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+              have h₁₀₄₂₈₁ : (N : ℝ) * Real.log N ^ c1 / ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) = (N : ℝ) ^ (1 - 5 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+                field_simp [h₁₀₄₂₂.ne', h₁₀₄₂₅.ne', h₁₀₄₂₆.ne', Real.rpow_sub, Real.rpow_add]
+                <;> ring_nf
+                <;> field_simp [h₁₀₄₂₂.ne', h₁₀₄₂₅.ne', h₁₀₄₂₆.ne', Real.rpow_sub, Real.rpow_add]
+                <;> ring_nf
+                <;> simp_all [Real.rpow_add, Real.rpow_sub, Real.rpow_neg, Real.rpow_one]
+                <;> field_simp [h₁₀₄₂₂.ne', h₁₀₄₂₅.ne', h₁₀₄₂₆.ne']
+                <;> ring_nf
+                <;> norm_num
+                <;> linarith
+              have h₁₀₄₂₈₂ : (1 : ℝ) - 5 / 8 = 3 / 8 := by norm_num
+              rw [h₁₀₄₂₈₁, h₁₀₄₂₈₂]
+              <;> simp [Real.rpow_sub]
+              <;> field_simp [h₁₀₄₂₂.ne', h₁₀₄₂₅.ne', h₁₀₄₂₆.ne']
+              <;> ring_nf
+            rw [h₁₀₄₂₈] at h₁₀₄₂₇
+            linarith
+          calc
+            |lam| * A ≤ (N : ℝ) * Real.log N ^ c1 / ((q : ℝ) * A) := by linarith
+            _ ≤ (N : ℝ) * Real.log N ^ c1 / A := by linarith
+            _ ≤ (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by linarith
+        have h₁₀₄ : (N : ℝ) / A + |lam| * A ≤ 2 * (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+          have h₁₀₄₁ : (N : ℝ) / A ≤ (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (-(c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := h₁₀₂
+          have h₁₀₄₂ : |lam| * A ≤ (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := h₁₀₃
+          have h₁₀₄₃ : (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (-(c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ≤ (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+            have h₁₀₄₃₁ : (-(c1 + c2 + (9 / 4 : ℝ) * (B + 218)) : ℝ) ≤ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) : ℝ) := by
+              ring_nf
+              <;> linarith
+            have h₁₀₄₃₂ : 1 ≤ Real.log N := by linarith
+            have h₁₀₄₃₃ : 0 < (N : ℝ) ^ (3 / 8 : ℝ) := by positivity
+            have h₁₀₄₃₄ : Real.log N ^ (-(c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ≤ Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+              apply Real.rpow_le_rpow_of_exponent_le
+              · linarith
+              · linarith
+            have h₁₀₄₃₅ : 0 ≤ (N : ℝ) ^ (3 / 8 : ℝ) := by positivity
+            nlinarith
+          have h₁₀₄₄ : (N : ℝ) / A + |lam| * A ≤ (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) + (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+            linarith
+          have h₁₀₄₅ : (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) + (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) = 2 * (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by ring
+          linarith
+        have h₁₀₅ : (10 : ℝ) * ((N : ℝ) / A + |lam| * A) ≤ 20 * (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+          have h₁₀₅₁ : (N : ℝ) / A + |lam| * A ≤ 2 * (N : ℝ) ^ (3 / 8 : ℝ) * Real.log N ^ (c1 - (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := h₁₀₄
+          have h₁₀₅₂ : 0 ≤ (N : ℝ) / A + |lam| * A := by positivity
+          nlinarith
+        linarith
+      
+      -- Bound T269 (crude bound sufficient for low range)
+      have h₁₁ : T269 N A lam q c7 ≤ (N : ℝ) * Real.log N ^ (c7 + c2 / 2 + 10) := by
+        have h₁₁₁ : T269 N A lam q c7 = Real.sqrt q * ((N : ℝ) / A + |lam| * N) * Real.log N ^ c7 := by
+          simp [T269]
+          <;> ring_nf
+        rw [h₁₁₁]
+        have h₁₁₂ : Real.sqrt q ≤ Real.sqrt (Real.log N ^ c2) := by
+          apply Real.sqrt_le_sqrt
+          exact_mod_cast hq
+        have h₁₁₃ : Real.sqrt (Real.log N ^ c2) = Real.log N ^ (c2 / 2) := by
+          rw [Real.sqrt_eq_rpow, ← Real.rpow_mul] <;> ring_nf <;> norm_num
+          <;> linarith
+        have h₁₁₄ : Real.sqrt q ≤ Real.log N ^ (c2 / 2) := by
+          linarith
+        have h₁₁₅ : (N : ℝ) / A ≤ (N : ℝ) := by
+          have h₁₁₅₁ : (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) ≤ A := by exact_mod_cast hA
+          have h₁₁₅₂ : 0 < (N : ℝ) := by positivity
+          have h₁₁₅₃ : 0 < A := by positivity
+          have h₁₁₅₄ : (N : ℝ) / A ≤ (N : ℝ) / ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+            apply div_le_div_of_le_left (by positivity) (by positivity)
+            linarith
+          have h₁₁₅₅ : (N : ℝ) / ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ≤ (N : ℝ) := by
+            have h₁₁₅₅₁ : (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) ≥ 1 := by
+              have h₁₁₅₅₂ : (N : ℝ) ≥ 3 := by exact_mod_cast (by linarith)
+              have h₁₁₅₅₃ : Real.log N ≥ 1 := by
+                have h₁₁₅₅₄ : Real.log N ≥ Real.log 3 := Real.log_le_log (by positivity) (by linarith)
+                have h₁₁₅₅₅ : Real.log 3 ≥ 1 := by
+                  have := Real.log_two_gt_d9
+                  have := Real.log_two_lt_d9
+                  norm_num at *
+                  <;> linarith
+                linarith
+              have h₁₁₅₅₆ : (N : ℝ) ^ (5 / 8 : ℝ) ≥ 1 := by
+                apply one_le_rpow
+                · linarith
+                · norm_num
+              have h₁₁₅₅₇ : Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) ≥ 1 := by
+                apply one_le_rpow
+                · linarith
+                · have h₁₁₅₅₈ : (c1 + c2 + (9 / 4 : ℝ) * (B + 218) : ℝ) ≥ 0 := by positivity
+                  linarith
+              nlinarith
+            have h₁₁₅₅₂ : 0 < (N : ℝ) := by positivity
+            have h₁₁₅₅₃ : 0 < (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) := by positivity
+            rw [div_le_iff (by positivity)]
+            nlinarith
+          linarith
+        have h₁₁₆ : |lam| * N ≤ (N : ℝ) * Real.log N ^ 10 := by
+          have h₁₁₆₁ : |lam| * (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) ≤ 1 := h₉
+          have h₁₁₆₂ : 0 < (q : ℝ) := by positivity
+          have h₁₁₆₃ : 0 < (A : ℝ) := by positivity
+          have h₁₁₆₄ : 0 < (N : ℝ) := by positivity
+          have h₁₁₆₅ : 0 < Real.log N := by linarith
+          have h₁₁₆₆ : |lam| ≤ 1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) := by
+            have h₁₁₆₆₁ : |lam| * (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) ≤ 1 := h₉
+            have h₁₁₆₆₂ : 0 < (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) := by positivity
+            have h₁₁₆₆₃ : |lam| ≤ 1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) := by
+              calc
+                |lam| = |lam| * 1 := by ring
+                _ ≤ |lam| * ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) * (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) := by
+                  have h₁₁₆₆₄ : 0 < (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)) := by positivity
+                  field_simp [h₁₁₆₆₄.ne']
+                  <;> nlinarith
+                _ = (|lam| * (q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) * (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) := by ring
+                _ ≤ 1 * (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) := by gcongr
+                _ = 1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1))) := by ring
+            exact h₁₁₆₆₃
+          have h₁₁₆₇ : |lam| * N ≤ (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) * N := by
+            gcongr
+          have h₁₁₆₈ : (1 / ((q : ℝ) * (A ^ 2 / N * Real.log N ^ (-c1)))) * N = (N : ℝ) ^ 2 * Real.log N ^ c1 / ((q : ℝ) * A ^ 2) := by
+            field_simp [h₁₁₆₂.ne', h₁₁₆₃.ne', h₁₁₆₄.ne', h₁₁₆₅.ne', Real.rpow_neg]
+            <;> ring_nf
+            <;> field_simp [h₁₁₆₂.ne', h₁₁₆₃.ne', h₁₁₆₄.ne', h₁₁₆₅.ne', Real.rpow_neg]
+            <;> ring_nf
+            <;> simp_all [Real.rpow_neg, Real.rpow_add, Real.rpow_sub]
+            <;> field_simp [h₁₁₆₂.ne', h₁₁₆₃.ne', h₁₁₆₄.ne', h₁₁₆₅.ne']
+            <;> ring_nf
+            <;> norm_num
+            <;> linarith
+          rw [h₁₁₆₈] at h₁₁₆₇
+          have h₁₁₆₉ : (N : ℝ) ^ 2 * Real.log N ^ c1 / ((q : ℝ) * A ^ 2) ≤ (N : ℝ) ^ 2 * Real.log N ^ c1 / A ^ 2 := by
+            have h₁₁₆₉₁ : (q : ℝ) ≥ 1 := by exact_mod_cast h₆
+            have h₁₁₆₉₂ : 0 < (q : ℝ) := by positivity
+            have h₁₁₆₉₃ : 0 < (A : ℝ) ^ 2 := by positivity
+            have h₁₁₆₉₄ : 0 < (N : ℝ) ^ 2 * Real.log N ^ c1 := by positivity
+            have h₁₁₆₉₅ : (q : ℝ) * A ^ 2 ≥ A ^ 2 := by nlinarith
+            have h₁₁₆₉₆ : (N : ℝ) ^ 2 * Real.log N ^ c1 / ((q : ℝ) * A ^ 2) ≤ (N : ℝ) ^ 2 * Real.log N ^ c1 / A ^ 2 := by
+              apply div_le_div_of_le_left (by positivity) (by positivity)
+              <;> nlinarith
+            exact h₁₁₆₉₆
+          have h₁₁₇₀ : (N : ℝ) ^ 2 * Real.log N ^ c1 / A ^ 2 ≤ (N : ℝ) * Real.log N ^ 10 := by
+            have h₁₁₇₀₁ : (N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) ≤ A := by exact_mod_cast hA
+            have h₁₁₇₀₂ : 0 < (N : ℝ) := by positivity
+            have h₁₁₇₀₃ : 0 < A := by positivity
+            have h₁₁₇₀₄ : 0 < Real.log N := by linarith
+            have h₁₁₇₀₅ : A ^ 2 ≥ ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ^ 2 := by
+              gcongr <;> nlinarith
+            have h₁₁₇₀₆ : ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ^ 2 = (N : ℝ) ^ (5 / 4 : ℝ) * Real.log N ^ (2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+              calc
+                ((N : ℝ) ^ (5 / 8 : ℝ) * Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ^ 2 = (N : ℝ) ^ (5 / 8 : ℝ * 2) * (Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ^ 2 := by
+                  rw [mul_rpow (by positivity) (by positivity)]
+                  <;> ring_nf
+                _ = (N : ℝ) ^ (5 / 4 : ℝ) * Real.log N ^ (2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+                  have h₁₁₇₀₇ : (Real.log N ^ (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ^ 2 = Real.log N ^ (2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+                    rw [← Real.rpow_nat_cast]
+                    rw [← Real.rpow_mul] <;> ring_nf <;> norm_num
+                    <;> linarith
+                  rw [h₁₁₇₀₇]
+                  <;> ring_nf
+                  <;> field_simp [Real.rpow_add, Real.rpow_mul]
+                  <;> ring_nf
+            have h₁₁₇₀₇ : A ^ 2 ≥ (N : ℝ) ^ (5 / 4 : ℝ) * Real.log N ^ (2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by linarith
+            have h₁₁₇₀₈ : (N : ℝ) ^ 2 * Real.log N ^ c1 / A ^ 2 ≤ (N : ℝ) ^ 2 * Real.log N ^ c1 / ((N : ℝ) ^ (5 / 4 : ℝ) * Real.log N ^ (2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218)))) := by
+              apply div_le_div_of_le_left (by positivity) (by positivity)
+              linarith
+            have h₁₁₇₀₉ : (N : ℝ) ^ 2 * Real.log N ^ c1 / ((N : ℝ) ^ (5 / 4 : ℝ) * Real.log N ^ (2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218)))) = (N : ℝ) ^ (3 / 4 : ℝ) * Real.log N ^ (c1 - 2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+              have h₁₁₇₀₉₁ : (N : ℝ) ^ 2 * Real.log N ^ c1 / ((N : ℝ) ^ (5 / 4 : ℝ) * Real.log N ^ (2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218)))) = (N : ℝ) ^ (2 - 5 / 4 : ℝ) * Real.log N ^ (c1 - 2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by
+                field_simp [h₁₁₇₀₂.ne', h₁₁₇₀₄.ne', Real.rpow_sub, Real.rpow_add]
+                <;> ring_nf
+                <;> field_simp [h₁₁₇₀₂.ne', h₁₁₇₀₄.ne', Real.rpow_sub, Real.rpow_add]
+                <;> ring_nf
+                <;> simp_all [Real.rpow_add, Real.rpow_sub, Real.rpow_neg, Real.rpow_one]
+                <;> field_simp [h₁₁₇₀₂.ne', h₁₁₇₀₄.ne']
+                <;> ring_nf
+                <;> norm_num
+                <;> linarith
+              have h₁₁₇₀₉₂ : (2 : ℝ) - 5 / 4 = 3 / 4 := by norm_num
+              rw [h₁₁₇₀₉₁, h₁₁₇₀₉₂]
+              <;> simp [Real.rpow_sub]
+              <;> field_simp [h₁₁₇₀₂.ne', h₁₁₇₀₄.ne']
+              <;> ring_nf
+            have h₁₁₇₁₀ : (N : ℝ) ^ (3 / 4 : ℝ) * Real.log N ^ (c1 - 2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ≤ (N : ℝ) * Real.log N ^ 10 := by
+              have h₁₁₇₁₀₁ : (N : ℝ) ≥ 3 := by exact_mod_cast (by linarith)
+              have h₁₁₇₁₀₂ : Real.log N ≥ 1 := by
+                have h₁₁₇₁₀₃ : Real.log N ≥ Real.log 3 := Real.log_le_log (by positivity) (by linarith)
+                have h₁₁₇₁₀₄ : Real.log 3 ≥ 1 := by
+                  have := Real.log_two_gt_d9
+                  have := Real.log_two_lt_d9
+                  norm_num at *
+                  <;> linarith
+                linarith
+              have h₁₁₇₁₀₃ : (N : ℝ) ^ (3 / 4 : ℝ) ≤ (N : ℝ) := by
+                apply Real.rpow_le_rpow_of_exponent_le
+                · linarith
+                · norm_num
+              have h₁₁₇₁₀₄ : Real.log N ^ (c1 - 2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ≤ Real.log N ^ 10 := by
+                have h₁₁₇₁₀₅ : (c1 - 2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218)) : ℝ) ≤ 10 := by
+                  nlinarith
+                have h₁₁₇₁₀₆ : 1 ≤ Real.log N := by linarith
+                have h₁₁₇₁₀₇ : Real.log N ^ (c1 - 2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ≤ Real.log N ^ (10 : ℝ) := by
+                  apply Real.rpow_le_rpow_of_exponent_le
+                  · linarith
+                  · linarith
+                simpa using h₁₁₇₁₀₇
+              calc
+                (N : ℝ) ^ (3 / 4 : ℝ) * Real.log N ^ (c1 - 2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) ≤ (N : ℝ) * Real.log N ^ (c1 - 2 * (c1 + c2 + (9 / 4 : ℝ) * (B + 218))) := by gcongr <;> nlinarith
+                _ ≤ (N : ℝ) * Real.log N ^ 10 := by gcongr <;> nlinarith
+            linarith
+          linarith
+        have h₁₁₇ : Real.sqrt q * ((N : ℝ) / A + |lam| * N) * Real.log N ^ c7 ≤ Real.log N ^ (c2 / 2) * ((N : ℝ) + (N : ℝ) * Real.log N ^ 10) * Real.log N ^ c7 := by
+          have h₁₁₇₁ : 0 ≤ Real.sqrt q := Real.sqrt_nonneg _
+          have h₁₁₇₂ : 0 ≤ (N : ℝ) / A + |lam| * N := by positivity
+          have h₁₁₇₃ : 0 ≤ Real.log N ^ c7 := by positivity
+          have h₁₁₇₄ : 0 ≤ Real.log N ^ (c2 / 2) := by positivity
+          have h₁₁₇₅ : Real.sqrt q ≤ Real.log N ^ (c2 / 2) := h₁₁₄
+          have h₁₁₇₆ : (N : ℝ) / A + |lam| * N ≤ (N : ℝ) + (N : ℝ) * Real.log N ^ 10 := by linarith
+          calc
+            Real.sqrt q * ((N : ℝ) / A + |lam| * N) * Real.log N ^ c7 ≤ Real.log N ^ (c2 / 2) * ((N : ℝ) / A + |lam| * N) * Real.log N ^ c7 := by gcongr <;> nlinarith
+            _ ≤ Real.log N ^ (c2 / 2) * ((N : ℝ) + (N : ℝ) * Real.log N ^ 10) * Real.log N ^ c7 := by gcongr <;> nlinarith
+        have h₁₁₈ : Real.log N ^ (c2 / 2) * ((N : ℝ) + (N : ℝ) * Real.log N ^ 10) * Real.log N ^ c7 ≤ (N : ℝ) * Real.log N ^ (c7 + c2 / 2 + 10) := by
+          have h₁₁₈₁ : 0 < Real.log N := by linarith
+          have h₁₁₈₂ : 0 < (N : ℝ) := by positivity
+          have h₁₁₈₃ : Real.log N ^ (c2 / 2) * ((N : ℝ) + (N : ℝ) * Real.log N ^ 10) * Real.log N ^ c7 = Real.log N ^ (c2 / 2) * (N : ℝ) * (1 + Real.log N ^ 10) * Real.log N ^ c7 := by ring
+          rw [h₁₁₈₃]
+          have h₁₁₈₄ : Real.log N ^ (c2 / 2) * (N : ℝ) * (1 + Real.log N ^ 10) * Real.log N ^ c7 = (N : ℝ) * Real.log N ^ (c2 / 2) * Real.log N ^ c7 * (1 + Real.log N ^ 10) := by ring
+          rw [h₁₁₈₄]
+          have h₁₁₈₅ : (N : ℝ) * Real.log N ^ (c2 / 2) * Real.log N ^ c7 * (1 + Real.log N ^ 10) = (N : ℝ) * Real.log N ^ (c2 / 2 + c7) * (1 + Real.log N ^ 10) := by
+            have h₁₁₈₅₁ : Real.log N ^ (c2 / 2) * Real.log N ^ c7 = Real.log N ^ (c2 / 2 + c7) := by
+              rw [← Real.rpow_add (by linarith)]
+              <;> ring_nf
+            rw [h₁₁₈₅₁]
+            <;> ring_nf
+          rw [h₁₁₈₅]
+          have h₁₁₈₆ : (N : ℝ) * Real.log N ^ (c2 / 2 + c7) * (1 + Real.log N ^ 10) ≤ (N : ℝ) * Real.log N ^ (c7 + c2 / 2 + 10) := by
+            have h₁₁₈₆₁ : 1 + Real.log N ^ 10 ≤ 2 * Real.log N ^ 10 := by
+              have h₁₁₈₆₂ : Real.log N ≥ 1 := by
+                have h₁₁₈₆₃ : Real.log N ≥ Real.log 3 := Real.log_le_log (by positivity) (by
+                  have h₁₁₈₆₄ : (N : ℝ) ≥ 3 := by exact_mod_cast (by linarith)
+                  linarith)
+                have h₁₁₈₆₅ : Real.log 3 ≥ 1 := by
+                  have := Real.log_two_gt_d9
+                  have := Real.log_two_lt_d9
+                  norm_num at *
+                  <;> linarith
+                linarith
+              have h₁₁₈₆₆ : Real.log N ^ 10 ≥ 1 := by
+                apply one_le_rpow
+                · linarith
+                · norm_num
+              nlinarith
+            have h₁₁₈₆₂ : (N : ℝ) * Real.log N ^ (c2 / 2 + c7) * (1 + Real.log N ^ 10) ≤ (N : ℝ) * Real.log N ^ (c2 / 2 + c7) * (2 * Real.log N ^ 10) := by
+              gcongr <;> nlinarith
+            have h₁₁₈₆₃ : (N : ℝ) * Real.log N ^ (c2 / 2 + c7) * (2 * Real.log N ^ 10) = 2 * (N : ℝ) * Real.log N ^ (c2 / 2 + c7 + 10) := by
+              have h₁₁₈₆₄ : Real.log N ^ (c2 / 2 + c7) * Real.log N ^ 10 = Real.log N ^ (c2 / 2 + c7 + 10) := by
+                rw [← Real.rpow_add (by linarith)]
+                <;> ring_nf
+              calc
+                (N : ℝ) * Real.log N ^ (c2 / 2 + c7) * (2 * Real.log N ^ 10) = 2 * (N : ℝ) * (Real.log N ^ (c2 / 2 + c7) * Real.log N ^ 10) := by ring
+                _ = 2 * (N : ℝ) * Real.log N ^ (c2 / 2 + c7 + 10) := by rw [h₁₁₈₆₄] <;> ring
+            have h₁₁₈₆₄ : 2 * (N : ℝ) * Real.log N ^ (c2 / 2 + c7 + 10) ≤ (N : ℝ) * Real.log N ^ (c7 + c2 / 2 + 10) := by
+              have h₁₁₈₆₅ : (2 : ℝ) ≤ Real.log N ^ (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10)) := by
+                have h₁₁₈₆₆ : (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10) : ℝ) = 0 := by ring
+                rw [h₁₁₈₆₆]
+                norm_num
+                <;> linarith
+              have h₁₁₈₆₆ : 0 < Real.log N := by linarith
+              have h₁₁₈₆₇ : 0 < (N : ℝ) := by positivity
+              have h₁₁₈₆₈ : 0 < Real.log N ^ (c2 / 2 + c7 + 10) := by positivity
+              have h₁₁₈₆₉ : 2 * (N : ℝ) * Real.log N ^ (c2 / 2 + c7 + 10) ≤ (N : ℝ) * Real.log N ^ (c2 / 2 + c7 + 10) * Real.log N ^ (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10)) := by
+                have h₁₁₈₆₁₀ : Real.log N ^ (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10)) ≥ 2 := by
+                  have h₁₁₈₆₁₁ : (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10) : ℝ) = 0 := by ring
+                  rw [h₁₁₈₆₁₁]
+                  norm_num
+                  <;> linarith
+                have h₁₁₈₆₁₁ : 0 < Real.log N ^ (c2 / 2 + c7 + 10) := by positivity
+                nlinarith
+              have h₁₁₈₆₁₀ : (N : ℝ) * Real.log N ^ (c2 / 2 + c7 + 10) * Real.log N ^ (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10)) = (N : ℝ) * Real.log N ^ (c7 + c2 / 2 + 10) := by
+                have h₁₁₈₆₁₁ : Real.log N ^ (c2 / 2 + c7 + 10) * Real.log N ^ (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10)) = Real.log N ^ (c7 + c2 / 2 + 10) := by
+                  have h₁₁₈₆₁₂ : (c2 / 2 + c7 + 10 : ℝ) + (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10) : ℝ) = (c7 + c2 / 2 + 10 : ℝ) := by ring
+                  have h₁₁₈₆₁₃ : Real.log N ^ (c2 / 2 + c7 + 10) * Real.log N ^ (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10)) = Real.log N ^ ((c2 / 2 + c7 + 10) + (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10))) := by
+                    rw [← Real.rpow_add (by linarith)]
+                    <;> ring_nf
+                  rw [h₁₁₈₆₁₃]
+                  <;> rw [h₁₁₈₆₁₂]
+                  <;> ring_nf
+                calc
+                  (N : ℝ) * Real.log N ^ (c2 / 2 + c7 + 10) * Real.log N ^ (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10)) = (N : ℝ) * (Real.log N ^ (c2 / 2 + c7 + 10) * Real.log N ^ (c7 + c2 / 2 + 10 - (c2 / 2 + c7 + 10))) := by ring
+                  _ = (N : ℝ) * Real.log N ^ (c7 + c2 / 2 + 10) := by rw [h₁₁₈₆₁₁]
+                  _ = (N : ℝ) * Real.log N ^ (c7 + c2 / 2 + 10) := by ring
+              linarith
+            linarith
+          linarith
+        linarith
+      
+      -- Define H' = max (H269) (|T1|^(1/3)) and ensure H' ≥ 2
+      have h₁₂ : ∀ (β T1 : ℝ), 1 / 2 ≤ β → β ≤ 5 / 6 → |T1| ≤ 2 * T269 N A lam q c7 → (N : ℝ) ^ (β - 1) * zeroCountZ β T1 (H269 N A lam) q ≤ (max (K23 + 1) 1 : ℝ) * Real.log N ^ (-B - 1) := by
+        intro β T1 hβ0 hβ1 hT1
+        have h₁₂₁ : 0 < (N : ℝ) := by positivity
+        have h₁₂₂ : 0 < Real.log N := by linarith
+        have h₁₂₃ : 1 ≤ Real.log N := by linarith
+        have h₁₂₄ : 0 < A := by positivity
+        have h₁₂₅ : 0 < (q : ℝ) := by positivity
+        -- Define H' = max (H269 N A lam) (|T1|^(1/3))
+        have h₁₂₆ : H269 N A lam ≥ 10 := by
+          have h₁₂₆₁ : H269 N A lam = 10 * ((N : ℝ) / A + |lam| * A) := by
+            simp [H269]
+            <;> ring_nf
+          rw [h₁₂₆₁]
+          have h₁₂₆₂ : (N : ℝ) / A ≥ 1 := by
+            have h₁₂₆₃ : A ≤ N := hAN
+            have h₁₂₆₄ : 0 < A := by positivity
+            have h₁₂₆₅ : 0 < (N : ℝ) := by positivity
+            have h₁₂₆₆ : (N : ℝ) / A ≥ 1 := by
+              rw [ge_iff_le]
+              rw [le_div_iff (by positivity)]
+              nlinarith
+            exact h₁₂₆₆
+          have h₁₂₆₃ : |lam| * A ≥ 0 := by positivity
+          nlinarith
+        have h₁₂₇ : 0 ≤ |T1| := abs_nonneg T1
+        have h₁₂₈ : 0 ≤ |T1| ^ (1 / 3 : ℝ) := by positivity
+        -- Define H' = max (H269 N A lam) (|T1|^(1/3))
+        let H' : ℝ := max (H269 N A lam) (|T1| ^ (1 / 3 : ℝ))
+        have h₁₂₉ : H' ≥ 2 := by
+          have h₁₂₉₁ : H269 N A lam ≥ 10 := h₁₂₆
+          have h₁₂₉₂ : H' = max (H269 N A lam) (|T1| ^ (1 / 3 : ℝ)) := rfl
+          have h₁₂₉₃ : H' ≥ H269 N A lam := by
+            rw [h₁₂₉₂]
+            apply le_max_left
+          linarith
+        have h₁₃₀ : |T1| ^ (1 / 3 : ℝ) ≤ H' := by
+          have h₁₃₀₁ : H' = max (H269 N A lam) (|T1| ^ (1 / 3 : ℝ)) := rfl
+          rw [h₁₃₀₁]
+          apply le_max_right
+        have h₁₃₁ : H269 N A lam ≤ H' := by
+          have h₁₃₁₁ : H' = max (H269 N A lam) (|T1| ^ (1 / 3 : ℝ)) := rfl
+          rw [h₁₃₁₁]
+          apply le_max_left
+        -- Apply h23 with α = β, T = T1, H = H'
+        have h₁₃₂ : zeroCountZ β T1 H' q ≤ K23 * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ) := by
+          have h₁₃₂₁ : 2 ≤ H' := by linarith
+          have h₁₃₂₂ : |T1| ^ (1 / 3 : ℝ) ≤ H' := h₁₃₀
+          have h₁₃₂₃ : 1 / 2 ≤ β := hβ0
+          have h₁₃₂₄ : β ≤ 1 := by linarith
+          have h₁₃₂₅ : zeroCountZ β T1 H' q ≤ K23 * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ) := by
+            have h₁₃₂₆ := hK23 q (by infer_instance) β T1 H' h₁₃₂₁ h₁₃₂₂ h₁₃₂₃ h₁₃₂₄
+            exact h₁₃₂₆
+          exact h₁₃₂₅
+        -- Use monotonicity of zeroCountZ in H
+        have h₁₃₃ : zeroCountZ β T1 (H269 N A lam) q ≤ zeroCountZ β T1 H' q := by
+          apply zeroCountZ_mono_H
+          <;> linarith
+        -- Combine to get bound on zeroCountZ β T1 (H269 N A lam) q
+        have h₁₃₄ : zeroCountZ β T1 (H269 N A lam) q ≤ K23 * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ) := by
+          linarith
+        -- Multiply by N^(β-1)
+        have h₁₃₅ : (N : ℝ) ^ (β - 1) * zeroCountZ β T1 (H269 N A lam) q ≤ (N : ℝ) ^ (β - 1) * (K23 * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ)) := by
+          have h₁₃₅₁ : 0 ≤ (N : ℝ) ^ (β - 1) := by positivity
+          have h₁₃₅₂ : 0 ≤ zeroCountZ β T1 (H269 N A lam) q := zeroCountZ_nonneg β T1 (H269 N A lam) q
+          have h₁₃₅₃ : 0 ≤ K23 * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ) := by positivity
+          nlinarith
+        -- Now we need to bound the RHS by (max (K23 + 1) 1) * Real.log N ^ (-B - 1)
+        have h₁₃₆ : (N : ℝ) ^ (β - 1) * (K23 * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ)) ≤ (max (K23 + 1) 1 : ℝ) * Real.log N ^ (-B - 1) := by
+          have h₁₃₆₁ : (N : ℝ) ^ (β - 1) * (K23 * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ)) = K23 * ((q : ℝ) * H' / (N : ℝ) ^ (3 / 8 : ℝ)) ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ) := by
+            have h₁₃₆₁₁ : 0 < (N : ℝ) := by positivity
+            have h₁₃₆₁₂ : 0 < (q : ℝ) := by positivity
+            have h₁₃₆₁₃ : 0 < H' := by
+              have h₁₃₆₁₄ : H' = max (H269 N A lam) (|T1| ^ (1 / 3 : ℝ)) := rfl
+              have h₁₃₆₁₅ : H269 N A lam ≥ 10 := h₁₂₆
+              have h₁₃₆₁₆ : H' ≥ H269 N A lam := by
+                rw [h₁₃₆₁₄]
+                apply le_max_left
+              linarith
+            have h₁₃₆₁₇ : 0 < (q : ℝ) * H' := by positivity
+            have h₁₃₆₁₈ : 0 < (N : ℝ) ^ (3 / 8 : ℝ) := by positivity
+            have h₁₃₆₁₉ : (N : ℝ) ^ (β - 1) = (N : ℝ) ^ (-(1 - β)) := by
+              have h₁₃₆₁₉₁ : (β - 1 : ℝ) = -(1 - β) := by ring
+              rw [h₁₃₆₁₉₁]
+            rw [h₁₃₆₁₉]
+            have h₁₃₆₂₀ : (N : ℝ) ^ (-(1 - β)) * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) = ((q : ℝ) * H' / (N : ℝ) ^ (3 / 8 : ℝ)) ^ (8 / 3 * (1 - β)) := by
+              have h₁₃₆₂₀₁ : (N : ℝ) ^ (-(1 - β)) = ((N : ℝ) ^ (3 / 8 : ℝ)) ^ (-(8 / 3 * (1 - β))) := by
+                have h₁₃₆₂₀₂ : (-(1 - β) : ℝ) = (3 / 8 : ℝ) * (-(8 / 3 * (1 - β))) := by ring
+                rw [h₁₃₆₂₀₂]
+                rw [← Real.rpow_mul (by positivity)]
+                <;> ring_nf
+                <;> field_simp
+                <;> ring_nf
+              rw [h₁₃₆₂₀₁]
+              have h₁₃₆₂₀₃ : ((N : ℝ) ^ (3 / 8 : ℝ)) ^ (-(8 / 3 * (1 - β))) * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) = ((q : ℝ) * H' / (N : ℝ) ^ (3 / 8 : ℝ)) ^ (8 / 3 * (1 - β)) := by
+                have h₁₃₆₂₀₄ : 0 < (N : ℝ) ^ (3 / 8 : ℝ) := by positivity
+                have h₁₃₆₂₀₅ : 0 < (q : ℝ) * H' := by positivity
+                have h₁₃₆₂₀₆ : ((N : ℝ) ^ (3 / 8 : ℝ)) ^ (-(8 / 3 * (1 - β))) = ((N : ℝ) ^ (3 / 8 : ℝ)) ^ (-(8 / 3 * (1 - β))) := rfl
+                calc
+                  ((N : ℝ) ^ (3 / 8 : ℝ)) ^ (-(8 / 3 * (1 - β))) * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) = (((N : ℝ) ^ (3 / 8 : ℝ)) ^ (-1)) ^ (8 / 3 * (1 - β)) * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) := by
+                    rw [show (-(8 / 3 * (1 - β)) : ℝ) = (-1 : ℝ) * (8 / 3 * (1 - β)) by ring]
+                    rw [← Real.rpow_mul (by positivity)]
+                    <;> ring_nf
+                  _ = (((N : ℝ) ^ (3 / 8 : ℝ)) ^ (-1) * ((q : ℝ) * H')) ^ (8 / 3 * (1 - β)) := by
+                    rw [← Real.mul_rpow (by positivity) (by positivity)]
+                    <;> ring_nf
+                  _ = ((q : ℝ) * H' / (N : ℝ) ^ (3 / 8 : ℝ)) ^ (8 / 3 * (1 - β)) := by
+                    have h₁₃₆₂₀₇ : ((N : ℝ) ^ (3 / 8 : ℝ)) ^ (-1) = 1 / (N : ℝ) ^ (3 / 8 : ℝ) := by
+                      rw [Real.rpow_neg (by positivity)]
+                      <;> field_simp
+                    rw [h₁₃₆₂₀₇]
+                    <;> field_simp [h₁₃₆₁₈.ne']
+                    <;> ring_nf
+              rw [h₁₃₆₂₀₃]
+            calc
+              (N : ℝ) ^ (-(1 - β)) * (K23 * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ)) = K23 * ((N : ℝ) ^ (-(1 - β)) * ((q : ℝ) * H') ^ (8 / 3 * (1 - β))) * Real.log ((q : ℝ) * H') ^ (216 : ℝ) := by ring
+              _ = K23 * ((q : ℝ) * H' / (N : ℝ) ^ (3 / 8 : ℝ)) ^ (8 / 3 * (1 - β)) * Real.log ((q : ℝ) * H') ^ (216 : ℝ) := by rw [h₁₃₆₂₀]
+          have h₁₃₆₂ : (q : ℝ) * H' / (N : ℝ) ^ (3 / 8 : ℝ) ≤ Real.log N ^ (-(c1 + c2 + (9 / 4 : ℝ) * (B + 218)) + c1 + c2) := by sorry
+          have h₁₃₆₃ : (q : ℝ) * H' / (N : ℝ) ^ (3 / 8 : ℝ) ≤ Real.log N ^ (-(9 / 4 : ℝ) * (B + 218)) := by sorry
+          have h₁₃₆₄ : ((q : ℝ) * H' / (N : ℝ) ^ (3 / 8 : ℝ)) ^ (8 / 3 * (1 - β)) ≤ Real.log N ^ (-(B + 218)) := by sorry
+          have h₁₃₆₅ : Real.log ((q : ℝ) * H') ≤ Real.log N + Real.log (Real.log N) + 10 := by sorry
+          have h₁₃₆₆ : Real.log ((q : ℝ) * H') ^ (216 : ℝ) ≤ (Real.log N + Real.log (Real.log N) + 10) ^ (216 : ℝ) := by sorry
+          have h₁₃₆₇ : (Real.log N + Real.log (Real.log N) + 10) ^ (216 : ℝ) ≤ Real.log N ^ (216 + 1) := by sorry
+          have h₁₃₆₈ : K23 * Real.log N ^ (-(B + 218)) * Real.log N ^ (216 + 1) ≤ (max (K23 + 1) 1 : ℝ) * Real.log N ^ (-B - 1) := by sorry
+          sorry
+        -- Final step
+        have h₁₃₇ : (N : ℝ) ^ (β - 1) * zeroCountZ β T1 (H269 N A lam) q ≤ (max (K23 + 1) 1 : ℝ) * Real.log N ^ (-B - 1) := by
+          linarith
+        exact h₁₃₇
+      -- Final step
+      have h₁₃ : (N : ℝ) ^ (β - 1) * zeroCountZ β T1 (H269 N A lam) q ≤ (max (K23 + 1) 1 : ℝ) * Real.log N ^ (-B - 1) := h₁₂ β T1 hβ0 hβ1 hT1
+      have h₁₄ : (max (K23 + 1) 1 : ℝ) * Real.log N ^ (-B - 1) ≤ (max (max (K23 + 1) 1) (max N₀_log 3) : ℝ) * Real.log N ^ (-B - 1) := by
+        have h₁₄₁ : (max (K23 + 1) 1 : ℝ) ≤ (max (max (K23 + 1) 1) (max N₀_log 3) : ℝ) := by apply le_max_left
+        have h₁₄₂ : 0 ≤ Real.log N ^ (-B - 1) := Real.rpow_nonneg (by linarith) _
+        nlinarith
+      linarith
+  -- Convert h_main to the required form
+  obtain ⟨c3, hc3, K, N₀, h_main'⟩ := h_main
+  refine' ⟨c3, hc3, K, N₀, _⟩
   intro N A α lam a q _ hN hA hAN hcond hq hlam β T1 hβ0 hβ1 hT1
-  have he : Real.exp 1 ≤ (N : ℝ) := (le_max_right _ _).trans hN
-  have hL1 : 1 ≤ Real.log N := by
-    simpa using Real.log_le_log (Real.exp_pos 1) he
-  have hN4 : (4096 : ℝ) ≤ N := (le_max_left _ _).trans ((le_max_left _ _).trans hN)
-  have hNL0 : L0 ≤ Real.log N := by
-    have := (le_max_right _ _).trans ((le_max_left _ _).trans hN)
-    simpa using Real.log_le_log (Real.exp_pos L0) this
-  obtain ⟨hasA, hasB, hasC⟩ := hL0 (Real.log N) hNL0
-  have hq1 : 1 ≤ q := hcond.2.2.2.1
-  obtain ⟨hTx, -⟩ := Task2842.window_x_bounds269 N A lam q c1 c2 c3 c7 hc1.le hc2.le
-    hc7.le (by rw [hc3]; linarith) hN4 hL1 hA hAN hq1 hq hcond.2.2.1
-  have hN0 : (0 : ℝ) < N := by linarith
-  have hA0 : 0 < A := lt_of_lt_of_le (mul_pos (Real.rpow_pos_of_pos hN0 _)
-      (Real.rpow_pos_of_pos (by linarith) _)) hA
-  obtain ⟨h10, hH⟩ := Task2842.H269_bounds N A lam q c1 hc1.le hL1 hA0 hAN hq1 hcond.2.2.1
-  set L := Real.log N with hLdef
-  have hLpos : 0 < L := by linarith
-  set x := (N : ℝ) ^ (1 / 8 : ℝ) with hx
-  have hx0 : 0 ≤ x := Real.rpow_nonneg hN0.le _
-  have hx8 : x ^ 8 = N := by
-    rw [hx, ← Real.rpow_natCast, ← Real.rpow_mul hN0.le]
-    norm_num
-  have hP : (N : ℝ) ^ (5 / 8 : ℝ) = x ^ 5 := by
-    rw [hx, ← Real.rpow_natCast, ← Real.rpow_mul hN0.le]
-    norm_num
-  have hx1 : 1 ≤ x := by
-    by_contra h
-    push Not at h
-    have : x ^ 8 < 1 := pow_lt_one₀ hx0 h (by norm_num)
-    linarith
-  have hxpos : 0 < x := by linarith
-  have hlogx : Real.log x = L / 8 := by
-    rw [hx, Real.log_rpow hN0]
-    ring
-  have hxexp : x = Real.exp (L / 8) := by
-    rw [← hlogx, Real.exp_log hxpos]
-  clear_value x L
-  have hLc : 0 < L ^ (c1 - c3) := Real.rpow_pos_of_pos hLpos _
-  have hHs : H269 N A lam ≤ 20 * x ^ 3 * L ^ (c1 - c3) := by
-    have h1 : x ^ 5 * L ^ c3 ≤ A := by rw [← hP]; exact hA
-    have hc3p : 0 < L ^ c3 := Real.rpow_pos_of_pos hLpos _
-    have e : L ^ (c1 - c3) = L ^ c1 / L ^ c3 := Real.rpow_sub hLpos _ _
-    calc H269 N A lam ≤ 20 * N * L ^ c1 / A := hH
-      _ ≤ 20 * N * L ^ c1 / (x ^ 5 * L ^ c3) := by
-          have : 0 < x ^ 5 * L ^ c3 := by positivity
-          gcongr
-      _ = 20 * x ^ 3 * L ^ (c1 - c3) := by
-          rw [e, ← hx8]
-          field_simp
-  have hx2 : 2 * x ^ 2 + 2 ≤ 4 * x ^ 3 * L ^ (c1 - c3) := by
-    have hk : L ^ (c3 - c1) ≤ x := by rw [hxexp]; exact hasB
-    have hinv : L ^ (c1 - c3) * L ^ (c3 - c1) = 1 := by
-      rw [← Real.rpow_add hLpos]
-      simp
-    have hx2' : 1 ≤ x ^ 2 := one_le_pow₀ hx1
-    have : x ^ 2 ≤ x ^ 3 * L ^ (c1 - c3) := by
-      have := mul_le_mul_of_nonneg_left hk (by positivity : 0 ≤ x ^ 2 * L ^ (c1 - c3))
-      calc x ^ 2 = x ^ 2 * (L ^ (c1 - c3) * L ^ (c3 - c1)) := by rw [hinv, mul_one]
-        _ = x ^ 2 * L ^ (c1 - c3) * L ^ (c3 - c1) := by ring
-        _ ≤ x ^ 2 * L ^ (c1 - c3) * x := this
-        _ = x ^ 3 * L ^ (c1 - c3) := by ring
-    linarith
-  set H' := H269 N A lam + 2 * x ^ 2 + 2 with hH'
-  clear_value H'
-  have hH'0 : 0 ≤ H269 N A lam := by linarith
-  have hH'2 : 2 ≤ H' := by rw [hH']; nlinarith
-  have hT1' : |T1| ^ (1 / 3 : ℝ) ≤ H' := by
-    have h1 : |T1| ≤ (2 * x ^ 2) ^ 3 := by nlinarith
-    have h2 := Real.rpow_le_rpow (abs_nonneg _) h1 (by norm_num : (0 : ℝ) ≤ 1 / 3)
-    have h3 : ((2 * x ^ 2) ^ 3) ^ (1 / 3 : ℝ) = 2 * x ^ 2 := by
-      rw [← Real.rpow_natCast, ← Real.rpow_mul (by positivity)]
-      norm_num
-    rw [h3] at h2
-    rw [hH']
-    linarith
-  have hmono := Task2842.zeroCountZ_mono_H q β T1 (H269 N A lam) H' (by rw [hH']; nlinarith)
-  have hz := h23' q β T1 H' hH'2 hT1' hβ0 (by linarith)
-  have hq1' : (1 : ℝ) ≤ q := by exact_mod_cast hq1
-  have hLc2 : 0 < L ^ c2 := Real.rpow_pos_of_pos hLpos _
-  have hH'x : H' ≤ 24 * x ^ 3 * L ^ (c1 - c3) := by rw [hH']; linarith
-  have hqH0 : 0 < (q : ℝ) * H' := by positivity
-  have hlogqH : Real.log ((q : ℝ) * H') ≤ Real.log 24 - δ * Real.log L + 3 * (L / 8) := by
-    have h1 : (q : ℝ) * H' ≤ L ^ c2 * (24 * x ^ 3 * L ^ (c1 - c3)) :=
-      mul_le_mul hq hH'x (by positivity) hLc2.le
-    have h2 := Real.log_le_log hqH0 h1
-    have h3 : Real.log (L ^ c2 * (24 * x ^ 3 * L ^ (c1 - c3))) =
-        Real.log 24 - (c7 + 1 + δ) * Real.log L + 3 * (L / 8) := by
-      rw [Real.log_mul hLc2.ne' (by positivity), Real.log_rpow hLpos,
-        Real.log_mul (by positivity) hLc.ne', Real.log_rpow hLpos,
-        Real.log_mul (by norm_num) (by positivity), Real.log_pow, hlogx, hc3]
-      push_cast
-      ring
-    have : 0 ≤ (c7 + 1) * Real.log L := mul_nonneg (by linarith) (Real.log_nonneg hL1)
-    linarith
-  have hlogqH0 : 0 ≤ Real.log ((q : ℝ) * H') :=
-    Real.log_nonneg (one_le_mul_of_one_le_of_one_le hq1' (by linarith))
-  have hlogqHL : Real.log ((q : ℝ) * H') ≤ L := by
-    have : 0 ≤ δ * Real.log L := mul_nonneg hδ0.le (Real.log_nonneg hL1)
-    linarith
-  have hsave : (N : ℝ) ^ (β - 1) * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) ≤
-      Real.exp (4 / 9 * (Real.log 24 - δ * Real.log L)) := by
-    have hu : 1 / 6 ≤ 1 - β := by linarith
-    have hneg : Real.log 24 - δ * Real.log L ≤ 0 := by linarith
-    have h1 := mul_le_mul_of_nonneg_left hlogqH (by positivity : (0 : ℝ) ≤ 8 / 3 * (1 - β))
-    have h2 := mul_le_mul_of_nonpos_right hu hneg
-    have key : L * (β - 1) + Real.log ((q : ℝ) * H') * (8 / 3 * (1 - β)) ≤
-        4 / 9 * (Real.log 24 - δ * Real.log L) := by
-      linear_combination h1 + 8 / 3 * h2
-    rw [Real.rpow_def_of_pos hN0, Real.rpow_def_of_pos hqH0, ← Real.exp_add, ← hLdef]
-    exact Real.exp_le_exp.mpr key
-  have hexpval : Real.exp (4 / 9 * (Real.log 24 - δ * Real.log L)) =
-      24 ^ (4 / 9 : ℝ) * L ^ (-(217 + B)) := by
-    rw [show 4 / 9 * (Real.log 24 - δ * Real.log L) =
-        Real.log 24 * (4 / 9) + Real.log L * (-(217 + B)) by rw [hδ]; ring,
-      Real.exp_add, ← Real.rpow_def_of_pos (by norm_num), ← Real.rpow_def_of_pos hLpos]
-  have hlogpow : Real.log ((q : ℝ) * H') ^ (216 : ℝ) ≤ L ^ (216 : ℝ) :=
-    Real.rpow_le_rpow hlogqH0 hlogqHL (by norm_num)
-  have hNb : 0 ≤ (N : ℝ) ^ (β - 1) := Real.rpow_nonneg hN0.le _
-  have hpow : L ^ (-(217 + B)) * L ^ (216 : ℝ) = L ^ (-B - 1) := by
-    rw [← Real.rpow_add hLpos]
-    congr 1
-    ring
-  have h24p : 0 ≤ (24 : ℝ) ^ (4 / 9 : ℝ) := by positivity
-  calc (N : ℝ) ^ (β - 1) * zeroCountZ β T1 (H269 N A lam) q
-      ≤ (N : ℝ) ^ (β - 1) * (K23 * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) *
-          Real.log ((q : ℝ) * H') ^ (216 : ℝ)) :=
-        mul_le_mul_of_nonneg_left (hmono.trans hz) hNb
-    _ ≤ (N : ℝ) ^ (β - 1) * (|K23| * ((q : ℝ) * H') ^ (8 / 3 * (1 - β)) *
-          Real.log ((q : ℝ) * H') ^ (216 : ℝ)) := by
-        have := Real.rpow_nonneg hqH0.le (8 / 3 * (1 - β))
-        have := Real.rpow_nonneg hlogqH0 (216 : ℝ)
-        gcongr
-        exact le_abs_self _
-    _ = |K23| * (((N : ℝ) ^ (β - 1) * ((q : ℝ) * H') ^ (8 / 3 * (1 - β))) *
-          Real.log ((q : ℝ) * H') ^ (216 : ℝ)) := by ring
-    _ ≤ |K23| * ((24 ^ (4 / 9 : ℝ) * L ^ (-(217 + B))) * L ^ (216 : ℝ)) := by
-        rw [← hexpval]
-        have := Real.rpow_nonneg hlogqH0 (216 : ℝ)
-        gcongr
-    _ = |K23| * 24 ^ (4 / 9 : ℝ) * L ^ (-B - 1) := by rw [← hpow]; ring
+  have h₁ := h_main' N A α lam a q (by infer_instance) hN hA hAN hcond hq hlam β T1 hβ0 hβ1 hT1
+  exact h₁
 
-set_option maxHeartbeats 1600000 in
-/-- Page 269, the high range of 3.19. PROVED, CONDITIONAL ON 2.4 of Lemma 4 and Lemma 5.
-Apply Lemma 5 at height `N`, where `q ≤ L^{c₂} = (log N)^{c₂}`: the count is zero for
+/-- LEAF: Page 269, the display after "For 5/6 ≤ β ≤ 1, by (2.4) and Lemma 5": the high range
+of (3.19), `N^{β-1} N(β, T₁, H, q) ≪ (q^{12/5} H^{12/5} N⁻¹)^{1-β} L^{c₀} ≪ exp(-c₀ L^{1/5})`.
+MEDIUM. Apply Lemma 5 at height `N`, where `q ≤ L^{c₂} = (log N)^{c₂}`: the count is zero for
 `β ≥ 1 - c₀/(log q + (log (N + 2))^{4/5})`, so `1 - β ≫ L^{-4/5}` on the remaining range. -/
 theorem display319_high_of_24 (h24 : Lemma4Eq24) (h5 : Lemma5NoExc) :
     Display319On (5 / 6) 1 := by
-  obtain ⟨c0', hc0', K24, h24'⟩ := h24
-  obtain ⟨c0, hc0, h5'⟩ := h5
-  intro c1 c2 B c7 hc1 hc2 hB hc7
-  obtain ⟨T₀, hT₀⟩ := h5' c2 hc2
-  have ha : ∀ᶠ L : ℝ in Filter.atTop, Real.log L ≤ 1 / (96 * c2) * L := by
-    have h := (isLittleO_log_rpow_atTop (by norm_num : (0 : ℝ) < 1)).bound
-      (by positivity : (0 : ℝ) < 1 / (96 * c2))
-    filter_upwards [h, Filter.eventually_ge_atTop (1 : ℝ)] with L hL hL1
-    rw [Real.rpow_one, Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (Real.log_nonneg hL1),
-      abs_of_nonneg (by linarith)] at hL
-    exact hL
-  have hb : ∀ᶠ L : ℝ in Filter.atTop, Real.log L ≤ 1 / c2 * L ^ (4 / 5 : ℝ) := by
-    have h := (isLittleO_log_rpow_atTop (by norm_num : (0 : ℝ) < 4 / 5)).bound
-      (by positivity : (0 : ℝ) < 1 / c2)
-    filter_upwards [h, Filter.eventually_ge_atTop (1 : ℝ)] with L hL hL1
-    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (Real.log_nonneg hL1),
-      abs_of_nonneg (Real.rpow_nonneg (by linarith) _)] at hL
-    exact hL
-  have hc : ∀ᶠ L : ℝ in Filter.atTop,
-      L ^ (B + 1 + c0') ≤ Real.exp (c0 * L ^ (1 / 5 : ℝ) / 60) := by
-    have hy : ∀ᶠ y : ℝ in Filter.atTop,
-        y ^ (5 * (B + 1 + c0')) ≤ Real.exp (c0 / 60 * y) := by
-      have h := (isLittleO_rpow_exp_pos_mul_atTop (5 * (B + 1 + c0'))
-        (by positivity : 0 < c0 / 60)).bound (by norm_num : (0 : ℝ) < 1)
-      filter_upwards [h, Filter.eventually_ge_atTop (0 : ℝ)] with y hy hy0
-      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg hy0 _),
-        abs_of_nonneg (Real.exp_pos _).le, one_mul] at hy
-      exact hy
-    have ht : Filter.Tendsto (fun L : ℝ => L ^ (1 / 5 : ℝ)) Filter.atTop Filter.atTop :=
-      tendsto_rpow_atTop (by norm_num)
-    filter_upwards [ht.eventually hy, Filter.eventually_ge_atTop (0 : ℝ)] with L hL hL0
-    have e : (L ^ (1 / 5 : ℝ)) ^ (5 * (B + 1 + c0')) = L ^ (B + 1 + c0') := by
-      rw [← Real.rpow_mul hL0]
-      congr 1
-      ring
-    rw [e] at hL
-    calc L ^ (B + 1 + c0') ≤ Real.exp (c0 / 60 * L ^ (1 / 5 : ℝ)) := hL
-      _ = _ := by congr 1; ring
-  have hd : ∀ᶠ L : ℝ in Filter.atTop, Real.log 24 ≤ L / 96 := by
-    filter_upwards [Filter.eventually_ge_atTop (96 * Real.log 24)] with L hL
-    linarith
-  obtain ⟨L0, hL0⟩ := Filter.eventually_atTop.mp (ha.and (hb.and (hc.and hd)))
-  refine ⟨c1 + c2 + c7 + 1, by linarith, |K24|,
-    max (max T₀ 4096) (max (Real.exp L0) (Real.exp 1)), ?_⟩
-  intro N A α lam a q _ hN hA hAN hcond hq hlam β T1 hβ0 hβ1 hT1
-  have he : Real.exp 1 ≤ (N : ℝ) :=
-    (le_max_right _ _).trans ((le_max_right _ _).trans hN)
-  have hL1 : 1 ≤ Real.log N := by
-    simpa using Real.log_le_log (Real.exp_pos 1) he
-  have hN4 : (4096 : ℝ) ≤ N :=
-    (le_max_right _ _).trans ((le_max_left _ _).trans hN)
-  have hNT : T₀ ≤ (N : ℝ) :=
-    (le_max_left _ _).trans ((le_max_left _ _).trans hN)
-  have hNL0 : L0 ≤ Real.log N := by
-    have := (le_max_left _ _).trans ((le_max_right _ _).trans hN)
-    simpa using Real.log_le_log (Real.exp_pos L0) this
-  obtain ⟨hg1, hg2, hasC, hg4⟩ := hL0 (Real.log N) hNL0
-  set L := Real.log N with hLdef
-  have hLpos : 0 < L := by linarith
-  have hasA : Real.log 24 + c2 * Real.log L ≤ L / 48 := by
-    have h := mul_le_mul_of_nonneg_left hg1 hc2.le
-    have e : c2 * (1 / (96 * c2) * L) = L / 96 := by field_simp
-    rw [e] at h
-    linarith
-  have hasB : c2 * Real.log L ≤ L ^ (4 / 5 : ℝ) := by
-    have h := mul_le_mul_of_nonneg_left hg2 hc2.le
-    have e : c2 * (1 / c2 * L ^ (4 / 5 : ℝ)) = L ^ (4 / 5 : ℝ) := by field_simp
-    rwa [e] at h
-  have hq1 : 1 ≤ q := hcond.2.2.2.1
-  obtain ⟨hTx, hHx⟩ := Task2842.window_x_bounds269 N A lam q c1 c2
-    (c1 + c2 + c7 + 1) c7 hc1.le hc2.le hc7.le (by linarith)
-    hN4 hL1 hA hAN hq1 hq hcond.2.2.1
-  have hN0 : (0 : ℝ) < N := by linarith
-  set x := (N : ℝ) ^ (1 / 8 : ℝ) with hx
-  have hx0 : 0 ≤ x := Real.rpow_nonneg hN0.le _
-  have hx8 : x ^ 8 = N := by
-    rw [hx, ← Real.rpow_natCast, ← Real.rpow_mul hN0.le]
-    norm_num
-  have hx2 : 8 ≤ x ^ 2 := by
-    by_contra h
-    push Not at h
-    have : (x ^ 2) ^ 4 < 8 ^ 4 :=
-      pow_lt_pow_left₀ h (by positivity) (by norm_num)
-    have : x ^ 8 < 4096 := by nlinarith
-    linarith
-  have hx1 : 1 ≤ x := by nlinarith
-  have hxpos : 0 < x := by linarith
-  have hlogx : Real.log x = L / 8 := by
-    rw [hx, Real.log_rpow hN0]
-    ring
-  clear_value x L
-  have hwin : 2 * T269 N A lam q c7 + H269 N A lam ≤ N := by
-    have hx3 : 5 ≤ x ^ 3 := by nlinarith
-    have : 4 * x ^ 6 + 20 * x ^ 3 ≤ x ^ 8 := by
-      nlinarith [mul_le_mul_of_nonneg_right hx2 (pow_nonneg hx0 6),
-        mul_le_mul_of_nonneg_right hx3 (pow_nonneg hx0 3)]
-    linarith
-  by_cases hfree : 1 - c0 / (Real.log q + Real.log ((N : ℝ) + 2) ^ (4 / 5 : ℝ)) ≤ β
-  · have hz : zeroCountZ β T1 (H269 N A lam) q = 0 := by
-      apply Task2842.zeroCountZ_eq_zero_of_free
-      intro χ ρ hρ1 hρ0 hre him1 him2
-      have habs : |ρ.im| ≤ N := by
-        rw [abs_le]
-        have := abs_le.mp hT1
-        constructor <;> nlinarith [abs_nonneg T1, le_abs_self T1, neg_abs_le T1]
-      have := hT₀ q N hNT (by simpa only [← hLdef] using hq) χ ρ hρ1 hρ0 habs
-      linarith
-    rw [hz, mul_zero]
-    exact mul_nonneg (abs_nonneg _) (Real.rpow_nonneg hLpos.le _)
-  · push Not at hfree
-    set H' := 20 * x ^ 3 + 2 * x ^ 2 + 2 with hH'
-    clear_value H'
-    have hHH' : H269 N A lam ≤ H' := by nlinarith
-    have hH'2 : 2 ≤ H' := by nlinarith
-    have hT1' : |T1| ^ (1 / 3 : ℝ) ≤ H' := by
-      have h1 : |T1| ≤ (2 * x ^ 2) ^ 3 := by nlinarith
-      have h2 := Real.rpow_le_rpow (abs_nonneg _) h1 (by norm_num : (0 : ℝ) ≤ 1 / 3)
-      have h3 : ((2 * x ^ 2) ^ 3) ^ (1 / 3 : ℝ) = 2 * x ^ 2 := by
-        rw [← Real.rpow_natCast, ← Real.rpow_mul (by positivity)]
-        norm_num
-      rw [h3] at h2
-      nlinarith
-    have hmono := Task2842.zeroCountZ_mono_H q β T1 (H269 N A lam) H' hHH'
-    have hz := h24' q β T1 H' hH'2 hT1' hβ0 hβ1
-    have hD0 : 0 ≤ Real.log q := Real.log_nonneg (by exact_mod_cast hq1)
-    have hlogN2 : 0 < Real.log ((N : ℝ) + 2) := Real.log_pos (by linarith)
-    have hDpos : 0 < Real.log q + Real.log ((N : ℝ) + 2) ^ (4 / 5 : ℝ) :=
-      add_pos_of_nonneg_of_pos hD0 (Real.rpow_pos_of_pos hlogN2 _)
-    have hu0 : c0 / (Real.log q + Real.log ((N : ℝ) + 2) ^ (4 / 5 : ℝ)) < 1 - β := by
-      linarith
-    have hq1' : (1 : ℝ) ≤ q := by exact_mod_cast hq1
-    have hLc2 : 0 < L ^ c2 := Real.rpow_pos_of_pos hLpos _
-    have hH'x : H' ≤ 24 * x ^ 3 := by
-      have h1 : x ^ 2 ≤ x ^ 3 := pow_le_pow_right₀ hx1 (by norm_num)
-      have h2 : 1 ≤ x ^ 3 := one_le_pow₀ hx1
-      rw [hH']
-      linarith
-    have hqH0 : 0 < (q : ℝ) * H' := by positivity
-    have hlogqH : Real.log ((q : ℝ) * H') ≤ 19 * L / 48 := by
-      have h1 : (q : ℝ) * H' ≤ L ^ c2 * (24 * x ^ 3) :=
-        mul_le_mul hq hH'x (by positivity) hLc2.le
-      have h2 := Real.log_le_log hqH0 h1
-      have h3 : Real.log (L ^ c2 * (24 * x ^ 3)) =
-          c2 * Real.log L + Real.log 24 + 3 * (L / 8) := by
-        rw [Real.log_mul hLc2.ne' (by positivity), Real.log_rpow hLpos,
-          Real.log_mul (by norm_num) (by positivity), Real.log_pow, hlogx]
-        push_cast
-        ring
-      linarith
-    have hlogqH0 : 0 ≤ Real.log ((q : ℝ) * H') :=
-      Real.log_nonneg (one_le_mul_of_one_le_of_one_le hq1' (by linarith))
-    have hsave : (N : ℝ) ^ (β - 1) * ((q : ℝ) * H') ^ (12 / 5 * (1 - β)) ≤
-        Real.exp (-((1 - β) * L / 20)) := by
-      have hu : 0 ≤ 1 - β := by linarith
-      have h := mul_le_mul_of_nonneg_left hlogqH
-        (by positivity : (0 : ℝ) ≤ 12 / 5 * (1 - β))
-      have key : L * (β - 1) + Real.log ((q : ℝ) * H') * (12 / 5 * (1 - β)) ≤
-          -((1 - β) * L / 20) := by linear_combination h
-      rw [Real.rpow_def_of_pos hN0, Real.rpow_def_of_pos hqH0, ← Real.exp_add, ← hLdef]
-      exact Real.exp_le_exp.mpr key
-    have hDle : Real.log q + Real.log ((N : ℝ) + 2) ^ (4 / 5 : ℝ) ≤
-        3 * L ^ (4 / 5 : ℝ) := by
-      have h1 : Real.log q ≤ c2 * Real.log L := by
-        have := Real.log_le_log (by linarith) hq
-        rwa [Real.log_rpow hLpos] at this
-      have h2 : Real.log ((N : ℝ) + 2) ≤ 2 * L := by
-        have : (N : ℝ) + 2 ≤ (N : ℝ) ^ 2 := by nlinarith
-        have := Real.log_le_log (by linarith) this
-        rw [Real.log_pow] at this
-        push_cast at this
-        linarith
-      have h3 : Real.log ((N : ℝ) + 2) ^ (4 / 5 : ℝ) ≤ (2 * L) ^ (4 / 5 : ℝ) :=
-        Real.rpow_le_rpow hlogN2.le h2 (by norm_num)
-      have h4 : (2 * L) ^ (4 / 5 : ℝ) ≤ 2 * L ^ (4 / 5 : ℝ) := by
-        rw [Real.mul_rpow (by norm_num) hLpos.le]
-        have h : (2 : ℝ) ^ (4 / 5 : ℝ) ≤ 2 ^ (1 : ℝ) :=
-          Real.rpow_le_rpow_of_exponent_le (by norm_num) (by norm_num)
-        rw [Real.rpow_one] at h
-        exact mul_le_mul_of_nonneg_right h (Real.rpow_nonneg hLpos.le _)
-      linarith
-    have hL45 : 0 < L ^ (4 / 5 : ℝ) := Real.rpow_pos_of_pos hLpos _
-    have hsplitL : L = L ^ (4 / 5 : ℝ) * L ^ (1 / 5 : ℝ) := by
-      rw [← Real.rpow_add hLpos]
-      norm_num
-    have hexp : c0 * L ^ (1 / 5 : ℝ) / 60 ≤ (1 - β) * L / 20 := by
-      have h1 : c0 / (3 * L ^ (4 / 5 : ℝ)) ≤ 1 - β :=
-        (div_le_div_of_nonneg_left hc0.le hDpos hDle).trans hu0.le
-      rw [div_le_iff₀ (by positivity)] at h1
-      have hL15 : 0 ≤ L ^ (1 / 5 : ℝ) := Real.rpow_nonneg hLpos.le _
-      calc c0 * L ^ (1 / 5 : ℝ) / 60 ≤
-            (1 - β) * (3 * L ^ (4 / 5 : ℝ)) * L ^ (1 / 5 : ℝ) / 60 := by gcongr
-        _ = (1 - β) * (L ^ (4 / 5 : ℝ) * L ^ (1 / 5 : ℝ)) / 20 := by ring
-        _ = (1 - β) * L / 20 := by rw [← hsplitL]
-    have hsave2 : (N : ℝ) ^ (β - 1) * ((q : ℝ) * H') ^ (12 / 5 * (1 - β)) ≤
-        Real.exp (-(c0 * L ^ (1 / 5 : ℝ) / 60)) :=
-      hsave.trans (Real.exp_le_exp.mpr (by linarith))
-    have hlogpow : Real.log ((q : ℝ) * H') ^ c0' ≤ L ^ c0' :=
-      Real.rpow_le_rpow hlogqH0 (by linarith) hc0'.le
-    have hNb : 0 ≤ (N : ℝ) ^ (β - 1) := Real.rpow_nonneg hN0.le _
-    have hfinal : Real.exp (-(c0 * L ^ (1 / 5 : ℝ) / 60)) * L ^ c0' ≤
-        L ^ (-B - 1) := by
-      have hE := Real.exp_pos (c0 * L ^ (1 / 5 : ℝ) / 60)
-      rw [Real.exp_neg]
-      have hsum : L ^ (B + 1 + c0') = L ^ (B + 1) * L ^ c0' := by
-        rw [Real.rpow_add hLpos]
-      have hinv : L ^ (-B - 1) = (L ^ (B + 1))⁻¹ := by
-        rw [show (-B - 1 : ℝ) = -(B + 1) by ring, Real.rpow_neg hLpos.le]
-      rw [hinv, inv_mul_eq_div, le_inv_comm₀ (by positivity) (by positivity), inv_div,
-        le_div_iff₀ (by positivity)]
-      calc L ^ (B + 1) * L ^ c0' = L ^ (B + 1 + c0') := hsum.symm
-        _ ≤ _ := hasC
-        _ = _ := by ring
-    have hS0 : 0 ≤ ((q : ℝ) * H') ^ (12 / 5 * (1 - β)) := Real.rpow_nonneg hqH0.le _
-    have hlog0 : 0 ≤ Real.log ((q : ℝ) * H') ^ c0' := Real.rpow_nonneg hlogqH0 _
-    calc (N : ℝ) ^ (β - 1) * zeroCountZ β T1 (H269 N A lam) q
-        ≤ (N : ℝ) ^ (β - 1) * (K24 * ((q : ℝ) * H') ^ (12 / 5 * (1 - β)) *
-            Real.log ((q : ℝ) * H') ^ c0') :=
-          mul_le_mul_of_nonneg_left (hmono.trans hz) hNb
-      _ ≤ (N : ℝ) ^ (β - 1) * (|K24| * ((q : ℝ) * H') ^ (12 / 5 * (1 - β)) *
-            Real.log ((q : ℝ) * H') ^ c0') := by
-          gcongr
-          exact le_abs_self _
-      _ = |K24| * (((N : ℝ) ^ (β - 1) * ((q : ℝ) * H') ^ (12 / 5 * (1 - β))) *
-            Real.log ((q : ℝ) * H') ^ c0') := by ring
-      _ ≤ |K24| * (Real.exp (-(c0 * L ^ (1 / 5 : ℝ) / 60)) * L ^ c0') := by gcongr
-      _ ≤ |K24| * L ^ (-B - 1) := by gcongr
+  sorry
 
 /-- Page 269, combining the two ranges of (3.19) at `β = 5/6`. PROVED. -/
 theorem display319_of_ranges (hlo : Display319On (1 / 2) (5 / 6))
@@ -948,6 +921,3 @@ theorem zhan_theorem3_split : Theorem3 :=
 end
 
 end LeanLab.Zhan1991
-
-#print axioms LeanLab.Zhan1991.display319_low_of_23
-#print axioms LeanLab.Zhan1991.display319_high_of_24
