@@ -32,7 +32,8 @@ theorem leaf_local_energy_from_characters_coprime :
           ∃ C : ℝ, ∀ x : ℝ, C ≤ x → ∀ ζ : ℝ,
             localMinorEnergy512 ε D x (b x) ζ ≤
               C * length512 ε x * Real.log x ^ (-L)) := by
-  sorry
+  intro B
+  exact Decomp561d.leaf_local_energy_from_characters561 B
 
 /-- P0069 pages 9 and 10 displays 2.11 to 2.16: the corrected local minor arc energy,
 exactly the statement of Theorem1CoprimeTwinS72.leaf_minor_local_energy512_coprime, from the
