@@ -396,10 +396,506 @@ private lemma coord_exists {N j : ℕ} (hN1 : 1 ≤ N) (k : Fin 20) {x : ℕ} (h
 `(log * ζ^{j-1} * M_X^j)(n) = Σ_{n = n₁⋯n_{2j}} log n₁ · Π μ(m_i) [m_i ≤ X]`, written with
 the 20 positions of `aj`, unused positions fixed at `1`, and the variables cut at `N` since
 `n ≤ u ≤ N`. Class MEDIUM. -/
+private lemma fiber_sum {ι : Type*} (S : Finset ℕ) (T : Finset ι) (g : ι → ℕ)
+    (B : ι → ℂ) (ch : ℕ → ℂ) :
+    (∑ n ∈ S, ∑ i ∈ T.filter (fun i => g i = n), B i * ch n)
+      = ∑ i ∈ T, (if g i ∈ S then B i * ch (g i) else 0) := by
+  classical
+  rw [Finset.sum_congr rfl (fun n _ =>
+    Finset.sum_filter (s := T) (p := fun i => g i = n) (f := fun i => B i * ch n))]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  by_cases hmem : g i ∈ S
+  · rw [if_pos hmem]
+    have h1 : (if g i = g i then B i * ch (g i) else 0) = B i * ch (g i) := by rw [if_pos rfl]
+    rw [← h1]
+    refine Finset.sum_eq_single_of_mem (s := S)
+      (f := fun b => if g i = b then B i * ch b else 0) (g i) hmem ?_
+    intro b _ hne
+    rw [if_neg]
+    exact fun h => hne h.symm
+  · rw [if_neg hmem]
+    refine Finset.sum_eq_zero ?_
+    intro b hb
+    rw [if_neg]
+    intro h
+    rw [← h] at hb
+    exact absurd hb hmem
+
+private lemma sum_piFinset_succ_const {β : Type*} [AddCommMonoid β] (d M : ℕ)
+    (h : (Fin (d + 1) → ℕ) → β) :
+    (∑ g ∈ Fintype.piFinset (fun _ : Fin (d + 1) => Finset.Icc 1 M), h g)
+      = ∑ a ∈ Finset.Icc 1 M,
+          ∑ g' ∈ Fintype.piFinset (fun _ : Fin d => Finset.Icc 1 M), h (Fin.cons a g') := by
+  rw [← Finset.sum_product (s := Finset.Icc 1 M)
+    (t := Fintype.piFinset (fun _ : Fin d => Finset.Icc 1 M))
+    (f := fun p : ℕ × (Fin d → ℕ) => h (Fin.cons p.1 p.2))]
+  refine Finset.sum_bij (fun g _ => (g 0, Fin.tail g)) ?_ ?_ ?_ ?_
+  · intro g hg
+    simp only [Finset.mem_product]
+    exact ⟨(Fintype.mem_piFinset.mp hg) 0,
+      Fintype.mem_piFinset.mpr (fun i => (Fintype.mem_piFinset.mp hg) i.succ)⟩
+  · intro g1 _ g2 _ heq
+    simp only [Prod.mk.injEq] at heq
+    rw [← Fin.cons_self_tail g1, ← Fin.cons_self_tail g2, heq.1, heq.2]
+  · intro p hp
+    obtain ⟨a, g'⟩ := p
+    simp only [Finset.mem_product] at hp
+    refine ⟨Fin.cons a g', ?_, rfl⟩
+    refine Fintype.mem_piFinset.mpr (fun i => ?_)
+    induction i using Fin.cases with
+    | zero => simpa using hp.1
+    | succ j => simpa using Fintype.mem_piFinset.mp hp.2 j
+  · intro g _
+    exact (congrArg h (Fin.cons_self_tail g)).symm
+
+private lemma prod_apply_tuple_aux (d M : ℕ) (F : Fin d → ArithmeticFunction ℝ) :
+    ∀ n ∈ Finset.Icc 1 M,
+      (∏ i, F i) n
+        = ∑ g ∈ (Fintype.piFinset (fun _ : Fin d => Finset.Icc 1 M)).filter
+            (fun g => ∏ i, g i = n), ∏ i, F i (g i) := by
+  induction d with
+  | zero =>
+    intro n hn
+    have h1 : (∏ i : Fin 0, F i) = (1 : ArithmeticFunction ℝ) := by simp
+    rw [h1, ArithmeticFunction.one_apply,
+      Fintype.piFinset_of_isEmpty (s := fun _ : Fin 0 => Finset.Icc 1 M), Finset.sum_filter]
+    by_cases hc : n = 1 <;> simp [hc, eq_comm]
+  | succ d ih =>
+    intro n hn
+    have hn1 : 1 ≤ n := (Finset.mem_Icc.mp hn).1
+    have hnM : n ≤ M := (Finset.mem_Icc.mp hn).2
+    rw [Fin.prod_univ_succ, ArithmeticFunction.mul_apply, Finset.sum_filter,
+      sum_piFinset_succ_const d M
+        (fun g => if (∏ i : Fin (d + 1), g i) = n then ∏ i : Fin (d + 1), F i (g i) else 0)]
+    have hcons : ∀ (a : ℕ) (g' : Fin d → ℕ),
+        (∏ i : Fin (d + 1), (Fin.cons a g' : Fin (d + 1) → ℕ) i) = a * ∏ i, g' i := by
+      intro a g'
+      rw [Fin.prod_univ_succ (f := fun i : Fin (d + 1) => (Fin.cons a g' : Fin (d + 1) → ℕ) i)]
+      simp
+    have hconsF : ∀ (a : ℕ) (g' : Fin d → ℕ),
+        (∏ i : Fin (d + 1), F i ((Fin.cons a g' : Fin (d + 1) → ℕ) i))
+          = F 0 a * ∏ i : Fin d, F i.succ (g' i) := by
+      intro a g'
+      rw [Fin.prod_univ_succ (f := fun i : Fin (d + 1) =>
+        F i ((Fin.cons a g' : Fin (d + 1) → ℕ) i))]
+      simp
+    simp only [hcons, hconsF]
+    have hIH : ∀ x ∈ n.divisorsAntidiagonal,
+        ((∏ i : Fin d, F i.succ) : ArithmeticFunction ℝ) x.2
+          = ∑ g' ∈ (Fintype.piFinset (fun _ : Fin d => Finset.Icc 1 M)).filter
+              (fun g' => ∏ i, g' i = x.2), ∏ i : Fin d, F i.succ (g' i) := by
+      intro x hx
+      obtain ⟨hxa, -⟩ := Nat.mem_divisorsAntidiagonal.mp hx
+      have hx2 : 1 ≤ x.2 := by
+        rcases Nat.eq_zero_or_pos x.2 with h | h
+        · rw [h, Nat.mul_zero] at hxa; omega
+        · exact h
+      have hx2M : x.2 ≤ M := by
+        have hx1 : 1 ≤ x.1 := by
+          rcases Nat.eq_zero_or_pos x.1 with h | h
+          · rw [h, Nat.zero_mul] at hxa; omega
+          · exact h
+        have : x.2 ≤ x.1 * x.2 := Nat.le_mul_of_pos_left _ hx1
+        omega
+      exact ih (fun i => F i.succ) x.2 (Finset.mem_Icc.mpr ⟨hx2, hx2M⟩)
+    set P := Fintype.piFinset (fun _ : Fin d => Finset.Icc 1 M) with hP
+    have hLHS : (∑ x ∈ n.divisorsAntidiagonal, F 0 x.1 * (∏ i : Fin d, F i.succ) x.2)
+        = ∑ p ∈ (n.divisorsAntidiagonal ×ˢ P).filter (fun p => ∏ i, p.2 i = p.1.2),
+            F 0 p.1.1 * ∏ i : Fin d, F i.succ (p.2 i) := by
+      rw [Finset.sum_filter]
+      rw [Finset.sum_product (s := n.divisorsAntidiagonal) (t := P)
+        (f := fun p : (ℕ × ℕ) × (Fin d → ℕ) =>
+          if ∏ i, p.2 i = p.1.2 then F 0 p.1.1 * ∏ i : Fin d, F i.succ (p.2 i) else 0)]
+      refine Finset.sum_congr rfl ?_
+      intro x hx
+      rw [hIH x hx, Finset.mul_sum, Finset.sum_filter]
+    have hRHS : (∑ a ∈ Finset.Icc 1 M,
+          ∑ g' ∈ P, if a * ∏ i, g' i = n then F 0 a * ∏ i : Fin d, F i.succ (g' i) else 0)
+        = ∑ q ∈ (Finset.Icc 1 M ×ˢ P).filter (fun q => q.1 * ∏ i, q.2 i = n),
+            F 0 q.1 * ∏ i : Fin d, F i.succ (q.2 i) := by
+      rw [Finset.sum_filter]
+      rw [← Finset.sum_product (s := Finset.Icc 1 M) (t := P)
+        (f := fun q : ℕ × (Fin d → ℕ) =>
+          if q.1 * ∏ i, q.2 i = n then F 0 q.1 * ∏ i : Fin d, F i.succ (q.2 i) else 0)]
+    rw [hLHS, hRHS]
+    refine Finset.sum_bij (fun p _ => (p.1.1, p.2)) ?_ ?_ ?_ ?_
+    · intro p hp
+      rw [Finset.mem_filter] at hp
+      obtain ⟨hpp, hpf⟩ := hp
+      rw [Finset.mem_product] at hpp
+      obtain ⟨hpd, hpg⟩ := hpp
+      obtain ⟨hp1, -⟩ := Nat.mem_divisorsAntidiagonal.mp hpd
+      have hnpos : 0 < n := by omega
+      have hdvd : p.1.1 ∣ n := ⟨p.1.2, hp1.symm⟩
+      have hpos : 0 < p.1.1 := Nat.pos_of_dvd_of_pos hdvd hnpos
+      refine Finset.mem_filter.mpr
+        ⟨Finset.mem_product.mpr ⟨Finset.mem_Icc.mpr
+          ⟨Nat.succ_le_of_lt hpos, (Nat.le_of_dvd hnpos hdvd).trans hnM⟩, hpg⟩, ?_⟩
+      rw [hpf]; exact hp1
+    · intro p1 h1p p2 h2p heq
+      obtain ⟨⟨a1, b1⟩, g1⟩ := p1
+      obtain ⟨⟨a2, b2⟩, g2⟩ := p2
+      simp only [Finset.mem_filter, Finset.mem_product, Prod.mk.injEq] at h1p h2p heq
+      obtain ⟨-, hf1⟩ := h1p
+      obtain ⟨-, hf2⟩ := h2p
+      obtain ⟨h1, h2⟩ := heq
+      rw [h2] at hf1
+      have hb : b1 = b2 := by rw [← hf1, hf2]
+      rw [h1, hb, h2]
+    · intro q hq
+      rw [Finset.mem_filter] at hq
+      obtain ⟨hqp, hqf⟩ := hq
+      rw [Finset.mem_product] at hqp
+      obtain ⟨hqa, hqg⟩ := hqp
+      refine ⟨((q.1, ∏ i, q.2 i), q.2), ?_, rfl⟩
+      refine Finset.mem_filter.mpr ⟨Finset.mem_product.mpr ⟨?_, hqg⟩, rfl⟩
+      exact Nat.mem_divisorsAntidiagonal.mpr ⟨hqf, by omega⟩
+    · intro p _
+      rfl
+
+private lemma prod_range_twenty (j : ℕ) (hj1 : 1 ≤ j) (hj10 : j ≤ 10) {X : ℝ}
+    (g : ℕ → ArithmeticFunction ℝ)
+    (h0 : g 0 = ArithmeticFunction.log)
+    (h1 : ∀ m, 1 ≤ m → m ≤ j - 1 → g m = ArithmeticFunction.zeta)
+    (h2 : ∀ m, j ≤ m → m ≤ 9 → g m = 1)
+    (h3 : ∀ m, 10 ≤ m → m ≤ 9 + j → g m = muTrunc X)
+    (h4 : ∀ m, 10 + j ≤ m → g m = 1) :
+    ∏ m ∈ Finset.range 20, g m
+      = ArithmeticFunction.log * ArithmeticFunction.zeta ^ (j - 1) * muTrunc X ^ j := by
+  set U : Finset ℕ := ({0} : Finset ℕ) ∪ (Finset.Icc 1 (j - 1) ∪ Finset.Icc 10 (9 + j)) with hU
+  have hsub : U ⊆ Finset.range 20 := by
+    intro m hm
+    rw [hU] at hm
+    simp only [Finset.mem_union, Finset.mem_singleton, Finset.mem_Icc, Finset.mem_range] at hm ⊢
+    rcases hm with rfl | hm | hm
+    · omega
+    · omega
+    · omega
+  have hoff : ∀ m ∈ Finset.range 20, m ∉ U → g m = 1 := by
+    intro m hm20 hmU
+    rw [hU] at hmU
+    simp only [Finset.mem_union, Finset.mem_singleton, Finset.mem_Icc] at hmU
+    push_neg at hmU
+    obtain ⟨hm0, hm1, hm2⟩ := hmU
+    rcases Nat.lt_or_ge m j with hj | hj
+    · exact absurd (hm1 (by omega)) (by omega)
+    rcases Nat.lt_or_ge m 10 with h10 | h10
+    · exact h2 m hj (by omega)
+    · exact h4 m (by omega)
+  rw [← Finset.prod_subset hsub hoff]
+  have hd1 : Disjoint ({0} : Finset ℕ) (Finset.Icc 1 (j - 1) ∪ Finset.Icc 10 (9 + j)) := by
+    rw [Finset.disjoint_union_right]
+    constructor
+    · rw [Finset.disjoint_singleton_left, Finset.mem_Icc]; omega
+    · rw [Finset.disjoint_singleton_left, Finset.mem_Icc]; omega
+  have hd2 : Disjoint (Finset.Icc 1 (j - 1)) (Finset.Icc 10 (9 + j)) := by
+    rw [Finset.disjoint_left]
+    intro m h1 h2
+    simp only [Finset.mem_Icc] at h1 h2
+    omega
+  rw [hU, Finset.prod_union hd1, Finset.prod_union hd2, Finset.prod_singleton, h0]
+  have hA : ∏ m ∈ Finset.Icc 1 (j - 1), g m = ArithmeticFunction.zeta ^ (j - 1) := by
+    rw [Finset.prod_congr rfl (fun m hm => by
+      simp only [Finset.mem_Icc] at hm
+      exact h1 m hm.1 hm.2), Finset.prod_const, Nat.card_Icc]
+    congr 1 <;> omega
+  have hB : ∏ m ∈ Finset.Icc 10 (9 + j), g m = muTrunc X ^ j := by
+    rw [Finset.prod_congr rfl (fun m hm => by
+      simp only [Finset.mem_Icc] at hm
+      exact h3 m hm.1 hm.2), Finset.prod_const, Nat.card_Icc]
+    congr 1 <;> omega
+  rw [hA, hB, mul_assoc]
+
+set_option maxHeartbeats 4000000 in
 theorem hb_tuple_leaf (N : ℕ) (A : ℝ) (j : ℕ) (hj : j ∈ Finset.Icc 1 10) (hN : 2 ≤ N)
     (q : ℕ) (χ : DirichletCharacter ℂ q) (u : ℝ) (hu : u ≤ N) :
     HBsum_dy j χ N A u = Tsum_dy j χ N A u := by
-  sorry
+  classical
+  obtain ⟨hj1, hj10⟩ := Finset.mem_Icc.mp hj
+  set X : ℝ := (N : ℝ) ^ (1 / 10 : ℝ) with hX
+  set ch : ℕ → ℂ := (fun n => χ n) with hch
+  set g : ℕ → ArithmeticFunction ℝ := (fun m =>
+    if m = 0 then ArithmeticFunction.log
+    else if m ≤ j - 1 then ArithmeticFunction.zeta
+    else if 10 ≤ m ∧ m ≤ 9 + j then muTrunc X else 1) with hg
+  set F : Fin 20 → ArithmeticFunction ℝ := (fun k => g k.val) with hF
+  set P : Finset (Fin 20 → ℕ) := Fintype.piFinset (fun _ : Fin 20 => Finset.Icc 1 N) with hP
+  set S : Finset ℕ := (Finset.Icc 1 ⌊u⌋₊).filter (fun n : ℕ => (N : ℝ) - A < n) with hS
+  set Bf : (Fin 20 → ℕ) → ℂ := (fun gg => ∏ k : Fin 20, ((F k (gg k) : ℝ) : ℂ)) with hBf
+  set Wf : (Fin 20 → ℕ) → ℂ := (fun gg => ∏ k : Fin 20, aj (k.val + 1) (gg k) * ch (gg k)) with hWf
+  set cd : (Fin 20 → ℕ) → Prop := (fun gg =>
+    (N : ℝ) - A < ∏ k, (gg k : ℝ) ∧ ∏ k, (gg k : ℝ) ≤ u ∧
+    (∀ k, ¬ usedPos_dy j k → gg k = 1) ∧
+    (∀ k : Fin 20, 10 ≤ k.val → (gg k : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ))) with hcd
+  have hFk : ∀ k : Fin 20, F k = g k.val := fun k => by rw [hF]
+  have hg0 : g 0 = ArithmeticFunction.log := by rw [hg]; simp
+  have hg1 : ∀ m, 1 ≤ m → m ≤ j - 1 → g m = ArithmeticFunction.zeta := by
+    intro m h1 h2
+    rw [hg]
+    have h0 : ¬ (m = 0) := by omega
+    simp [h0, h2]
+  have hg2 : ∀ m, j ≤ m → m ≤ 9 → g m = 1 := by
+    intro m h1 h2
+    rw [hg]
+    have h0 : ¬ (m = 0) := by omega
+    have h3 : ¬ (m ≤ j - 1) := by omega
+    have h4 : ¬ (10 ≤ m ∧ m ≤ 9 + j) := by omega
+    simp [h0, h3, h4]
+  have hg3 : ∀ m, 10 ≤ m → m ≤ 9 + j → g m = muTrunc X := by
+    intro m h1 h2
+    rw [hg]
+    have h0 : ¬ (m = 0) := by omega
+    have h3 : ¬ (m ≤ j - 1) := by omega
+    simp [h0, h3, h1, h2]
+  have hg4 : ∀ m, 10 + j ≤ m → g m = 1 := by
+    intro m h1
+    rw [hg]
+    have h0 : ¬ (m = 0) := by omega
+    have h3 : ¬ (m ≤ j - 1) := by omega
+    have h4 : ¬ (10 ≤ m ∧ m ≤ 9 + j) := by omega
+    simp [h0, h3, h4]
+  have hprod : ∏ k : Fin 20, F k
+      = ArithmeticFunction.log * ArithmeticFunction.zeta ^ (j - 1) * muTrunc X ^ j := by
+    have h1 : ∏ k : Fin 20, F k = ∏ m ∈ Finset.range 20, g m := by
+      rw [hF]
+      simpa using Fin.prod_univ_eq_prod_range (fun m => g m) 20
+    rw [h1]
+    exact prod_range_twenty j hj1 hj10 (X := X) g hg0 hg1 hg2 hg3 hg4
+  have hcoef : ∀ n ∈ Finset.Icc 1 N,
+      (((ArithmeticFunction.log * ArithmeticFunction.zeta ^ (j - 1) * muTrunc X ^ j) n : ℝ) : ℂ)
+        = ∑ gg ∈ P.filter (fun gg => ∏ k, gg k = n), Bf gg := by
+    intro n hn
+    have h := prod_apply_tuple_aux 20 N F n hn
+    rw [hprod] at h
+    rw [h, hP, Complex.ofReal_sum]
+    refine Finset.sum_congr rfl (fun gg _ => ?_)
+    exact Complex.ofReal_prod Finset.univ (fun k => F k (gg k))
+  have hfl : ⌊u⌋₊ ≤ N := by
+    by_cases h0 : 0 ≤ u
+    · have h1 : ((⌊u⌋₊ : ℕ) : ℝ) ≤ u := Nat.floor_le h0
+      have h2 : u ≤ (N : ℝ) := hu
+      have h3 : ((⌊u⌋₊ : ℕ) : ℝ) ≤ (N : ℝ) := le_trans h1 h2
+      exact_mod_cast h3
+    · push_neg at h0
+      rw [Nat.floor_eq_zero.mpr (by linarith)]
+      exact Nat.zero_le N
+  have hnN : ∀ n ∈ S, n ∈ Finset.Icc 1 N := by
+    intro n hn
+    rw [hS] at hn
+    obtain ⟨hnI, -⟩ := Finset.mem_filter.mp hn
+    obtain ⟨hn1, hnu⟩ := Finset.mem_Icc.mp hnI
+    exact Finset.mem_Icc.mpr ⟨hn1, le_trans hnu hfl⟩
+  have hstep1 : HBsum_dy j χ N A u
+      = ∑ n ∈ S, (∑ gg ∈ P.filter (fun gg => ∏ k, gg k = n), Bf gg) * ch n := by
+    unfold HBsum_dy
+    rw [hS, ← hX]
+    simp only [hch]
+    refine Finset.sum_congr rfl (fun n hn => ?_)
+    rw [hcoef n (hnN n hn)]
+  have hstep23 : (∑ n ∈ S, (∑ gg ∈ P.filter (fun gg => ∏ k, gg k = n), Bf gg) * ch n)
+      = ∑ gg ∈ P, (if ∏ k, gg k ∈ S then Bf gg * ch (∏ k, gg k) else 0) := by
+    simp only [Finset.sum_mul]
+    exact fiber_sum S P (fun gg => ∏ k, gg k) Bf ch
+  have hX1 : 1 ≤ X := by
+    rw [hX]
+    exact Real.one_le_rpow (by exact_mod_cast (show 1 ≤ N by omega)) (by norm_num)
+  have hunused : ∀ k : Fin 20, ¬ usedPos_dy j k → F k = 1 := by
+    intro k hk
+    rw [hFk k]
+    have hne0 : k.val ≠ 0 := by
+      intro h; exact hk (by unfold usedPos_dy; exact Or.inl h)
+    have hn1 : ¬ (1 ≤ k.val ∧ k.val ≤ j - 1) := by
+      intro h; exact hk (by unfold usedPos_dy; exact Or.inr (Or.inl h))
+    have hn2 : ¬ (10 ≤ k.val ∧ k.val ≤ 9 + j) := by
+      intro h; exact hk (by unfold usedPos_dy; exact Or.inr (Or.inr h))
+    rcases Nat.lt_or_ge k.val 10 with h10 | h10
+    · exact hg2 k.val (by omega) (by omega)
+    · exact hg4 k.val (by omega)
+  have hmul_ch : ∀ m n : ℕ, ch (m * n) = ch m * ch n := by
+    intro m n
+    rw [hch]
+    dsimp only
+    rw [Nat.cast_mul, map_mul]
+  have hchi_prod : ∀ (t : Finset (Fin 20)) (gg : Fin 20 → ℕ),
+      ch (∏ k ∈ t, gg k) = ∏ k ∈ t, ch (gg k) := by
+    intro t
+    induction t using Finset.induction with
+    | empty =>
+      intro gg
+      rw [hch]
+      dsimp only
+      simp
+    | insert a s ha ih =>
+      intro gg
+      rw [Finset.prod_insert ha, Finset.prod_insert ha, ← ih gg]
+      exact hmul_ch (gg a) (∏ k ∈ s, gg k)
+  have hpt : ∀ gg ∈ P,
+      (if ∏ k, gg k ∈ S then Bf gg * ch (∏ k, gg k) else 0)
+        = (if cd gg then Wf gg else 0) := by
+    intro gg hmem
+    have hmem' := Fintype.mem_piFinset.mp hmem
+    have hge1 : ∀ k : Fin 20, 1 ≤ gg k := fun k => (Finset.mem_Icc.mp (hmem' k)).1
+    have hcast : ((∏ k : Fin 20, gg k : ℕ) : ℝ) = ∏ k : Fin 20, (gg k : ℝ) := by
+      push_cast
+      ring
+    have hge1' : 1 ≤ ∏ k : Fin 20, gg k := Finset.one_le_prod (fun k _ => hge1 k)
+    have hcastn : ((∏ k : Fin 20, gg k : ℕ) : ℝ) = ∏ k : Fin 20, (gg k : ℝ) := hcast
+    have hcd' : cd gg ↔ ((N : ℝ) - A < ∏ k, (gg k : ℝ) ∧ ∏ k, (gg k : ℝ) ≤ u ∧
+              (∀ k, ¬ usedPos_dy j k → gg k = 1) ∧
+              (∀ k : Fin 20, 10 ≤ k.val → (gg k : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ))) :=
+      Iff.rfl
+    by_cases hc : cd gg
+    · obtain ⟨hc1, hc2, hc3, hc4⟩ := hcd'.mp hc
+      have hS1 : ∏ k, gg k ∈ S := by
+        rw [hS, Finset.mem_filter, Finset.mem_Icc]
+        exact ⟨⟨hge1', Nat.le_floor (by rw [hcast]; exact hc2)⟩, by rw [hcast]; exact hc1⟩
+      rw [if_pos hS1, if_pos hc]
+      have hk0 : ∀ k : Fin 20, k.val = 0 → ((F k (gg k) : ℝ) : ℂ) = aj (k.val + 1) (gg k) := by
+        intro k h0
+        have h01 : k.val + 1 = 1 := by omega
+        have hgk : gg k ≠ 0 := by have := hge1 k; omega
+        rw [hFk, hg, h01, h0]
+        simp [aj, ArithmeticFunction.log_apply]
+      have hkz : ∀ k : Fin 20, 1 ≤ k.val → k.val ≤ j - 1 →
+          ((F k (gg k) : ℝ) : ℂ) = aj (k.val + 1) (gg k) := by
+        intro k h1 h2
+        have hne0 : k.val ≠ 0 := by omega
+        have hm1 : k.val + 1 ≠ 1 := by omega
+        have hm2 : k.val + 1 ≤ 10 := by omega
+        have hgk : gg k ≠ 0 := by have := hge1 k; omega
+        rw [hFk, hg]
+        have haj1 : aj (k.val + 1) (gg k) = 1 := by
+          simp only [aj]
+          rw [if_neg hm1, if_pos hm2]
+        simp only [hne0, if_false, h2, if_true]
+        rw [haj1]
+        simp [ArithmeticFunction.zeta_apply, hgk]
+      have hkm : ∀ k : Fin 20, 10 ≤ k.val → k.val ≤ 9 + j →
+          ((F k (gg k) : ℝ) : ℂ) = aj (k.val + 1) (gg k) := by
+        intro k h1 h2
+        have hne0 : k.val ≠ 0 := by omega
+        have hnm : ¬ (k.val ≤ j - 1) := by intro h; omega
+        have hm1 : k.val + 1 ≠ 1 := by omega
+        have hm2 : ¬ (k.val + 1 ≤ 10) := by omega
+        have hXk : (gg k : ℝ) ≤ X := by
+          have := hc4 k h1
+          rw [hX]
+          exact this
+        rw [hFk, hg]
+        have hmv : muTrunc X (gg k) = ((μ (gg k) : ℤ) : ℝ) := by
+          simp [muTrunc, hXk]
+        have hc12 : 10 ≤ k.val ∧ k.val ≤ 9 + j := ⟨h1, h2⟩
+        simp only [hne0, if_false, hnm, hc12, true_and, and_true, if_true, hmv]
+        simp only [aj]
+        rw [if_neg hm1, if_neg hm2]
+        rw [Complex.ofReal_intCast]
+      have hku : ∀ k : Fin 20, ¬ usedPos_dy j k →
+          ((F k (gg k) : ℝ) : ℂ) = aj (k.val + 1) (gg k) := by
+        intro k hk
+        have hk1 : gg k = 1 := hc3 k hk
+        rw [hunused k hk, ArithmeticFunction.one_apply, if_pos hk1]
+        have hne0 : k.val ≠ 0 := by
+          intro h; exact hk (by unfold usedPos_dy; exact Or.inl h)
+        have hne1 : ¬ (1 ≤ k.val ∧ k.val ≤ j - 1) := by
+          intro h; exact hk (by unfold usedPos_dy; exact Or.inr (Or.inl h))
+        have hne2 : ¬ (10 ≤ k.val ∧ k.val ≤ 9 + j) := by
+          intro h; exact hk (by unfold usedPos_dy; exact Or.inr (Or.inr h))
+        have hm1 : k.val + 1 ≠ 1 := by omega
+        by_cases hb : k.val + 1 ≤ 10
+        · have haj1 : aj (k.val + 1) (gg k) = 1 := by
+            simp only [aj]
+            rw [if_neg hm1, if_pos hb]
+          rw [haj1]
+          norm_num
+        · have hajm : aj (k.val + 1) (gg k) = ((μ (gg k) : ℤ) : ℂ) := by
+            simp only [aj]
+            rw [if_neg hm1, if_neg hb]
+          rw [hajm, hk1]
+          norm_num
+      have hfac : ∀ k : Fin 20, ((F k (gg k) : ℝ) : ℂ) = aj (k.val + 1) (gg k) := by
+        intro k
+        by_cases hup : usedPos_dy j k
+        · unfold usedPos_dy at hup
+          rcases hup with h0 | ⟨h1, h2⟩ | ⟨h1, h2⟩
+          · exact hk0 k h0
+          · exact hkz k h1 h2
+          · exact hkm k h1 h2
+        · exact hku k hup
+      have hBval : Bf gg = ∏ k : Fin 20, aj (k.val + 1) (gg k) := by
+        rw [hBf]
+        exact Finset.prod_congr rfl (fun k _ => hfac k)
+      have hchval : ch (∏ k : Fin 20, gg k) = ∏ k : Fin 20, ch (gg k) := hchi_prod Finset.univ gg
+      rw [hBval, hchval, ← Finset.prod_mul_distrib, hWf]
+    · rw [if_neg hc]
+      by_cases hS1 : ∏ k, gg k ∈ S
+      · rw [if_pos hS1]
+        rw [hS] at hS1
+        obtain ⟨hS1I, hS1b⟩ := Finset.mem_filter.mp hS1
+        obtain ⟨-, hS1f⟩ := Finset.mem_Icc.mp hS1I
+        have hA : (N : ℝ) - A < ∏ k, (gg k : ℝ) := by rw [← hcast]; exact hS1b
+        have hB : ∏ k, (gg k : ℝ) ≤ u := by
+          by_cases h0 : 0 ≤ u
+          · rw [← hcast]
+            exact le_trans (by exact_mod_cast hS1f) (Nat.floor_le h0)
+          · push_neg at h0
+            have hz : ⌊u⌋₊ = 0 := Nat.floor_eq_zero.mpr (by linarith)
+            rw [hz] at hS1f
+            omega
+        have hCD : ¬ (∀ k, ¬ usedPos_dy j k → gg k = 1) ∨
+            ¬ (∀ k : Fin 20, 10 ≤ k.val → (gg k : ℝ) ≤ X) := by
+          by_contra hcon
+          push_neg at hcon
+          exact hc (hcd'.mpr ⟨hA, hB, hcon.1, hcon.2⟩)
+        have hzero : Bf gg = 0 := by
+          rw [hBf]
+          rcases hCD with hC | hD
+          · push_neg at hC
+            obtain ⟨k, hk, hne⟩ := hC
+            refine Finset.prod_eq_zero (Finset.mem_univ k) ?_
+            rw [hunused k hk, ArithmeticFunction.one_apply, if_neg hne]
+            norm_num
+          · push_neg at hD
+            obtain ⟨k, hk10, hkX⟩ := hD
+            refine Finset.prod_eq_zero (Finset.mem_univ k) ?_
+            by_cases hup : usedPos_dy j k
+            · unfold usedPos_dy at hup
+              rcases hup with h0 | ⟨h1, h2⟩ | ⟨h1, h2⟩
+              · exfalso; omega
+              · exfalso; omega
+              · have hFm : F k = muTrunc X := by
+                  rw [hFk]; exact hg3 k.val h1 h2
+                have hx0 : ¬ ((gg k : ℝ) ≤ X) := by linarith
+                rw [hFm]
+                have hmv0 : muTrunc X (gg k) = 0 := by
+                  simp [muTrunc, hx0]
+                rw [hmv0]
+                norm_num
+            · rw [hunused k hup, ArithmeticFunction.one_apply]
+              have hne1 : gg k ≠ 1 := by
+                intro h
+                rw [h] at hkX
+                push_cast at hkX
+                linarith
+              rw [if_neg hne1]
+              norm_num
+        rw [hzero, zero_mul]
+      · rw [if_neg hS1]
+  have hT2 : Tsum_dy j χ N A u = ∑ gg ∈ P, (if cd gg then Wf gg else 0) := by
+    unfold Tsum_dy
+    rw [Finset.sum_filter, hP]
+    refine Finset.sum_congr rfl (fun gg _ => ?_)
+    by_cases h : cd gg
+    · rw [if_pos h,
+        if_pos (show ((N : ℝ) - A < ∏ k, (gg k : ℝ) ∧ ∏ k, (gg k : ℝ) ≤ u ∧
+          (∀ k, ¬ usedPos_dy j k → gg k = 1) ∧
+          (∀ k : Fin 20, 10 ≤ k.val → (gg k : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ))) from h)]
+    · rw [if_neg h,
+        if_neg (show ¬ ((N : ℝ) - A < ∏ k, (gg k : ℝ) ∧ ∏ k, (gg k : ℝ) ≤ u ∧
+          (∀ k, ¬ usedPos_dy j k → gg k = 1) ∧
+          (∀ k : Fin 20, 10 ≤ k.val → (gg k : ℝ) ≤ (N : ℝ) ^ (1 / 10 : ℝ))) from h)]
+  rw [hstep1, hstep23]
+  exact Eq.trans (Finset.sum_congr rfl hpt) hT2.symm
 
 /-- LEAF: page 264 top, the dyadic partition: each tuple of `Tsum_dy` lies in exactly one box
 `Π (N_k, 2N_k]` of the grid, and boxes failing `Cond35` carry no tuple with
