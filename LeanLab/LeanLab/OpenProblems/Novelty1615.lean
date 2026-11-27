@@ -24,6 +24,13 @@ def LcmBound (lo B : ℕ) : Prop :=
 theorem lcmBound_vacuity : ∃ S : Finset (ℕ × ℤ), Covers S ∧ Set.InjOn Prod.fst (S : Set (ℕ × ℤ)) ∧
     ∀ s ∈ S, ∃ p : ℕ, p.Prime ∧ 3 ≤ p ∧ s.1 = p - 1 := cover_three
 
+/-- The reciprocal-sum route alone cannot prove the bound. These 18 admissible moduli divide
+`7650720 < 8000000`, and their reciprocal sum is greater than one. -/
+theorem admissible_recip_counterexample_7650720 :
+    (∑ m ∈ ({4, 6, 10, 12, 16, 18, 22, 28, 30, 36, 40, 42, 46, 60, 66, 70, 72, 88} : Finset ℕ),
+      (1 : ℚ) / m) > 1 := by
+  norm_num [Finset.sum_insert, Finset.sum_singleton]
+
 /-- **OPEN target.** Twin: the same bound at 8000000. This is an unrefereed public search, unit U-1615
 reproduced only its candidate counts 213 and 420, not the search itself. No Lean proof exists. -/
 theorem lcm_ge_8000000 : LcmBound 5 8000000 := by
@@ -49,8 +56,9 @@ theorem lcm_ge_8000000 : LcmBound 5 8000000 := by
     omega
   have hsum := one_le_sum_inv hS hpos
   have hsmall : (∑ m ∈ S.image Prod.fst, (1 : ℚ) / m) < 1 := by
-    -- BLOCKED 2026-11-19 FREE-nv-glm3 task1433 lcm_ge_8000000:
-    -- exact missing result: a Lean-checked exhaustive certificate for all candidate lcms below 8000000.
+    -- BLOCKED 2026-11-25 FREE-nv-mistral task3457 lcm_ge_8000000:
+    -- exact missing result: a Lean-checked exhaustive residue assignment certificate for the 420 candidate lcms
+    -- in [4000000, 8000000). The reciprocal-sum route is false, as proved above.
     sorry
   have heq : (∑ s ∈ S, (1 : ℚ) / s.1) = ∑ m ∈ S.image Prod.fst, (1 : ℚ) / m := by
     exact (Finset.sum_image (s := S) (g := Prod.fst)
