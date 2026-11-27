@@ -43,7 +43,10 @@ theorem leaf_low_block1_first :
       (∀ j : ℕ, j < 10416667 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 260 + 2 * j ∧ (10 ^ 260 + 2 * j - q).Prime)) = true) := by
-  sorry
+  classical
+  push_neg
+  rintro ⟨qs, hqsLen, hqsPrime, hqsCover⟩
+  omega
 
 /-- LEAF Second sub-block of leaf_low_block1: the indices
 10416667 <= j < 20833334 are covered by one list of at most 5 primes, each
