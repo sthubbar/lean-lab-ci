@@ -38,7 +38,8 @@ theorem upper_slack_split_rescaled_short_distribution
       Task308.ShortDistribution ε
         (ω (1/(1/4+(2*(1/16-1/10^5))/8-ε)) / (1/4+(2*(1/16-1/10^5))/8-ε) +
           upperDeletedIntegral ω ε + δ) (upperNormCoeff ε lam) := by
-  sorry
+  obtain ⟨lam, Λ, hb, hX, hd, -⟩ := upslack_route h4 h9 hω hz hε hε8 hδ
+  exact ⟨lam, Λ, hb, hX, hd⟩
 
 /-- LEAF: the short mean square condition follows from the short distribution condition for the
 normalized coefficient, with the same rescaling, the same density and the same slack delta. Once the
