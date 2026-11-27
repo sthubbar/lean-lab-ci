@@ -15,9 +15,10 @@ namespace LeanLab.Cai2002
 
 /-- LEAF: BJS display 31 at n = 500 and ε = 1/100000: τ_500 ≤ 2 * 10 ^ -12, interval value
 1.11454485e-12 at 40 digits, notes/burst-20261122/twinT-scripts/tau_interval.py.
-Class HARD: a certified evaluation of the first 500 terms of the recursion. -/
+Class HARD: a certified evaluation of the first 500 terms of the recursion.
+PROVED in burst-20261124 S9 from tau500_value1122e of Prove1122cTauNum.lean. -/
 theorem tau500_value1122c : bjsTau306 bjsC306 (1 / 100000) 500 ≤ 2e-12 := by
-  sorry
+  exact tau500_value1122e
 
 theorem c_eq_s77o (n : ℕ) (hn : 501 ≤ n) : bjsC306 n = 0.9607 := by
   unfold bjsC306
@@ -169,3 +170,5 @@ end LeanLab.Cai2002
 #print axioms LeanLab.Cai2002.tau_odd_tail_of500_s77
 #print axioms LeanLab.Cai2002.tau_even_tail_of500_s77
 #print axioms LeanLab.Cai2002.tau_odd_tail_twin1122c
+#print axioms LeanLab.Cai2002.tau500_value1122c
+#print axioms LeanLab.Cai2002.tau_even_tail_twin1122c
