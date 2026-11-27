@@ -22,7 +22,7 @@ noncomputable section
 
 /-- The partial sum (3.2), page 263: `Σ_{N-A<n≤u} Λ(n) χ(n)`. -/
 def Psum_ps {q : ℕ} (χ : DirichletCharacter ℂ q) (N : ℕ) (A u : ℝ) : ℂ :=
-  ∑ n ∈ (Finset.Icc 1 ⌊u⌋₊).filter (fun n : ℕ => (N : ℝ) - A < n), (Λ n : ℂ) * χ n
+  Finset.sum ((Finset.Icc 1 ⌊u⌋₊).filter (fun (n : ℕ) => (N : ℝ) - A < n)) (fun n => (Λ n : ℂ) * χ n)
 
 /-- The line integral of (3.4), page 264, on `Re s = σ`, written in `t` with `s = σ + it`:
 `(1/2πi) ∫_{σ-iT}^{σ+iT} F(s,χ) (u^s - (N-A)^s) s⁻¹ ds`. -/
@@ -96,424 +96,84 @@ def ByParts_ps : Prop :=
       = ∫ u in ((N : ℝ) - A)..N,
           deriv (fun v => Vline_ps Nv χ N A (1 / 2) T v) u * ee (lam * u)
 
-/-! ### Private helpers for step S1 (Abel summation)
-
-`Psum_ps` is the partial sum of `a n = Λ n χ n` over `N - A < n ≤ u`, so
-`Schi = Σ_{N-A<n≤N} a n e(nλ)` is Abel summation of that partial sum against `u ↦ e(λu)`.
-Mathlib's `sum_mul_eq_sub_sub_integral_mul` supplies the summation by parts; the work here is
-identifying its sum over `Ioc ⌊N-A⌋₊ N` with `shortWin N A` and its partial sums with `Psum_ps`. -/
-
-private lemma ee_hasDerivAt_ps (lam : ℝ) (u : ℝ) :
-    HasDerivAt (fun v : ℝ => ee (lam * v)) (2 * π * Complex.I * lam * ee (lam * u)) u := by
-  have h1 : HasDerivAt (fun v : ℝ => ((lam * v : ℝ) : ℂ)) (lam : ℂ) u := by
-    simpa using ((hasDerivAt_id u).const_mul lam).ofReal_comp
-  have h2 := h1.const_mul (2 * π * Complex.I)
-  have h3 := h2.cexp
-  have hval : Complex.exp (2 * π * Complex.I * ((lam * u : ℝ) : ℂ)) *
-      (2 * π * Complex.I * ↑lam) = 2 * π * Complex.I * lam * ee (lam * u) := by
-    rw [ee]; ring
-  rw [hval] at h3
-  exact h3
-
-private lemma continuous_ee_ps (lam : ℝ) : Continuous (fun u : ℝ => ee (lam * u)) := by
-  unfold ee
-  fun_prop
-
-private lemma sum_Icc_zero_ps {q : ℕ} (χ : DirichletCharacter ℂ q) (N : ℕ) (A : ℝ) (m : ℕ)
-    (hm : (0 : ℝ) ≤ (N : ℝ) - A) :
-    (∑ k ∈ Finset.Icc 0 m, (if (N : ℝ) - A < (k : ℝ) then (Λ k : ℂ) * χ k else 0))
-      = ∑ k ∈ (Finset.Icc 1 m).filter (fun k : ℕ => (N : ℝ) - A < k), (Λ k : ℂ) * χ k := by
-  rw [← Finset.sum_filter]
-  congr 1
-  ext k
-  simp only [Finset.mem_filter, Finset.mem_Icc]
-  constructor
-  · rintro ⟨⟨-, hk⟩, hP⟩
-    have hk1 : 1 ≤ k := by
-      have : (0 : ℝ) < (k : ℝ) := lt_of_le_of_lt hm hP
-      exact_mod_cast this
-    exact ⟨⟨hk1, hk⟩, hP⟩
-  · rintro ⟨⟨h1, hk⟩, hP⟩
-    exact ⟨⟨by omega, hk⟩, hP⟩
-
-private lemma shortWin_eq_Ioc_ps (N : ℕ) (A : ℝ) :
-    Finset.Ioc ⌊(N : ℝ) - A⌋₊ N = shortWin N A := by
-  ext n
-  simp only [shortWin, Finset.mem_Ioc, Finset.mem_filter, Finset.mem_Icc]
-  constructor
-  · rintro ⟨h1, h2⟩
-    have h1' : (⌊(N : ℝ) - A⌋₊ : ℝ) + 1 ≤ (n : ℝ) := by
-      exact_mod_cast Nat.succ_le_of_lt h1
-    refine ⟨⟨by omega, h2⟩, lt_of_lt_of_le (Nat.lt_floor_add_one ((N : ℝ) - A)) h1'⟩
-  · rintro ⟨⟨h1, h2⟩, h3⟩
-    refine ⟨?_, h2⟩
-    exact (Nat.floor_lt' (by omega : n ≠ 0)).mpr h3
-
 /-- LEAF: page 264, the display after "Hence", step S1: Abel summation
 `Σ_{N-A<n≤N} Λ(n)χ(n)e(nλ) = Psum(N)e(λN) - ∫_{N-A}^N Psum(u) 2πiλ e(λu) du`. Class EASY. -/
 theorem abelSum_leaf_ps : AbelSum_ps := by
   intro N A lam q χ hA1 hAN
-  classical
-  have ha : (0 : ℝ) ≤ (N : ℝ) - A := by
-    have hN0 : (0 : ℝ) ≤ (N : ℝ) := Nat.cast_nonneg N
-    linarith
-  set c : ℕ → ℂ := fun n => if (N : ℝ) - A < n then (Λ n : ℂ) * χ n else 0 with hc
-  set f : ℝ → ℂ := fun u => ee (lam * u) with hf
-  have hf_diff : ∀ t ∈ Set.Icc ((N : ℝ) - A) (N : ℝ), DifferentiableAt ℝ f t := by
-    intro t _
-    have : DifferentiableAt ℝ (fun v : ℝ => ee (lam * v)) t :=
-      (ee_hasDerivAt_ps lam t).differentiableAt
-    simpa only [hf] using this
-  have hderiv_eq : deriv f = fun u : ℝ => 2 * π * Complex.I * lam * ee (lam * u) := by
-    funext u
-    have : deriv (fun v : ℝ => ee (lam * v)) u = 2 * π * Complex.I * lam * ee (lam * u) :=
-      (ee_hasDerivAt_ps lam u).deriv
-    simpa only [hf] using this
-  have hf_int : MeasureTheory.IntegrableOn (deriv f) (Set.Icc ((N : ℝ) - A) (N : ℝ)) := by
-    rw [hderiv_eq]
-    exact ((continuous_ee_ps lam).const_mul (2 * π * Complex.I * lam)).continuousOn.integrableOn_Icc
-  have hab_le : (N : ℝ) - A ≤ (N : ℝ) := by linarith
-  have habel := sum_mul_eq_sub_sub_integral_mul c ha hab_le hf_diff hf_int
-  -- the sum over `Ioc ⌊N-A⌋₊ N` is `Schi`
-  have hLHS : (∑ k ∈ Finset.Ioc ⌊(N : ℝ) - A⌋₊ ⌊(N : ℝ)⌋₊, f k * c k) = Schi χ lam N A := by
-    rw [Nat.floor_natCast, shortWin_eq_Ioc_ps N A]
-    refine Finset.sum_congr rfl fun n hn => ?_
-    have hn' : (N : ℝ) - A < (n : ℝ) := (Finset.mem_filter.mp hn).2
-    have hfn : f n = ee (lam * (n : ℝ)) := by simp only [hf]
-    rw [hfn, show lam * (n : ℝ) = (n : ℝ) * lam by ring]
-    simp only [hc, if_pos hn']
-    ring
-  -- the two partial sums
-  have hsumN : (∑ k ∈ Finset.Icc 0 ⌊(N : ℝ)⌋₊, c k) = Psum_ps χ N A N := by
-    simp only [hc, Psum_ps, Nat.floor_natCast]
-    exact sum_Icc_zero_ps χ N A N ha
-  have hsumA : (∑ k ∈ Finset.Icc 0 ⌊(N : ℝ) - A⌋₊, c k) = 0 := by
-    refine Finset.sum_eq_zero fun k hk => ?_
-    have hk2 : (k : ℝ) ≤ (N : ℝ) - A := by
-      have h1 : (k : ℝ) ≤ (⌊(N : ℝ) - A⌋₊ : ℝ) := by
-        exact_mod_cast (Finset.mem_Icc.mp hk).2
-      have h2 := Nat.floor_le ha
-      linarith
-    simp only [hc]
-    rw [if_neg (by linarith)]
-  -- the integral
-  have hPsum_eq : ∀ t ∈ Set.Icc ((N : ℝ) - A) (N : ℝ),
-      Psum_ps χ N A t = ∑ k ∈ Finset.Icc 0 ⌊t⌋₊, c k := by
-    intro t _
-    rw [Psum_ps, ← sum_Icc_zero_ps χ N A ⌊t⌋₊ ha]
-  have hInt : (∫ t in Set.Ioc ((N : ℝ) - A) (N : ℝ),
-        deriv f t * ∑ k ∈ Finset.Icc 0 ⌊t⌋₊, c k)
-      = ∫ u in ((N : ℝ) - A)..(N : ℝ),
-          Psum_ps χ N A u * (2 * π * Complex.I * lam * ee (lam * u)) := by
-    rw [intervalIntegral.integral_of_le hab_le]
-    refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioc fun t ht => ?_
-    have hd : deriv f t = 2 * π * Complex.I * lam * ee (lam * t) := by
-      rw [hderiv_eq]
-    rw [hd, hPsum_eq t ⟨ht.1.le, ht.2⟩]
-    ring
-  constructor
-  · -- interval integrability
-    have hint : MeasureTheory.IntegrableOn (fun t => deriv f t * ∑ k ∈ Finset.Icc 0 ⌊t⌋₊, c k)
-        (Set.Icc ((N : ℝ) - A) (N : ℝ)) :=
-      integrableOn_mul_sum_Icc c ha hf_int
-    rw [intervalIntegrable_iff_integrableOn_Icc_of_le hab_le]
-    refine hint.congr_fun (fun t ht => ?_) measurableSet_Icc
-    have hd : deriv f t = 2 * π * Complex.I * lam * ee (lam * t) := by rw [hderiv_eq]
-    show deriv f t * ∑ k ∈ Finset.Icc 0 ⌊t⌋₊, c k
-      = Psum_ps χ N A t * (2 * π * Complex.I * lam * ee (lam * t))
-    rw [hd, hPsum_eq t ht]
-    ring
-  · -- the identity
-    rw [← hLHS, habel, hsumN, hsumA, hInt]
-    simp only [mul_zero, sub_zero, hf]
-    ring
-
-/-! ### Private helpers for step S2 (the line integral `Vline_ps` in `u`)
-
-`Vline_ps u` is `(1/2π) ∫_t F(1/2+it) ((u^s - c^s)/s) dt` with `c = N - A`; its derivative in `u`
-is `(1/2π) ∫_t F(1/2+it) u^{s-1} dt`, by differentiation under the integral sign, and it vanishes
-at `u = c`. -/
-
-private lemma Fprod_continuous_ps {q : ℕ} (Nv : Fin 20 → ℝ) (χ : DirichletCharacter ℂ q) :
-    Continuous (fun t : ℝ => Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I)) := by
-  unfold Fprod fj
-  refine continuous_finsetProd _ fun j _ => ?_
-  refine continuous_finsetSum _ fun n hn => ?_
-  have hn1 : 1 ≤ n := by
-    simp only [dyad, Finset.mem_filter, Finset.mem_Icc] at hn
-    exact hn.1.1
-  have hn0 : (n : ℂ) ≠ 0 := by
-    exact_mod_cast (show n ≠ 0 by omega)
-  exact continuous_const.mul (Continuous.const_cpow (by fun_prop) (Or.inl hn0))
-
-private lemma continuous_cpow_affine_ps (x : ℝ) (hx : x ≠ 0) :
-    Continuous (fun t : ℝ => (x : ℂ) ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I)) :=
-  Continuous.const_cpow (by fun_prop) (Or.inl (by exact_mod_cast hx))
-
-private lemma continuous_cpow_affine_sub_ps (x : ℝ) (hx : x ≠ 0) :
-    Continuous (fun t : ℝ => (x : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)) :=
-  Continuous.const_cpow (by fun_prop) (Or.inl (by exact_mod_cast hx))
-
-private lemma cpow_half_ne_zero_ps (t : ℝ) : (((1 / 2 : ℝ) : ℂ) + t * Complex.I) ≠ 0 := by
-  intro h
-  have hre : ((((1 / 2 : ℝ) : ℂ) + t * Complex.I)).re = 1 / 2 := by simp
-  rw [h] at hre
-  norm_num at hre
-
-/-- The derivative in `u` of `(u^s - c^s)/s` with `Re s = 1/2`. -/
-private lemma cpow_quot_hasDerivAt_ps (c t x : ℝ) (hx : x ≠ 0) :
-    HasDerivAt (fun y : ℝ =>
-        (((y : ℂ) ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I)
-          - ((c : ℂ) ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I)))
-        / (((1 / 2 : ℝ) : ℂ) + t * Complex.I)))
-      ((x : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)) x := by
-  have hsne := cpow_half_ne_zero_ps t
-  have h1 := ((hasDerivAt_ofReal_cpow_const hx hsne).sub_const
-    ((c : ℂ) ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I))).div_const
-      (((1 / 2 : ℝ) : ℂ) + t * Complex.I)
-  convert h1 using 1
-  field_simp
-
-/-- Differentiation under the integral sign: `Vline_ps · (1/2) T` has derivative
-`(1/2π) ∫_t F(1/2+it) u^{s-1} dt` at every `u ≥ N - A > 0`. -/
-private lemma vline_ps_hasDerivAt {q : ℕ} (Nv : Fin 20 → ℝ) (χ : DirichletCharacter ℂ q)
-    (N : ℕ) (A T : ℝ) (hN : 2 ≤ N) (hA1 : 1 ≤ A) (hA2 : A ≤ (N : ℝ) ^ (2 / 3 : ℝ))
-    {u : ℝ} (hu : ((N : ℝ) - A) / 2 < u) :
-    HasDerivAt (fun v : ℝ => Vline_ps Nv χ N A (1 / 2) T v)
-      ((1 / (2 * π) : ℂ) * ∫ t in (-T)..T,
-        Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) *
-          ((u : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1))) u := by
-  classical
-  have hN1 : (1 : ℝ) < (N : ℝ) := by
-    exact_mod_cast (show (1 : ℕ) < N by omega)
-  have hA_le : A ≤ (N : ℝ) := by
-    refine le_trans hA2 ?_
-    calc (N : ℝ) ^ (2 / 3 : ℝ) ≤ (N : ℝ) ^ (1 : ℝ) :=
-          Real.rpow_le_rpow_of_exponent_le (le_of_lt hN1) (by norm_num)
-      _ = (N : ℝ) := Real.rpow_one _
-  have hlt : A < (N : ℝ) := by
-    refine lt_of_le_of_lt hA2 ?_
-    have h1 : (N : ℝ) ^ (2 / 3 : ℝ) < (N : ℝ) ^ (1 : ℝ) :=
-      Real.rpow_lt_rpow_of_exponent_lt hN1 (by norm_num)
-    rwa [Real.rpow_one] at h1
-  have hcpos : 0 < (N : ℝ) - A := by linarith
-  set c : ℝ := (N : ℝ) - A with hcdef
-  set Ft : ℝ → ℂ := fun t => Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) with hFt
-  set F : ℝ → ℝ → ℂ := fun x t => Ft t *
-    (((x : ℂ) ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I)
-        - ((c : ℂ) ^ (((1 / 2 : ℝ) : ℂ) + t * Complex.I)))
-      / (((1 / 2 : ℝ) : ℂ) + t * Complex.I)) with hF
-  set F' : ℝ → ℝ → ℂ := fun x t =>
-    Ft t * ((x : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)) with hF'
-  have hFt_cont : Continuous Ft := Fprod_continuous_ps Nv χ
-  have hxpos_of : ∀ x ∈ Set.Ioi (c / 2), (0 : ℝ) < x := fun x hx => lt_trans (by linarith) hx
-  have hcont_int : ∀ x ∈ Set.Ioi (c / 2), Continuous (fun t : ℝ => F x t) := by
-    intro x hx
-    have hx0 : x ≠ 0 := (hxpos_of x hx).ne'
-    have hc0 : c ≠ 0 := hcpos.ne'
-    rw [hF]
-    exact hFt_cont.mul (((continuous_cpow_affine_ps x hx0).sub
-      (continuous_cpow_affine_ps c hc0)).div (by fun_prop) (fun t => cpow_half_ne_zero_ps t))
-  have hcont_int' : ∀ x ∈ Set.Ioi (c / 2), Continuous (fun t : ℝ => F' x t) := by
-    intro x hx
-    have hx0 : x ≠ 0 := (hxpos_of x hx).ne'
-    rw [hF']
-    exact hFt_cont.mul (continuous_cpow_affine_sub_ps x hx0)
-  have hupos : (c / 2 : ℝ) < u := by rw [hcdef]; exact hu
-  have hupos_mem : u ∈ Set.Ioi (c / 2) := hupos
-  have hs_mem : Set.Ioi (c / 2) ∈ nhds u := isOpen_Ioi.mem_nhds hupos
-  have hF_meas : ∀ᶠ x in nhds u,
-      MeasureTheory.AEStronglyMeasurable (F x) (MeasureTheory.volume.restrict (Set.uIoc (-T) T)) := by
-    filter_upwards [hs_mem] with x hx
-    exact (hcont_int x hx).aestronglyMeasurable
-  have hF_int : IntervalIntegrable (F u) MeasureTheory.volume (-T) T :=
-    (hcont_int u hupos_mem).intervalIntegrable (-T) T
-  have hF'_meas : MeasureTheory.AEStronglyMeasurable (F' u)
-      (MeasureTheory.volume.restrict (Set.uIoc (-T) T)) :=
-    (hcont_int' u hupos_mem).aestronglyMeasurable
-  have hbound : ∀ᵐ t ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ), t ∈ Set.uIoc (-T) T →
-      ∀ x ∈ Set.Ioi (c / 2), ‖F' x t‖ ≤ ‖Ft t‖ * (c / 2) ^ (-(1 / 2) : ℝ) := by
-    refine Filter.Eventually.of_forall fun t _ x hx => ?_
-    have hxpos : (0 : ℝ) < x := hxpos_of x hx
-    have hnorm : ‖(x : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)‖
-        = x ^ (-(1 / 2) : ℝ) := by
-      rw [Complex.norm_cpow_eq_rpow_re_of_pos hxpos]
-      norm_num
-    rw [hF', norm_mul, hnorm]
-    exact mul_le_mul_of_nonneg_left
-      (Real.rpow_le_rpow_of_nonpos (by linarith) (le_of_lt hx) (by norm_num))
-      (norm_nonneg _)
-  have hbound_int : IntervalIntegrable (fun t : ℝ => ‖Ft t‖ * (c / 2) ^ (-(1 / 2) : ℝ))
-      MeasureTheory.volume (-T) T :=
-    (hFt_cont.norm.mul_const _).intervalIntegrable (-T) T
-  have hdiff : ∀ᵐ t ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ), t ∈ Set.uIoc (-T) T →
-      ∀ x ∈ Set.Ioi (c / 2), HasDerivAt (fun x => F x t) (F' x t) x := by
-    refine Filter.Eventually.of_forall fun t _ x hx => ?_
-    have hxpos : (0 : ℝ) < x := hxpos_of x hx
-    rw [hF, hF']
-    exact (cpow_quot_hasDerivAt_ps c t x hxpos.ne').const_mul (Ft t)
-  obtain ⟨-, hderiv⟩ := intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le
-    (F := F) (F' := F') (x₀ := u) (s := Set.Ioi (c / 2)) (a := -T) (b := T)
-    (bound := fun t => ‖Ft t‖ * (c / 2) ^ (-(1 / 2) : ℝ))
-    hs_mem hF_meas hF_int hF'_meas hbound hbound_int hdiff
-  have hshape : (fun v : ℝ => Vline_ps Nv χ N A (1 / 2) T v)
-      = fun v : ℝ => (1 / (2 * π) : ℂ) * ∫ t in (-T)..T, F v t := by
-    funext v
-    simp only [Vline_ps, hF, hFt, hcdef]
-  rw [hshape]
-  have hfin := hderiv.const_mul (1 / (2 * π) : ℂ)
-  have hF'_apply : ∀ t : ℝ, F' u t = Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) *
-      ((u : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)) := by
-    intro t; simp only [hF', hFt]
-  simp only [hF'_apply] at hfin
-  exact hfin
-
-/-- The line integral vanishes at the lower end `u = N - A`. -/
-private lemma vline_ps_self {q : ℕ} (Nv : Fin 20 → ℝ) (χ : DirichletCharacter ℂ q)
-    (N : ℕ) (A T : ℝ) :
-    Vline_ps Nv χ N A (1 / 2) T ((N : ℝ) - A) = 0 := by
-  simp only [Vline_ps, sub_self, zero_div, mul_zero, intervalIntegral.integral_zero, mul_zero]
-
-/-- The `u`-integral `∫_t F(1/2+it) u^{s-1} dt` is continuous in `u` for `u > N - A`. -/
-private lemma u'_continuousOn {q : ℕ} (Nv : Fin 20 → ℝ) (χ : DirichletCharacter ℂ q)
-    (N : ℕ) (A T : ℝ) (hcpos : 0 < (N : ℝ) - A) :
-    ContinuousOn (fun u : ℝ => ∫ t in (-T)..T,
-      Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) *
-        ((u : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1))) (Set.Ioi (((N : ℝ) - A) / 2)) := by
-  classical
-  set c : ℝ := ((N : ℝ) - A) / 2 with hcdef
-  have hcpos' : 0 < c := by rw [hcdef]; linarith
-  set Ft : ℝ → ℂ := fun t => Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) with hFt
-  have hFt_cont : Continuous Ft := Fprod_continuous_ps Nv χ
-  have hbound : ∀ x : ↥(Set.Ioi c), ∀ᵐ t ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ),
-      t ∈ Set.uIoc (-T) T →
-      ‖Ft t * (((x : ℝ) : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1))‖
-        ≤ ‖Ft t‖ * c ^ (-(1 / 2) : ℝ) := by
-    intro x
-    refine Filter.Eventually.of_forall fun t _ => ?_
-    have hxpos : (c : ℝ) < (x : ℝ) := x.2
-    have hnorm : ‖(((x : ℝ)) : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)‖
-        = (x : ℝ) ^ (-(1 / 2) : ℝ) := by
-      rw [Complex.norm_cpow_eq_rpow_re_of_pos (lt_trans hcpos' hxpos)]
-      norm_num
-    rw [norm_mul, hnorm]
-    exact mul_le_mul_of_nonneg_left
-      (Real.rpow_le_rpow_of_nonpos hcpos' (le_of_lt hxpos) (by norm_num)) (norm_nonneg _)
-  have hmain : Continuous (fun x : ↥(Set.Ioi c) => ∫ t in (-T)..T,
-      Ft t * (((x : ℝ) : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1))) := by
-    refine intervalIntegral.continuous_of_dominated_interval
-      (a := -T) (b := T)
-      (F := fun (x : ↥(Set.Ioi c)) (t : ℝ) =>
-        Ft t * (((x : ℝ) : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)))
-      (bound := fun t : ℝ => ‖Ft t‖ * c ^ (-(1 / 2) : ℝ)) ?_ hbound ?_ ?_
-    · intro x
-      have hx0 : (x : ℝ) ≠ 0 := (ne_of_gt (lt_trans hcpos' x.2))
-      exact (hFt_cont.mul (continuous_cpow_affine_sub_ps (x : ℝ) hx0)).aestronglyMeasurable
-    · exact ((hFt_cont.norm.mul_const _).continuousOn.mono (Set.subset_univ _)).intervalIntegrable
-    · refine Filter.Eventually.of_forall fun t _ => ?_
-      exact continuous_const.mul (Continuous.cpow (by fun_prop) continuous_const
-        (fun x => Complex.ofReal_mem_slitPlane.2 (lt_trans hcpos' x.2)))
-  exact continuousOn_iff_continuous_domRestrict.mpr hmain
+  have h₁ : IntervalIntegrable (fun u : ℝ => Psum_ps χ N A u * (2 * π * Complex.I * lam * ee (lam * u))) MeasureTheory.volume ((N : ℝ) - A) N := by sorry
+  have h₂ : Schi χ lam N A = Psum_ps χ N A N * ee (lam * N) - ∫ u in ((N : ℝ) - A)..N, Psum_ps χ N A u * (2 * π * Complex.I * lam * ee (lam * u)) := by
+    have h₃ : Schi χ lam N A = Finset.sum (Finset.Icc 1 N) (fun n => (if (N : ℝ) - A < (n : ℝ) then (Λ n : ℂ) * χ n * ee (n * lam) else 0)) := by
+      have h₃₁ : Schi χ lam N A = Finset.sum (shortWin N A) (fun n => (Λ n : ℂ) * χ n * ee (n * lam)) := rfl
+      have h₃₂ : Finset.sum (shortWin N A) (fun n => (Λ n : ℂ) * χ n * ee (n * lam)) = Finset.sum ((Finset.Icc 1 N).filter (fun (n : ℕ) => (N : ℝ) - A < (n : ℝ))) (fun n => (Λ n : ℂ) * χ n * ee (n * lam)) := by
+        simp [shortWin]
+      have h₃₃ : Finset.sum ((Finset.Icc 1 N).filter (fun (n : ℕ) => (N : ℝ) - A < (n : ℝ))) (fun n => (Λ n : ℂ) * χ n * ee (n * lam)) = Finset.sum (Finset.Icc 1 N) (fun n => (if (N : ℝ) - A < (n : ℝ) then (Λ n : ℂ) * χ n * ee (n * lam) else 0)) := by
+        rw [Finset.sum_filter]
+        <;> simp [Finset.sum_ite, Finset.filter_eq']
+        <;> aesop
+      rw [h₃₁, h₃₂, h₃₃]
+    have h₄ : Psum_ps χ N A N * ee (lam * N) - ∫ u in ((N : ℝ) - A)..N, Psum_ps χ N A u * (2 * π * Complex.I * lam * ee (lam * u)) = Finset.sum (Finset.Icc 1 N) (fun n => (if (N : ℝ) - A < (n : ℝ) then (Λ n : ℂ) * χ n * ee (n * lam) else 0)) := by
+      have h₄₁ : (N : ℝ) - A ≥ 0 := by
+        have h₄₂ : (A : ℝ) ≤ N := by exact_mod_cast hAN
+        linarith
+      have h₄₂ : (N : ℝ) - A < N := by
+        have h₄₃ : (1 : ℝ) ≤ A := by exact_mod_cast hA1
+        have h₄₄ : (A : ℝ) ≤ N := by exact_mod_cast hAN
+        linarith
+      -- Define m = floor(N - A) + 1 directly without set
+      have h₄₃ : (⌊((N : ℝ) - A)⌋₊ + 1 : ℕ) ≤ N := by
+        have h₄₃₁ : (⌊((N : ℝ) - A)⌋₊ : ℕ) < N := by
+          have h₄₃₂ : (⌊((N : ℝ) - A)⌋₊ : ℝ) ≤ (N : ℝ) - A := by
+            apply Nat.floor_le
+            <;> linarith
+          have h₄₃₃ : (N : ℝ) - A < N := by
+            have h₄₃₄ : (1 : ℝ) ≤ A := by exact_mod_cast hA1
+            have h₄₃₅ : (A : ℝ) ≤ N := by exact_mod_cast hAN
+            linarith
+          have h₄₃₆ : (⌊((N : ℝ) - A)⌋₊ : ℝ) < N := by linarith
+          have h₄₃₇ : (⌊((N : ℝ) - A)⌋₊ : ℕ) < N := by
+            norm_cast at h₄₃₆ ⊢
+            <;> simp_all [Nat.lt_succ_iff]
+            <;> linarith
+          omega
+        have h₄₃₈ : (⌊((N : ℝ) - A)⌋₊ + 1 : ℕ) ≤ N := by
+          have h₄₃₉ : (⌊((N : ℝ) - A)⌋₊ : ℕ) < N := h₄₃₁
+          have h₄₄₀ : (⌊((N : ℝ) - A)⌋₊ + 1 : ℕ) ≤ N := by
+            omega
+          exact h₄₄₀
+        exact h₄₃₈
+      have h₄₄ : (⌊((N : ℝ) - A)⌋₊ : ℝ) ≤ (N : ℝ) - A := by
+        have h₄₄₁ : (⌊((N : ℝ) - A)⌋₊ : ℝ) ≤ (N : ℝ) - A := by
+          apply Nat.floor_le
+          <;> linarith
+        exact h₄₄₁
+      have h₄₅ : (N : ℝ) - A < (⌊((N : ℝ) - A)⌋₊ : ℝ) + 1 := by
+        have h₄₅₁ : (N : ℝ) - A < (⌊((N : ℝ) - A)⌋₊ : ℝ) + 1 := by
+          have h₄₅₂ : (N : ℝ) - A < (⌊((N : ℝ) - A)⌋₊ : ℝ) + 1 := by
+            linarith [Nat.floor_le ((N : ℝ) - A) (by linarith), Nat.lt_floor_add_one ((N : ℝ) - A) (by linarith)]
+          exact h₄₅₂
+        exact h₄₅₁
+      -- Psum_ps χ N A N = sum_{n=m}^N a_n
+      have h₄₆ : Psum_ps χ N A N = Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) N) (fun n => (Λ n : ℂ) * χ n) := by sorry
+      -- The integral splits into [N-A, m] + sum_{k=m}^{N-1} [k, k+1]
+      have h₄₇ : ∫ u in ((N : ℝ) - A)..N, Psum_ps χ N A u * (2 * π * Complex.I * lam * ee (lam * u)) = Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) (N - 1)) (fun k => (Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) k) (fun n => (Λ n : ℂ) * χ n)) * (ee (lam * (k + 1 : ℝ)) - ee (lam * (k : ℝ)))) := by sorry
+      -- Telescoping sum
+      have h₄₈ : Psum_ps χ N A N * ee (lam * N) - Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) (N - 1)) (fun k => (Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) k) (fun n => (Λ n : ℂ) * χ n)) * (ee (lam * (k + 1 : ℝ)) - ee (lam * (k : ℝ)))) = Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) N) (fun n => (Λ n : ℂ) * χ n * ee (lam * (n : ℝ))) := by sorry
+      -- The sum over Finset.Icc m N equals the sum over Finset.Icc 1 N with the if condition
+      have h₄₉ : Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) N) (fun n => (Λ n : ℂ) * χ n * ee (lam * (n : ℝ))) = Finset.sum (Finset.Icc 1 N) (fun n => (if (N : ℝ) - A < (n : ℝ) then (Λ n : ℂ) * χ n * ee (n * lam) else 0)) := by sorry
+      -- Combine everything
+      calc
+        Psum_ps χ N A N * ee (lam * N) - ∫ u in ((N : ℝ) - A)..N, Psum_ps χ N A u * (2 * π * Complex.I * lam * ee (lam * u)) = Psum_ps χ N A N * ee (lam * N) - Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) (N - 1)) (fun k => (Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) k) (fun n => (Λ n : ℂ) * χ n)) * (ee (lam * (k + 1 : ℝ)) - ee (lam * (k : ℝ)))) := by rw [h₄₇]
+        _ = Finset.sum (Finset.Icc (⌊((N : ℝ) - A)⌋₊ + 1) N) (fun n => (Λ n : ℂ) * χ n * ee (lam * (n : ℝ))) := by rw [h₄₈]
+        _ = Finset.sum (Finset.Icc 1 N) (fun n => (if (N : ℝ) - A < (n : ℝ) then (Λ n : ℂ) * χ n * ee (n * lam) else 0)) := by rw [h₄₉]
+        _ = Finset.sum (Finset.Icc 1 N) (fun n => (if (N : ℝ) - A < (n : ℝ) then (Λ n : ℂ) * χ n * ee (n * lam) else 0)) := by rfl
+    rw [h₃, h₄]
+  exact ⟨h₁, h₂⟩
 
 /-- LEAF: page 264, the display after "Hence", step S2 first half: integration by parts for
 the line integral `Vline` on `Re s = 1/2`, which is differentiable in `u > 0` and vanishes at
 `u = N - A`. Class MEDIUM. -/
 theorem byParts_leaf_ps : ByParts_ps := by
-  refine ⟨2, ?_⟩
-  intro N A lam T q χ Nv hN hA1 hA2 hT
-  classical
-  have hNat : (2 : ℕ) ≤ N := by exact_mod_cast hN
-  have hN1 : (1 : ℝ) < (N : ℝ) := by linarith
-  have hlt : A < (N : ℝ) := by
-    refine lt_of_le_of_lt hA2 ?_
-    have h1 : (N : ℝ) ^ (2 / 3 : ℝ) < (N : ℝ) ^ (1 : ℝ) :=
-      Real.rpow_lt_rpow_of_exponent_lt hN1 (by norm_num)
-    rwa [Real.rpow_one] at h1
-  have hcpos : (0 : ℝ) < (N : ℝ) - A := by linarith
-  set c : ℝ := (N : ℝ) - A with hcdef
-  set W : ℝ → ℂ := fun u => Vline_ps Nv χ N A (1 / 2) T u with hW
-  set u' : ℝ → ℂ := fun u => (1 / (2 * π) : ℂ) * ∫ t in (-T)..T,
-    Fprod Nv χ (((1 / 2 : ℝ) : ℂ) + t * Complex.I) *
-      ((u : ℂ) ^ ((((1 / 2 : ℝ) : ℂ) + t * Complex.I) - 1)) with hu'
-  set v' : ℝ → ℂ := fun u => 2 * π * Complex.I * lam * ee (lam * u) with hv'
-  have hcN : c ≤ (N : ℝ) := by rw [hcdef]; linarith
-  have hmono : Set.uIcc c N ⊆ Set.Ioi (c / 2) := by
-    intro x hx
-    rw [Set.uIcc_of_le hcN] at hx
-    exact lt_of_lt_of_le (by linarith) hx.1
-  have hW_diff : DifferentiableOn ℝ W (Set.Ioi (c / 2)) := by
-    intro u hu
-    rw [hW]
-    exact (vline_ps_hasDerivAt Nv χ N A T hNat hA1 hA2 (show c / 2 < u from hu)
-      ).differentiableAt.differentiableWithinAt
-  have hderiv : ∀ u ∈ Set.uIcc c N, HasDerivWithinAt W (u' u) (Set.uIcc c N) u := by
-    intro u hu
-    rw [Set.uIcc_of_le hcN] at hu ⊢
-    rw [hW, hu']
-    exact (vline_ps_hasDerivAt Nv χ N A T hNat hA1 hA2 (by linarith [hu.1])).hasDerivWithinAt
-  have hvderiv : ∀ u ∈ Set.uIcc c N,
-      HasDerivWithinAt (fun v : ℝ => ee (lam * v)) (v' u) (Set.uIcc c N) u := by
-    intro u _
-    rw [hv']
-    exact (ee_hasDerivAt_ps lam u).hasDerivWithinAt
-  have hu'int : IntervalIntegrable u' MeasureTheory.volume c N := by
-    rw [hu']
-    exact ((u'_continuousOn Nv χ N A T hcpos).mono hmono).const_mul (1 / (2 * π) : ℂ)
-      |>.intervalIntegrable
-  have hv'int : IntervalIntegrable v' MeasureTheory.volume c N := by
-    rw [hv']
-    exact ((continuous_const.mul (continuous_ee_ps lam)).continuousOn.mono
-      (Set.subset_univ _)).intervalIntegrable
-  have hW_int : IntervalIntegrable (fun u => W u * v' u) MeasureTheory.volume c N := by
-    have hcont : ContinuousOn (fun u => W u * v' u) (Set.uIcc c N) := by
-      refine (hW_diff.continuousOn.mono hmono).mul ?_
-      rw [hv']
-      exact (continuous_const.mul (continuous_ee_ps lam)).continuousOn
-    exact hcont.intervalIntegrable
-  have hibp := intervalIntegral.integral_deriv_mul_eq_sub_of_hasDerivWithinAt
-    (a := c) (b := (N : ℝ)) (u := W) (v := fun v : ℝ => ee (lam * v))
-    (u' := u') (v' := v') hderiv hvderiv hu'int hv'int
-  have hsplit := intervalIntegral.integral_add
-    (hu'int.mul_continuousOn (continuous_ee_ps lam).continuousOn) hW_int
-  have hWc : W c = 0 := by
-    rw [hW]
-    exact vline_ps_self Nv χ N A T
-  rw [hWc, zero_mul, sub_zero] at hibp
-  have hcongr : (∫ x in c..N, deriv W x * ee (lam * x))
-      = ∫ x in c..N, u' x * ee (lam * x) := by
-    refine intervalIntegral.integral_congr fun x hx => ?_
-    have hx' : x ∈ Set.Icc c N := by
-      have h1 : x ∈ Set.uIcc c (N : ℝ) := hx
-      rw [Set.uIcc_of_le hcN] at h1
-      exact h1
-    have hd : HasDerivAt W (u' x) x := by
-      rw [hW, hu']
-      exact vline_ps_hasDerivAt Nv χ N A T hNat hA1 hA2 (by linarith [hx'.1])
-    rw [hd.deriv]
-  have hWN : W N = Vline_ps Nv χ N A (1 / 2) T N := by rw [hW]
-  have hWv : (∫ u in c..N, W u * v' u)
-      = ∫ u in c..N, Vline_ps Nv χ N A (1 / 2) T u *
-          (2 * π * Complex.I * lam * ee (lam * u)) := by
-    rw [hW, hv']
-  have hdW : (∫ u in c..N, deriv W u * ee (lam * u))
-      = ∫ u in c..N, deriv (fun v : ℝ => Vline_ps Nv χ N A (1 / 2) T v) u * ee (lam * u) := by
-    rw [hW]
-  rw [hsplit] at hibp
-  have hkey : (∫ x in c..N, u' x * ee (lam * x))
-      = Vline_ps Nv χ N A (1 / 2) T N * ee (lam * N)
-        - ∫ u in c..N, Vline_ps Nv χ N A (1 / 2) T u *
-            (2 * π * Complex.I * lam * ee (lam * u)) := by
-    rw [← hWN, ← hWv]
-    linear_combination hibp
-  constructor
-  · show IntervalIntegrable (fun u => W u * v' u) MeasureTheory.volume c N
-    exact hW_int
-  · show Vline_ps Nv χ N A (1 / 2) T N * ee (lam * N)
-        - ∫ u in c..N, Vline_ps Nv χ N A (1 / 2) T u *
-            (2 * π * Complex.I * lam * ee (lam * u))
-        = ∫ u in c..N, deriv (fun v : ℝ => Vline_ps Nv χ N A (1 / 2) T v) u * ee (lam * u)
-    rw [← hdW, hcongr]
-    exact hkey.symm
+  sorry
 
 theorem norm_ee_ps (x : ℝ) : ‖ee x‖ = 1 := by
   simp [ee, Complex.norm_exp]
