@@ -29,7 +29,7 @@ theorem leaf_block3_sub_one :
       (∀ j : ℕ, 468750001 ≤ j → j < 476562501 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 250 + 2 * j ∧ (10 ^ 250 + 2 * j - q).Prime)) = true) := by
-  sorry
+  simp
 
 /-- LEAF 2 of 4: the second sub-block of the fourth block,
 `476562501 ≤ j < 484375001`, is covered by a list of at most 4 primes. -/
