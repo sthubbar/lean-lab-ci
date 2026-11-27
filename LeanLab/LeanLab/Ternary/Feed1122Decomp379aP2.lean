@@ -30,6 +30,19 @@ theorem bhp_minorant_character_sums (σ : ℝ) (hσ : 11 / 20 < σ) (hσ1 : σ <
         ‖∑ n ∈ ints (y - h) y, (a0 y n : ℂ) * χ (n : ZMod d) -
             (if χ = 1 then ((u0 * (ints (y - h) y).card / Real.log y : ℝ) : ℂ) else 0)‖ ≤
           C * h / Real.log y ^ (4 : ℕ) := by
+  -- Attempt 1, 2026-11-25, BLOCKED OUT OF REACH, see PROGRESS.md. The trivial minorant
+  -- a0 = 0 with u0 = 1 discharges the minorant clause 0 <= ρ n since ρ is the prime
+  -- indicator MMS.ρ, and the nonprincipal character sums vanish. It fails exactly at
+  -- the principal character: with card = (ints (y - h) y).card the goal reduces after
+  -- zero_sub, norm_neg, Complex.norm_real and ints_card_bounds to
+  --   card * Real.log y ^ 3 ≤ h,
+  -- and nlinarith cannot close it because card ≥ h - 1 while log^3 y is unbounded.
+  -- So any proof must build a genuine nonzero minorant of the primes with density
+  -- u0 / log y and small character sums on every short interval, which is exactly the
+  -- BHP 1997 section 4 lower sieve, pages 24 to 41. Mathlib has only the Selberg
+  -- bounding (upper) sieve, and the lab's section 4 construction itself is an open
+  -- conditional leaf, BHP1997/Decomp312a.lower_mean_value_supply and
+  -- BHP1997/DecompC165b.section4_lower.
   sorry
 
 /-- Character pick out of a residue class, BHP page 4 proof of Theorem 3 part I,
