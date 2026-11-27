@@ -19,11 +19,13 @@ No new definition. AI wrote the Lean code. Binary Goldbach is open; nothing here
 -/
 import LeanLab.BHP1997.SieveConditionsC165
 import LeanLab.DERZ1997.Kernel136
-import LeanLab.Akeno2026.Decomp86
+import LeanLab.BHP1997.Decomp312c
+import LeanLab.BHP1997.PerronHalfSmall
 
 namespace LeanLab.BHP1997.S130PerronWindow
 open Classical Complex DecompC165b
 open LeanLab.DERZ1997.Decomp1529b
+open LeanLab.BHP1997.PerronHalfSmall
 open scoped BigOperators
 
 /-- Page 43 to 44, the change `(y+yz)^s m^(-s) = ((y+yz)/m)^s` inside the Perron integral, for
@@ -96,7 +98,52 @@ is an import plus a case split on `T |log u| ≤ 1`. -/
 theorem leaf_perron_kernel_half (u : ℝ) (hu : 0 < u) (T : ℝ) (hT : 1 ≤ T) :
     ‖perronI u (1 / 2) T - (if 1 < u then 1 else 0)‖ ≤
       if u = 1 then 1 else u ^ (1 / 2 : ℝ) * min 1 (1 / (T * |Real.log u|)) := by
-  sorry
+  have hT0 : 0 < T := lt_of_lt_of_le (by norm_num) hT
+  by_cases hu1 : u = 1
+  · subst u
+    have hnorm := perron_norm_small (y := (1 : ℝ)) (c := (1 / 2 : ℝ)) (T := T)
+      (by norm_num) (by norm_num) hT0 (by simp)
+    simpa using hnorm
+  · by_cases hsmall : T * |Real.log u| ≤ 1
+    · by_cases hu12 : 1 < u
+      · have hlogpos : 0 < Real.log u := Real.log_pos hu12
+        have hDpos : 0 < T * |Real.log u| := mul_pos hT0 (abs_pos.mpr hlogpos)
+        have hmin : min 1 (1 / (T * |Real.log u|)) = 1 := by
+          apply min_eq_left
+          exact (le_div_iff₀ hDpos).2 (by simpa using hsmall)
+        have hgt := perron_gt_one_small (y := u) (c := (1 / 2 : ℝ)) (T := T)
+          hu12 (by norm_num) hT0 (by simpa [abs_of_pos hlogpos] using hsmall)
+        simpa [hu1, hu12, hmin] using hgt
+      · have hlogne : Real.log u ≠ 0 := Real.log_ne_zero_of_pos_of_ne_one hu hu1
+        have hDpos : 0 < T * |Real.log u| := mul_pos hT0 (abs_pos.mpr hlogne)
+        have hmin : min 1 (1 / (T * |Real.log u|)) = 1 := by
+          apply min_eq_left
+          exact (le_div_iff₀ hDpos).2 (by simpa using hsmall)
+        have hnorm := perron_norm_small (y := u) (c := (1 / 2 : ℝ)) (T := T)
+          hu (by norm_num) hT0 hsmall
+        simpa [hu1, hu12, hmin] using hnorm
+    · have hlogne : Real.log u ≠ 0 := Real.log_ne_zero_of_pos_of_ne_one hu hu1
+      have hDpos : 0 < T * |Real.log u| := mul_pos hT0 (abs_pos.mpr hlogne)
+      have hrem := LeanLab.BHP1997.Decomp312c.perron_remainder_bound490
+        (y := u) (c := (1 / 2 : ℝ)) (T := T) hu hu1 (by norm_num) hT0
+      have hpi : 1 ≤ Real.pi := by
+        have := Real.pi_gt_d9
+        linarith
+      have hpiD : T * |Real.log u| ≤ Real.pi * T * |Real.log u| := by
+        calc
+          T * |Real.log u| ≤ Real.pi * (T * |Real.log u|) :=
+            mul_le_mul_of_nonneg_right hpi (le_of_lt hDpos)
+          _ = Real.pi * T * |Real.log u| := by ring
+      have hinv : 1 / (Real.pi * T * |Real.log u|) ≤ 1 / (T * |Real.log u|) :=
+        one_div_le_one_div_of_le (by positivity) hpiD
+      have hfactor : u ^ (1 / 2 : ℝ) / (Real.pi * T * |Real.log u|) ≤
+          u ^ (1 / 2 : ℝ) * (1 / (T * |Real.log u|)) :=
+        mul_le_mul_of_nonneg_left hinv (Real.rpow_nonneg hu.le _)
+      have hmin : min 1 (1 / (T * |Real.log u|)) = 1 / (T * |Real.log u|) := by
+        apply min_eq_right
+        exact (div_le_one hDpos).2 hpiD
+      rw [show min 1 (1 / (T * |Real.log u|)) = 1 / (T * |Real.log u|) from hmin]
+      simpa [hu1, perronI] using hrem.trans hfactor
 
 /-- Page 43 to 44, Lemma 3.19 error sum, the harmonic sum in real form, from Mathlib
 `harmonic_le_one_add_log`. PROVED. -/
@@ -306,7 +353,8 @@ theorem coeff_le_rpow (b : ℝ → ℕ → ℝ) {B : ℝ}
   have hB'0 : 0 ≤ B' := le_max_right _ _
   set δ0 : ℝ := 1 / (400 * (B' + 1)) with hδ0
   have hδ0p : 0 < δ0 := by rw [hδ0]; positivity
-  obtain ⟨Kd, hKd, hdiv⟩ := LeanLab.Akeno2026.Decomp86.card_divisors_le_rpow hδ0p
+  obtain ⟨Kd, hKd, hdiv⟩ :=
+    LeanLab.BHP1997.PerronHalfSmall.card_divisors_le_rpow_real δ0 hδ0p
   refine ⟨max C0 0 * Kd ^ B', by positivity, fun x m hm q χ => ?_⟩
   have hm1 : (1 : ℝ) ≤ m := by exact_mod_cast hm
   have hd1 : (1 : ℝ) ≤ (m.divisors.card : ℝ) := by
@@ -327,7 +375,7 @@ theorem coeff_le_rpow (b : ℝ → ℕ → ℝ) {B : ℝ}
   have h2 : (m.divisors.card : ℝ) ^ B' ≤ Kd ^ B' * (m : ℝ) ^ (1 / 400 : ℝ) := by
     have hm0 : (0 : ℝ) ≤ m := by positivity
     calc (m.divisors.card : ℝ) ^ B' ≤ (Kd * (m : ℝ) ^ δ0) ^ B' :=
-          Real.rpow_le_rpow (by positivity) (hdiv m) hB'0
+          Real.rpow_le_rpow (by positivity) (hdiv m hm) hB'0
       _ = Kd ^ B' * (m : ℝ) ^ (δ0 * B') := by
           rw [Real.mul_rpow hKd.le (Real.rpow_nonneg hm0 _), ← Real.rpow_mul hm0]
       _ ≤ Kd ^ B' * (m : ℝ) ^ (1 / 400 : ℝ) := by
