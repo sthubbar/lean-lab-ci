@@ -19,6 +19,7 @@ No new definition. AI wrote the Lean code. Binary Goldbach is open; nothing here
 -/
 import LeanLab.BHP1997.SieveConditionsC165
 import LeanLab.DERZ1997.Kernel136
+import LeanLab.DERZ1997.Perron136
 import LeanLab.Akeno2026.Decomp86
 
 namespace LeanLab.BHP1997.S130PerronWindow
@@ -96,7 +97,56 @@ is an import plus a case split on `T |log u| ≤ 1`. -/
 theorem leaf_perron_kernel_half (u : ℝ) (hu : 0 < u) (T : ℝ) (hT : 1 ≤ T) :
     ‖perronI u (1 / 2) T - (if 1 < u then 1 else 0)‖ ≤
       if u = 1 then 1 else u ^ (1 / 2 : ℝ) * min 1 (1 / (T * |Real.log u|)) := by
-  sorry
+  have hT0 : 0 < T := by linarith
+  have hc : (0 : ℝ) < 1 / 2 := by norm_num
+  -- the numerator `u^(1/2)` and the price of the factor `π` in the remainder bound
+  have hkey : ∀ A D : ℝ, 0 < A → 0 < D → A / (Real.pi * D) ≤ A * (1 / D) := by
+    intro A D hA hD
+    rw [mul_one_div]
+    exact div_le_div_of_nonneg_left hA.le hD (by nlinarith [Real.pi_gt_three])
+  rcases lt_trichotomy u 1 with hlt | heq | hgt
+  · -- `u < 1`: the indicator is `0`
+    have hu1 : u ≠ 1 := ne_of_lt hlt
+    have hlog : 0 < |Real.log u| :=
+      abs_pos.mpr (Real.log_ne_zero_of_pos_of_ne_one hu hu1)
+    have hd : 0 < T * |Real.log u| := mul_pos hT0 hlog
+    rw [if_neg hu1, if_neg (by linarith : ¬ (1 : ℝ) < u), sub_zero]
+    by_cases hsmall : T * |Real.log u| ≤ 1
+    · rw [min_eq_left (by rw [le_div_iff₀ hd]; simpa using hsmall), mul_one]
+      exact LeanLab.DERZ1997.Perron136.perron_norm_small hu hc hT0 hsmall
+    · rw [not_le] at hsmall
+      rw [min_eq_right ((div_le_one hd).mpr hsmall.le)]
+      have h := LeanLab.DERZ1997.Perron136.perron_remainder_bound (y := u) (c := 1 / 2)
+        (T := T) hu hu1 hc hT0
+      rw [if_neg (by linarith : ¬ (1 : ℝ) < u), sub_zero] at h
+      refine h.trans ?_
+      have hden : Real.pi * T * |Real.log u| = Real.pi * (T * |Real.log u|) := by ring
+      rw [hden]
+      exact hkey _ _ (Real.rpow_pos_of_pos hu _) hd
+  · -- `u = 1`: the two sides of the jump, bounded by `1`
+    subst heq
+    rw [if_pos rfl, if_neg (by norm_num : ¬ (1 : ℝ) < 1), sub_zero]
+    have h := LeanLab.DERZ1997.Perron136.perron_norm_small (y := 1) (c := 1 / 2) (T := T)
+      one_pos hc hT0 (by simp)
+    simpa using h
+  · -- `u > 1`: the indicator is `1`
+    have hu1 : u ≠ 1 := ne_of_gt hgt
+    have hlog : 0 < Real.log u := Real.log_pos hgt
+    have hd : 0 < T * Real.log u := mul_pos hT0 hlog
+    rw [if_neg hu1, if_pos hgt]
+    by_cases hsmall : T * Real.log u ≤ 1
+    · rw [abs_of_pos hlog, min_eq_left (by rw [le_div_iff₀ hd]; simpa using hsmall),
+        mul_one]
+      exact LeanLab.DERZ1997.Perron136.perron_gt_one_small hgt hc hT0 hsmall
+    · rw [not_le] at hsmall
+      rw [abs_of_pos hlog, min_eq_right ((div_le_one hd).mpr hsmall.le)]
+      have h := LeanLab.DERZ1997.Perron136.perron_remainder_bound (y := u) (c := 1 / 2)
+        (T := T) hu hu1 hc hT0
+      rw [if_pos hgt, abs_of_pos hlog] at h
+      refine h.trans ?_
+      have hden : Real.pi * T * Real.log u = Real.pi * (T * Real.log u) := by ring
+      rw [hden]
+      exact hkey _ _ (Real.rpow_pos_of_pos hu _) hd
 
 /-- Page 43 to 44, Lemma 3.19 error sum, the harmonic sum in real form, from Mathlib
 `harmonic_le_one_add_log`. PROVED. -/
