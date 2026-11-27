@@ -16,6 +16,7 @@ PROVED. For (3.12) the `N^ε` obstruction noted for (3.11) in the sibling note
 Zhan1991-S9-04-prop2-question.md does not arise.
 -/
 import LeanLab.Zhan1991.SPLIT_prop1_312_S9
+import LeanLab.Zhan1991.Holder312Proof_S9
 
 namespace LeanLab.Zhan1991
 open Finset Real Filter
@@ -40,7 +41,7 @@ theorem holder_312_leaf_S9 (Nv : Fin 20 → ℝ) (q : ℕ) [NeZero q] (i j : Fin
           ∫ t in Set.uIoc T2 (2 * T2),
             ‖∏ k ∈ ({i, j} : Finset (Fin 20))ᶜ, fj (k.val + 1) (Nv k) χ
               (1 / 2 + t * Complex.I)‖ ^ 2) := by
-  sorry
+  exact holder_312_proof_S9
 
 /-- LEAF: Proposition 2 for (3.12), page 269 last paragraph with page 267, displays (3.14) and
 (3.15): Perron's formula for `f_j`, the line shift with Lemma 7 and the usual fourth power
