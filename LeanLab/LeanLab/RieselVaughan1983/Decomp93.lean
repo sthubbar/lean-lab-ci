@@ -149,9 +149,9 @@ private lemma sum_shift_le (p : ℕ) (hp : p.Prime) (N : ℕ) (z : ℝ) (hz : 0 
       · exact le_trans (Nat.div_le_self q p) h2
       · calc p * (q / p) = q / p * p := Nat.mul_comm _ _
           _ = q := hdm
-          _ ≤ N := h2
+          ≤ N := h2
       · rw [Nat.mul_comm]; exact hdm
-    · rintro ⟨m, ⟨⟨h1, h2⟩, hmN⟩, rfl⟩
+    · rintro ⟨m, ⟨⟨h1, hmN⟩, hmN⟩, rfl⟩
       have hp0 : 0 < p := hp.pos
       have hm0 : 0 < m := h1
       have hpos : 0 < p * m := Nat.mul_pos hp0 hm0
@@ -218,7 +218,6 @@ private lemma beta_step (p : ℕ) (hp : p.Prime) (h2 : 2 < p) (N : ℕ) (z : ℝ
     have hcf : cf b (p * m) = cf b m * v := by
       rw [Nat.mul_comm p m, cf_mul_prime b hp hm0 hm, hvb]
     simp only [hh, if_pos hpdiv, if_neg hm, hcf]
-    field_simp
     try ring
   have hann : ∀ m, h (p * p * m) = 0 := by
     intro m
@@ -232,14 +231,14 @@ private lemma beta_step (p : ℕ) (hp : p.Prime) (h2 : 2 < p) (N : ℕ) (z : ℝ
   have hS2 : ∑ q ∈ (Icc 1 N).filter (fun q => p ∣ q), h q / (1 + q / z)
       = (∑ q ∈ (Icc 1 N).filter (fun q => p ∣ q), g q) / v := by
     rw [Finset.sum_div]
-    apply Finset.sum_congr rfl
+    apply Finset.sum_congru rfl
     intro q hq
     rw [Finset.mem_filter] at hq
     simp only [hh, hg, if_pos hq.2]
     rw [div_div, div_div, mul_comm]
   have hS1 : ∑ q ∈ (Icc 1 N).filter (fun q => ¬ p ∣ q), h q / (1 + q / z)
       = ∑ q ∈ (Icc 1 N).filter (fun q => ¬ p ∣ q), g q := by
-    apply Finset.sum_congr rfl
+    apply Finset.sum_congru rfl
     intro q hq
     rw [Finset.mem_filter] at hq
     simp only [hh, hg, if_neg hq.2]
@@ -260,25 +259,25 @@ private lemma beta_step (p : ℕ) (hp : p.Prime) (h2 : 2 < p) (N : ℕ) (z : ℝ
     rw [← Finset.sum_filter_add_sum_filter_not (s := Icc 1 N) (p := fun q => p ∣ q)
       (f := fun q => (if p ∣ q then c else 1) * g q), hS2def, hS1def, Finset.mul_sum]
     congr 1
-    · apply Finset.sum_congr rfl
+    · apply Finset.sum_congru rfl
       intro q hq
       rw [Finset.mem_filter] at hq
       rw [if_pos hq.2]
-    · apply Finset.sum_congr rfl
+    · apply Finset.sum_congru rfl
       intro q hq
       rw [Finset.mem_filter] at hq
       rw [if_neg hq.2, one_mul]
   have e1 : ∑ q ∈ Icc 1 N, (if p ∣ q then 2 / ((p : ℝ) - 2) else 1) * cf b q / (1 + q / z)
       = 2 / ((p : ℝ) - 2) * S2 + S1 := by
     rw [← hsplit (2 / ((p : ℝ) - 2))]
-    apply Finset.sum_congr rfl
+    apply Finset.sum_congru rfl
     intro q _
     simp only [hg]
     ring
   have e2 : ∑ q ∈ Icc 1 N, (if p ∣ q then 1 / ((p : ℝ) - 1) else 1) * cf b q / (1 + q / z)
       = 1 / ((p : ℝ) - 1) * S2 + S1 := by
     rw [← hsplit (1 / ((p : ℝ) - 1))]
-    apply Finset.sum_congr rfl
+    apply Finset.sum_congru rfl
     intro q _
     simp only [hg]
     ring
@@ -309,7 +308,7 @@ private lemma cf_lw_eq_sieveCoeff (q : ℕ) : cf lw q = Lemma2.sieveCoeff q := b
     unfold cf
     have h1 : ∀ p ∈ q.primeFactors, lw p = Lemma2.localWeight p :=
       fun p hp => lw_eq_localWeight (Nat.prime_of_mem_primeFactors hp)
-    rw [Finset.prod_congr rfl h1, moebius_cast_apply]
+    rw [Finset.prod_congru rfl h1, moebius_cast_apply]
 
 private lemma aS_empty : aS ∅ = lw := by
   ext r
@@ -325,7 +324,7 @@ private lemma cf_aS_eq_coefficient (n : ℕ) (hn : 0 < n) (he : Even n) (q : ℕ
     simp [cf, coefficient]
   · unfold cf coefficient
     congr 1
-    apply Finset.prod_congr rfl
+    apply Finset.prod_congru rfl
     intro p hp
     have hpprime := Nat.prime_of_mem_primeFactors hp
     have hpdvd : p ∣ n ↔ p ∈ n.primeFactors := by
@@ -370,7 +369,7 @@ private lemma Phi_step (z : ℝ) (hz : 0 < z) (P : Finset ℕ)
         (if p ∣ q then 1 / ((p : ℝ) - 1) else 1) * cf b q / (1 + q / z))
       = Phi z (insert p S) := by
     rw [Phi]
-    apply Finset.sum_congr rfl
+    apply Finset.sum_congru rfl
     intro q _
     have hratio : cf (aS (insert p S)) q
         = (if p ∣ q then aS (insert p S) p / b p else 1) * cf b q :=
@@ -383,7 +382,7 @@ private lemma Phi_step (z : ℝ) (hz : 0 < z) (P : Finset ℕ)
   have hL : (∑ q ∈ Icc 1 ⌊z⌋₊,
         (if p ∣ q then 2 / ((p : ℝ) - 2) else 1) * cf b q / (1 + q / z)) = Phi z S := by
     rw [Phi]
-    apply Finset.sum_congr rfl
+    apply Finset.sum_congru rfl
     intro q _
     have hratio : cf (aS S) q = (if p ∣ q then aS S p / b p else 1) * cf b q :=
       cf_cons (aS S) b hp (by rw [hbp]; norm_num) q (fun r _ hrp => by
@@ -419,21 +418,6 @@ private lemma Phi_bound (z : ℝ) (hz : 0 < z) (P : Finset ℕ)
         intro hcon
         rw [Finset.mem_sdiff] at hcon
         exact hcon.2 (Finset.mem_insert_self a T)
-      have hins : insert a (P \ insert a T) = P \ T := by
-        ext x
-        simp only [Finset.mem_insert, Finset.mem_sdiff]
-        constructor
-        · rintro (rfl | ⟨hxP, hxnot⟩)
-          · exact ⟨haP, ha⟩
-          · exact ⟨hxP, fun hxT => hxnot (Or.inr hxT)⟩
-        · rintro ⟨hxP, hxT⟩
-          by_cases hxa : x = a
-          · exact Or.inl hxa
-          · refine Or.inr ⟨hxP, ?_⟩
-            intro hcon
-            rcases hcon with h' | h'
-            · exact hxa h'
-            · exact hxT h'
       have hstep := Phi_step z hz P hP a haP (P \ insert a T) haS
       rw [hins] at hstep
       have hih := ih hTP
@@ -580,11 +564,3 @@ theorem lemma5Used24_decomposed : Lemma5Used 24 0 := by
 
 end
 end LeanLab.RieselVaughan1983.Decomp93
-
-#print axioms LeanLab.RieselVaughan1983.Decomp93.mv_sieve
-#print axioms LeanLab.RieselVaughan1983.Decomp93.sum_comparison
-#print axioms LeanLab.RieselVaughan1983.Decomp93.sieve319
-#print axioms LeanLab.RieselVaughan1983.Decomp93.weighted_lower
-#print axioms LeanLab.RieselVaughan1983.Decomp93.row24
-#print axioms LeanLab.RieselVaughan1983.Decomp93.comparison24
-#print axioms LeanLab.RieselVaughan1983.Decomp93.lemma5Used24_decomposed
