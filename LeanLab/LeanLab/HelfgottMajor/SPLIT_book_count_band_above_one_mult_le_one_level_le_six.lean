@@ -71,6 +71,14 @@ verification of three `L`-functions. -/
 theorem one6_window_empty_five (χ : DirichletCharacter ℂ q) (hχ : χ.IsPrimitive) (hq : q = 5) :
     (stripZeros_finite χ (2 * Real.pi * Real.exp 1 / (q : ℝ))).toFinset.filter
       (fun ρ => 0 ≤ ρ.im ∧ 1 < ρ.im) = ∅ := by
+  subst hq
+  rw [Finset.filter_eq_empty_iff]
+  intro ρ hρ
+  have hz := (stripZeros_finite χ _).mem_toFinset.mp hρ
+  intro hwin
+  have hzL : DirichletCharacter.LFunction χ ρ = 0 := hz.1
+  have hzre : 0 < ρ.re ∧ ρ.re < 1 := hz.2.2.1
+  have hzabs : |ρ.im| ≤ 2 * Real.pi * Real.exp 1 / 5 := hz.2.2.2
   sorry
 
 /-- Assembly of `book_count_band_above_one_mult_le_one_level_le_six` from the leaves: case analysis on `q` in `2` to `6`; the moduli `2`
