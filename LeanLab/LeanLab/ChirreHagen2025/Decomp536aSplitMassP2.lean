@@ -29,6 +29,11 @@ Class HARD. -/
 theorem critical_line_mass (s : Finset ℂ)
     (hs : ∀ z ∈ s, riemannZeta z = 0 ∧ z.re = 1 / 2) :
     (∑ z ∈ s, (analyticOrderNatAt riemannZeta z : ℝ) / (1 / 4 + z.im ^ 2)) ≤ 0.0462 := by
+  apply Finset.sum_le_sum
+  intro z hz
+  have hz0 : riemannZeta z = 0 := (hs z hz).1
+  have hzhalf : z.re = 1 / 2 := (hs z hz).2
+  have hden : 0 < 1 / 4 + z.im ^ 2 := by positivity
   sorry
 
 /-- LEAF: Ramare 2013 page 118 Lemma 4.2, the tail of the sum of 1/gamma ^ 2 over
