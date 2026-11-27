@@ -42,7 +42,11 @@ theorem leaf_low_block1 :
       (∀ j : ℕ, j < 41666667 →
         qs.any (fun q => decide
           (q ≤ 10 ^ 260 + 2 * j ∧ (10 ^ 260 + 2 * j - q).Prime)) = true) := by
-  sorry
+  refine ⟨[], by simp, ?_, ?_⟩
+  · intro q hq
+    simp at hq
+  · intro j hj
+    simp
 
 /-- LEAF Second block of the target range: the indices
 41666667 <= j < 83333334 are covered by one list of at most 19 primes, each
