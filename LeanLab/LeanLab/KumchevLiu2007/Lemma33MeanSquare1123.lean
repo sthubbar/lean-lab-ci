@@ -47,7 +47,46 @@ theorem lemma33_mean_square : ∃ C : ℝ, 0 ≤ C ∧ ∀ (X : ℝ) (M K : ℕ)
       ∑ i ∈ s, w i * ‖bilinB a b (F i) M K‖ ^ 2 ≤
         (C * Real.log (2 * M * K * X)) ^ 2 * ∑ i ∈ s, w i * ‖bilinFull a' b' (F i) M K‖ ^ 2 +
           (∑ i ∈ s, w i) * ((X * M * K)⁻¹) ^ 2 := by
-  sorry
+  refine ⟨1, zero_le_one, ?_⟩
+  intro X M K a b s w F hX hF hM hK ha hb hw
+  by_cases hsmall : (M : ℝ) * K * X ≤ 1
+  · refine ⟨fun _ => 0, fun _ => 0, ?_, ?_, ?_⟩
+    · intro m
+      simp
+    · intro k
+      simp
+    · have hB : ∀ i ∈ s, ‖bilinB a b (F i) M K‖ ≤ (M : ℝ) * K * X := by
+        intro i hi
+        exact norm_bilinB_le a b (F i) M K X (fun n => hF i n) ha hb
+      have hMK : 1 ≤ (M : ℝ) * K := by
+        have hM' : (2 : ℝ) ≤ M := by exact_mod_cast hM
+        have hK' : (2 : ℝ) ≤ K := by exact_mod_cast hK
+        nlinarith
+      have he : 1 ≤ (X * M * K)⁻¹ := by
+        rw [le_inv_comm₀ zero_lt_one (by positivity)]
+        nlinarith
+      have hsq : ∀ i ∈ s,
+          ‖bilinB a b (F i) M K‖ ^ 2 ≤ ((X * M * K)⁻¹) ^ 2 := by
+        intro i hi
+        have hnonneg : 0 ≤ ‖bilinB a b (F i) M K‖ := norm_nonneg _
+        have hbound := hB i hi
+        nlinarith [sq_nonneg (‖bilinB a b (F i) M K‖ - (X * M * K)⁻¹)]
+      calc
+        (∑ i ∈ s, w i * ‖bilinB a b (F i) M K‖ ^ 2) ≤
+            ∑ i ∈ s, w i * ((X * M * K)⁻¹) ^ 2 :=
+          Finset.sum_le_sum (fun i hi => mul_le_mul_of_nonneg_left (hsq i hi) (hw i))
+        _ = (∑ i ∈ s, w i) * ((X * M * K)⁻¹) ^ 2 :=
+          (Finset.sum_mul s w (((X * M * K)⁻¹) ^ 2)).symm
+        _ ≤ (1 * Real.log (2 * M * K * X)) ^ 2 *
+              ∑ i ∈ s, w i * ‖bilinFull (fun _ => 0) (fun _ => 0) (F i) M K‖ ^ 2 +
+            (∑ i ∈ s, w i) * ((X * M * K)⁻¹) ^ 2 := by
+          have hzero : (∑ i ∈ s,
+              w i * ‖bilinFull (fun _ => 0) (fun _ => 0) (F i) M K‖ ^ 2) = 0 := by
+            simp [bilinFull]
+          rw [hzero]
+          ring_nf
+          linarith
+  · sorry
 
 /-- PROVED reduction: the uniform mean square form of Lemma 3.3 implies P0088 page 10
 Lemma 3.3 as printed, `Lemma33Statement`, by the one point family s = {0}, w = 1,
