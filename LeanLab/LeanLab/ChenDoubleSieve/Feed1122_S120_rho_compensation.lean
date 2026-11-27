@@ -35,6 +35,14 @@ theorem crossing_compensation_rho : ∃ C : ℝ, 0 ≤ C ∧ ∃ N0 : ℕ,
           (Wu08.S₃ (primeSequence N) N ((N : ℝ) ^ kappa2) ((N : ℝ) ^ sigma2) : ℝ)) +
         (Wu08.S₄ (primeSequence N) N ((N : ℝ) ^ kappa2) ((N : ℝ) ^ sigma2) : ℝ) +
         C * (N : ℝ) ^ (11 / 12 : ℝ) := by
-  sorry
+  refine ⟨1, by norm_num, 4, ?_⟩
+  intro N hEven hN
+  have hreserve := Task347.transportReserve_nonneg N (by omega)
+  have hS3 := Task347.S3_raising_le N (by omega)
+  have hS4 : (0 : ℝ) ≤
+      (Wu08.S₄ (primeSequence N) N ((N : ℝ) ^ kappa2) ((N : ℝ) ^ sigma2) : ℝ) :=
+    Nat.cast_nonneg _
+  dsimp only [Task347.transportReserve] at hreserve
+  nlinarith
 
 end LeanLab.ChenDoubleSieve.Task315.Feed1122S120
