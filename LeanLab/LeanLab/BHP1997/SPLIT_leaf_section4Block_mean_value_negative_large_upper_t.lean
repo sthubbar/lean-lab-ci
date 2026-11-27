@@ -257,7 +257,57 @@ theorem leaf_section4Block_mean_value_negative_large_upper_t_well_spaced_shell
                 (section4Block ε m n a b x k : ℂ) * χ (k : ZMod q) /
                   (k : ℂ) ^ Thm4.half (-t)‖) ≤
             C * x ^ (1 / 2 : ℝ) * Real.log x ^ (-A) := by
-  sorry
+  have h_main : ∃ (η : ℝ), 0 < η ∧ ∀ (ε : ℝ), 0 < ε → ε < η →
+    ∀ (m n : ℝ), 0 ≤ m → 0 ≤ n →
+    max (0.45 : ℝ) m + max (0.225 : ℝ) n ≤ 0.775 →
+    ∀ (a b : ℝ → ℕ → ℝ),
+      (∀ (x : ℝ) (k : ℕ), |a x k| ≤ (k.divisors.card : ℝ) ^ B) →
+      (∀ (x : ℝ) (k : ℕ), |b x k| ≤ (k.divisors.card : ℝ) ^ B) →
+      ∀ (A : ℝ), 0 < A → ∃ (C X : ℝ), ∀ (x : ℝ), X ≤ x → ∀ (q : ℕ),
+        1 ≤ q → (q : ℝ) ≤ Real.log x ^ A → ∀ (χ : DirichletCharacter ℂ q),
+        ∀ (T : ℝ), ∀ (S : Finset ℝ),
+          (∀ (t : ℝ), t ∈ S → x ^ ((0.45 - 2 * ε / 3) / 2) ≤ t ∧ t ≤ x ^ (0.45 - 2 * ε / 3) ∧ T / 2 ≤ t ∧ t ≤ T) →
+          (∀ (t u : ℝ), t ∈ S → u ∈ S → t ≠ u → 1 ≤ |t - u|) →
+          (∑ t ∈ S, ‖∑ k ∈ Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊,
+              (section4Block ε m n a b x k : ℂ) * χ (k : ZMod q) /
+                (k : ℂ) ^ Thm4.half (-t)‖) ≤
+            C * x ^ (1 / 2 : ℝ) * Real.log x ^ (-A) := by
+    -- Use Theorem4Paper to get a small ε₀ such that Theorem4 ε₀ B' holds
+    have h₁ : ∃ (ε₀ : ℝ), 0 < ε₀ ∧ ∀ (ε : ℝ), 0 < ε → ε < ε₀ → Thm4.Theorem4 ε (2 * B + 3) := by
+      have h₂ : ∃ (ε₀ : ℝ), 0 < ε₀ ∧ ∀ (ε : ℝ), 0 < ε → ε < ε₀ → Thm4.Theorem4 ε (2 * B + 3) := by
+        -- Theorem4Paper says ∀ B, ∃ ε₀ > 0, ∀ ε < ε₀, Theorem4 ε B
+        have h₃ : ∀ (B : ℝ), ∃ (ε₀ : ℝ), 0 < ε₀ ∧ ∀ (ε : ℝ), 0 < ε → ε < ε₀ → Thm4.Theorem4 ε B := by
+          intro B
+          have h₄ : Thm4.Theorem4Paper := h4
+          simpa [Thm4.Theorem4Paper] using h₄ B
+        -- Apply to B' = 2*B+3
+        obtain ⟨ε₀, hε₀, hε₀'⟩ := h₃ (2 * B + 3)
+        exact ⟨ε₀, hε₀, hε₀'⟩
+      exact h₂
+    obtain ⟨ε₀, hε₀, hε₀'⟩ := h₁
+    use min ε₀ (1 / 10)
+    constructor
+    · exact lt_min hε₀ (by norm_num)
+    · intro ε hε hεη m n hm hn hreg a b ha hb A hA
+      have hε' : ε < ε₀ := lt_of_lt_of_le hεη (min_le_left _ _)
+      have hεsmall : ε < 1 / 10 := lt_of_lt_of_le hεη (min_le_right _ _)
+      have hThm4 : Thm4.Theorem4 ε (2 * B + 3) := hε₀' ε hε hε'
+      -- Now we need to instantiate Theorem4 with the right parameters to bound our sum
+      -- The block section4Block is a convolution of three sequences (a, b, truncated rough)
+      -- which corresponds to a product of three Dirichlet polynomials.
+      -- We need to choose c₁, c₂, K, θ, α₁, α₂, X, etc. appropriately.
+      -- This is the core of the proof and requires careful parameter matching.
+      have h_final : ∃ (C X : ℝ), ∀ (x : ℝ), X ≤ x → ∀ (q : ℕ),
+        1 ≤ q → (q : ℝ) ≤ Real.log x ^ A → ∀ (χ : DirichletCharacter ℂ q),
+        ∀ (T : ℝ), ∀ (S : Finset ℝ),
+          (∀ (t : ℝ), t ∈ S → x ^ ((0.45 - 2 * ε / 3) / 2) ≤ t ∧ t ≤ x ^ (0.45 - 2 * ε / 3) ∧ T / 2 ≤ t ∧ t ≤ T) →
+          (∀ (t u : ℝ), t ∈ S → u ∈ S → t ≠ u → 1 ≤ |t - u|) →
+          (∑ t ∈ S, ‖∑ k ∈ Finset.Ioc ⌊x / 2⌋₊ ⌊2 * x⌋₊,
+              (section4Block ε m n a b x k : ℂ) * χ (k : ZMod q) /
+                (k : ℂ) ^ Thm4.half (-t)‖) ≤
+            C * x ^ (1 / 2 : ℝ) * Real.log x ^ (-A) := by sorry
+      exact h_final
+  exact h_main
 
 /-- Glue, PROVED. The integrand is continuous in the height: every index is a positive
 integer, so `(k : ℂ) ^ Thm4.half (-t)` is a nonvanishing continuous function of `t`,
