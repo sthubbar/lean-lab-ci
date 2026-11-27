@@ -10,11 +10,17 @@ open LeanLab.SchnirelmannConstant
 
 /-- LEAF: The intermediate range. -/
 theorem large_even_lower (n : ℕ) (hn : Even n) (h1 : 10 ^ 30 < n) (h2 : n ≤ 4 * 10 ^ 32) :
-    AtMostPrimes 6 n := sorry
+    AtMostPrimes 6 n := by
+  -- The greedy reduction needs finite Goldbach and explicit prime interval proofs.
+  -- The checked reductions leave both inputs unproved. See task3543 in PROGRESS.md.
+  sorry
 
 /-- LEAF: The upper range. -/
 theorem large_even_upper (n : ℕ) (hn : Even n) (h : 4 * 10 ^ 32 < n) :
-    AtMostPrimes 6 n := sorry
+    AtMostPrimes 6 n := by
+  -- Count369.upper_of_theorem2 reduces this range to the explicit density theorem.
+  -- Its Theorem2 hypothesis remains unproved. See task3543 in PROGRESS.md.
+  sorry
 
 /-- The assembled target theorem. -/
 theorem large_even_assembly : ∀ n : ℕ, Even n → 10 ^ 30 < n → AtMostPrimes 6 n := by
