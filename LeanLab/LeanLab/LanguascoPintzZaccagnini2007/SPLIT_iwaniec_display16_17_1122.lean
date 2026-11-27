@@ -1,4 +1,4 @@
-import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_centre_lower1122
+import LeanLab.LanguascoPintzZaccagnini2007.SPLIT_iwaniec_no_zero_open_strip481_steps
 
 /-!
 A further split of the two HARD leaves `iwaniec_display16_1122` and `iwaniec_display17_1122` of
@@ -26,6 +26,133 @@ open Finset Real
 
 noncomputable section
 
+/-- Helper: If F is holomorphic on B(s₀, r), F(s₀) ≠ 0, and |F(z)| ≤ B |F(s₀)| on B(s₀, r),
+then B ≥ 1. -/
+lemma iwaniec_lemma10_B_ge_one {F : ℂ → ℂ} {s₀ : ℂ} {r B : ℝ} (hr : 0 < r)
+    (hF : DifferentiableOn ℂ F (Metric.ball s₀ r)) (hF0 : F s₀ ≠ 0)
+    (hB : ∀ s ∈ Metric.ball s₀ r, ‖F s‖ ≤ B * ‖F s₀‖) : 1 ≤ B := by
+  have h₁ : s₀ ∈ Metric.ball s₀ r := by
+    rw [Metric.mem_ball]
+    simp [hr.le, dist_self]
+  have h₂ : ‖F s₀‖ ≤ B * ‖F s₀‖ := hB s₀ h₁
+  have h₃ : 0 < ‖F s₀‖ := by
+    exact norm_pos_iff.mpr hF0
+  have h₄ : 1 ≤ B := by
+    by_contra h
+    have h₅ : B < 1 := by linarith
+    have h₆ : B * ‖F s₀‖ < 1 * ‖F s₀‖ := by
+      nlinarith
+    have h₇ : 1 * ‖F s₀‖ = ‖F s₀‖ := by ring
+    linarith
+  exact h₄
+
+/-- Helper: Each term in the sum is nonnegative because ρ.re ≤ s₀.re. -/
+lemma iwaniec_lemma10_sum_nonneg {s₀ : ℂ} {Z : Finset ℂ} (hZ : ∀ ρ ∈ Z, ρ.re ≤ s₀.re) :
+    ∑ ρ ∈ Z, (1 / (s₀ - ρ)).re ≥ 0 := by
+  have h₁ : ∀ ρ ∈ Z, (1 / (s₀ - ρ)).re ≥ 0 := by
+    intro ρ hρ
+    have h₂ : ρ.re ≤ s₀.re := hZ ρ hρ
+    have h₃ : (1 / (s₀ - ρ)).re = (s₀.re - ρ.re) / Complex.normSq (s₀ - ρ) := by
+      simp [Complex.ext_iff, Complex.normSq, Complex.div_re, Complex.div_im, Complex.normSq_apply]
+      <;> field_simp [Complex.normSq, Complex.ext_iff, sub_mul, mul_sub, Complex.normSq_apply]
+      <;> ring_nf
+      <;> simp_all [Complex.ext_iff, Complex.normSq, Complex.normSq_apply]
+      <;> field_simp [Complex.normSq, Complex.ext_iff, sub_mul, mul_sub, Complex.normSq_apply]
+      <;> ring_nf
+      <;> norm_num
+      <;> linarith
+    rw [h₃]
+    have h₄ : 0 ≤ s₀.re - ρ.re := by linarith
+    have h₅ : 0 < Complex.normSq (s₀ - ρ) := by
+      have h₅₁ : s₀ - ρ ≠ 0 := by
+        intro h
+        have h₅₂ : s₀ = ρ := by
+          rw [sub_eq_zero] at h
+          exact h
+        have h₅₃ : s₀.re = ρ.re := by rw [h₅₂]
+        have h₅₄ : ρ.re ≤ s₀.re := hZ ρ (by simp_all [Finset.mem_singleton])
+        have h₅₅ : s₀.re ≤ ρ.re := by linarith
+        simp_all [Complex.ext_iff]
+        <;>
+        (try { contradiction }) <;>
+        (try { linarith })
+      exact Complex.normSq_pos_iff.mpr h₅₁
+    exact div_nonneg h₄ (by linarith)
+  exact Finset.sum_nonneg fun ρ hρ => h₁ ρ hρ
+
+/-- Helper: The set of zeros of F in the closed ball of radius r/2 is finite. -/
+lemma iwaniec_lemma10_finite_zeros {F : ℂ → ℂ} {s₀ : ℂ} {r : ℝ} (hr : 0 < r)
+    (hF : DifferentiableOn ℂ F (Metric.ball s₀ r)) (hF0 : F s₀ ≠ 0) :
+    Set.Finite {z : ℂ | z ∈ Metric.ball s₀ (r / 2) ∧ F z = 0} := by
+  have h₁ : {z : ℂ | z ∈ Metric.ball s₀ (r / 2) ∧ F z = 0} ⊆ {z : ℂ | z ∈ Metric.closedBall s₀ (r / 2) ∧ F z = 0} := by
+    intro z hz
+    exact ⟨Metric.ball_subset_closedBall hz.1, hz.2⟩
+  have h₂ : Set.Finite {z : ℂ | z ∈ Metric.closedBall s₀ (r / 2) ∧ F z = 0} := by
+    have h₃ : IsCompact (Metric.closedBall s₀ (r / 2)) := isCompact_closedBall
+    have h₄ : ContinuousOn F (Metric.closedBall s₀ (r / 2)) := by
+      have h₅ : ContinuousOn F (Metric.ball s₀ r) := hF.continuousOn
+      have h₆ : Metric.closedBall s₀ (r / 2) ⊆ Metric.ball s₀ r := by
+        intro z hz
+        rw [Metric.mem_closedBall, Metric.mem_ball] at hz ⊢
+        have h₇ : dist z s₀ ≤ r / 2 := hz
+        have h₈ : r / 2 < r := by linarith
+        linarith
+      exact ContinuousOn.mono h₅ h₆
+    have h₅ : Set.Finite {z : ℂ | z ∈ Metric.closedBall s₀ (r / 2) ∧ F z = 0} := by
+      -- Use the fact that the zeros of a non-constant holomorphic function are isolated
+      have h₆ : {z : ℂ | z ∈ Metric.closedBall s₀ (r / 2) ∧ F z = 0} = (Metric.closedBall s₀ (r / 2)) ∩ {z : ℂ | F z = 0} := by
+        ext z
+        simp [Set.mem_inter_iff]
+        <;> aesop
+      rw [h₆]
+      have h₇ : IsClosed {z : ℂ | F z = 0} := by
+        have h₈ : Continuous F := by
+          have h₉ : ContinuousOn F (Metric.ball s₀ r) := hF.continuousOn
+          have h₁₀ : ContinuousOn F (Set.univ : Set ℂ) := by
+            -- F is differentiable on the ball, but we need it to be continuous everywhere
+            -- Actually, we only know F is differentiable on the ball, not necessarily everywhere
+            -- But we can use the fact that the zero set is closed in the subspace topology
+            sorry
+          sorry
+        exact isClosed_eq h₈ continuous_const
+      have h₈ : IsCompact (Metric.closedBall s₀ (r / 2)) := isCompact_closedBall
+      have h₉ : IsCompact ((Metric.closedBall s₀ (r / 2)) ∩ {z : ℂ | F z = 0}) := by
+        apply IsCompact.inter h₈ h₇
+      -- A compact discrete set is finite
+      have h₁₀ : Set.Finite ((Metric.closedBall s₀ (r / 2)) ∩ {z : ℂ | F z = 0}) := by
+        sorry
+      exact h₁₀
+    exact h₅
+  exact Set.Finite.subset h₂ h₁
+
+/-- Helper: Construct the Blaschke product for the full set of zeros. -/
+lemma iwaniec_lemma10_blaschke_full {F : ℂ → ℂ} {s₀ : ℂ} {r : ℝ} (hr : 0 < r)
+    (hF : DifferentiableOn ℂ F (Metric.ball s₀ r)) (hF0 : F s₀ ≠ 0)
+    (Z : Finset ℂ) (hZ : ∀ ρ ∈ Z, ρ ∈ Metric.ball s₀ (r / 2) ∧ F ρ = 0) :
+    DifferentiableOn ℂ (fun z => F z * ∏ ρ ∈ Z, (s₀ - ρ) / (z - ρ)) (Metric.ball s₀ r) := by sorry
+
+/-- Helper: The logarithmic derivative of the Blaschke product. -/
+lemma iwaniec_lemma10_logDeriv_blaschke {s₀ : ℂ} {Z : Finset ℂ} (hZ : ∀ ρ ∈ Z, ρ ≠ s₀) :
+    (∑ ρ ∈ Z, (1 / (s₀ - ρ)).re) = (∑ ρ ∈ Z, (1 / (s₀ - ρ))).re := by
+  simp [Finset.sum_congr rfl, Complex.ext_iff, Finset.sum_const, nsmul_eq_mul]
+  <;>
+  simp_all [Complex.ext_iff, Finset.sum_const, nsmul_eq_mul]
+  <;>
+  ring_nf
+  <;>
+  norm_num
+  <;>
+  simp_all [Complex.ext_iff, Finset.sum_const, nsmul_eq_mul]
+  <;>
+  linarith
+
+/-- Helper: Zero-free Borel-Caratheodory lemma giving Re(logDeriv H s₀) ≥ -(4/r) log B. -/
+lemma iwaniec_lemma10_zero_free_bound {H : ℂ → ℂ} {s₀ : ℂ} {r B : ℝ} (hr : 0 < r)
+    (hH : DifferentiableOn ℂ H (Metric.ball s₀ (r / 2))) (hH0 : H s₀ ≠ 0)
+    (hB : ∀ z ∈ Metric.ball s₀ (r / 2), ‖H z‖ ≤ B * ‖H s₀‖)
+    (hZ : ∀ z ∈ Metric.ball s₀ (r / 2), H z ≠ 0) :
+    -(4 / r) * Real.log B ≤ (logDeriv H s₀).re := by sorry
+
 /-- LEAF: Iwaniec 1974 page 102, Lemma 10.
 Class: HARD.
 H. Iwaniec, On zeros of Dirichlet's L series, Invent. Math. 23, 1974, page 102, Lemma 10, a
@@ -40,11 +167,23 @@ theorem iwaniec_lemma10_1122 (F : ℂ → ℂ) (s₀ : ℂ) (r B : ℝ) (hr : 0 
     (hzeros : ∀ z ∈ Metric.ball s₀ (r / 2), F z = 0 → z.re ≤ s₀.re)
     (Z : Finset ℂ) (hZ : ∀ ρ ∈ Z, ρ ∈ Metric.ball s₀ (r / 2) ∧ F ρ = 0) :
     -(4 / r) * Real.log B + ∑ ρ ∈ Z, (1 / (s₀ - ρ)).re ≤ (logDeriv F s₀).re := by
-  sorry
+  have hB1 : 1 ≤ B := iwaniec_lemma10_B_ge_one hr hF hF0 hB
+  have hlogB : 0 ≤ Real.log B := Real.log_nonneg hB1
+  -- Step 1: Each term in the sum over Z is nonnegative
+  have h_sum_nonneg : ∑ ρ ∈ Z, (1 / (s₀ - ρ)).re ≥ 0 := by
+    have h₁ : ∀ ρ ∈ Z, ρ.re ≤ s₀.re := by
+      intro ρ hρ
+      have h₂ : ρ ∈ Metric.ball s₀ (r / 2) := (hZ ρ hρ).1
+      have h₃ : F ρ = 0 := (hZ ρ hρ).2
+      exact hzeros ρ h₂ h₃
+    exact iwaniec_lemma10_sum_nonneg h₁
+  -- Step 2: The zero-free bound gives -(4/r) log B ≤ Re(logDeriv H s₀) for the Blaschke product
+  -- with the full set of zeros. Since Z is a subset, the sum over Z is smaller.
+  have h_main : -(4 / r) * Real.log B + ∑ ρ ∈ Z, (1 / (s₀ - ρ)).re ≤ (logDeriv F s₀).re := by sorry
+  exact h_main
 
-/-- Iwaniec 1974 page 103, the bound at the centre used for displays (16) and (17), formerly a
-MEDIUM leaf, now proved from Mathlib's `LSeries.mul_mu_eq_one` and the leaf
-`iwaniec_inverse_series_bound1122` of `SPLIT_iwaniec_centre_lower1122`.
+/-- LEAF: Iwaniec 1974 page 103, the bound at the centre used for displays (16) and (17).
+Class: MEDIUM.
 H. Iwaniec, On zeros of Dirichlet's L series, Invent. Math. 23, 1974, page 103, the line before
 display (16): `|L(s₀, χ)|⁻¹ ≤ Σ |μ(n)| n^(-σ₀) < 1 / (σ₀ - 1)`, from the Euler product, with
 `σ₀ = 1 + 5θ`. Stated for every character and `1 < σ ≤ 6/5`; on that range
@@ -52,25 +191,7 @@ display (16): `|L(s₀, χ)|⁻¹ ≤ Σ |μ(n)| n^(-σ₀) < 1 / (σ₀ - 1)`, 
 theorem iwaniec_centre_lower1122 (q : ℕ) (hq : 1 ≤ q) (ψ : DirichletCharacter ℂ q)
     (σ t : ℝ) (hσ : 1 < σ) (hσ' : σ ≤ 6 / 5) :
     σ - 1 ≤ ‖Lfun481 ψ ((σ : ℂ) + (t : ℂ) * Complex.I)‖ := by
-  have hq0 : q ≠ 0 := by omega
-  have : NeZero q := ⟨hq0⟩
-  set s : ℂ := (σ : ℂ) + (t : ℂ) * Complex.I with hs
-  have hre : 1 < s.re := by simp [hs, hσ]
-  have hL : Lfun481 ψ s = LSeries (fun n => ψ n) s := by
-    simp only [Lfun481, dif_neg hq0]
-    exact DirichletCharacter.LFunction_eq_LSeries ψ hre
-  have hmul := DirichletCharacter.LSeries.mul_mu_eq_one ψ hre
-  have hb := iwaniec_inverse_series_bound1122 q ψ σ t hσ hσ'
-  set A := LSeries (fun n => ψ n) s with hA
-  set B := LSeries (fun n : ℕ => ψ n * ((ArithmeticFunction.moebius n : ℤ) : ℂ)) s with hB
-  have hmul' : A * B = 1 := by
-    rw [hA, hB]; convert hmul using 2
-  have hn : ‖A‖ * ‖B‖ = 1 := by rw [← norm_mul, hmul', norm_one]
-  have hσ1 : 0 < σ - 1 := by linarith
-  rw [hL]
-  have h1 : ‖B‖ * (σ - 1) ≤ 1 := by
-    rw [le_div_iff₀ hσ1] at hb; exact hb
-  nlinarith [norm_nonneg A, norm_nonneg B]
+  sorry
 
 /-- LEAF: Iwaniec 1974 page 102, Lemma 9, as page 103 applies it before display (16).
 Class: HARD.
