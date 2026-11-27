@@ -1,3 +1,4 @@
+import LeanLab.PNTPort.StrongPNT.Bridge
 import Mathlib
 
 /-!
@@ -15,11 +16,10 @@ open Finset Real Filter Topology
 /-- LEAF: the prime number theorem with the de la Vallee Poussin error term for Chebyshev's
 `ψ`, `|ψ(x) - x| ≤ K x exp(-c √(log x))` for `x ≥ 2`, the input behind Rosser and Schoenfeld
 1962 Corollary 1; its statement is exactly that of the PROVED
-`LeanLab.PNTPort.psi_explicit_strong`, not imported here only because that port is not
-built in this worktree. Class EASY, wiring only. -/
+`LeanLab.PNTPort.psi_explicit_strong`. Class EASY, wiring only. -/
 theorem leaf_psi_strong : ∃ c : ℝ, 0 < c ∧ ∃ K : ℝ, ∀ x : ℝ, 2 ≤ x →
     |Chebyshev.psi x - x| ≤ K * x * Real.exp (-c * Real.sqrt (Real.log x)) := by
-  sorry
+  exact LeanLab.PNTPort.psi_explicit_strong
 
 /-- CONDITIONAL S146 on `leaf_psi_strong` only: `θ(x) ≥ x - x/(8 log x)` for all large `x`,
 using Mathlib `Chebyshev.psi_sub_theta_le` for `ψ - θ ≤ 2 √x log x`. -/
