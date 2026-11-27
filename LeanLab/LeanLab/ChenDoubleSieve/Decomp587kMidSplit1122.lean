@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Decomp587k
+import LeanLab.ChenDoubleSieve.Decomp587kSplitR0J9
 
 /-!
 Phi sub window split of the middle window LEAFs `window_mid` of the cells r0j9, r0j10, r0j11
@@ -40,7 +41,20 @@ Buchstab integral, middle window sub window 1 of 4, phi between 9 / 4 and 37 / 1
 theorem window_mid_1 {ω : ℝ → ℝ} (hω : IsBuchstab ω) (hz : ZeroBelowOne ω)
     {φ : ℝ} (hφ : (9 / 4 : ℝ) ≤ φ) (hφtop : φ ≤ (37 / 16 : ℝ)) :
     buchstabIntegral ω 1 (fun j => (r0j9_lo j : ℝ)) (fun j => (r0j9_hi j : ℝ)) φ ≤ ((870161 / 62500000) : ℝ) := by
-  sorry
+  have h := Task587.SplitR0J9.cell_integral_cap hω (n := 1) 6 r0j9_lo r0j9_hi
+    (A := (2 : ℝ)) (C := (567144 / 1000000 : ℝ))
+    (by norm_num) (by norm_num) (fun u hu => Wu04Buchstab.buchstab_le_567144 hω hu)
+    (by intro j; fin_cases j <;> norm_num [r0j9_lo])
+    (by intro j; fin_cases j <;> norm_num [r0j9_lo, r0j9_hi])
+    (fun x hx => Task587.SplitR0J9.argument_ge (d := 3) (1 : Fin 3)
+      (lo := r0j9_lo) (hi := r0j9_hi) (A := (2 : ℝ)) (P := (9 / 4 : ℝ))
+      (by norm_num) (by intro j; fin_cases j <;> norm_num [r0j9_lo]) hφ
+      (by norm_num [r0j9_hi, Fin.sum_univ_three]) hx)
+  change buchstabIntegral ω 1 (fun j => (r0j9_lo j : ℝ)) (fun j => (r0j9_hi j : ℝ)) φ ≤
+    (567144 / 1000000 : ℝ) * (∫ x in domain (fun j => (r0j9_lo j : ℝ)) (fun j => (r0j9_hi j : ℝ)),
+      cellPoly 6 (1 : Fin 3) r0j9_lo r0j9_hi x) at h
+  rw [r0j9_integral] at h
+  exact h.trans (by norm_num)
 
 /-- LEAF: Wu 2004 Lemma 5.2 page 26, D2,9, Table 1 row 1 page 30, numerical maximisation of the
 Buchstab integral, middle window sub window 2 of 4, phi between 37 / 16 and 19 / 8. Class HARD. -/
