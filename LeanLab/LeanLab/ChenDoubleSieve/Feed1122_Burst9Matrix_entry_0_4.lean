@@ -1,4 +1,5 @@
 import LeanLab.ChenDoubleSieve.Table1Algebra
+import LeanLab.ChenDoubleSieve.Burst8P2
 
 /-!
 # Feed 1122 split of `Burst9Matrix.entry_0_4`
@@ -24,7 +25,18 @@ open LeanLab.ChenDoubleSieve.Wu04Table
 continuous term `σ₀(t)`. MEDIUM. -/
 theorem leaf_integrable :
     IntervalIntegrable (tableKernel 0) volume (5/2 : ℝ) (13/5 : ℝ) := by
-  sorry
+  have h₁ : IntervalIntegrable (tableKernel 0) volume (1 : ℝ) (3 : ℝ) := by
+    -- Use the general integrability result for table kernels on [1, 3]
+    have h₂ : ∀ i : Fin 9, IntervalIntegrable (Wu04Table.tableKernel i) volume (1 : ℝ) (3 : ℝ) := by
+      apply LeanLab.ChenDoubleSieve.Burst8P2.table_kernel_integrable
+    -- Specialize to i = 0 (the first row)
+    have h₃ : IntervalIntegrable (Wu04Table.tableKernel (0 : Fin 9)) volume (1 : ℝ) (3 : ℝ) := h₂ (0 : Fin 9)
+    simpa [Wu04Table.tableKernel] using h₃
+  -- Restrict the interval from [1, 3] to [5/2, 13/5]
+  have h₂ : IntervalIntegrable (tableKernel 0) volume (5/2 : ℝ) (13/5 : ℝ) := by
+    have h₃ : IntervalIntegrable (tableKernel 0) volume (5/2 : ℝ) (13/5 : ℝ) := h₁.mono_set (Set.uIcc_subset_uIcc (by norm_num) (by norm_num))
+    exact h₃
+  exact h₂
 
 /-- LEAF: Wu 2004 display 7.1, kernel Xi2 of display 3.22, page 15, left half panel `[5/2, 51/20]` of `a_{1,5}`:
 quadrature value 0.013516138048, stated bound leaves 3.91e-08. MEDIUM. -/

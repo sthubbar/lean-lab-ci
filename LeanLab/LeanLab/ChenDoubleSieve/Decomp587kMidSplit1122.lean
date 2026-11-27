@@ -1,4 +1,7 @@
 import LeanLab.ChenDoubleSieve.Decomp587k
+import LeanLab.ChenDoubleSieve.Task587CapChain1122
+import LeanLab.ChenDoubleSieve.Task587SharpTail
+import LeanLab.ChenDoubleSieve.Task587CellCertificate
 
 /-!
 Phi sub window split of the middle window LEAFs `window_mid` of the cells r0j9, r0j10, r0j11
@@ -19,6 +22,8 @@ noncomputable section
 open Real Set Finset MeasureTheory
 namespace LeanLab.ChenDoubleSieve.Task587.MidSplit1122
 open Wu04Functional
+open LeanLab.ChenDoubleSieve.Task587.CapChain
+open LeanLab.ChenDoubleSieve.Task587
 
 /-- Four consecutive closed windows cover their union. Derived bookkeeping for the phi
 cuts of Wu 2004 Lemma 5.2 page 26. -/
