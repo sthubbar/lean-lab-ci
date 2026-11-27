@@ -26,6 +26,19 @@ namespace LeanLab.OpenProblems.Novelty1615
 
 open LeanLab.OpenProblems.Erdos273
 
+/-- Every member of `T` is an admissible divisor for `L`.  This isolates the arithmetic
+bookkeeping needed by the finite counting step. -/
+private lemma top_candidate_subset (L : ℕ) (T : Finset ℕ) (hLpos : 0 < L)
+    (hdvd : ∀ d ∈ T, d ∣ L)
+    (hform : ∀ d ∈ T, ∃ p : ℕ, p.Prime ∧ 5 ≤ p ∧ d = p - 1) :
+    T ⊆ (Nat.divisors L).filter (fun d => 4 ≤ d ∧ (d + 1).Prime) := by
+  intro d hdT
+  obtain ⟨p, hp, h5, rfl⟩ := hform d hdT
+  refine Finset.mem_filter.mpr ⟨Nat.mem_divisors.mpr ⟨hdvd (p - 1) hdT, hLpos.ne'⟩, ?_, ?_⟩
+  · omega
+  · rw [Nat.sub_add_cancel h5]
+    exact hp
+
 /-- LEAF: counting step of `leaf_cover_search_top`. For `4600000 ≤ L < 8000000` outside the listed `91` lcm values, and outside the four reciprocal-test values,
 a finite set of divisors of `L` of the shape `p - 1`, `p ≥ 5` prime, has fewer than `100` members.
 Class HARD: a finite divisor count over the window with no covering in it, the same kind of
@@ -46,6 +59,10 @@ theorem leaf_count_top_window (L : ℕ) (hlo : 4600000 ≤ L) (hhi : L < 8000000
     (T : Finset ℕ) (hdvd : ∀ d ∈ T, d ∣ L)
     (hform : ∀ d ∈ T, ∃ p : ℕ, p.Prime ∧ 5 ≤ p ∧ d = p - 1) :
     T.card < 100 := by
+  have hsub : T ⊆ (Nat.divisors L).filter (fun d => 4 ≤ d ∧ (d + 1).Prime) :=
+    top_candidate_subset L T (by omega) hdvd hform
+  have hcard : T.card ≤ ((Nat.divisors L).filter (fun d => 4 ≤ d ∧ (d + 1).Prime)).card :=
+    Finset.card_le_card hsub
   sorry
 
 /-- LEAF: search step of `leaf_cover_search_top` on the listed lcm values. A covering system with distinct
