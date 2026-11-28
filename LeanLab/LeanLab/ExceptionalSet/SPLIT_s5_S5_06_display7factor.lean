@@ -18,7 +18,7 @@ Pieces.
 * `leaf_karW_lemma3_applied`, LEAF MEDIUM: Lemma 3 on the sum over `|μ| ≤ K`,
   `Σ_μ min(2K+1, 1/(2‖B μ‖)) ≤ 6(2K+1+Q log Q)((2K+1)Q^{-1}+1)`.
 * `leaf_karW_display7_arith`, proved: `6(2K+1+Q log Q)((2K+1)Q^{-1}+1) ≤ 108k²X²(Q^{-1}+X^{-1}log Q+X^{-2}Q log Q)`.
-* `leaf_karW_display7_Qbounds`, LEAF MEDIUM: `Q^{-1}+X^{-1}log Q+X^{-2}Q log Q ≤ 9n P^{-ρs} log P`.
+* `leaf_karW_display7_Qbounds`, proved by CLOUD S5-06b with `cc0 = max(1, 1/c3)`: `Q^{-1}+X^{-1}log Q+X^{-2}Q log Q ≤ 9n P^{-ρs} log P`.
 * `leaf_karW_display7_factor_of_leaves`, the exact statement of `leaf_karW_display7_factor`, proved.
 
 AI wrote the Lean code. Binary Goldbach is OPEN.
@@ -206,7 +206,40 @@ theorem leaf_karW_display7_arith (k : ℕ) (X K Q : ℝ) (hk : 1 ≤ k) (hX : 1 
     nlinarith
   nlinarith
 
-/-- LEAF: the bounds of p. 247 from the definitions of `Q_s` and `P2`, class MEDIUM:
+/-- From `n ≥ karN0 c1 c2 c4`: `1/(n²(n+1)) ≤ c1 - c2 - c4` and `1/(n²(n+1)) ≤ c1/3`. -/
+theorem karN0_delta (c1 c2 c4 : ℝ) (n : ℕ) (hc1 : 0 < c1) (hc241 : c2 + c4 < c1)
+    (hn0 : karN0 c1 c2 c4 ≤ n) :
+    1 / ((n : ℝ) ^ 2 * (n + 1)) ≤ c1 - (c2 + c4) ∧ 1 / ((n : ℝ) ^ 2 * (n + 1)) ≤ c1 / 3 := by
+  unfold karN0 at hn0
+  have h12 : (12 : ℝ) ≤ n := le_trans (le_max_left _ _) hn0
+  have hA : 1 / Real.sqrt c1 ≤ n := le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hn0
+  have hB : 1 / (c1 - (c2 + c4)) ^ ((1 : ℝ) / 3) ≤ n :=
+    le_trans (le_trans (le_max_right _ _) (le_max_right _ _)) hn0
+  have hd : 0 < c1 - (c2 + c4) := by linarith
+  have hnpos : (0 : ℝ) < n := by linarith
+  have hden : 0 < (n : ℝ) ^ 2 * (n + 1) := by positivity
+  constructor
+  · -- `n³ ≥ 1/d`
+    have hcube : 0 < (c1 - (c2 + c4)) ^ ((1 : ℝ) / 3) := Real.rpow_pos_of_pos hd _
+    have h1 : 1 ≤ (n : ℝ) * (c1 - (c2 + c4)) ^ ((1 : ℝ) / 3) := by
+      rw [div_le_iff₀ hcube] at hB; linarith
+    have h3 : 1 ≤ ((n : ℝ) * (c1 - (c2 + c4)) ^ ((1 : ℝ) / 3)) ^ 3 := one_le_pow₀ h1
+    have h4 : ((n : ℝ) * (c1 - (c2 + c4)) ^ ((1 : ℝ) / 3)) ^ 3 = (n : ℝ) ^ 3 * (c1 - (c2 + c4)) := by
+      rw [mul_pow, ← Real.rpow_natCast ((c1 - (c2 + c4)) ^ ((1 : ℝ) / 3)) 3, ← Real.rpow_mul hd.le]
+      norm_num
+    rw [h4] at h3
+    rw [div_le_iff₀ hden]
+    nlinarith [sq_nonneg (n : ℝ)]
+  · have hs : 0 < Real.sqrt c1 := Real.sqrt_pos.mpr hc1
+    have h1 : 1 ≤ (n : ℝ) * Real.sqrt c1 := by
+      rw [div_le_iff₀ hs] at hA; linarith
+    have h2 : 1 ≤ ((n : ℝ) * Real.sqrt c1) ^ 2 := one_le_pow₀ h1
+    rw [mul_pow, Real.sq_sqrt hc1.le] at h2
+    rw [div_le_iff₀ hden]
+    nlinarith [sq_nonneg (n : ℝ)]
+
+set_option maxHeartbeats 1000000 in
+/-- The bounds of p. 247 from the definitions of `Q_s` and `P2`, proved:
 `Q_s^{-1} ≤ 2P^{-c3 s}`, `P2^{-1} ≤ 2P^{-c1/3}`, `P2^{-2s}Q_s ≤ 2P^{-c4 s}`, `log Q_s ≤ n log P`,
 hence `Q_s^{-1} + P2^{-s} log Q_s + P2^{-2s} Q_s log Q_s ≤ 9n P^{-ρ s} log P`, here with `P2 + 1`
 in place of `P2`. Uses `P^{-c2 s} ≤ |B_s| ≤ P^{-c3 s}` from `KarHyp`, `n ≥ karN0` and `P` large. -/
@@ -226,7 +259,136 @@ theorem leaf_karW_display7_Qbounds :
                 Real.log (⌊|iteratedDeriv s f (a : ℝ) / (s.factorial : ℝ)|⁻¹⌋₊ : ℝ)
             ≤ 9 * (n : ℝ) * (P : ℝ) ^ (-(min (c1 / 3) (min c3 c4) * (s : ℝ))) *
                 Real.log (P : ℝ) := by
-  sorry
+  intro c0 c1 c2 c3 c4 hc0 hc1 hc2 hc3 hc4 hc01 hc11 hc241
+  refine ⟨max 1 (1 / c3), by positivity, ?_⟩
+  intro N P n f T a k hP hn hn0 hbig hH ha haP hnk s hs
+  set b : ℝ := iteratedDeriv s f (a : ℝ) / (s.factorial : ℝ) with hb
+  set B : ℝ := |b| with hBdef
+  set Q : ℝ := ((⌊B⁻¹⌋₊ : ℕ) : ℝ) with hQdef
+  set M : ℕ := karP2 c1 n P with hM
+  set X : ℝ := ((M : ℝ) + 1) ^ s with hX
+  set L : ℝ := Real.log (P : ℝ) with hLdef
+  set ρ : ℝ := min (c1 / 3) (min c3 c4) with hρ
+  have hP1 : (1 : ℝ) ≤ P := by exact_mod_cast hP
+  have hP0 : (0 : ℝ) < P := by exact_mod_cast hP
+  have hn2 : (2 : ℝ) ≤ n := by exact_mod_cast hn
+  have hsT : s ∈ Finset.Icc 2 n := hH.2.2.1 hs
+  rw [Finset.mem_Icc] at hsT
+  have hs2 : (2 : ℝ) ≤ s := by exact_mod_cast hsT.1
+  have hsn : (s : ℝ) ≤ n := by exact_mod_cast hsT.2
+  have hL : max 1 (1 / c3) * (n : ℝ) ^ 2 ≤ L := by
+    rw [hLdef, Real.le_log_iff_exp_le hP0]; exact hbig
+  have hL1 : 1 ≤ L := by
+    have : (1 : ℝ) ≤ max 1 (1 / c3) := le_max_left _ _
+    nlinarith
+  have hL0 : 0 ≤ L := by linarith
+  have hc3L : 1 ≤ c3 * s * L := by
+    have h1 : (1 / c3) * (n : ℝ) ^ 2 ≤ L :=
+      le_trans (mul_le_mul_of_nonneg_right (le_max_right _ _) (by positivity)) hL
+    have h2 : 1 ≤ c3 * L := by
+      have := mul_le_mul_of_nonneg_left h1 hc3.le
+      rw [← mul_assoc, mul_one_div_cancel hc3.ne', one_mul] at this
+      nlinarith
+    nlinarith
+  -- `P^x = exp(x log P)`
+  have hrp : ∀ x : ℝ, (P : ℝ) ^ x = Real.exp (L * x) := fun x => by
+    rw [Real.rpow_def_of_pos hP0]
+  -- the bounds on `B`
+  have haI : (a : ℝ) ∈ Set.Icc (N : ℝ) (N + P) := by
+    constructor
+    · exact_mod_cast ha
+    · have : a ≤ N + P := by
+        have := Nat.zero_le (karP2 c1 n P ^ 2); omega
+      exact_mod_cast this
+  have hbB := hH.2.2.2.2 s hs (a : ℝ) haI
+  have hB0 : 0 < B := lt_of_lt_of_le (Real.rpow_pos_of_pos hP0 _) hbB.1
+  have hBinv_lo : (P : ℝ) ^ (c3 * s) ≤ B⁻¹ := by
+    have := hbB.2
+    rw [← inv_le_inv₀ (Real.rpow_pos_of_pos hP0 _) hB0, ← Real.rpow_neg hP0.le] at this
+    simpa [neg_mul] using this
+  have hBinv_hi : B⁻¹ ≤ (P : ℝ) ^ (c2 * s) := by
+    have := hbB.1
+    rw [← inv_le_inv₀ hB0 (Real.rpow_pos_of_pos hP0 _), ← Real.rpow_neg hP0.le] at this
+    simpa [neg_mul] using this
+  have hPc3 : 2 ≤ (P : ℝ) ^ (c3 * s) := by
+    rw [hrp]
+    have : Real.exp 1 ≤ Real.exp (L * (c3 * s)) := Real.exp_le_exp.2 (by nlinarith)
+    have h2 := Real.exp_one_gt_d9
+    linarith
+  have hQhi : Q ≤ B⁻¹ := Nat.floor_le (by positivity)
+  have hQlo : B⁻¹ - 1 < Q := by
+    have := Nat.lt_floor_add_one B⁻¹
+    rw [hQdef]; linarith
+  have hQ1 : 1 ≤ Q := by
+    rw [hQdef]
+    exact_mod_cast Nat.le_floor (by push_cast; linarith)
+  have hQ0 : 0 < Q := by linarith
+  -- the three terms
+  have hT1 : Q⁻¹ ≤ 2 * (P : ℝ) ^ (-(c3 * s)) := by
+    rw [Real.rpow_neg hP0.le]
+    have hp : 0 < (P : ℝ) ^ (c3 * s) := Real.rpow_pos_of_pos hP0 _
+    rw [inv_le_iff_one_le_mul₀ hQ0]
+    have : (P : ℝ) ^ (c3 * s) ≤ 2 * Q := by linarith
+    calc (1 : ℝ) = ((P : ℝ) ^ (c3 * s))⁻¹ * (P : ℝ) ^ (c3 * s) := by field_simp
+      _ ≤ ((P : ℝ) ^ (c3 * s))⁻¹ * (2 * Q) := by gcongr
+      _ = 2 * ((P : ℝ) ^ (c3 * s))⁻¹ * Q := by ring
+  have hlogQ0 : 0 ≤ Real.log Q := Real.log_nonneg hQ1
+  have hlogQ : Real.log Q ≤ n * L := by
+    have h1 : Real.log Q ≤ Real.log ((P : ℝ) ^ (c2 * s)) :=
+      Real.log_le_log hQ0 (hQhi.trans hBinv_hi)
+    rw [Real.log_rpow hP0] at h1
+    have hc2_1 : c2 < 1 := by linarith
+    have : c2 * s ≤ n := by nlinarith
+    nlinarith
+  obtain ⟨hδ1, hδ2⟩ := karN0_delta c1 c2 c4 n hc1 hc241 hn0
+  set δ : ℝ := 1 / ((n : ℝ) ^ 2 * (n + 1)) with hδ
+  set e : ℝ := c1 / 2 - 1 / (2 * ((n : ℝ) ^ 2 * (n + 1))) with he
+  have heδ : e = c1 / 2 - δ / 2 := by rw [he, hδ]; field_simp
+  have hP2 : (P : ℝ) ^ e ≤ (M : ℝ) + 1 := by
+    have := Nat.lt_floor_add_one ((P : ℝ) ^ e)
+    have hk : ((M : ℕ) : ℝ) = ((⌊(P : ℝ) ^ e⌋₊ : ℕ) : ℝ) := rfl
+    rw [hk]; linarith
+  have hXlo : (P : ℝ) ^ (e * s) ≤ X := by
+    rw [Real.rpow_mul hP0.le, Real.rpow_natCast]
+    exact pow_le_pow_left₀ (Real.rpow_nonneg hP0.le _) hP2 s
+  have hXpos : 0 < (P : ℝ) ^ (e * s) := Real.rpow_pos_of_pos hP0 _
+  have hX0 : 0 < X := lt_of_lt_of_le hXpos hXlo
+  have hT2 : X⁻¹ ≤ (P : ℝ) ^ (-(c1 / 3 * s)) := by
+    rw [Real.rpow_neg hP0.le]
+    refine inv_anti₀ (Real.rpow_pos_of_pos hP0 _) (le_trans ?_ hXlo)
+    apply Real.rpow_le_rpow_of_exponent_le hP1
+    have : c1 / 3 ≤ e := by rw [heδ]; linarith
+    nlinarith
+  have hT3 : (X ^ 2)⁻¹ * Q ≤ (P : ℝ) ^ (-(c4 * s)) := by
+    have hX2 : (P : ℝ) ^ (2 * e * s) ≤ X ^ 2 := by
+      have : (P : ℝ) ^ (2 * e * s) = ((P : ℝ) ^ (e * s)) ^ 2 := by
+        rw [← Real.rpow_natCast, ← Real.rpow_mul hP0.le]; ring_nf
+      rw [this]; exact pow_le_pow_left₀ hXpos.le hXlo 2
+    have hQP : Q ≤ (P : ℝ) ^ (c2 * s) := hQhi.trans hBinv_hi
+    calc (X ^ 2)⁻¹ * Q ≤ ((P : ℝ) ^ (2 * e * s))⁻¹ * (P : ℝ) ^ (c2 * s) := by
+          gcongr
+      _ = (P : ℝ) ^ (c2 * s - 2 * e * s) := by
+          rw [Real.rpow_sub hP0, div_eq_inv_mul]
+      _ ≤ (P : ℝ) ^ (-(c4 * s)) := by
+          apply Real.rpow_le_rpow_of_exponent_le hP1
+          have : c2 + c4 ≤ 2 * e := by rw [heδ]; linarith
+          nlinarith
+  -- every `P^{-x s}` with `x ≥ ρ` is at most `P^{-ρ s}`
+  have hmono : ∀ x : ℝ, ρ ≤ x → (P : ℝ) ^ (-(x * s)) ≤ (P : ℝ) ^ (-(ρ * s)) := by
+    intro x hx
+    apply Real.rpow_le_rpow_of_exponent_le hP1
+    nlinarith
+  have hρ1 : ρ ≤ c1 / 3 := min_le_left _ _
+  have hρ3 : ρ ≤ c3 := (min_le_right _ _).trans (min_le_left _ _)
+  have hρ4 : ρ ≤ c4 := (min_le_right _ _).trans (min_le_right _ _)
+  have hR0 : 0 ≤ (P : ℝ) ^ (-(ρ * s)) := Real.rpow_nonneg hP0.le _
+  have e1 := (hT1.trans (by linarith [hmono c3 hρ3] : 2 * (P : ℝ) ^ (-(c3 * s)) ≤ 2 * (P : ℝ) ^ (-(ρ * s))))
+  have e2 : X⁻¹ * Real.log Q ≤ (P : ℝ) ^ (-(ρ * s)) * (n * L) :=
+    mul_le_mul ((hT2.trans (hmono _ hρ1))) hlogQ hlogQ0 hR0
+  have e3 : (X ^ 2)⁻¹ * Q * Real.log Q ≤ (P : ℝ) ^ (-(ρ * s)) * (n * L) :=
+    mul_le_mul ((hT3.trans (hmono _ hρ4))) hlogQ hlogQ0 hR0
+  have hnL : 1 ≤ (n : ℝ) * L := by nlinarith
+  nlinarith
 
 /-- The exact statement of `leaf_karW_display7_factor`, from the pieces. -/
 theorem leaf_karW_display7_factor_of_leaves (h3 : KarLemma3) :
