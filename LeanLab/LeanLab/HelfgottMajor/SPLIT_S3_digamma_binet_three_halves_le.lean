@@ -1,4 +1,5 @@
 import Mathlib
+import LeanLab.HelfgottMajor.SPLIT_S3_digamma_binet_second
 
 /-!
 Split of `SqShortLeftLeaves.digamma_binet_three_halves_le` in
@@ -25,16 +26,15 @@ namespace BinetS3
 open Complex MeasureTheory Set
 open scoped Real
 
-/-- LEAF: Binet's second formula for the digamma function, OLBC10 5.9.15, the formula Helfgott
+/-- Binet's second formula for the digamma function, OLBC10 5.9.15, the formula Helfgott
 1305.2897 page 34 cites for display 4.10: for `ℜ z > 0`,
 `ψ(z) = log z - 1/(2z) - 2 ∫₀^∞ t dt / ((t² + z²)(e^{2πt} - 1))`, principal logarithm.
-Class HARD: CITED-LEFT, a classical theorem not in Mathlib, whose `digamma` has no integral
-representation. -/
+Assembled, unit S3-08p2, from the leaves of `SPLIT_S3_digamma_binet_second`. -/
 theorem digamma_binet_second (z : ℂ) (hz : 0 < z.re) :
     digamma z = Complex.log z - 1 / (2 * z) -
       2 * ∫ t in Ioi (0 : ℝ),
-        (t : ℂ) / (((t : ℂ) ^ 2 + z ^ 2) * ((Real.exp (2 * π * t) : ℂ) - 1)) := by
-  sorry
+        (t : ℂ) / (((t : ℂ) ^ 2 + z ^ 2) * ((Real.exp (2 * π * t) : ℂ) - 1)) :=
+  BinetSecondSplit.digamma_binet_second_split z hz
 
 /-- PROVED: convergence of the integral of display 4.10 of Helfgott 1305.2897 page 34: the
 function `t / (e^{2πt} - 1)` is integrable on `(0, ∞)`. It is at most `e^{-πt}/(2π)` since
