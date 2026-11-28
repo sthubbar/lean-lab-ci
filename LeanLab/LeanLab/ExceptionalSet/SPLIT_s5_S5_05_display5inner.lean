@@ -12,8 +12,8 @@ Notation. `J_k(λ)` is the number of solutions of the system
 Pieces.
 * `karJsol`, `karLamBox`: the definitions of `J_k(λ)` and of the box.
 * `leaf_karJ_expand`, LEAF MEDIUM: `|Σ_z e(c + Σ_j β_j z^j)|^{2k} = Σ_λ J_k(λ) e(Σ_j β_j λ_j)`.
-* `leaf_karJ_sum`, LEAF MEDIUM: `Σ_λ J_k(λ) = (M+1)^{2k}`.
-* `leaf_karJ_le_zero`, LEAF MEDIUM: `J_k(λ) ≤ J_k(0)`.
+* `leaf_karJ_sum`, proved by CLOUD S5-05b: `Σ_λ J_k(λ) = (M+1)^{2k}`.
+* `leaf_karJ_le_zero`, proved by CLOUD S5-05b: `J_k(λ) ≤ J_k(0)`.
 * `leaf_karJ_zero_integral`, LEAF HARD: `J_k(0) = ∫_{[0,1]^n} |Σ_y e(α_1 y + ... + α_n y^n)|^{2k}`.
 * `leaf_karJ_second_expansion`, LEAF MEDIUM: `Σ_λ |S(λ)|^{2k} ≤ J_k(0) ∏_s 𝔖_s`.
 * `karW_display5_phase`, the rewriting of `Σ_{j=1}^n B_j (yz)^j`, proved.
@@ -53,18 +53,94 @@ theorem leaf_karJ_expand (n k M : ℕ) (c : ℝ) (β : Fin n → ℝ) :
       = ∑ l ∈ karLamBox n k M, (karJsol n k M l : ℂ) * eC (∑ j : Fin n, β j * (l j : ℝ)) := by
   sorry
 
-/-- LEAF: `Σ_λ J_k(λ) = (M+1)^{2k}`, Karacuba p. 246, class MEDIUM: every pair of `k`-tuples is
+/-- `Σ_λ J_k(λ) = (M+1)^{2k}`, Karacuba p. 246, proved: every pair of `k`-tuples is
 counted once, at the value `λ` of its power sum differences, which lies in the box. -/
 theorem leaf_karJ_sum (n k M : ℕ) :
     ∑ l ∈ karLamBox n k M, (karJsol n k M l : ℝ) = ((M : ℝ) + 1) ^ (2 * k) := by
-  sorry
+  classical
+  set g : (Fin k → Fin (M + 1)) × (Fin k → Fin (M + 1)) → (Fin n → ℤ) := fun p j =>
+    (∑ i, ((p.1 i : ℕ) : ℤ) ^ ((j : ℕ) + 1)) - ∑ i, ((p.2 i : ℕ) : ℤ) ^ ((j : ℕ) + 1) with hg
+  have hmaps : ∀ p ∈ (Finset.univ : Finset ((Fin k → Fin (M + 1)) × (Fin k → Fin (M + 1)))),
+      g p ∈ karLamBox n k M := by
+    intro p _
+    simp only [karLamBox, Fintype.mem_piFinset, Finset.mem_Icc]
+    intro j
+    have hb : ∀ q : Fin k → Fin (M + 1), 0 ≤ ∑ i, ((q i : ℕ) : ℤ) ^ ((j : ℕ) + 1) ∧
+        ∑ i, ((q i : ℕ) : ℤ) ^ ((j : ℕ) + 1) ≤ ((k * M ^ ((j : ℕ) + 1) : ℕ) : ℤ) := by
+      intro q
+      refine ⟨Finset.sum_nonneg (fun i _ => by positivity), ?_⟩
+      calc ∑ i, ((q i : ℕ) : ℤ) ^ ((j : ℕ) + 1) ≤ ∑ _i : Fin k, ((M : ℤ)) ^ ((j : ℕ) + 1) := by
+            refine Finset.sum_le_sum (fun i _ => ?_)
+            have : ((q i : ℕ) : ℤ) ≤ M := by have := (q i).isLt; omega
+            exact pow_le_pow_left₀ (by positivity) this _
+        _ = ((k * M ^ ((j : ℕ) + 1) : ℕ) : ℤ) := by simp
+    have h1 := hb p.1
+    have h2 := hb p.2
+    simp only [hg]
+    constructor <;> linarith [h1.1, h1.2, h2.1, h2.2]
+  have hcard := Finset.card_eq_sum_card_fiberwise hmaps
+  have hJ : ∀ l, karJsol n k M l = ((Finset.univ : Finset ((Fin k → Fin (M + 1)) × (Fin k → Fin (M + 1)))).filter
+      (fun p => g p = l)).card := by
+    intro l
+    unfold karJsol
+    congr 1
+    ext p
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, hg, funext_iff]
+  simp only [hJ]
+  rw [← Nat.cast_sum, ← hcard]
+  simp [Finset.card_univ, Fintype.card_prod, Fintype.card_fun, Fintype.card_fin]
+  ring
 
-/-- LEAF: `J_k(λ) ≤ J_k(0)`, Karacuba p. 246, class MEDIUM. With `r(u)` the number of
+/-- `J_k(λ) ≤ J_k(0)`, Karacuba p. 246, proved. With `r(u)` the number of
 `k`-tuples with power sum vector `u`, `J_k(λ) = Σ_u r(u + λ) r(u) ≤ Σ_u r(u)^2 = J_k(0)` by
-Cauchy Schwarz; the paper reads it off the integral formula. -/
+`2ab ≤ a² + b²` termwise; the paper reads it off the integral formula. -/
 theorem leaf_karJ_le_zero (n k M : ℕ) (l : Fin n → ℤ) :
     karJsol n k M l ≤ karJsol n k M 0 := by
-  sorry
+  classical
+  set v : (Fin k → Fin (M + 1)) → (Fin n → ℤ) := fun q j =>
+    ∑ i, ((q i : ℕ) : ℤ) ^ ((j : ℕ) + 1) with hv
+  set V : Finset (Fin n → ℤ) := Finset.univ.image v with hV
+  set r : (Fin n → ℤ) → ℕ := fun u => (Finset.univ.filter (fun q => v q = u)).card with hr
+  have hJ : ∀ m : Fin n → ℤ, karJsol n k M m = ∑ u ∈ V, r u * r (u - m) := by
+    intro m
+    have e1 : karJsol n k M m = ((Finset.univ : Finset ((Fin k → Fin (M + 1)) × (Fin k → Fin (M + 1)))).filter
+        (fun p => v p.2 = v p.1 - m)).card := by
+      unfold karJsol
+      congr 1
+      ext p
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and, hv, funext_iff, Pi.sub_apply]
+      constructor
+      · intro h j; have := h j; linarith
+      · intro h j; have := h j; linarith
+    rw [e1, Finset.card_filter, ← Finset.univ_product_univ, Finset.sum_product]
+    have hin : ∀ a : Fin k → Fin (M + 1),
+        (∑ b : Fin k → Fin (M + 1), if v b = v a - m then 1 else 0) = r (v a - m) := by
+      intro a
+      rw [hr]
+      simp only [Finset.card_filter]
+    simp only [hin]
+    rw [Finset.sum_comp (f := fun u => r (u - m)) (g := v)]
+    refine Finset.sum_congr rfl (fun u _ => ?_)
+    rw [smul_eq_mul]
+  rw [hJ l, hJ 0]
+  simp only [sub_zero]
+  have hAM : ∀ u ∈ V, 2 * (r u * r (u - l)) ≤ r u * r u + r (u - l) * r (u - l) := by
+    intro u _
+    nlinarith [sq_nonneg ((r u : ℤ) - r (u - l))]
+  have hshift : ∑ u ∈ V, r (u - l) * r (u - l) ≤ ∑ u ∈ V, r u * r u := by
+    have hinj : Set.InjOn (fun u : Fin n → ℤ => u - l) V := fun a _ b _ h => by simpa using h
+    rw [← Finset.sum_image (f := fun w => r w * r w) (g := fun u => u - l) hinj]
+    refine Finset.sum_le_sum_of_ne_zero (fun w _ hw => ?_)
+    have hr0 : r w ≠ 0 := fun h => hw (by simp [h])
+    rw [hr] at hr0
+    obtain ⟨q, hq⟩ := Finset.card_ne_zero.mp hr0
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hq
+    rw [hV]
+    exact Finset.mem_image.mpr ⟨q, Finset.mem_univ _, hq⟩
+  have h2 : 2 * ∑ u ∈ V, r u * r (u - l) ≤ ∑ u ∈ V, r u * r u + ∑ u ∈ V, r (u - l) * r (u - l) := by
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+    exact Finset.sum_le_sum hAM
+  omega
 
 /-- LEAF: the integral formula for `J_k(0)`, Karacuba p. 246, class HARD:
 `J_k(0) = ∫_{[0,1]^n} |Σ_{y ≤ M} e(α_1 y + ... + α_n y^n)|^{2k} dα`, by expanding the
