@@ -24,6 +24,7 @@ The assembly proves both parent statements from the leaves, byte identical.
 AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.InteriorHalvesAux
+import LeanLab.KumchevLiu2007.SPLIT_S3_leaf_right_half_lemma34_instance
 
 namespace LeanLab.KumchevLiu2007.Eq33RouteD
 
@@ -122,7 +123,7 @@ theorem leaf_right_half_lemma34_instance (A : ℝ) (hA : 0 < A) :
               roughWeight (w) (m / p)) *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log (Y / 2) ^ A := by
-  sorry
+  exact S3RightHalf.leaf_right_half_lemma34_instance_of_leaves A hA
 
 /-- LEAF: the band of H between x = Y / 2 and Y (log X)^(A/2), Y = windowY X eps,
 on the right half [Y / 2, Y] of the t window, for eps below 1/6. This band lies in the
@@ -169,48 +170,7 @@ theorem leaf_window_basic (A ε c x0 : ℝ) (hA : 0 ≤ A) (hε : 0 < ε) (hε6 
       x0 ≤ windowY X ε / c ∧ 0 < Real.log (windowY X ε / c) ∧
       Real.log (windowY X ε / c) ≤ Real.log X ∧ Real.sqrt (windowY X ε / c) ≤ H ∧
       Real.log X ^ A ≤ (2 : ℝ) ^ A * Real.log (windowY X ε / c) ^ A := by
-  let a : ℝ := 7 / 12 + ε / 2
-  have ha : 0 < a := by dsimp [a]; linarith
-  have ha1 : a ≤ 1 := by dsimp [a]; linarith
-  have hc : 0 < c := by linarith
-  have hlogc : 0 ≤ Real.log c := Real.log_nonneg (by linarith)
-  have ht : Filter.Tendsto (fun X : ℝ => windowY X ε / c) Filter.atTop Filter.atTop := by
-    exact (tendsto_rpow_atTop ha).atTop_div_const hc
-  have hL := Real.tendsto_log_atTop.eventually_ge_atTop
-    (max 1 ((Real.log c + 1) / (a - 1 / 2)))
-  have hlarge := ht.eventually_ge_atTop x0
-  obtain ⟨X0, hX0⟩ := Filter.eventually_atTop.mp (hL.and hlarge)
-  refine ⟨max 2 X0, (le_max_left _ _), ?_⟩
-  intro X H hX hH
-  have hX2 : (2 : ℝ) ≤ X := (le_max_left _ _).trans hX
-  have hXp : 0 < X := by linarith
-  obtain ⟨hLX, hx0⟩ := hX0 X ((le_max_right _ _).trans hX)
-  have hL1 : 1 ≤ Real.log X := (le_max_left _ _).trans hLX
-  have hLg : (Real.log c + 1) / (a - 1 / 2) ≤ Real.log X :=
-    (le_max_right _ _).trans hLX
-  have hgap : 0 < a - 1 / 2 := by dsimp [a]; linarith
-  have hlog : Real.log (windowY X ε / c) = a * Real.log X - Real.log c := by
-    change Real.log (X ^ a / c) = a * Real.log X - Real.log c
-    rw [Real.log_div (Real.rpow_pos_of_pos hXp a).ne' hc.ne', Real.log_rpow hXp]
-  have hhalf : Real.log X ≤ 2 * Real.log (windowY X ε / c) := by
-    have hh := (div_le_iff₀ hgap).mp hLg
-    rw [hlog]
-    nlinarith
-  have hlogpos : 0 < Real.log (windowY X ε / c) := by linarith
-  refine ⟨hx0, hlogpos, ?_, ?_, ?_⟩
-  · rw [hlog]
-    nlinarith [mul_le_mul_of_nonneg_right ha1 (by linarith : 0 ≤ Real.log X)]
-  · have hy : 0 ≤ windowY X ε := (Real.rpow_pos_of_pos hXp _).le
-    calc
-      Real.sqrt (windowY X ε / c) ≤ Real.sqrt (windowY X ε) :=
-        Real.sqrt_le_sqrt (div_le_self hy (by linarith))
-      _ = X ^ (a / 2) := by rw [Real.sqrt_eq_rpow, windowY, ← Real.rpow_mul hXp.le]; congr 1; dsimp [a]; ring
-      _ ≤ X ^ (7 / 18 + ε) := Real.rpow_le_rpow_of_exponent_le (by linarith) (by dsimp [a]; linarith)
-      _ ≤ H := hH
-  · calc
-      Real.log X ^ A ≤ (2 * Real.log (windowY X ε / c)) ^ A :=
-        Real.rpow_le_rpow (by linarith) hhalf hA
-      _ = _ := Real.mul_rpow (by norm_num) hlogpos.le
+  sorry
 
 /-- LEAF: P0088 page 15, the remark after display 52 that the choice of z0 in
 display 34 is set by the hypothesis on M in Lemma 3.4: for B at least one and
@@ -222,60 +182,7 @@ theorem leaf_window_cutoff (B ε c : ℝ) (hB : 1 ≤ B) (hε : 0 < ε) (hε6 : 
     ∃ X0 : ℝ, 2 ≤ X0 ∧ ∀ X : ℝ, X0 ≤ X →
       windowY X ε ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ (-2 : ℤ) ≤
         (windowY X ε / c) ^ (1 / 4 : ℝ) * (Real.log (windowY X ε / c) ^ B) ^ (-2 : ℤ) := by
-  let a : ℝ := 7 / 12 + ε / 2
-  have ha : 0 < a := by dsimp [a]; linarith
-  have ha23 : a ≤ 2 / 3 := by dsimp [a]; linarith
-  have hc : 0 < c := by linarith
-  have hlogc : 0 ≤ Real.log c := Real.log_nonneg (by linarith)
-  have ht : Filter.Tendsto (fun X : ℝ => Real.log (windowY X ε / c)) Filter.atTop Filter.atTop :=
-    Real.tendsto_log_atTop.comp ((tendsto_rpow_atTop ha).atTop_div_const hc)
-  obtain ⟨X0, hX0⟩ := Filter.eventually_atTop.mp (ht.eventually_ge_atTop 1)
-  refine ⟨max 2 X0, le_max_left _ _, ?_⟩
-  intro X hX
-  have hX2 : (2 : ℝ) ≤ X := (le_max_left _ _).trans hX
-  have hx : 0 < X := by linarith
-  have hL : 0 < Real.log X := Real.log_pos (by linarith)
-  have hl1 : 1 ≤ Real.log (windowY X ε / c) := hX0 X ((le_max_right _ _).trans hX)
-  have hl : 0 < Real.log (windowY X ε / c) := by linarith
-  have hlog : Real.log (windowY X ε / c) = a * Real.log X - Real.log c := by
-    change Real.log (X ^ a / c) = a * Real.log X - Real.log c
-    rw [Real.log_div (Real.rpow_pos_of_pos hx a).ne' hc.ne', Real.log_rpow hx]
-  have hlL : Real.log (windowY X ε / c) ≤ 2 / 3 * Real.log X := by
-    rw [hlog]
-    nlinarith [mul_le_mul_of_nonneg_right ha23 hL.le]
-  have hB0 : 0 ≤ B := by linarith
-  have hQB : Real.log (windowY X ε / c) ^ B ≤ 2 / 3 * Real.log X ^ B := by
-    calc
-      _ ≤ (2 / 3 * Real.log X) ^ B := Real.rpow_le_rpow hl.le hlL hB0
-      _ = (2 / 3 : ℝ) ^ B * Real.log X ^ B := Real.mul_rpow (by norm_num) hL.le
-      _ ≤ (2 / 3 : ℝ) * Real.log X ^ B :=
-        mul_le_mul_of_nonneg_right (Real.rpow_le_self_of_le_one (by norm_num) (by norm_num) hB)
-          (Real.rpow_pos_of_pos hL B).le
-  have hcroot : c ^ (1 / 4 : ℝ) ≤ 2 := by
-    have hh : c ^ (1 / 4 : ℝ) ≤ (16 : ℝ) ^ (1 / 4 : ℝ) :=
-      Real.rpow_le_rpow hc.le (by linarith) (by norm_num)
-    have he : (16 : ℝ) ^ (1 / 4 : ℝ) = 2 := by
-      rw [show (16 : ℝ) = 2 ^ (4 : ℕ) by norm_num, ← Real.rpow_natCast,
-        ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
-      norm_num
-    exact hh.trans_eq he
-  have hy : 0 < windowY X ε := Real.rpow_pos_of_pos hx _
-  have hv : 0 < (windowY X ε / c) ^ (1 / 4 : ℝ) := Real.rpow_pos_of_pos (div_pos hy hc) _
-  have heq : (windowY X ε / c) ^ (1 / 4 : ℝ) * c ^ (1 / 4 : ℝ) =
-      windowY X ε ^ (1 / 4 : ℝ) := by
-    rw [← Real.mul_rpow (div_pos hy hc).le hc.le, div_mul_cancel₀ _ hc.ne']
-  have hUV : windowY X ε ^ (1 / 4 : ℝ) ≤ 2 * (windowY X ε / c) ^ (1 / 4 : ℝ) := by
-    rw [← heq]
-    nlinarith [mul_le_mul_of_nonneg_left hcroot hv.le]
-  have hp : 0 < Real.log X ^ B := Real.rpow_pos_of_pos hL _
-  have hq : 0 < Real.log (windowY X ε / c) ^ B := Real.rpow_pos_of_pos hl _
-  simp only [zpow_neg, zpow_ofNat, ← div_eq_mul_inv]
-  apply (div_le_div_iff₀ (sq_pos_of_pos hp) (sq_pos_of_pos hq)).mpr
-  calc
-    _ ≤ (2 * (windowY X ε / c) ^ (1 / 4 : ℝ)) *
-        (2 / 3 * Real.log X ^ B) ^ 2 := by gcongr
-    _ ≤ (windowY X ε / c) ^ (1 / 4 : ℝ) * (Real.log X ^ B) ^ 2 := by
-      nlinarith [mul_nonneg hv.le (sq_nonneg (Real.log X ^ B))]
+  sorry
 
 /-- LEAF: P0088 page 15, the note after display 52 that the condition on
 theta2 ensures z1 at most H Y^(-1/2) L^(-2B): for eps below 1/6, large X and
@@ -288,71 +195,7 @@ theorem leaf_window_rough (B ε c : ℝ) (hB : 0 ≤ B) (hε : 0 < ε) (hε6 : �
       2 ≤ windowY X ε ^ (1 / 6 + ε / 2) ∧
       windowY X ε ^ (1 / 6 + ε / 2) ≤
         H / Real.sqrt (windowY X ε / c) * (Real.log (windowY X ε / c) ^ B) ^ (-2 : ℤ) := by
-  let a : ℝ := 7 / 12 + ε / 2
-  let r : ℝ := a * (2 / 3 + ε / 2)
-  let d : ℝ := 7 / 18 + ε - r
-  have ha : 0 < a := by dsimp [a]; linarith
-  have ha1 : a ≤ 1 := by dsimp [a]; linarith
-  have hd : 0 < d := by
-    have hf : 0 < 3 / 8 - ε / 4 := by linarith
-    dsimp [d, r, a]
-    nlinarith [mul_pos hε hf]
-  have hc : 0 < c := by linarith
-  have hlogc : 0 ≤ Real.log c := Real.log_nonneg (by linarith)
-  have hsmall := (isLittleO_log_rpow_rpow_atTop (2 * B) hd).bound zero_lt_one
-  have hz : ∀ᶠ X : ℝ in Filter.atTop, 2 ≤ windowY X ε ^ (1 / 6 + ε / 2) := by
-    have hh := (tendsto_rpow_atTop (show 0 < a * (1 / 6 + ε / 2) by positivity)).eventually_ge_atTop 2
-    filter_upwards [hh, Filter.eventually_gt_atTop (0 : ℝ)] with X h hX
-    simpa only [windowY, ← Real.rpow_mul hX.le] using h
-  have hl := (Real.tendsto_log_atTop.comp ((tendsto_rpow_atTop ha).atTop_div_const hc)).eventually_ge_atTop 1
-  obtain ⟨X0, hX0⟩ := Filter.eventually_atTop.mp (hsmall.and (hz.and hl))
-  refine ⟨max 2 X0, le_max_left _ _, ?_⟩
-  intro X H hX hH
-  have hX2 : (2 : ℝ) ≤ X := (le_max_left _ _).trans hX
-  have hx : 0 < X := by linarith
-  have hL : 0 < Real.log X := Real.log_pos (by linarith)
-  obtain ⟨hs, hz2, hl1⟩ := hX0 X ((le_max_right _ _).trans hX)
-  change 1 ≤ Real.log (windowY X ε / c) at hl1
-  have hl0 : 0 < Real.log (windowY X ε / c) := by linarith
-  have hs' : Real.log X ^ (2 * B) ≤ X ^ d := by
-    simpa only [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hL _),
-      abs_of_pos (Real.rpow_pos_of_pos hx _), one_mul] using hs
-  have hlog : Real.log (windowY X ε / c) ≤ Real.log X := by
-    have he : Real.log (windowY X ε / c) = a * Real.log X - Real.log c := by
-      change Real.log (X ^ a / c) = a * Real.log X - Real.log c
-      rw [Real.log_div (Real.rpow_pos_of_pos hx a).ne' hc.ne', Real.log_rpow hx]
-    rw [he]
-    nlinarith [mul_le_mul_of_nonneg_right ha1 hL.le]
-  have hlogB : Real.log (windowY X ε / c) ^ B ≤ Real.log X ^ B :=
-    Real.rpow_le_rpow hl0.le hlog hB
-  have hpow : (Real.log X ^ B) ^ (2 : ℕ) = Real.log X ^ (2 * B) := by
-    rw [← Real.rpow_natCast, ← Real.rpow_mul hL.le]
-    norm_num only [Nat.cast_ofNat]
-    rw [mul_comm B (2 : ℝ)]
-  have hy : 0 < windowY X ε := Real.rpow_pos_of_pos hx _
-  have hprod : windowY X ε ^ (1 / 6 + ε / 2) * Real.sqrt (windowY X ε) = X ^ r := by
-    rw [Real.sqrt_eq_rpow, ← Real.rpow_add hy, windowY, ← Real.rpow_mul hx.le]
-    congr 1
-    dsimp [r, a]
-    ring
-  have hsqrt : Real.sqrt (windowY X ε / c) ≤ Real.sqrt (windowY X ε) :=
-    Real.sqrt_le_sqrt (div_le_self hy.le (by linarith))
-  have hbound : windowY X ε ^ (1 / 6 + ε / 2) * Real.sqrt (windowY X ε / c) *
-      (Real.log (windowY X ε / c) ^ B) ^ (2 : ℕ) ≤ H := by
-    calc
-      _ ≤ windowY X ε ^ (1 / 6 + ε / 2) * Real.sqrt (windowY X ε) *
-          (Real.log X ^ B) ^ (2 : ℕ) := by gcongr
-      _ = X ^ r * Real.log X ^ (2 * B) := by rw [hprod, hpow]
-      _ ≤ X ^ r * X ^ d := mul_le_mul_of_nonneg_left hs' (by positivity)
-      _ = X ^ (7 / 18 + ε) := by rw [← Real.rpow_add hx]; congr 1; dsimp [d]; ring
-      _ ≤ H := hH
-  refine ⟨hz2, ?_⟩
-  have hp : 0 < Real.log (windowY X ε / c) ^ B := Real.rpow_pos_of_pos hl0 _
-  have hsqrt0 : 0 < Real.sqrt (windowY X ε / c) := Real.sqrt_pos.mpr (div_pos hy hc)
-  rw [zpow_neg, zpow_ofNat, ← div_eq_mul_inv]
-  apply (le_div_iff₀ (sq_pos_of_pos hp)).mpr
-  apply (le_div_iff₀ hsqrt0).mpr
-  convert hbound using 1 <;> ring
+  sorry
 
 /-- P0088 page 10 display 41 from the hypothesis on alpha of the parent, with
 L = log X replaced by any smaller positive l: l^B at most q at most H l^(-B)
@@ -585,3 +428,5 @@ theorem leaf_interior_right_half_from_leaves (A : ℝ) (hA : 0 < A) :
 #print axioms leaf_interior_right_half_from_leaves
 
 end LeanLab.KumchevLiu2007.Eq33RouteD
+
+#print axioms LeanLab.KumchevLiu2007.Eq33RouteD.leaf_right_half_lemma34_instance
