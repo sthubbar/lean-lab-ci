@@ -45,7 +45,29 @@ character modulo `6` factors through `ZMod 3`, since `(ZMod 6)ˣ → (ZMod 3)ˣ`
 its conductor divides `3` and no character modulo `6` is primitive. Class MEDIUM: finite
 group facts about `(ZMod 6)ˣ` and `DirichletCharacter.FactorsThrough`. -/
 theorem card6_no_primitive_six (χ : DirichletCharacter ℂ q) (hq : q = 6) : ¬ χ.IsPrimitive := by
-  sorry
+  subst hq
+  intro hp
+  have hd : (3 : ℕ) ∣ 6 := by decide
+  have htab : ∀ y z : ZMod 6, y * z = 1 → y = 1 ∨ y = -1 := by
+    decide
+  have hker : (ZMod.unitsMap hd).ker ≤ χ.toUnitHom.ker := by
+    intro x hx
+    have hx' : ZMod.castHom hd (ZMod 3) (x : ZMod 6) = 1 := by
+      rw [ZMod.castHom_apply, ← ZMod.unitsMap_val hd x, (MonoidHom.mem_ker).mp hx]; rfl
+    have hx1 : x = 1 := by
+      rcases htab _ _ x.mul_inv with h | h
+      · exact Units.ext h
+      · rw [h, map_neg, map_one] at hx'
+        exact absurd hx' (by decide)
+    rw [hx1]
+    exact one_mem _
+  have hf : χ.FactorsThrough 3 :=
+    (DirichletCharacter.factorsThrough_iff_ker_unitsMap hd).mpr hker
+  have hc : χ.conductor ∣ 3 :=
+    (DirichletCharacter.mem_conductorSet_iff_conductor_dvd χ hd).mp hf
+  have hc3 : χ.conductor ≤ 3 := Nat.le_of_dvd (by norm_num) hc
+  rw [DirichletCharacter.isPrimitive_def] at hp
+  omega
 
 /-- LEAF: zero free rectangle for the primitive character modulo `3`, the window
 `(1, 2πe / 3]` of the band at conductor `3` holds no strip zero of `L(·, χ)`. Numerically the
