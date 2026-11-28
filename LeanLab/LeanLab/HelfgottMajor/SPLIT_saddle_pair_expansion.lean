@@ -67,7 +67,16 @@ theorem leaf_saddle_expansion_at_one_sub_s (δ : ℝ) (s : ℂ) (hδ : δ ≠ 0)
     ‖gaussianMellin δ (1 - s)‖ ≤
       2.1085 * exp (-BookE.E (|s.im| / (π * δ) ^ 2) * |s.im|) +
         saddleRemainder δ s.im / 2 := by
-  sorry
+  have h := leaf_saddle_expansion_at_s δ (1 - s) hδ
+    (by simp only [Complex.sub_re, Complex.one_re]; linarith)
+    (by simp only [Complex.sub_re, Complex.one_re]; linarith)
+    (by simpa using hτ)
+  have him : (1 - s).im = -s.im := by simp
+  have hre : saddleRemainder δ (-s.im) = saddleRemainder δ s.im := by
+    unfold saddleRemainder
+    simp only [abs_neg, neg_div, neg_sq]
+  rw [him, abs_neg, hre] at h
+  exact h
 
 /-- The pair expansion of Corollary 3.2 at `k` equal to zero, assembled from the two
 one-sided saddle expansions: the two halves of the coefficient add to the paper's
@@ -84,3 +93,5 @@ theorem saddle_pair_expansion_split (δ : ℝ) (s : ℂ) (hδ : δ ≠ 0)
   linarith only [h1, h2]
 
 end LeanLab.HelfgottMajor.Decomp503a
+
+#print axioms LeanLab.HelfgottMajor.Decomp503a.leaf_saddle_expansion_at_one_sub_s
