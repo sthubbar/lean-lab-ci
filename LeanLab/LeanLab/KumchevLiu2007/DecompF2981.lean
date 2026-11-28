@@ -13,6 +13,8 @@ AI wrote the Lean code. Goldbach is open.
 -/
 import LeanLab.KumchevLiu2007.BlockInputs628
 import LeanLab.KumchevLiu2007.Prep1121KLMajorArc
+import LeanLab.KumchevLiu2007.Split1122A12Corr
+import LeanLab.KumchevLiu2007.SPLIT_S3_major_arc_rough_correction_F2981
 
 namespace LeanLab.KumchevLiu2007.F2981
 
@@ -24,19 +26,22 @@ attribute [local instance] Classical.propDecidable
 every positive logarithmic parameter B and positive epsilon at most seven
 eighteenths, there are C and X0 such that every Dirichlet character defect on
 a prime subwindow is at most C times the window length times the fourth
-negative logarithmic power. -/
+negative logarithmic power. Closed burst-20261127 S3-26 by Split1122A12Corr.a12Corr,
+which rests on its one cited LEAF thetaChi_short, the Huxley type short interval
+Siegel Walfisz theorem of page 15. -/
 theorem major_arc_prime_correction_F2981 :
-    Prep1121KLMajor.A12Corr := by
-  sorry
+    Prep1121KLMajor.A12Corr :=
+  Split1122A12Corr.a12Corr
 
 /-- LEAF. Rough-weight character correction estimate for the major-arc proof.
 For every positive logarithmic parameter B and positive epsilon at most seven
 eighteenths, there are C and X0 such that the squared integral of every
 Dirichlet-character defect for the rough weight is at most C times the squared
-block width times the fourth negative logarithmic power. -/
+block width times the fourth negative logarithmic power. Closed burst-20261127 S3-27
+from the two cited part leaves of SPLIT_S3_major_arc_rough_correction_F2981. -/
 theorem major_arc_rough_correction_F2981 :
-    Prep1121KLMajor.A22Corr := by
-  sorry
+    Prep1121KLMajor.A22Corr :=
+  S3RoughCorr.major_arc_rough_correction_of_leaves
 
 /-- Assembly. The exact statement of Task628.major_arc_block, proved from the
 prime-character and rough-weight correction leaves with no sorry of its own. -/
@@ -53,4 +58,6 @@ theorem major_arc_block_F2981 (A : ℝ) (hA : 0 < A) :
 
 end LeanLab.KumchevLiu2007.F2981
 
+#print axioms LeanLab.KumchevLiu2007.F2981.major_arc_prime_correction_F2981
+#print axioms LeanLab.KumchevLiu2007.F2981.major_arc_rough_correction_F2981
 #print axioms LeanLab.KumchevLiu2007.F2981.major_arc_block_F2981
