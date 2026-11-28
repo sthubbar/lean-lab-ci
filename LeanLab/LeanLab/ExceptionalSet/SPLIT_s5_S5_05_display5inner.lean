@@ -14,7 +14,7 @@ Pieces.
 * `leaf_karJ_expand`, proved by CLOUD S5-05c: `|Σ_z e(c + Σ_j β_j z^j)|^{2k} = Σ_λ J_k(λ) e(Σ_j β_j λ_j)`.
 * `leaf_karJ_sum`, proved by CLOUD S5-05b: `Σ_λ J_k(λ) = (M+1)^{2k}`.
 * `leaf_karJ_le_zero`, proved by CLOUD S5-05b: `J_k(λ) ≤ J_k(0)`.
-* `leaf_karJ_zero_integral`, LEAF HARD: `J_k(0) = ∫_{[0,1]^n} |Σ_y e(α_1 y + ... + α_n y^n)|^{2k}`.
+* `leaf_karJ_zero_integral`, proved by CLOUD S5-05d: `J_k(0) = ∫_{[0,1]^n} |Σ_y e(α_1 y + ... + α_n y^n)|^{2k}`.
 * `leaf_karJ_second_expansion`, proved by CLOUD S5-05c: `Σ_λ |S(λ)|^{2k} ≤ J_k(0) ∏_s 𝔖_s`.
 * `karW_display5_phase`, the rewriting of `Σ_{j=1}^n B_j (yz)^j`, proved.
 * `karW_display5_first`, the first expansion and the triangle inequality,
@@ -218,14 +218,118 @@ theorem leaf_karJ_le_zero (n k M : ℕ) (l : Fin n → ℤ) :
     exact Finset.sum_le_sum hAM
   omega
 
-/-- LEAF: the integral formula for `J_k(0)`, Karacuba p. 246, class HARD:
+/-! ### The integral formula for `J_k(0)`: orthogonality on the unit cube -/
+
+section karJ_integral
+
+open MeasureTheory
+
+/-- `‖e(x)‖ = 1`. -/
+theorem karJ_eC_norm (x : ℝ) : ‖eC x‖ = 1 := by
+  unfold eC
+  rw [show (2 * (Real.pi : ℂ) * Complex.I * (x : ℂ)) = ((2 * Real.pi * x : ℝ) : ℂ) * Complex.I by
+    push_cast; ring]
+  exact Complex.norm_exp_ofReal_mul_I _
+
+/-- Orthogonality on `(0, 1]`: `∫ e(x m) dx = [m = 0]`. -/
+theorem karJ_integral_char_Ioc (m : ℤ) :
+    ∫ x in Set.Ioc (0 : ℝ) 1, eC (x * (m : ℝ)) = if m = 0 then 1 else 0 := by
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1)]
+  by_cases hm : m = 0
+  · subst hm
+    simp [eC]
+  · have h2 : (2 * ↑Real.pi * Complex.I : ℂ) ≠ 0 := by
+      apply mul_ne_zero
+      · rw [show (2 * (↑Real.pi : ℂ)) = ↑(2 * Real.pi) by push_cast; ring]
+        exact Complex.ofReal_ne_zero.mpr (by positivity)
+      · exact Complex.I_ne_zero
+    have hc : (2 * ↑Real.pi * Complex.I * (m : ℝ) : ℂ) ≠ 0 := mul_ne_zero h2 (by
+      rw [show ((m : ℝ) : ℂ) = ((m : ℂ)) by push_cast; ring]
+      exact_mod_cast hm)
+    have hcongr : Set.EqOn (fun x : ℝ => eC (x * (m : ℝ)))
+        (fun x : ℝ => Complex.exp ((2 * ↑Real.pi * Complex.I * ((m : ℝ) : ℂ)) * (x : ℂ)))
+        (Set.uIcc 0 1) := by
+      intro x _
+      dsimp only
+      unfold eC
+      rw [show 2 * ↑Real.pi * Complex.I * (↑(x * (m : ℝ)) : ℂ)
+          = (2 * ↑Real.pi * Complex.I * ((m : ℝ) : ℂ)) * (x : ℂ) by push_cast; ring]
+    rw [intervalIntegral.integral_congr hcongr, integral_exp_mul_complex hc]
+    have hexp : Complex.exp (2 * ↑Real.pi * Complex.I * (m : ℂ)) = 1 := by
+      rw [show 2 * ↑Real.pi * Complex.I * (m : ℂ)
+          = (m : ℂ) * (2 * ↑Real.pi * Complex.I) by push_cast; ring]
+      exact Complex.exp_int_mul_two_pi_mul_I m
+    simp [hexp, hm]
+
+/-- Orthogonality on `[0, 1]`. -/
+theorem karJ_integral_char_Icc (m : ℤ) :
+    ∫ x in Set.Icc (0 : ℝ) 1, eC (x * (m : ℝ)) = if m = 0 then 1 else 0 := by
+  rw [MeasureTheory.integral_Icc_eq_integral_Ioc]
+  exact karJ_integral_char_Ioc m
+
+/-- A character on the cube is integrable. -/
+theorem karJ_integrable_char (n : ℕ) (m : Fin n → ℤ) :
+    Integrable (fun α : Fin n → ℝ => eC (∑ j : Fin n, α j * (m j : ℝ)))
+      (Measure.pi fun _ : Fin n => volume.restrict (Set.Icc (0 : ℝ) 1)) := by
+  refine Integrable.of_bound ?_ 1 ?_
+  · have : Continuous fun α : Fin n → ℝ => eC (∑ j : Fin n, α j * (m j : ℝ)) := by
+      unfold eC; fun_prop
+    exact this.aestronglyMeasurable
+  · filter_upwards with α
+    rw [karJ_eC_norm]
+
+/-- The integral of one character over the unit cube is `1` if all coefficients vanish and
+`0` otherwise. -/
+theorem karJ_integral_prod_char (n : ℕ) (m : Fin n → ℤ) :
+    (∫ α, eC (∑ j : Fin n, α j * (m j : ℝ))
+        ∂(Measure.pi fun _ : Fin n => volume.restrict (Set.Icc (0 : ℝ) 1)))
+      = if m = 0 then 1 else 0 := by
+  have hF : ∀ α : Fin n → ℝ, eC (∑ j : Fin n, α j * (m j : ℝ))
+      = ∏ j : Fin n, eC (α j * (m j : ℝ)) := fun α => karW_eC_sum _ _
+  simp only [hF]
+  rw [integral_fintype_prod_eq_prod (f := fun j x => eC (x * (m j : ℝ)))]
+  simp only [karJ_integral_char_Icc]
+  have h := Finset.prod_boole (M₀ := ℂ) (s := Finset.univ) (p := fun j : Fin n => m j = 0)
+  have e : (∀ j ∈ (Finset.univ : Finset (Fin n)), m j = 0) ↔ m = 0 := by
+    simp [funext_iff]
+  rw [h]
+  split_ifs with h1 h2 h2
+  · rfl
+  · exact absurd (e.mp h1) h2
+  · exact absurd (e.mpr h2) h1
+  · rfl
+
+end karJ_integral
+
+/-- The integral formula for `J_k(0)`, Karacuba p. 246, proved:
 `J_k(0) = ∫_{[0,1]^n} |Σ_{y ≤ M} e(α_1 y + ... + α_n y^n)|^{2k} dα`, by expanding the
 `2k`-th power and the orthogonality `∫_0^1 e(mα) dα = [m = 0]` in each coordinate. -/
 theorem leaf_karJ_zero_integral (n k M : ℕ) :
     (karJsol n k M 0 : ℝ)
       = ∫ α in Set.pi Set.univ (fun _ : Fin n => Set.Icc (0 : ℝ) 1),
           ‖∑ y ∈ Finset.range (M + 1), eC (∑ j : Fin n, α j * (y : ℝ) ^ ((j : ℕ) + 1))‖ ^ (2 * k) := by
-  sorry
+  rw [MeasureTheory.volume_pi, MeasureTheory.Measure.restrict_pi_pi]
+  set μ := MeasureTheory.Measure.pi fun _ : Fin n => MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) 1)
+    with hμ
+  apply Complex.ofReal_injective
+  rw [← integral_complex_ofReal]
+  have hexp : ∀ α : Fin n → ℝ, ((‖∑ y ∈ Finset.range (M + 1),
+        eC (∑ j : Fin n, α j * (y : ℝ) ^ ((j : ℕ) + 1))‖ ^ (2 * k) : ℝ) : ℂ)
+      = ∑ l ∈ karLamBox n k M, (karJsol n k M l : ℂ) * eC (∑ j : Fin n, α j * (l j : ℝ)) := by
+    intro α
+    have h := leaf_karJ_expand n k M 0 α
+    simp only [zero_add] at h
+    exact h
+  simp only [hexp]
+  rw [MeasureTheory.integral_finsetSum _ (fun l _ => (karJ_integrable_char n l).const_mul _)]
+  simp only [MeasureTheory.integral_const_mul, karJ_integral_prod_char, mul_ite, mul_one, mul_zero]
+  rw [Finset.sum_ite_eq']
+  have h0 : (0 : Fin n → ℤ) ∈ karLamBox n k M := by
+    simp only [karLamBox, Fintype.mem_piFinset, Finset.mem_Icc, Pi.zero_apply]
+    intro j
+    constructor <;> omega
+  simp only [h0, ↓reduceIte]
+  norm_cast
 
 /-- `∏_{j : Fin n} G(j+1) = ∏_{s=1}^n G(s)`. -/
 theorem karW_prod_fin_shift (n : ℕ) (G : ℕ → ℝ) :
