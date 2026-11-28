@@ -1,4 +1,5 @@
 import Mathlib
+import LeanLab.HelfgottMajor.SPLIT_S3_main_term_envelope_far
 
 /-!
 Split of the leaf `Decomp457b.tail_neg_digamma_main_term_envelope`, the elementary envelope
@@ -31,12 +32,6 @@ theorem main_term_envelope_near (t : ℝ) (ht : 2 ≤ t) (ht' : t ≤ 5 / 2) :
       2 / 9375 ≤ Real.log t + 3 / 2 := by
   sorry
 
-/-- The squared norm of a complex number is the sum of the squares of its real and
-imaginary parts. -/
-lemma complex_norm_sq_eq (z : ℂ) : ‖z‖ ^ 2 = z.re ^ 2 + z.im ^ 2 := by
-  rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
-  ring
-
 /-- LEAF: the elementary envelope of P0014 page 34 display 4.10 on the line of real part
 minus one half, far range `5/2 ≤ t`: the explicit Stirling main term at `w = 5/2 + it` minus
 the three recurrence terms, plus `2/9375`, is at most `log t + 3/2`. Here the margin is at
@@ -49,19 +44,7 @@ theorem main_term_envelope_far (t : ℝ) (ht : 5 / 2 ≤ t) :
           1 / (12 * ((5 / 2 : ℂ) + t * I) ^ 2) -
         (((-1 / 2 : ℂ) + t * I)⁻¹ + ((1 / 2 : ℂ) + t * I)⁻¹ + ((3 / 2 : ℂ) + t * I)⁻¹)‖ +
       2 / 9375 ≤ Real.log t + 3 / 2 := by
-  have hnorm :
-      ‖Complex.log ((5 / 2 : ℂ) + t * I) - 1 / (2 * ((5 / 2 : ℂ) + t * I)) -
-          1 / (12 * ((5 / 2 : ℂ) + t * I) ^ 2) -
-        (((-1 / 2 : ℂ) + t * I)⁻¹ + ((1 / 2 : ℂ) + t * I)⁻¹ + ((3 / 2 : ℂ) + t * I)⁻¹)‖ ^ 2 =
-        (Complex.log ((5 / 2 : ℂ) + t * I) - 1 / (2 * ((5 / 2 : ℂ) + t * I)) -
-          1 / (12 * ((5 / 2 : ℂ) + t * I) ^ 2) -
-        (((-1 / 2 : ℂ) + t * I)⁻¹ + ((1 / 2 : ℂ) + t * I)⁻¹ + ((3 / 2 : ℂ) + t * I)⁻¹)).re ^ 2 +
-          (Complex.log ((5 / 2 : ℂ) + t * I) - 1 / (2 * ((5 / 2 : ℂ) + t * I)) -
-          1 / (12 * ((5 / 2 : ℂ) + t * I) ^ 2) -
-        (((-1 / 2 : ℂ) + t * I)⁻¹ + ((1 / 2 : ℂ) + t * I)⁻¹ + ((3 / 2 : ℂ) + t * I)⁻¹)).im ^ 2 := by
-    exact complex_norm_sq_eq _
-  -- BLOCKED 2026-11-25 FREE-nv-nemosuper task3485 main_term_envelope_far. OUT OF REACH: the exact missing result is a directly usable Mathlib bridge from Complex.tan_arg and Real.arctan_eq_of_tan_eq to the combined imaginary-part derivative, or an equivalent packaged theorem. LeanSearch POST returned HTTP 403. Local Mathlib search of Analysis/SpecialFunctions/Complex/Arg.lean found no arctan bridge. #check Complex.arg_eq_arctan reported unknown identifier. Own attempt error: Test3485.lean:28:65: error: failed to prove positivity/nonnegativity/nonzeroness.
-  sorry
+  exact LeanLab.HelfgottMajor.SplitS3EnvFar.main_term_envelope_far_proof t ht
 
 /-- The norm of the main term is even in `t`: at `-t` every quantity is the complex
 conjugate of the one at `t`, and `log` commutes with conjugation off the negative axis. -/
@@ -122,3 +105,5 @@ theorem main_term_envelope_of_leaves (t : ℝ) (ht : 2 ≤ |t|) :
 
 end TailNegMainTerm
 end LeanLab.HelfgottMajor.Decomp457b
+
+#print axioms LeanLab.HelfgottMajor.Decomp457b.TailNegMainTerm.main_term_envelope_far
