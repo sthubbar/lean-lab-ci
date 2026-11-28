@@ -1,4 +1,6 @@
 import LeanLab.HelfgottMajor.SPLIT_psi_le_rosser_schoenfeld
+import LeanLab.HelfgottMajor.SPLIT_S3_psi_le_mid_range
+import LeanLab.HelfgottMajor.SPLIT_S3_psi_le_large_range
 
 /-!
 # Split of `psi_le_of_two_thousand_le` (`HelfgottMajor/SPLIT_psi_le_rosser_schoenfeld`)
@@ -94,14 +96,14 @@ Theorem 18 is their explicit formula bound; a direct computation of `ψ` up to `
 instance by the kernel check used here below `20000` in chunks, would also do. -/
 theorem psi_le_mid_range (x : ℝ) (hx : 20000 ≤ x) (hx' : x ≤ 10 ^ 8) :
     Chebyshev.psi x ≤ 1.03882 * x := by
-  sorry
+  exact LeanLab.HelfgottMajor.SplitS3PsiMid.psi_le_mid_range_split x hx hx'
 
 /-- LEAF: Rosser and Schoenfeld 1962, pages 77 and 78, the range `10^8 < x` of Theorem 12, "by
 Table I as soon as we have justified the values in this table", resting on the explicit zeros of
 `ζ` and an explicit zero free region.  HARD. -/
 theorem psi_le_large_range (x : ℝ) (hx : 10 ^ 8 < x) :
     Chebyshev.psi x ≤ 1.03882 * x := by
-  sorry
+  exact LeanLab.HelfgottMajor.SplitS3PsiLarge.psi_le_large_range_split x hx
 
 /-- The parent leaf `psi_le_of_two_thousand_le`, verbatim, from the proved range and the two
 range leaves. -/
@@ -114,3 +116,6 @@ theorem psi_le_of_two_thousand_le_split (x : ℝ) (hx : 2000 ≤ x) :
     · exact psi_le_large_range x h2
 
 end LeanLab.HelfgottMajor.SplitPsiTwoThousand
+
+#print axioms LeanLab.HelfgottMajor.SplitPsiTwoThousand.psi_le_mid_range
+#print axioms LeanLab.HelfgottMajor.SplitPsiTwoThousand.psi_le_large_range
