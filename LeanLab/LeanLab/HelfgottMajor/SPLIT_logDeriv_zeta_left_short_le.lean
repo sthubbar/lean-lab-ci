@@ -1,4 +1,5 @@
 import Mathlib
+import LeanLab.HelfgottMajor.SPLIT_S3_digamma_binet_three_halves_le
 
 /-!
 Split of `SqShortLeaves.logDeriv_zeta_left_short_le` in
@@ -34,8 +35,8 @@ open scoped Real
 `|t² + z²| ≥ 9/4`, and `∫₀^∞ t dt / (e^{2πt} - 1) = Γ(2) ζ(2) / (2π)² = 1/24`.
 Class MEDIUM: needs Binet's integral for `digamma`, not in Mathlib. -/
 theorem digamma_binet_three_halves_le (z : ℂ) (hz : z.re = 3 / 2) :
-    ‖digamma z - (Complex.log z - 1 / (2 * z))‖ ≤ 1 / 27 := by
-  sorry
+    ‖digamma z - (Complex.log z - 1 / (2 * z))‖ ≤ 1 / 27 :=
+  BinetS3.digamma_binet_three_halves_le_split z hz
 
 /-- LEAF: the numerical core of display 4.12 of Helfgott 1305.2897, page 34, for `q = 1` on
 the short range, sharpened by keeping signs: for `z = 3/2 - it` with `|t| ≤ 2`, the von
@@ -104,5 +105,6 @@ theorem logDeriv_zeta_left_short_le_of_leaves (t : ℝ) (ht : |t| ≤ 2) :
 end SqShortLeftLeaves
 end LeanLab.HelfgottMajor.Decomp457b
 
+#print axioms LeanLab.HelfgottMajor.Decomp457b.SqShortLeftLeaves.digamma_binet_three_halves_le
 #print axioms LeanLab.HelfgottMajor.Decomp457b.SqShortLeftLeaves.logDeriv_zeta_left_eq
 #print axioms LeanLab.HelfgottMajor.Decomp457b.SqShortLeftLeaves.logDeriv_zeta_left_short_le_of_leaves
