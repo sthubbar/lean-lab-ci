@@ -15,7 +15,7 @@ Pieces.
 * `leaf_karW_geom_bound`, proved: `|Σ_{|t| ≤ K} e(θt)| ≤ 1/(2‖θ‖)` for `‖θ‖ > 0`, from
   `karW_eC_nat_mul` and `karW_eC_sub_one_ge`, `|e(θ) - 1| ≥ 4‖θ‖`.
 * `karW_geom_min`, proved from it and the trivial bound: `|Σ_{|t| ≤ K} e(θt)| ≤ karMinGeom K θ`.
-* `leaf_karW_lemma3_applied`, LEAF MEDIUM: Lemma 3 on the sum over `|μ| ≤ K`,
+* `leaf_karW_lemma3_applied`, proved by CLOUD S5-06c from `karacuba_lemma3_regularized`: Lemma 3 on the sum over `|μ| ≤ K`,
   `Σ_μ min(2K+1, 1/(2‖B μ‖)) ≤ 6(2K+1+Q log Q)((2K+1)Q^{-1}+1)`.
 * `leaf_karW_display7_arith`, proved: `6(2K+1+Q log Q)((2K+1)Q^{-1}+1) ≤ 108k²X²(Q^{-1}+X^{-1}log Q+X^{-2}Q log Q)`.
 * `leaf_karW_display7_Qbounds`, proved by CLOUD S5-06b with `cc0 = max(1, 1/c3)`: `Q^{-1}+X^{-1}log Q+X^{-2}Q log Q ≤ 9n P^{-ρs} log P`.
@@ -141,16 +141,106 @@ theorem karW_geom_min (K : ℕ) (θ : ℝ) :
       exact lt_of_le_of_ne this (Ne.symm h0)
     exact le_min htriv (leaf_karW_geom_bound K θ hpos)
 
-/-- LEAF: Lemma 3 of Karacuba p. 244 applied on p. 247 to `𝔖_s`, class MEDIUM. For real `B`
+/-- Lemma 3 of Karacuba p. 244 applied on p. 247 to `𝔖_s`, proved from
+`Decomp538a.karacuba_lemma3_regularized`. For real `B`
 with `0 < |B| ≤ 1` and `Q = [|B|^{-1}] ≥ 1`, write `B = ±(1/Q + θ/Q²)` with `|θ| ≤ 1`; Lemma 3
 with `U = 2K+1`, `2K+1` consecutive `μ` and the paper's convention `1/0 = ∞` gives
 `Σ_{|μ| ≤ K} min(2K+1, 1/(2‖Bμ‖)) ≤ 6(2K+1+Q log Q)((2K+1)Q^{-1}+1)`. The lab's `KarLemma3`
-drops the integer points, where `1/0 = 0` in Lean, so it does not give this alone. -/
+drops the integer points, where `1/0 = 0` in Lean, so it does not give this alone; the
+regularized form of Decomp538a does. -/
 theorem leaf_karW_lemma3_applied (B : ℝ) (K : ℕ) (hB0 : 0 < |B|) (hB1 : |B| ≤ 1) :
     ∑ μ ∈ Finset.Icc (-(K : ℤ)) (K : ℤ), karMinGeom K (B * (μ : ℝ))
       ≤ 6 * (((2 * K + 1 : ℕ) : ℝ) + (⌊|B|⁻¹⌋₊ : ℝ) * Real.log (⌊|B|⁻¹⌋₊ : ℝ)) *
         (((2 * K + 1 : ℕ) : ℝ) / (⌊|B|⁻¹⌋₊ : ℝ) + 1) := by
-  sorry
+  set q : ℕ := ⌊|B|⁻¹⌋₊ with hqdef
+  set U : ℝ := ((2 * K + 1 : ℕ) : ℝ) with hU
+  have hinv1 : (1 : ℝ) ≤ |B|⁻¹ := by rw [one_le_inv₀ hB0]; exact hB1
+  have hq1 : 1 ≤ q := Nat.le_floor (by exact_mod_cast hinv1)
+  have hqR : (1 : ℝ) ≤ q := by exact_mod_cast hq1
+  have hqle : (q : ℝ) ≤ |B|⁻¹ := Nat.floor_le (by positivity)
+  have hqlt : |B|⁻¹ < (q : ℝ) + 1 := Nat.lt_floor_add_one _
+  have hqB : (q : ℝ) * |B| ≤ 1 := by
+    have := mul_le_mul_of_nonneg_right hqle hB0.le
+    rwa [inv_mul_cancel₀ hB0.ne'] at this
+  have hqB2 : 1 < ((q : ℝ) + 1) * |B| := by
+    have := mul_lt_mul_of_pos_right hqlt hB0
+    rwa [inv_mul_cancel₀ hB0.ne'] at this
+  -- `B = a/q + θ/q²` with `a = ±1`, `|θ| ≤ 1`
+  set a : ℤ := if 0 < B then 1 else -1 with ha
+  set θ : ℝ := (B - (a : ℝ) / q) * (q : ℝ) ^ 2 with hθ
+  have hq0 : (0 : ℝ) < q := by linarith
+  have hBeq : (a : ℝ) / q + θ / (q : ℝ) ^ 2 = B := by
+    rw [hθ]; field_simp; ring
+  have hgcd : Int.gcd a q = 1 := by
+    rw [ha]; split_ifs <;> simp
+  have hθ1 : |θ| ≤ 1 := by
+    have hkey : |B - (a : ℝ) / q| = 1 / q - |B| := by
+      rw [ha]
+      split_ifs with hBp
+      · rw [abs_of_pos hBp]
+        push_cast
+        rw [abs_sub_comm, abs_of_nonneg]
+        rw [abs_of_pos hBp] at hqB
+        rw [sub_nonneg, le_div_iff₀ hq0]; linarith
+      · have hBn : B < 0 := by
+          rcases lt_or_eq_of_le (not_lt.mp hBp) with h | h
+          · exact h
+          · rw [h, abs_zero] at hB0; exact absurd hB0 (lt_irrefl 0)
+        rw [abs_of_neg hBn]
+        push_cast
+        rw [show B - -1 / (q : ℝ) = -(-B - 1 / q) by ring, abs_neg, abs_sub_comm, abs_of_nonneg]
+        rw [abs_of_neg hBn] at hqB
+        rw [sub_nonneg, le_div_iff₀ hq0]; linarith
+    rw [hθ, abs_mul, hkey, abs_of_nonneg (by positivity : (0 : ℝ) ≤ (q : ℝ) ^ 2)]
+    have e : (1 / (q : ℝ) - |B|) * (q : ℝ) ^ 2 = q - (q : ℝ) ^ 2 * |B| := by
+      field_simp
+    rw [e]
+    nlinarith
+  -- reindex `μ = x - (K + 1)`, `x ∈ [1, 2K+1]`
+  have hI : Finset.Icc (-(K : ℤ)) (K : ℤ) = (Finset.Icc 1 (2 * K + 1)).map
+      ⟨fun x : ℕ => (x : ℤ) - (K + 1), fun x y h => by simpa using h⟩ := by
+    ext t
+    simp only [Finset.mem_Icc, Finset.mem_map]
+    constructor
+    · rintro ⟨h1, h2⟩
+      refine ⟨(t + K + 1).toNat, by omega, ?_⟩
+      show (((t + K + 1).toNat : ℕ) : ℤ) - (K + 1) = t
+      omega
+    · rintro ⟨m, hm, rfl⟩
+      show -(K : ℤ) ≤ (m : ℤ) - (K + 1) ∧ (m : ℤ) - (K + 1) ≤ K
+      omega
+  set β : ℝ := -(B * ((K : ℝ) + 1)) with hβ
+  have hsum : ∑ μ ∈ Finset.Icc (-(K : ℤ)) (K : ℤ), karMinGeom K (B * (μ : ℝ))
+      = ∑ x ∈ Finset.Icc 1 (2 * K + 1), karMinGeom K ((a / q + θ / (q : ℝ) ^ 2) * x + β) := by
+    rw [hI, Finset.sum_map]
+    refine Finset.sum_congr rfl (fun x _ => ?_)
+    show karMinGeom K (B * ((((x : ℤ) - (K + 1) : ℤ)) : ℝ)) = _
+    rw [hBeq, hβ]
+    congr 1
+    push_cast
+    ring
+  rw [hsum]
+  have hle : ∀ y : ℝ, karMinGeom K y ≤
+      (if Int.fract y = 0 then U else min U (1 / min (Int.fract y) (1 - Int.fract y))) := by
+    intro y
+    unfold karMinGeom
+    have hn : nint y = min (Int.fract y) (1 - Int.fract y) := rfl
+    have h1f : 0 < 1 - Int.fract y := by linarith [Int.fract_lt_one y]
+    by_cases hf : Int.fract y = 0
+    · have : nint y = 0 := by rw [hn, hf]; simp
+      rw [if_pos this, if_pos hf]
+    · have hpos : 0 < nint y := by
+        rw [hn]
+        exact lt_min (lt_of_le_of_ne (Int.fract_nonneg y) (Ne.symm hf)) h1f
+      rw [if_neg hpos.ne', if_neg hf, ← hn]
+      apply min_le_min_left
+      apply one_div_le_one_div_of_le hpos
+      linarith
+  refine (Finset.sum_le_sum (fun x _ => hle _)).trans ?_
+  have hUpos : 0 < U := by rw [hU]; positivity
+  have h := LeanLab.ExceptionalSet.Decomp538a.karacuba_lemma3_regularized U (2 * K + 1) a q θ β
+    hUpos hq1 hgcd hθ1
+  exact h
 
 /-- The arithmetic of p. 247, `6(2kP2^s+1+Q log Q)((2kP2^s+1)Q^{-1}+1) ≤
 30k²P2^{2s}(Q^{-1}+P2^{-s}log Q+P2^{-2s}Q log Q)`, class EASY, with `X = (P2+1)^s` in place of
