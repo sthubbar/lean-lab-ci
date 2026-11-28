@@ -19,6 +19,7 @@ Everything else the statement writes, the whole range of H above Y ^ (7 / 18)
 and the whole minor arc condition, is kept inside every leaf unchanged.
 -/
 import LeanLab.KumchevLiu2007.SPLIT_lemma34_first_sum
+import LeanLab.KumchevLiu2007.SPLIT_S3_leaf_large_cutoff_quarters
 
 namespace LeanLab.KumchevLiu2007.Eq33RouteD
 
@@ -95,7 +96,7 @@ theorem leaf_lower_quarter_large_cutoff (A : ℝ) (hA : 0 < A) :
             roughWeight z m *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  exact S3Quarters.leaf_lower_quarter_large_cutoff_of_leaves_S3 A hA
 
 /-- LEAF: the case where the cut-off exceeds the sixth root of the window, on
 the upper quarter [3Y / 8, Y / 2]. Same thin surviving set as the lower quarter,
@@ -115,7 +116,7 @@ theorem leaf_upper_quarter_large_cutoff (A : ℝ) (hA : 0 < A) :
             roughWeight z m *
               fourier ((m ^ 2 : ℕ) : ℤ) (α : AddCircle (1 : ℝ))‖ ^ 2) ≤
             C * H ^ 2 / Real.log X ^ A := by
-  sorry
+  exact S3Quarters.leaf_upper_quarter_large_cutoff_of_leaves_S3 A hA
 
 /-- The estimate on the left half, from the four leaves: compare the cut-off
 with the sixth root of the window, take the two quarters of that regime, add
@@ -222,3 +223,7 @@ theorem leaf_large_cutoff_left_half_split (A : ℝ) (hA : 0 < A) :
     linarith
 
 end LeanLab.KumchevLiu2007.Eq33RouteD
+
+#print axioms LeanLab.KumchevLiu2007.Eq33RouteD.leaf_lower_quarter_large_cutoff
+#print axioms LeanLab.KumchevLiu2007.Eq33RouteD.leaf_upper_quarter_large_cutoff
+#print axioms LeanLab.KumchevLiu2007.Eq33RouteD.leaf_large_cutoff_left_half_split
